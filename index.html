@@ -120,6 +120,23 @@ body.has-sensors .sensorbtn { display: inline-block; }
 #sheetSub, #sheetHelp { text-align: center; font-size: 0.8rem; color: var(--muted); }
 #sheet .row { justify-content: center; margin-top: 10px; }
 #sheet .row button { flex: 1; }
+#dbSheet { position: fixed; inset: 0; background: var(--bg); z-index: 30; display: none; flex-direction: column; padding: 12px; padding-top: max(12px, env(safe-area-inset-top)); max-width: 640px; margin: 0 auto; }
+#dbSheet.show { display: flex; }
+#dbSheet h3 { margin: 0; color: var(--accent); font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+#dbSheet .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0 6px; }
+#dbSheet .filters input, #dbSheet .filters .seg { grid-column: 1 / -1; }
+#dbSheet .filters .seg { display: flex; }
+#dbSheet .filters .seg button { flex: 1; padding: 8px 6px; }
+#dbList { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border); }
+.dbItem { display: block; width: 100%; text-align: left; background: none; color: var(--text); border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 10px 4px; margin: 0; font-size: 0.92rem; font-weight: 500; }
+.dbItem:active { background: var(--input); transform: none; }
+.dbItem .t { display: block; }
+.dbItem .m { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 2px; font-weight: 400; }
+.dbItem .old { color: var(--warn); }
+.note { font-size: 0.72rem; color: var(--warn); }
+#bulletInfo { font-size: 0.75rem; color: var(--muted); }
+#mvEstOut { font-size: 0.8rem; color: var(--warn); margin-top: 4px; }
+#mvEstOut b { color: var(--text); }
 footer { text-align: center; font-size: 0.7rem; color: #6b8f71; margin: 16px 0 8px; }
 </style>
 </head>
@@ -146,6 +163,7 @@ footer { text-align: center; font-size: 0.7rem; color: #6b8f71; margin: 16px 0 8
       <div class="grid">
         <div><label for="sightHeight">Sight height (in)</label><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
         <div><label for="zero">Zero range (yd)</label><div class="stepper" data-step="25" data-min="10" data-max="1000"><input type="number" inputmode="numeric" id="zero" value="100"></div><div class="err" id="e-zero"></div></div>
+        <div><label for="barrel">Barrel length (in)</label><input type="number" inputmode="decimal" id="barrel" step="0.5" placeholder="optional, e.g. 20"><div class="err" id="e-barrel"></div></div>
         <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift (needs bullet length).</div><div class="err" id="e-twist"></div></div>
       </div>
     </details>
@@ -164,13 +182,27 @@ footer { text-align: center; font-size: 0.7rem; color: #6b8f71; margin: 16px 0 8
     <details id="loadDetails">
       <summary>Load details</summary>
       <div class="grid">
+        <div class="full"><button class="sm ghost" type="button" id="dbOpen" style="width:100%;padding:10px">📚 Pick bullet from database</button>
+          <div id="bulletInfo"></div>
+          <input type="hidden" id="bulletId"><input type="hidden" id="bulletName"><input type="hidden" id="bcBands"></div>
         <div><label for="bc">Ballistic coefficient (BC)</label><input type="number" inputmode="decimal" id="bc" step="0.001" value="0.223"><div class="err" id="e-bc"></div></div>
         <div><label for="drag">Drag model</label><select id="drag"><option value="G7" selected>G7 (boat-tail / long-range)</option><option value="G1">G1 (flat-base / most box BCs)</option></select></div>
         <div><label for="weight">Bullet weight (gr)</label><input type="number" inputmode="decimal" id="weight" step="1" value="168"><div class="err" id="e-weight"></div></div>
         <div><label for="diameter">Diameter (in)</label><input type="number" inputmode="decimal" id="diameter" step="0.001" value="0.308"><div class="err" id="e-diameter"></div></div>
         <div><label for="mv">Muzzle velocity (fps)</label><input type="number" inputmode="numeric" id="mv" step="5" value="2750"><div class="err" id="e-mv"></div></div>
+        <div><label for="mvSource">MV is…</label><select id="mvSource"><option value="">(not set)</option><option value="measured">Chronographed</option><option value="factory">Box / factory</option><option value="estimate">Estimated</option></select></div>
         <div><label for="length">Bullet length (in)</label><input type="number" inputmode="decimal" id="length" step="0.01" value="1.215" placeholder="optional"><div class="err" id="e-length"></div></div>
-        <div class="full hint">BC must match the drag model printed on the box (G1 vs G7). Bullet length is optional; it enables spin drift.</div>
+        <div class="full" id="bandsRow" style="display:none"><label for="useBands">Sierra velocity-banded G1</label><select id="useBands"><option value="">Use single BC above</option><option value="1">Use velocity bands (G1 only)</option></select><div class="hint" id="bandsTxt"></div></div>
+        <div class="full hint">BC must match the drag model printed on the box (G1 vs G7). Bullet length is optional; it enables spin drift. Factory BCs are often optimistic — true them against real drops.</div>
+        <div class="full"><details id="mvEstBox"><summary>Estimate MV for a different barrel (no chronograph)</summary>
+          <div class="grid">
+            <div><label for="refMV">Reference MV (fps)</label><input type="number" inputmode="numeric" id="refMV" step="5" placeholder="box / load data"><div class="err" id="e-refMV"></div></div>
+            <div><label for="refBarrel">Ref. barrel (in)</label><input type="number" inputmode="decimal" id="refBarrel" step="0.5" placeholder="24"><div class="err" id="e-refBarrel"></div></div>
+            <div><label for="fpsPerInch">fps per inch</label><input type="number" inputmode="decimal" id="fpsPerInch" step="1" placeholder="25"><div class="err" id="e-fpsPerInch"></div></div>
+            <div><label>&nbsp;</label><button class="sm ghost" type="button" id="mvEstBtn" style="width:100%;padding:10px">Estimate MV for this barrel</button></div>
+            <div class="full" id="mvEstOut"></div>
+            <div class="full hint">Estimate = reference MV + (your barrel − reference barrel) × fps per inch. Rough guide only (typically 20–30 fps/in); a chronographed MV always wins. Set your barrel length under Rifle details.</div>
+          </div></details></div>
       </div>
     </details>
   </div>
@@ -275,8 +307,21 @@ footer { text-align: center; font-size: 0.7rem; color: #6b8f71; margin: 16px 0 8
   <div id="sheetHelp"></div>
   <div class="row"><button type="button" class="ghost" id="sheetCancel">Cancel</button><button type="button" id="sheetLock">🔒 Lock</button></div>
 </div>
+<div id="dbSheet" role="dialog" aria-modal="true" aria-label="Bullet database">
+  <h3><span>📚 Bullet database</span><button class="sm ghost" type="button" id="dbClose">✕ Close</button></h3>
+  <div class="filters">
+    <input type="search" id="dbQ" placeholder="Search, e.g. 6.5 140 ELD" autocomplete="off" enterkeyhint="search">
+    <span class="seg" id="dbKind" role="group" aria-label="Bullet type"><button type="button" data-v="" class="on">All</button><button type="button" data-v="rifle">Rifle</button><button type="button" data-v="handgun">Handgun</button></span>
+    <select id="dbCal" aria-label="Caliber"></select>
+    <select id="dbBrand" aria-label="Brand"></select>
+  </div>
+  <div class="note">Factory BCs are often optimistic. Pick fills BC, drag model, weight, diameter and length; you still enter your muzzle velocity.</div>
+  <div class="hint" id="dbStatus">Loading…</div>
+  <div id="dbList"></div>
+</div>
 <footer>
-  Powered by js-ballistics (point-mass 3DoF + spin drift). Weather from Open-Meteo. Values are approximations — always verify with a chronograph and real-world testing.
+  Powered by js-ballistics (point-mass 3DoF + spin drift). Weather from Open-Meteo. Values are approximations — always verify with a chronograph and real-world testing.<br>
+  Bullet database: specifications published by Hornady, Sierra, Speer, Berger, Nosler, Barnes, Lapua, Hammer and Cutting Edge (each entry links its source), plus older bullets from <a href="https://github.com/ammolytics/projectiles" style="color:inherit">ammolytics/projectiles</a> (MIT License). Manufacturer names are trademarks of their owners.
 </footer>
 <script type="module">
 const $ = id => document.getElementById(id);
@@ -290,8 +335,9 @@ const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); re
 const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-const RIFLE_F = ["sightHeight", "zero", "twist"];
-const LOAD_F = ["bc", "drag", "weight", "diameter", "mv", "length"];
+const RIFLE_F = ["sightHeight", "zero", "twist", "barrel"];
+const LOAD_F = ["bc", "drag", "weight", "diameter", "mv", "length", "mvSource", "refMV", "refBarrel", "fpsPerInch", "bulletId", "bulletName", "bcBands", "useBands"];
+const LONG_F = { bulletName: 100, bcBands: 200, bulletId: 80 };
 const RANGE_F = ["bearing", "altitude", "target", "rangeLat", "rangeLon"];
 const WX_F = ["windSpeed", "windDir", "temp", "humidity", "altitude", "pressure"];
 const ALL_F = [...RIFLE_F, ...LOAD_F, ...RANGE_F, "windSpeed", "windDir", "temp", "humidity", "pressure", "maxRange", "step"];
@@ -344,7 +390,7 @@ function renderPickers() {
   updateDirty();
 }
 function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f])); }
-function applyLoad() { const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, l[f] ?? (f === "drag" ? "G7" : ""))); }
+function applyLoad() { const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, l[f] ?? (f === "drag" ? "G7" : ""))); renderBulletInfo(); }
 function applyRange() {
   const g = curRange();
   if (g) {
@@ -370,7 +416,9 @@ function updateDirty() {
   ["rangeSave", "rangeRename", "rangeDel"].forEach(id => $(id).disabled = !g);
   const tw = num("twist");
   $("rifleSum").textContent = `${val("sightHeight") || "?"}" sight height · ${val("zero") || "?"} yd zero` + (tw ? ` · 1:${Math.abs(tw)}" ${tw < 0 ? "LH" : "RH"} twist` : "");
-  $("loadSum").textContent = `${val("weight") || "?"} gr · ${val("bc") || "?"} ${$("drag").value} · ${val("mv") || "?"} fps`;
+  const mvs = { measured: " (chrono)", factory: " (box)", estimate: " (est.)" }[$("mvSource").value] || "";
+  $("loadSum").textContent = (val("bulletName") ? val("bulletName") + " · " : `${val("weight") || "?"} gr · `) + `${val("bc") || "?"} ${$("drag").value}${bandsOn() ? " banded" : ""} · ${val("mv") || "?"} fps${mvs}`;
+  if (val("barrel")) $("rifleSum").textContent += ` · ${val("barrel")}" barrel`;
   const b = num("bearing");
   $("rangeSum").textContent = (g ? "" : "Weather uses your phone's location. ") +
     (b != null ? `Facing ${fmt(b, 0)}° ${compass(b)}` : "No shooting direction set") +
@@ -432,11 +480,11 @@ $("importFile").onchange = async e => {
   try {
     const d = JSON.parse(await f.text());
     if (!d || !Array.isArray(d.rifles)) throw new Error("not a presets file");
-    const str = v => v == null ? "" : String(v).slice(0, 40);
+    const str = (v, n = 40) => v == null ? "" : String(v).slice(0, n);
     const rifles = d.rifles.filter(r => r && r.name).map(r => ({ id: str(r.id) || uid(), name: String(r.name).slice(0, 60),
       ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null,
       loads: (Array.isArray(r.loads) ? r.loads : []).filter(l => l && l.name).map(l => ({ id: str(l.id) || uid(), name: String(l.name).slice(0, 60),
-        ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k])])) })) }));
+        ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k], LONG_F[k])])) })) }));
     const ranges = (Array.isArray(d.ranges) ? d.ranges : []).filter(g => g && g.name).map(g => ({ id: str(g.id) || uid(), name: String(g.name).slice(0, 60),
       ...Object.fromEntries(RANGE_F.map(k => [k, str(g[k])])) }));
     const replace = confirm(`Import ${rifles.length} rifle(s) and ${ranges.length} range(s).\n\nOK = replace all current presets\nCancel = merge with current presets`);
@@ -654,7 +702,7 @@ dial.addEventListener("pointermove", e => { if (dialDrag) dialSet(e); });
 /* ---------------- validation ---------------- */
 const RULES = {
   bc: [0.01, 2, true, "BC is usually 0.1–1.0"], weight: [1, 1000, true], diameter: [0.1, 1, true, "e.g. 0.308"], mv: [300, 5000, true],
-  length: [0, 3, false], sightHeight: [0, 10, true], zero: [10, 3000, true], twist: [-40, 40, false],
+  length: [0, 3, false], barrel: [4, 40, false], refMV: [300, 5000, false], refBarrel: [4, 40, false], fpsPerInch: [0, 100, false], sightHeight: [0, 10, true], zero: [10, 3000, true], twist: [-40, 40, false],
   windSpeed: [0, 80, true], windDir: [0, 360, true], bearing: [0, 360, false], temp: [-40, 140, true], humidity: [0, 100, true],
   altitude: [-1500, 20000, true], pressure: [15, 32, false, "inHg, e.g. 29.92"], target: [10, 3000, false], maxRange: [50, 3000, true], step: [5, 1000, true],
   shotAngle: [-60, 60, false], rangeLat: [-90, 90, false], rangeLon: [-180, 180, false]
@@ -693,7 +741,10 @@ async function calculate() {
   try {
     const twist = num("twist") || 0, length = num("length") || 0;
     const mkShot = () => {
-      const dm = new DragModel({ bc: num("bc"), dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
+      const pts = bandsOn() ? bandPoints() : null;
+      const dm = pts ? B.DragModelMultiBC({ bcPoints: pts.map(p => new B.BCPoint({ BC: p.bc, V: UNew.FPS(p.v) })), dragTable: DragTables.G1,
+          weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) })
+        : new DragModel({ bc: num("bc"), dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
         weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
       const ammo = new Ammo({ dm, mv: UNew.FPS(num("mv")) });
       const weapon = new Weapon({ sightHeight: UNew.Inch(num("sightHeight")), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
@@ -871,17 +922,162 @@ if ("DeviceOrientationEvent" in window && matchMedia("(pointer: coarse)").matche
   if (!window.isSecureContext) $("sensorHint").textContent += " Compass/angle buttons need https.";
 }
 
+/* ---------------- bullet database ---------------- */
+const DB_URL = "bullets.json", IDB_NAME = "bcalc-db", K_DBMETA = "bcalc.bulletsMeta.v1";
+let DB = null, dbLoading = null;
+function idb(mode, fn) {
+  return new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error("no IndexedDB"));
+    const o = indexedDB.open(IDB_NAME, 1);
+    o.onupgradeneeded = () => o.result.createObjectStore("kv");
+    o.onerror = () => rej(o.error);
+    o.onsuccess = () => { const tx = o.result.transaction("kv", mode), st = tx.objectStore("kv"); const r = fn(st);
+      tx.oncomplete = () => { res(r && r.result); o.result.close(); }; tx.onerror = () => rej(tx.error); };
+  });
+}
+const idbGet = k => idb("readonly", st => st.get(k));
+const idbPut = (k, v) => idb("readwrite", st => st.put(v, k));
+function prepDB(d) {
+  if (!d || !Array.isArray(d.bullets)) throw new Error("bad bullets file");
+  d.bullets.forEach(b => b._h = [b.brand, b.line, b.name, b.caliber, b.sku, b.type, b.weight_gr + "gr", b.weight_gr + " gr"].filter(Boolean).join(" ").toLowerCase()
+    .replace(/[®™]/g, "").replace(/-/g, " "));
+  d.byId = new Map(d.bullets.map(b => [b.id, b])); return d;
+}
+async function loadDB() {
+  if (DB) return DB;
+  if (dbLoading) return dbLoading;
+  dbLoading = (async () => {
+    let cached = null;
+    try { cached = await idbGet("bullets"); } catch {}
+    if (!cached) { try { cached = JSON.parse(localStorage.getItem("bcalc.bullets.v1")); } catch {} }
+    const fetchFresh = async () => {
+      const r = await fetch(DB_URL, { cache: "no-cache" }); if (!r.ok) throw new Error("HTTP " + r.status);
+      const d = await r.json(); if (!Array.isArray(d.bullets)) throw new Error("bad bullets file");
+      try { await idbPut("bullets", d); } catch { try { localStorage.setItem("bcalc.bullets.v1", JSON.stringify(d)); } catch {} }
+      store(K_DBMETA, d.meta || {}); return d;
+    };
+    if (cached && cached.bullets) {
+      DB = prepDB(cached);
+      fetchFresh().then(d => { if ((d.meta || {}).generated !== (cached.meta || {}).generated || d.bullets.length !== cached.bullets.length) { DB = prepDB(d); if ($("dbSheet").classList.contains("show")) renderDB(); } }).catch(() => {});
+      return DB;
+    }
+    DB = prepDB(await fetchFresh()); return DB;
+  })();
+  try { return await dbLoading; } finally { dbLoading = null; }
+}
+const f3 = v => v == null ? "" : String(+v).replace(/^0\./, ".");
+let dbKind = "";
+const kindOk = b => !dbKind || (dbKind === "handgun" ? b.type === "handgun" : b.type !== "handgun");
+function fillCalOptions(keep) {
+  const dias = new Map(); DB.bullets.filter(kindOk).forEach(b => { if (!dias.has(b.diameter_in)) dias.set(b.diameter_in, { label: b.caliber || f3(b.diameter_in), n: 0 }); dias.get(b.diameter_in).n++; });
+  const cs = $("dbCal"); cs.innerHTML = ""; cs.add(new Option(dbKind ? `All ${dbKind} calibers` : "All calibers", ""));
+  [...dias.entries()].sort((a, b) => a[0] - b[0]).forEach(([d, x]) => cs.add(new Option(`${x.label} · ${x.n}`, d)));
+  cs.value = dias.has(+keep) ? String(+keep) : "";
+  return dias;
+}
+function fillDBFilters() {
+  const dias = fillCalOptions("");
+  const cs = $("dbCal");
+  const cur = num("diameter"); let best = "";
+  if (cur) { let bd = 0.0025; for (const d of dias.keys()) if (Math.abs(d - cur) < bd) { bd = Math.abs(d - cur); best = String(d); } }
+  cs.value = best;
+  const brands = [...new Set(DB.bullets.map(b => b.brand))].sort();
+  const bs = $("dbBrand"), keep = bs.value; bs.innerHTML = ""; bs.add(new Option("All brands", "")); brands.forEach(b => bs.add(new Option(b, b))); bs.value = brands.includes(keep) ? keep : "";
+}
+function renderDB() {
+  if (!DB) return;
+  const q = $("dbQ").value.toLowerCase().replace(/[®™]/g, "").replace(/-/g, " ").trim(), toks = q.split(/\s+/).filter(Boolean);
+  const cal = $("dbCal").value, brand = $("dbBrand").value;
+  let res = DB.bullets.filter(b => kindOk(b) && (!cal || String(b.diameter_in) === cal) && (!brand || b.brand === brand) &&
+    toks.every(t => /^\d{2,4}$/.test(t) && +t >= 15 ? (b.weight_gr === +t || b._h.includes(t + "gr") || (b.caliber || "").includes(t) || (b.sku || "").toLowerCase() === t) : b._h.includes(t)));
+  res.sort((a, b) => (!!a.status - !!b.status) || a.diameter_in - b.diameter_in || a.weight_gr - b.weight_gr || a.brand.localeCompare(b.brand));
+  const total = res.length; res = res.slice(0, 150);
+  $("dbStatus").textContent = `${total} match${total === 1 ? "" : "es"}${total > 150 ? " (showing 150; refine the search)" : ""} · ${DB.bullets.length} bullets, data ${DB.meta?.generated || "?"}`;
+  $("dbList").innerHTML = res.map(b => `<button type="button" class="dbItem" data-id="${escapeHtml(b.id)}"><span class="t">${escapeHtml(b.brand)} ${escapeHtml(b.name.toLowerCase().startsWith(b.brand.toLowerCase()) ? b.name.slice(b.brand.length).trim() : b.name)}</span>` +
+    `<span class="m">${escapeHtml(b.caliber || "")} · ${b.weight_gr} gr · ${b.g7 ? "G7 " + f3(b.g7) + " · " : ""}${b.g1 ? "G1 " + f3(b.g1) : ""}${b.g1_bands ? " (banded)" : ""}${b.length_in ? ` · L ${b.length_in}"` : ""}${b.type ? " · " + escapeHtml(b.type) : ""}${b.status ? ' · <span class="old">older/discontinued</span>' : ""}</span></button>`).join("") ||
+    `<div class="hint" style="padding:12px 0">No bullets match. Try fewer words or "All calibers".</div>`;
+}
+async function openDB() {
+  $("dbSheet").classList.add("show"); document.body.style.overflow = "hidden";
+  $("dbStatus").textContent = "Loading bullet database…"; $("dbList").innerHTML = "";
+  try { await loadDB(); fillDBFilters(); renderDB(); setTimeout(() => $("dbQ").focus(), 50); }
+  catch (e) { $("dbStatus").textContent = "Couldn't load the bullet database (" + e.message + "). Connect once to download it; it is then kept for offline use."; }
+}
+function closeDB() { $("dbSheet").classList.remove("show"); document.body.style.overflow = ""; }
+$("dbOpen").onclick = openDB; $("dbClose").onclick = closeDB;
+$("dbQ").addEventListener("input", () => renderDB());
+$("dbCal").addEventListener("change", () => renderDB());
+$("dbKind").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; dbKind = b.dataset.v;
+  $("dbKind").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); if (DB) { fillCalOptions($("dbCal").value); renderDB(); } }); $("dbBrand").addEventListener("change", () => renderDB());
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("dbSheet").classList.contains("show")) closeDB(); });
+const bandStr = bands => (bands || []).map(x => `${x.bc}@${x.v_min_fps}`).join(",");
+function parseBands() { return val("bcBands").split(",").map(x => x.split("@").map(Number)).filter(([bc, v]) => bc > 0 && v >= 0).map(([bc, v]) => ({ bc, v })).sort((a, b) => b.v - a.v); }
+const bandsOn = () => $("useBands").value === "1" && $("drag").value === "G1" && parseBands().length > 1;
+function bandPoints() {
+  // each Sierra band applies above its lower velocity limit; anchor each BC at the middle of its band
+  const b = parseBands(); return b.map((x, i) => {
+    const hi = i === 0 ? x.v + 400 : b[i - 1].v, lo = x.v || Math.max(0, hi - 400);
+    return { bc: x.bc, v: Math.round((lo + hi) / 2) };
+  });
+}
+function pickBullet(id) {
+  const b = DB && DB.byId.get(id); if (!b) return;
+  const g7 = b.g7 != null, model = g7 ? "G7" : "G1";
+  setVal("bc", g7 ? b.g7 : b.g1); $("drag").value = model;
+  setVal("weight", b.weight_gr); setVal("diameter", b.diameter_in); setVal("length", b.length_in ?? "");
+  setVal("bulletId", b.id); setVal("bulletName", `${b.brand} ${b.caliber || ""} ${b.weight_gr} gr ${b.line || ""}`.replace(/\s+/g, " ").trim().slice(0, 100));
+  setVal("bcBands", bandStr(b.g1_bands)); $("useBands").value = "";
+  closeDB(); $("loadDetails").open = true; renderBulletInfo(); updateDirty(); schedule();
+  toast(`Filled from ${b.brand} ${b.weight_gr} gr — now enter your MV and Save`);
+  setTimeout(() => { $("mv").focus(); $("mv").select?.(); }, 60);
+}
+$("dbList").addEventListener("click", e => { const it = e.target.closest(".dbItem"); if (it) pickBullet(it.dataset.id); });
+function markEdited() { $("bulletInfo").dataset.edited = "1"; renderBulletInfo(); }
+function renderBulletInfo() {
+  const el = $("bulletInfo"), id = val("bulletId"), bands = parseBands();
+  $("bandsRow").style.display = bands.length > 1 ? "" : "none";
+  $("bandsTxt").textContent = bands.length > 1 ? "Sierra G1 bands: " + bands.map(x => `${f3(x.bc)} ${x.v ? "≥ " + x.v + " fps" : "below that"}`).join(" · ") + ($("drag").value !== "G1" ? " — switch drag model to G1 to use them." : "") : "";
+  if (!id) { el.textContent = ""; return; }
+  const b = DB && DB.byId.get(id);
+  let t = "From database: " + (val("bulletName") || id);
+  if (b) t += ` · ${b.g7 ? "G7 " + f3(b.g7) + " / " : ""}${b.g1 ? "G1 " + f3(b.g1) : ""}${b.bc_note ? " · " + b.bc_note : ""}${b.status ? " · " + b.status : ""}`;
+  el.innerHTML = escapeHtml(t) + (b?.source ? ` · <a href="${escapeHtml(b.source)}" target="_blank" rel="noopener" style="color:inherit">source</a>` : "") + " · factory BC, may be optimistic";
+}
+function swapModel() {
+  // a database bullet: switching G1/G7 swaps in that model's published BC
+  const b = DB && DB.byId.get(val("bulletId")); if (!b) { renderBulletInfo(); return; }
+  const v = $("drag").value === "G7" ? b.g7 : b.g1;
+  if (v != null) { setVal("bc", v); toast(`${$("drag").value} BC ${f3(v)} from database`); }
+  else toast(`No published ${$("drag").value} BC for this bullet`);
+  renderBulletInfo();
+}
+$("mvEstBtn").onclick = () => {
+  const out = $("mvEstOut"), ref = num("refMV"), bar = num("barrel"), rb = num("refBarrel") ?? 24, k = num("fpsPerInch") ?? 25;
+  if (!ref) { out.textContent = "Enter the reference MV (from the box or load data) first."; return; }
+  if (!bar) { out.textContent = "Enter this rifle's barrel length under Rifle details first."; $("rifleDetails").open = true; return; }
+  const est = Math.round(ref + (bar - rb) * k);
+  out.innerHTML = `ESTIMATE (not measured): <b>${est} fps</b> = ${ref} + (${bar}" − ${rb}") × ${k} fps/in. ` +
+    `<button class="sm" type="button" id="mvEstUse">Use as MV</button>` + (num("mv") && $("mvSource").value === "measured" ? ` <span class="hint">You have a chronographed MV (${num("mv")}); it is more reliable.</span>` : "");
+  $("mvEstUse").onclick = () => { setVal("mv", est); $("mvSource").value = "estimate"; out.innerHTML = `MV set to the estimate <b>${est} fps</b> (marked “Estimated”). Replace it with a chronograph reading when you have one.`; updateDirty(); schedule(); };
+};
+
 /* ---------------- wiring ---------------- */
 let calcT;
 function schedule() { clearTimeout(calcT); calcT = setTimeout(calculate, 350); }
 document.addEventListener("input", e => {
-  const id = e.target.id; if (!id || id === "placeQ") return;
+  const id = e.target.id; if (!id || id === "placeQ" || id.startsWith("db")) return;
+  if (id === "mv" && $("mvSource").value === "estimate") $("mvSource").value = "";
+  if (["bc", "weight", "diameter"].includes(id) && val("bulletId")) markEdited();
   if (WX_F.includes(id)) manual.add(id);
   if (id === "bearing") applyAuto(); else { renderChips(); updateDirty(); }
   if (id === "windDir" || id === "windSpeed") drawDial();
   schedule();
 });
-document.addEventListener("change", e => { if (e.target.id === "drag") { updateDirty(); schedule(); } });
+document.addEventListener("change", e => {
+  const id = e.target.id;
+  if (id === "drag") { swapModel(); updateDirty(); schedule(); }
+  if (id === "mvSource" || id === "useBands") { renderBulletInfo(); updateDirty(); schedule(); }
+});
 btn.addEventListener("click", calculate);
 function seg(id, key) {
   const el = $(id);
@@ -895,6 +1091,7 @@ window.addEventListener("resize", () => lastRun && renderChart(lastRun.samples))
 /* ---------------- start ---------------- */
 for (const [f, v] of Object.entries(S.values || {})) if ($(f) && v != null) $(f).value = v;
 renderPickers(); applyRifle(); applyLoad();
+if (val("bulletId")) loadDB().then(renderBulletInfo).catch(() => {});
 if (curRange()) applyRange(); else applyAuto();
 if (!P.rifles.length) $("rifleDetails").open = true;
 drawDial();
@@ -907,7 +1104,7 @@ try {
   console.error(e);
   statusEl.textContent = "Couldn't load the ballistics engine (offline?). Connect once and reload."; statusEl.classList.add("bad");
 }
-window.__bc = { P, S, manual, auto, get wx() { return wx; } };
+window.__bc = { P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB };
 </script>
 </body>
 </html>

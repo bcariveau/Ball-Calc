@@ -1,0 +1,17 @@
+{
+  "id": "./beta.html",
+  "name": "Ball-Calc Beta",
+  "short_name": "Ball-Calc β",
+  "description": "Ball-Calc ballistic calculator (beta): dope, loads, chrono and shot log, works offline.",
+  "start_url": "./beta.html",
+  "scope": "./beta",
+  "display": "standalone",
+  "background_color": "#0a1f14",
+  "theme_color": "#0a1f14",
+  "icons": [
+    { "src": "ballcalc-beta-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "ballcalc-beta-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "ballcalc-beta-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "ballcalc-beta-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

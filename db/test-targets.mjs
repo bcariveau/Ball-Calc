@@ -37,6 +37,10 @@ const PB = hex("80 1C 22 02 26 10 31 20 33 31 05 07 C3 02 D9 02 C3 02 CE 02 16 0
 const p = await ctx.newPage();
 const hook = pg => { pg.on("console", m => { if (m.type() === "error" || m.type() === "warning") errs.push(m.type() + ": " + m.text()); }); pg.on("pageerror", e => errs.push("PAGEERR " + e.message)); pg.on("dialog", d => d.accept()); };
 hook(p);
+// tgpolish: the target setup collapses to one summary line; open it before using its fields
+const openSet = () => p.evaluate(() => { const b = document.getElementById("tgSum"); if (b && document.getElementById("tgEd").classList.contains("show") && b.getAttribute("aria-expanded") === "false") b.click(); });
+const SETRE = /^#tg(Dist|Du|U|Tpl|StrSel|DialV|DialD|DialApp)$/;
+for (const fn of ["fill", "selectOption", "press", "click"]) { const o = p[fn].bind(p); p[fn] = async (sel, ...a) => { if (typeof sel === "string" && SETRE.test(sel)) await openSet(); return o(sel, ...a); }; }
 const ready = (pg = p) => pg.waitForFunction(() => document.getElementById("status").textContent.startsWith("Done"), null, { timeout: 30000 });
 const lum = h => { const m = h.match(/\d+(\.\d+)?/g).map(Number).slice(0, 3).map(x => x / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]; };
 const cr = (a, c) => { const [x, y] = [lum(a), lum(c)].sort((m, k) => k - m); return (x + 0.05) / (y + 0.05); };

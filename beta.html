@@ -366,6 +366,9 @@ svg.mk { width: 14px; height: 14px; flex: 0 0 14px; vertical-align: -2px; margin
 svg.tgS, #tgSvg { width: 100%; aspect-ratio: 1; display: block; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
 #tgEd { z-index: 31; } #tgEd > *, #slEditor > #slStrBar, #slEditor > #slTgView, #slEditor > #sbDock { flex-shrink: 0; }
 #tgEd .tgSet { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } #tgEd .tgSet .full { grid-column: 1 / -1; }
+#tgSum { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin: 0 0 8px; padding: 8px 12px; text-align: left; font-size: 0.9rem; font-weight: 700; line-height: 1.3; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; }
+#tgSum .t { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; } #tgSum .i { flex: 0 0 auto; color: var(--accent); font-size: 1rem; }
+#tgEd.setc .tgSet, #tgEd.meas #tgSum { display: none; }
 #tgEd .dd { display: flex; gap: 6px; } #tgEd .dd input { flex: 1 1 auto; min-width: 0; } #tgEd .dd select { flex: 0 0 64px; width: 64px; }
 #tgEd .seg { display: flex; width: 100%; margin-top: 8px; } #tgEd .seg button { flex: 1; }
 #tgTip { margin: 6px 0; font-weight: 600; color: var(--text); font-size: 0.85rem; min-height: 1.2em; }
@@ -951,7 +954,8 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
 </div>
 <div id="tgEd" class="ovl" role="dialog" aria-modal="true" aria-label="Target">
   <h3><span id="tgEdT">Target</span><button class="sm" type="button" id="tgEdDone">✓ Done</button></h3>
-  <div class="tgSet">
+  <button type="button" id="tgSum" aria-expanded="false" aria-controls="tgSetBox"></button>
+  <div class="tgSet" id="tgSetBox">
     <div class="full"><label for="tgStrSel">String</label><select id="tgStrSel"></select></div>
     <div><label for="tgTpl">Template</label><select id="tgTpl"><option value="grid1">1″ grid</option><option value="moa">MOA grid</option><option value="mil">MIL grid</option><option value="bull">Bullseye</option><option value="steel">Steel plate</option></select></div>
     <div><label for="tgDist">Distance</label><div class="dd"><input type="number" inputmode="decimal" id="tgDist" min="5" max="3000"><select id="tgDu" aria-label="Distance unit"><option value="yd">yd</option><option value="m">m</option></select></div></div>
@@ -3305,8 +3309,8 @@ async function tgDope(yd) {   // the dope the app shows now (conditions + shot a
     if (look) sv.shot.lookAngle = B.UNew.Degree(look);
     const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
     const p = r.samples[r.samples.length - 1]; if (!p || Math.abs(p.distance.In(B.Distance.Yard) - yd * cosA) > 1) return null;
-    const a = angs(p), ts = turretSpec(), c = curCond();
-    return cleanDial({ e: a.e, u: S.ang, c: a.ec, cl: ts.lbl, k: ts.k || 1, src: "app", wx: { temp: c.temp, hum: c.hum, alt: c.alt, press: c.press, tp: powderT(), look, yd }, at: Date.now() });
+    const a = angs(p), ts = turretSpec(), c = curCond(), e = Math.round(a.ec * ts.v * 1e6) / 1e6;   // whole clicks × click size, in the turret's unit
+    return cleanDial({ e, u: ts.u, c: a.ec, cl: ts.lbl, k: ts.k || 1, src: "app", wx: { temp: c.temp, hum: c.hum, alt: c.alt, press: c.press, tp: powderT(), look, yd }, at: Date.now() });
   } catch { return null; }
 }
 function tgWxSnap(yd) { const c = curCond(); return { temp: c.temp, hum: c.hum, alt: c.alt, press: c.press, tp: powderT(), look: num("shotAngle") || 0, yd }; }
@@ -3323,24 +3327,32 @@ async function tgRedope(g) {   // distance changed: an unedited app-dope dial fo
   let n = 0; sess.tg.strings.forEach(st => { if (st.tid === g.id && st.dial && st.dial.src === "app") { st.dial = { ...d }; n++; } });
   if (n) { tgAfterEditQuiet(); if (TE) teRender(); }
 }
-function dialTxt(d, U) {   // "U 1.20 mil"
-  const v = angConv(d.e, d.u, U); return `${v >= 0 ? "U" : "D"} ${Math.abs(v).toFixed(2)} ${angU(U)}`;
+function dialDec(v) { return Math.abs(v * 10 - Math.round(v * 10)) < 1e-9 ? 1 : 2; }   // 0.1 mil / ½ MOA → 1 decimal; ¼ MOA, 0.05 mil, ⅛ MOA → 2 (never thousandths)
+function dialView(d, ts) {   // the dial as read on the turret: app dope (incl. older raw ones) at whole clicks; an edited value as typed (≤2 decimals)
+  ts = ts || (ED ? tsFor(ED.rifleId) : turretSpec()); const u = ts.u, raw = angConv(d.e, d.u, u);
+  let v, s, c;
+  if (d.src === "app") { c = Math.round(raw / ts.v); v = c * ts.v; s = Math.abs(v).toFixed(dialDec(ts.v)); }
+  else { v = raw; s = String(+Math.abs(v).toFixed(2)); c = d.u === u && d.c != null ? d.c : Math.round(raw / ts.v); }
+  const dir = v < 0 || (v === 0 && raw < 0) ? "D" : "U";
+  return { v, s, c, dir, u, txt: `${dir} ${s} ${angU(u)}` };
 }
+function dialTxt(d) { return dialView(d).txt; }   // "U 11.00 MOA" / "U 2.8 mil"
 function teDialPaint() {
-  const st = teStr(), d = st.dial, U = S.ang, ts = tsFor(ED.rifleId);
-  $("tgDialU").textContent = angU(U);
-  if (document.activeElement !== $("tgDialV")) setVal("tgDialV", d ? +Math.abs(angConv(d.e, d.u, U)).toFixed(3) : "");
-  $("tgDialD").value = d && angConv(d.e, d.u, U) < 0 ? "D" : "U";
+  const st = teStr(), d = st.dial, ts = tsFor(ED.rifleId), U = ts.u, dv = d && dialView(d, ts);
+  $("tgDialU").textContent = angU(U); $("tgDialV").step = String(ts.v);
+  if (document.activeElement !== $("tgDialV")) setVal("tgDialV", dv ? dv.s : "");
+  $("tgDialD").value = dv ? dv.dir : "U";
   const w = d && d.wx, wx = w ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", `${fmt(w.look || 0, 0)}° angle`].filter(Boolean).join(" · ") : "";
-  $("tgDialH").innerHTML = d ? `= ${d.c != null ? `${d.c >= 0 ? "U" : "D"} ${Math.abs(d.c)} clicks (${escapeHtml(d.cl || ts.lbl)})` : ""}${d.k && d.k !== 1 ? ` · tracking ×${fmt(d.k, 3)}` : ""} · ${d.src === "app" ? "app dope" : "edited"}${wx ? ` · saved with ${wx}` : ""}`
+  $("tgDialH").innerHTML = d ? `= ${dv.dir} ${Math.abs(dv.c)} clicks (${escapeHtml(ts.lbl)})${d.k && d.k !== 1 ? ` · tracking ×${fmt(d.k, 3)}` : ""} · ${d.src === "app" ? "app dope, whole clicks" : "edited"}${wx ? ` · saved with ${wx}` : ""}`
     : `Not saved — enter what you dialed${tgSame() ? " or tap App dope" : ""}. Truing then falls back to today's prediction.`;
 }
 async function teDialSet(raw, dir) {
   const st = teStr(); if (!st) return; const v = parseFloat(raw);
   if (raw === "" || raw == null) { if (st.dial) { teSnap(); delete st.dial; tgAfterEditQuiet(); } teRender(); return; }
   if (!(v >= 0 && v <= 300)) { toast("Elevation 0–300"); teDialPaint(); return; }
-  const U = S.ang, ts = tsFor(ED.rifleId), e = dir === "D" ? -v : v, eT = angConv(e, U, ts.u), old = st.dial;
-  teSnap(); st.dial = cleanDial({ e, u: U, c: Math.round(eT / ts.v), cl: ts.lbl, k: old && old.k || ts.k || 1, src: old && old.src === "app" && Math.abs(angConv(old.e, old.u, U) - e) < 1e-6 ? "app" : "user",
+  const ts = tsFor(ED.rifleId), U = ts.u, e = dir === "D" ? -v : v, old = st.dial, ov = old && dialView(old, ts);
+  if (ov && +ov.s === v && ov.dir === dir) { teDialPaint(); return; }   // unchanged (an app dial shown at clicks keeps its stored value)
+  teSnap(); st.dial = cleanDial({ e, u: U, c: Math.round(e / ts.v), cl: ts.lbl, k: old && old.k || ts.k || 1, src: "user",
     wx: old && old.wx || tgWxSnap(tgYd(teTgt())), at: old && old.at || Date.now() });
   tgAfterEditQuiet(); teRender();
 }
@@ -3349,8 +3361,19 @@ $("tgDialD").onchange = () => teDialSet($("tgDialV").value.trim(), $("tgDialD").
 $("tgDialApp").onclick = async () => {
   if (!TE) return; const st = teStr(), d = await tgDope(tgYd(teTgt()));
   if (!d) { toast(tgSame() ? "No dope at that distance — check the inputs on the Dope tab" : "Pick this session's gun + load on Gear to use its dope"); return; }
-  teSnap(); st.dial = d; tgAfterEditQuiet(); teRender(); toast(`Dial set to the app's dope: ${dialTxt(d, S.ang)}`);
+  teSnap(); st.dial = d; tgAfterEditQuiet(); teRender(); toast(`Dial set to the app's dope: ${dialTxt(d)} (${Math.abs(d.c)} clicks)`);
 };
+
+function teSumPaint() {   // one tappable line for String/Template/Distance/Measure in/Elevation dialed
+  const st = teStr(), g = teTgt(), d = st.dial, o = $("tgTpl").querySelector(`option[value="${g.tpl}"]`), dv = d && dialView(d);
+  const parts = [o ? o.textContent : g.tpl, g.dist > 0 ? `${fmt(g.dist, 0)} ${g.du}` : "distance?"]; if (g.u === "cm") parts.push("cm");
+  parts.push(dv ? `${dv.dir} ${dv.s} ${angU(dv.u)} (${Math.abs(dv.c)})` : "dial?");
+  const open = !!TE.setOpen, b = $("tgSum");
+  b.innerHTML = `<span class="t">${escapeHtml(parts.join(" · "))}</span><span class="i" aria-hidden="true">${open ? "▴" : "✎"}</span>`;
+  b.setAttribute("aria-expanded", String(open)); b.setAttribute("aria-label", `Setup: ${parts.join(", ")}. ${open ? "Tap to collapse" : "Tap to edit"}`);
+  $("tgEd").classList.toggle("setc", !open);
+}
+$("tgSum").onclick = () => { if (!TE) return; TE.setOpen = !TE.setOpen; teSumPaint(); if (TE.setOpen) $("tgStrSel").focus({ preventScroll: true }); };
 
 /* ---- target editor ---- */
 function teStr() { return ED && ED.tg && ED.tg.strings.find(s => s.id === TE.str); }
@@ -3365,12 +3388,15 @@ function openTgEd(strId, opts = {}) {
   if (!ED) return; const t = tgEnsure(ED); if (!t.strings.some(s => s.id === strId)) strId = t.cur;
   banHide();   // the editor is now the focus; the banner would sit over its buttons
   const st = t.strings.find(s => s.id === strId);
-  TE = { str: strId, mode: st.aim ? "hole" : "aim", sel: null, undo: [], drag: null, span: null, pairNext: opts.pairNext || null, m: null };
-  const g = t.targets.find(q => q.id === st.tid); if (!(g.dist > 0)) g.dist = tgDefDist();
+  const g = t.targets.find(q => q.id === st.tid), fresh = !t.strings.some(s => s.tid === g.id && (s.aim || s.holes.length || s.dial));
+  const willDial = !st.dial && !st.holes.length && tgRecent(ED) && tgSame();   // the app's dope fills it in a moment
+  TE = { str: strId, mode: st.aim ? "hole" : "aim", sel: null, undo: [], drag: null, span: null, pairNext: opts.pairNext || null, m: null,
+    setOpen: fresh && !(g.dist > 0 || tgDefDist() > 0) || fresh && !st.dial && !willDial, fresh };   // collapsed unless a new target is missing something
+  if (!(g.dist > 0)) g.dist = tgDefDist();
   $("tgEd").classList.add("show"); $("tgEd").scrollTop = 0; $("tgUndo").disabled = true;
   if (BAN.sid === ED.id) banPaint();
   teRender();
-  if (!st.holes.length && !st.dial && tgRecent(ED)) tgAutoDial(ED, st);   // first marked: default to the dope at this moment
+  if (!st.holes.length && !st.dial && tgRecent(ED)) tgAutoDial(ED, st).then(() => { if (TE && TE.fresh && teStr() === st && !st.dial && !TE.setOpen) { TE.setOpen = true; teRender(); } });   // first marked: default to the dope at this moment (no dope → open the setup)
 }
 async function closeTgEd() {
   if (!TE) return; if (TE.mode === "meas") teMeasCommit();
@@ -3405,7 +3431,7 @@ function teRender() {
   $("tgEdT").textContent = `String ${n} · Target ${tgtLetter(t, g.id)}`;
   $("tgTpl").value = g.tpl; setVal("tgDist", g.dist ?? ""); $("tgDu").value = g.du; $("tgU").value = g.u;
   $("tgStrSel").innerHTML = t.strings.map((s, i) => `<option value="${escapeHtml(s.id)}">String ${i + 1} · Target ${tgtLetter(t, s.tid)}</option>`).join(""); $("tgStrSel").value = st.id;
-  $("tgEd").classList.toggle("meas", TE.mode === "meas");
+  $("tgEd").classList.toggle("meas", TE.mode === "meas"); teSumPaint();
   $("tgMode").querySelectorAll("button").forEach(b => { const on = b.dataset.v === TE.mode; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
   const rd = readings(ED, st.id), pn = TE.pairNext && rd.findIndex(x => x.id === TE.pairNext) + 1;
   $("tgTip").textContent = TE.mode === "aim" ? `Tap the aim point for String ${n} (drag to adjust).`
@@ -3593,7 +3619,7 @@ function teResults() {
     h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
   } else if (gs.n > 1) {
     const vU = S.ang, need = -gs.cy / inPerU(vU, yd), d = st.dial;
-    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d, vU)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
+    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
     h += `<button type="button" id="tgTrue"${TE.atDist && same ? "" : " disabled"}>🎯 Send vertical to Truing (${gs.cy >= 0 ? "group high" : "group low"} ${lenTxt(Math.abs(gs.cy), u)} = ${need >= 0 ? "U" : "D"} ${Math.abs(need).toFixed(2)} ${angU(vU)})</button>`;
     h += `<div class="hint">${d ? `Sends dialed − offset (the elevation that would have centered the group) with this string's saved conditions and angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}Only the vertical offset is sent. Horizontal (${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}) is never sent — it's mostly wind.${same ? "" : " <b>Pick this session's gun + load on Gear to send it.</b>"}</div>`;
   }
@@ -3616,7 +3642,7 @@ async function tgSendTrue() {
     setVal("trObs", obs.toFixed(2));
     const cTxt = TR.cond ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", w.tp != null ? `powder ${fmt(w.tp, 0)}°F` : ""].filter(Boolean).join(" · ") : "";
     if (TR.cond) $("trFor").textContent += ` · using the string's conditions: ${cTxt}`;
-    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d, U)}${d.k && d.k !== 1 ? ` (×${fmt(d.k, 3)} tracking = ${dialT.toFixed(2)} ${angU(U)})` : ""}, group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} (${Math.abs(corr).toFixed(2)} ${angU(U)}) at ${yd} yd → <b>${obs.toFixed(2)} ${angU(U)}</b> would have centered it. ${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only (horizontal is mostly wind). Tap Solve.`;
+    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d)}${d.k && d.k !== 1 ? ` (×${fmt(d.k, 3)} tracking = ${dialT.toFixed(2)} ${angU(U)})` : ""}, group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} (${Math.abs(corr).toFixed(2)} ${angU(U)}) at ${yd} yd → <b>${obs.toFixed(2)} ${angU(U)}</b> would have centered it. ${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only (horizontal is mostly wind). Tap Solve.`;
   } else {   // old strings: today's prediction (current behavior)
     TR.look = 0; setVal("trAngle", 0); TR.cond = null;
     const pred = await predAt(yd, {}); if (!pred) { $("trOut").innerHTML = `<span class="bad">${yd} yd is beyond this bullet's reach.</span>`; return; }

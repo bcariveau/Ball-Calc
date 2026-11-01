@@ -37,6 +37,10 @@ const PB = hex("80 1C 22 02 26 10 31 20 33 31 05 07 C3 02 D9 02 C3 02 CE 02 16 0
 const p = await ctx.newPage();
 const hook = pg => { pg.on("console", m => { if (m.type() === "error" || m.type() === "warning") errs.push(m.type() + ": " + m.text()); }); pg.on("pageerror", e => errs.push("PAGEERR " + e.message)); pg.on("dialog", d => d.accept()); };
 hook(p);
+// tgpolish: the target setup collapses to one summary line; open it before using its fields
+const openSet = () => p.evaluate(() => { const b = document.getElementById("tgSum"); if (b && document.getElementById("tgEd").classList.contains("show") && b.getAttribute("aria-expanded") === "false") b.click(); });
+const SETRE = /^#tg(Dist|Du|U|Tpl|StrSel|DialV|DialD|DialApp)$/;
+for (const fn of ["fill", "selectOption", "press", "click"]) { const o = p[fn].bind(p); p[fn] = async (sel, ...a) => { if (typeof sel === "string" && SETRE.test(sel)) await openSet(); return o(sel, ...a); }; }
 const ready = (pg = p) => pg.waitForFunction(() => document.getElementById("status").textContent.startsWith("Done"), null, { timeout: 30000 });
 const lum = h => { const m = h.match(/\d+(\.\d+)?/g).map(Number).slice(0, 3).map(x => x / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]; };
 const cr = (a, c) => { const [x, y] = [lum(a), lum(c)].sort((m, k) => k - m); return (x + 0.05) / (y + 0.05); };
@@ -82,8 +86,8 @@ ok("tapping anywhere on the row toggles it", (await ED()).tg.mark === true); awa
 await p.click("#tgMarkBtn"); await p.waitForSelector("#tgEd.show"); await p.waitForTimeout(500);
 E = await ED(); let d0 = E.tg.strings[0].dial;
 ok("first mark (recent session) defaults the dial to the app's dope at the target distance", d0 && d0.src === "app" && d0.u === "MIL" && d0.e > 2 && d0.wx.yd === 500 && d0.wx.temp === 59 && d0.wx.look === 0 && d0.k === 1.05, JSON.stringify(d0));
-ok("…stored with clicks and the tracking factor (turret reading = dope ÷ k)", d0.c === Math.round(d0.e / 0.1) && d0.cl.includes("0.1"), JSON.stringify(d0));
-ok("dial box shows it in the display unit + clicks", +(await p.inputValue("#tgDialV")) === +d0.e.toFixed(3) && (await p.inputValue("#tgDialD")) === "U" && (await T("#tgDialU")) === "mil" && (await T("#tgDialH")).includes(`U ${d0.c} clicks`) && (await T("#tgDialH")).includes("tracking ×1.05") && (await T("#tgDialH")).includes("app dope"), await T("#tgDialH"));
+ok("…stored with clicks and the tracking factor (turret reading = dope ÷ k)", d0.c === Math.round(d0.e / 0.1) && Math.abs(d0.e - d0.c * 0.1) < 1e-9 && d0.cl.includes("0.1"), JSON.stringify(d0));
+ok("dial box shows it at turret resolution + clicks", (await p.inputValue("#tgDialV")) === d0.e.toFixed(1) && (await p.inputValue("#tgDialD")) === "U" && (await T("#tgDialU")) === "mil" && (await T("#tgDialH")).includes(`U ${d0.c} clicks`) && (await T("#tgDialH")).includes("tracking ×1.05") && (await T("#tgDialH")).includes("app dope"), await T("#tgDialH"));
 await p.fill("#tgDist", "300"); await p.press("#tgDist", "Tab"); await p.waitForTimeout(400); E = await ED();
 ok("an unedited app dial follows a distance change", E.tg.strings[0].dial.wx.yd === 300 && E.tg.strings[0].dial.e < d0.e && E.tg.strings[0].dial.src === "app");
 await p.fill("#tgDist", "500"); await p.press("#tgDist", "Tab"); await p.waitForTimeout(400);
@@ -95,7 +99,7 @@ await p.fill("#tgDist", "500"); await p.press("#tgDist", "Tab"); await p.waitFor
 await p.click("#tgUndo"); await p.click("#tgUndo"); await p.click("#tgUndo"); await p.waitForTimeout(60);
 ok("Undo restores the previous dial", (await ED()).tg.strings[0].dial.src === "app");
 await p.fill("#tgDialV", "3.5"); await p.press("#tgDialV", "Tab"); await p.waitForTimeout(60);
-ok("dial box controls ≥44px", (await small("#tgDialBox input, #tgDialBox select, #tgDialBox button")).length === 0, JSON.stringify(await small("#tgDialBox input, #tgDialBox select, #tgDialBox button")));
+await openSet(); ok("dial box controls ≥44px", (await small("#tgDialBox input, #tgDialBox select, #tgDialBox button")).length === 0, JSON.stringify(await small("#tgDialBox input, #tgDialBox select, #tgDialBox button")));
 
 /* ---------- 2) velocity-vs-vertical thresholds ---------- */
 // group 1.0″ high on average at 500 yd, fast shots high (r ≈ 0.98)
@@ -116,14 +120,14 @@ await setHoles(0, H5); await p.waitForTimeout(60);
 /* ---------- 1b) Send vertical to Truing = dialed − offset, with the string's conditions ---------- */
 await p.evaluate(() => { const st = window.__bc.ED.tg.strings[0]; st.dial.wx = { ...st.dial.wx, temp: 20, alt: 5000, press: 24.9, hum: 10, tp: 25, look: 8 }; window.__bc.openTgEd(st.id); });
 await p.waitForTimeout(60);
-ok("the at-distance confirm is a full-row ≥44px switch naming the dial", await p.evaluate(() => { const l = document.querySelector('label.tgl[for="tgAtDist"]'); return l && l.getBoundingClientRect().height >= 44 && document.getElementById("tgAtDist").getAttribute("role") === "switch" && l.textContent.includes("U 3.50 mil dialed"); }), await T("#tgRes"));
+ok("the at-distance confirm is a full-row ≥44px switch naming the dial", await p.evaluate(() => { const l = document.querySelector('label.tgl[for="tgAtDist"]'); return l && l.getBoundingClientRect().height >= 44 && document.getElementById("tgAtDist").getAttribute("role") === "switch" && l.textContent.includes("U 3.5 mil dialed"); }), await T("#tgRes"));
 await p.click('label.tgl[for="tgAtDist"]'); await p.waitForTimeout(40);
 ok("…toggling it enables Send vertical to Truing", !(await p.isDisabled("#tgTrue")));
 const cy = H5.reduce((a, q) => a + q[1], 0) / 5;
 await p.click("#tgTrue"); await p.waitForSelector("#trSheet.show"); await p.waitForTimeout(500);
 let trO = +(await p.inputValue("#trObs"));
 ok("Truing observed = dialed × tracking − vertical offset (not a fresh prediction)", near(trO, 3.5 * 1.05 - cy / 18, 0.006) && +(await p.inputValue("#trRange")) === 500, `${trO} vs ${3.5 * 1.05 - cy / 18}`);
-ok("Truing uses the string's saved angle + conditions", +(await p.inputValue("#trAngle")) === 8 && (await T("#trFor")).includes("using the string's conditions") && (await T("#trFor")).includes("20°F") && (await T("#trOut")).includes("dialed U 3.50 mil") && (await T("#trOut")).includes("×1.05 tracking"), (await T("#trFor")) + " | " + (await T("#trOut")));
+ok("Truing uses the string's saved angle + conditions", +(await p.inputValue("#trAngle")) === 8 && (await T("#trFor")).includes("using the string's conditions") && (await T("#trFor")).includes("20°F") && (await T("#trOut")).includes("dialed U 3.5 mil") && (await T("#trOut")).includes("×1.05 tracking"), (await T("#trFor")) + " | " + (await T("#trOut")));
 ok("TR carries the saved conditions + powder temp", await p.evaluate(() => { const c = window.__bc.TR.cond; return c && c.cond.temp === 20 && c.cond.alt === 5000 && c.cond.press === 24.9 && c.Tp === 25; }));
 await p.click("#trGo"); await p.waitForTimeout(700);
 const outCold = await T("#trOut");
@@ -244,6 +248,7 @@ await p.click("#slEdClose"); await p.waitForTimeout(100);
 await p.click(`.slItem[data-id="${MID}"]`); await p.waitForSelector("#slEditor.show");
 await p.evaluate(() => { const st = window.__bc.ED.tg.strings[0]; st.holes = st.holes.slice(0, 4); window.__bc.openTgEd(st.id); }); await p.waitForTimeout(60);
 await p.click('#tgList .lr:not(.rdu) >> nth=0 >> .lrX'); await p.waitForTimeout(30);
+await openSet();
 for (const th of ["dark", "light", "od", "fde", "night"]) {
   await p.evaluate(t => document.documentElement.dataset.theme = t, th); await p.waitForTimeout(30);
   const bad = (await colors(["#tgDialBox label", "#tgDialH", "#tgDialApp", "#tgDialD", "#tgDialV", "#tgVV", "#tgVV .pt", "#tgList .lsub", "#tgList .lmenu button", "#tgList .rv", "#tgList .rk", "#tgList .hn", "#tgZbar .zh", "#tgZoomT", "#tgZfit", ".tgl span", ".tgl small"])).filter(([, c, bg]) => cr(c, bg) < 4.5).map(([s, c, bg]) => `${s} ${cr(c, bg).toFixed(2)}`);

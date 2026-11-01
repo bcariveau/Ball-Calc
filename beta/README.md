@@ -61,7 +61,7 @@ writer `set_X(v)` (for example `set_lastRun`, `set_LOG`, `set_slKey`).
 
 Shared partials (`views/parts.js`) are defined once and reused:
 - `sheetHead()` is every sheet's title + ✕ Close bar.
-- `ctxRow()` is the gun · load · zero · unit context line on Gear and Log. Dope uses its card header, `#dcFor`, and `components.js` `ctxPaint()` fills all three.
+- `ctxRow()` is the gun · load · zero · unit context line, placed directly under the header on Dope, Gear and Log (`#ctxDope`, `#ctxGear`, `#ctxLog`). `components.js` `ctxPaint()` fills all three.
 - `startBtn()` is the ▶ Start / Continue shooting button on Dope and Log, painted by `components.js` `shBtnPaint()`.
 
 The runtime UI pieces live in `js/components.js`: `toast()`, `openOvl()`/`closeOvl()` for sheets, steppers, segmented controls, and hint shortening.

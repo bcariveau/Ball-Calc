@@ -82,7 +82,7 @@ function renderLog() {
   const { rifleId, loadId } = curKeyIds(), l = curLoad(), list = sessFor(rifleId, loadId);
   $("slNewBtn").disabled = false; $("slNewBtn").title = l ? "Type velocities by hand (no radar)" : "Pick a gun and load first"; shBtnPaint();
   const orph = orphanSessions(), emp = !l ? !LOG.length : !list.length;
-  $("slSum").hidden = emp;
+  $("slSum").hidden = emp; $("slEmpty").hidden = !emp;   // one short muted line in the empty card
   if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = (emp ? slEmptyHTML(false) : "") + orphanHTML(orph); $("slChartBox").style.display = "none"; $("slCmp").hidden = true; paintSel(); return; }
   const all = list.flatMap(s => s.shots), st = shotStats(all);
   $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} · ${st.n} shots for “${l.name}” · all-shot avg ${st.avg.toFixed(0)} fps, SD ${st.sd.toFixed(1)}`
@@ -97,7 +97,7 @@ function renderLog() {
   renderCompare();
 }
 function slEmptyHTML(hasLoad) {
-  return "";   // no empty-state line: ▶ Start shooting sits right above on the Log tab
+  return "";   // the static #slEmpty line ("No sessions yet.") covers the empty state; ▶ Start shooting sits right above
 }
 /* compare sessions (ladder / charge tests) */
 let cmpScope = "load";

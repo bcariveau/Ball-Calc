@@ -1,9 +1,10 @@
 // beta/js/views/dope.js — markup for the Dope tab and printable dope card.
-import { startBtn } from "./parts.js";
+import { ctxRow, startBtn } from "./parts.js";
 
 export const dopeTab = `<section class="tab" id="tabDope" data-tab="dope" role="tabpanel" aria-labelledby="tabBtnDope">
+${ctxRow("ctxDope")}
 <div id="dopeCard" aria-live="polite">
-  <div class="dcTop"><span class="dcFor ctx" id="dcFor" role="note"></span><button class="ghost ic wxIc" type="button" id="calcBtn" aria-label="Refresh weather and recalculate" title="Refresh weather and recalculate">↻ Weather</button></div>
+  <div class="dcTop"><button class="ghost ic wxIc" type="button" id="calcBtn" aria-label="Refresh weather and recalculate" title="Refresh weather and recalculate">↻ Weather</button></div>
   <div class="dcBig">
     <div><span class="k" id="dcElevK">Dial</span><b id="dcElev">—</b><span class="c" id="dcElevC"></span><span class="clk" id="dcElevClk"></span></div>
     <div><span class="k" id="dcWindK">Wind hold</span><b id="dcWind">—</b><span class="c" id="dcWindC"></span><span class="clk" id="dcWindClk"></span></div>

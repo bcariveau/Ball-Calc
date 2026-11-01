@@ -9,6 +9,7 @@ ${startBtn("slStartBtn")}
 <!-- ===== Shot log ===== -->
 <div class="section" id="slSection">
   <h2>Shot log <span class="row"><button class="sm ghost" type="button" id="slImportBtn">⇧ Athlon file</button><button class="sm ghost" type="button" id="slNewBtn" title="Type velocities by hand">＋ Session</button></span></h2>
+  <p class="slNone" id="slEmpty" hidden>No sessions yet.</p>
   <div id="radarBox">
     <div class="row"><button class="sm" type="button" id="radarConnect">📡 Connect radar</button><button class="sm ghost" type="button" id="radarReconnect" hidden>↻ Reconnect</button><button class="sm ghost" type="button" id="radarDisconnect" hidden>Disconnect</button></div>
     <div class="summary bad" id="radarNo" hidden></div>

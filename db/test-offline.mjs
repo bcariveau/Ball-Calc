@@ -1,9 +1,9 @@
-// offline round: beta-only service worker (scope ./beta), precache + cache-first shell, real airplane mode (server killed + context offline),
+// offline round (beta-only stage; index.html here is the pre-offline build — main-app coexistence is in test-offline-main): beta-only service worker (scope ./beta), precache + cache-first shell, real airplane mode (server killed + context offline),
 // solve / Shooting view / log a shot offline, index/previous/legacy NOT controlled, update banner (SW version bump + content-only change),
 // offline pill, weather fails gracefully, data (localStorage / IndexedDB) untouched, manifest + icons, banner/pill contrast in all 5 themes.
 import { chromium } from "playwright"; import assert from "assert/strict"; import fs from "fs"; import { spawn, execSync } from "child_process";
 const SRC = "/workspace/site", TMP = "/tmp/offsite", PORT = 8771, BASE = `http://localhost:${PORT}/Ball-Calc/`, SHOT = "/workspace/screenshot-off-";
-execSync(`pkill -f "[h]ttp.server ${PORT}" ; sleep 0.3; rm -rf ${TMP} && cp -r ${SRC} ${TMP}; true`, { shell: "/bin/bash" });
+execSync(`pkill -f "[h]ttp.server ${PORT}" ; sleep 0.3; rm -rf ${TMP} && cp -r ${SRC} ${TMP} && cp /workspace/ballistic-calculator-pre-offline.html.bak ${TMP}/Ball-Calc/index.html && rm -f ${TMP}/Ball-Calc/sw.js; true`, { shell: "/bin/bash" });
 let srv = null;
 const up = async () => { srv = spawn("python3", ["-m", "http.server", String(PORT), "-d", TMP], { stdio: "ignore" });
   for (let i = 0; i < 50; i++) { try { if ((await fetch(BASE + "sw-beta.js")).ok) return; } catch {} await new Promise(r => setTimeout(r, 100)); } throw new Error("server didn't start"); };

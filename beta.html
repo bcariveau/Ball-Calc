@@ -164,6 +164,25 @@ body.has-sensors .sensorbtn { display: inline-block; }
 #slCmpTbl tr.best td { background: var(--chip); }
 #slCmpTbl td.l { text-align: left; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
 .slTools { margin-top: 4px; }
+/* saved recipes + copy load sheets */
+.rcItem { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; width: 100%; text-align: left; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 11px; margin: 0 0 8px; font-size: 0.9rem; font-weight: 600; }
+.rcItem:active { transform: none; background: var(--hover); }
+.rcItem .d { grid-column: 1 / -1; color: var(--muted); font-size: 0.75rem; font-weight: 400; }
+.rcItem .s { text-align: right; font-variant-numeric: tabular-nums; color: var(--accent); font-size: 0.84rem; white-space: nowrap; }
+.rcItem .s small { display: block; color: var(--muted); font-weight: 400; font-size: 0.7rem; }
+.rcItem .s small.none { color: var(--hint); }
+.rcItem .w { grid-column: 1 / -1; color: var(--warn); font-size: 0.72rem; font-weight: 500; }
+.rcItem .tag { font-size: 0.66rem; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--chip); color: var(--accent); border: 1px solid var(--chip-b); margin-left: 6px; vertical-align: 1px; white-space: nowrap; }
+.ovl .list { overflow-y: auto; flex: 1 1 auto; margin-top: 8px; -webkit-overflow-scrolling: touch; }
+.ovl .sub { color: var(--accent); font-size: 0.8rem; font-weight: 700; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.rcBtn { width: 100%; margin-top: 8px; padding: 10px; }
+#cpDup { width: 100%; padding: 12px; margin-top: 6px; }
+#cpMvRow { margin: 2px 0 4px; }
+#cpMvRow .seg { display: flex; flex: 1 1 100%; }
+#cpMvRow .seg button { flex: 1; padding: 8px 6px; }
+#cpAllBtn { width: 100%; margin-top: 2px; }
+#loadRow > button { padding-left: 4px; padding-right: 4px; font-size: 0.78rem; white-space: nowrap; }
+#loadRow > button.danger { flex: 0 0 42px; }
 /* shot log */
 .slItem { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; width: 100%; text-align: left; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; margin: 0 0 6px; font-size: 0.88rem; font-weight: 500; }
 .slItem:active { transform: none; background: var(--hover); }
@@ -238,11 +257,12 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
 
   <div class="picker">
     <div class="lbl"><span>Load (ammo for this gun)</span><span class="dirty" id="loadDirty"></span></div>
-    <div class="row">
+    <div class="row" id="loadRow">
       <select id="loadSel" aria-label="Load"></select>
       <button class="sm ghost" type="button" id="loadNew">＋ New</button>
       <button class="sm ghost" type="button" id="loadSave">💾 Save</button>
       <button class="sm ghost" type="button" id="loadRename">✎ Rename</button>
+      <button class="sm ghost" type="button" id="loadCopy" aria-label="Copy load">📑 Copy</button>
       <button class="sm danger" type="button" id="loadDel" aria-label="Delete load">🗑</button>
     </div>
     <div class="summary" id="loadSum"></div>
@@ -251,6 +271,7 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
       <div class="grid">
         <div class="full"><button class="sm ghost" type="button" id="dbOpen" style="width:100%;padding:10px">📚 Pick bullet from database</button>
           <div id="bulletInfo"></div>
+          <button class="sm ghost rcBtn" type="button" id="rcBulletBtn" hidden></button>
           <input type="hidden" id="bulletId"><input type="hidden" id="bulletName"><input type="hidden" id="bcBands"></div>
         <div><label for="bc">Ballistic coefficient (BC)</label><input type="number" inputmode="decimal" id="bc" step="0.001" value="0.223"><div class="err" id="e-bc"></div></div>
         <div><label for="drag">Drag model</label><select id="drag"><option value="G7" selected>G7 (boat-tail / long-range)</option><option value="G1">G1 (flat-base / most box BCs)</option></select></div>
@@ -277,6 +298,7 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
       <summary>Load data <span class="rsum" id="recipeSum">Powder, charge, primer, COAL… or factory ammo</span></summary>
       <span class="seg" id="ldKindSeg" role="group" aria-label="Ammo type"><button type="button" data-v="hand">🧪 Handload</button><button type="button" data-v="factory">📦 Factory ammo</button></span>
       <input type="hidden" id="ldKind" value="hand">
+      <button class="sm ghost rcBtn" type="button" id="rcFind" hidden></button>
       <div class="grid" id="ldHand">
         <div class="full"><label for="ldPowder">Powder</label><input type="text" list="dlPowder" id="ldPowder" maxlength="60" autocomplete="off" placeholder="e.g. Hodgdon H4350"></div>
         <div><label for="ldCharge">Charge (gr)</label><div class="stepper" data-step="0.1" data-min="0" data-max="200"><input type="number" inputmode="decimal" id="ldCharge" step="0.1" placeholder="—"></div></div>
@@ -435,6 +457,25 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
   <div class="note">Factory BCs are often optimistic. Pick fills BC, drag model, weight, diameter and length; you still enter your muzzle velocity.</div>
   <div class="hint" id="dbStatus">Loading…</div>
   <div id="dbList"></div>
+</div>
+<div id="rcSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Saved recipes for this bullet">
+  <h3><span>📖 Saved recipes</span><button class="sm ghost" type="button" id="rcClose">✕ Close</button></h3>
+  <div class="summary" id="rcFor"></div>
+  <div class="hint">Recipes saved on any of your guns for this same bullet (same database bullet, or same diameter, weight and BC). Tap one to put it in this load's data, then 💾 Save. Velocities from another gun or barrel will differ — always work up again.</div>
+  <div class="list" id="rcList"></div>
+</div>
+<div id="cpSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Copy load">
+  <h3><span id="cpTitle">Copy load</span><button class="sm ghost" type="button" id="cpClose">✕ Close</button></h3>
+  <div class="summary" id="cpFor"></div>
+  <div class="list">
+    <button type="button" id="cpDup">➕ Duplicate on this gun</button>
+    <div class="hint">Same bullet, MV and load data under a new name — handy for a ladder or seating-depth test at a new charge.</div>
+    <div class="sub">Copy to another gun</div>
+    <div class="row" id="cpMvRow"><span class="hint" style="margin:0">Muzzle velocity on the other gun</span><span class="seg" id="cpMv" role="group" aria-label="Muzzle velocity on the other gun"><button type="button" data-v="est">Estimate for its barrel</button><button type="button" data-v="keep">Keep, mark estimated</button></span></div>
+    <div id="cpList"></div>
+    <button class="sm ghost" type="button" id="cpAllBtn" hidden></button>
+    <div class="hint" style="margin-top:10px">Copies the bullet, BC, drag model, MV and load data. Zero, sight height, twist and barrel stay with each gun. Chrono sessions are not copied. The copy opens on its gun, ready to edit.</div>
+  </div>
 </div>
 <div id="slEditor" class="ovl" role="dialog" aria-modal="true" aria-label="Chronograph session">
   <h3><span id="slEdTitle">Session</span><button class="sm ghost" type="button" id="slEdClose">✕ Close</button></h3>
@@ -607,7 +648,8 @@ function updateDirty() {
   $("rangeDirty").textContent = gd ? "● unsaved changes" : "";
   $("rifleSave").classList.toggle("hot", rd); $("loadSave").classList.toggle("hot", ld); $("rangeSave").classList.toggle("hot", gd);
   ["rifleSave", "rifleRename", "rifleDel"].forEach(id => $(id).disabled = !r);
-  ["loadSave", "loadRename", "loadDel"].forEach(id => $(id).disabled = !l);
+  ["loadSave", "loadRename", "loadDel", "loadCopy"].forEach(id => $(id).disabled = !l);
+  paintRecipeBtns();
   $("loadNew").disabled = !r;
   ["rangeSave", "rangeRename", "rangeDel"].forEach(id => $(id).disabled = !g);
   const tw = num("twist");
@@ -1266,6 +1308,8 @@ function pickBullet(id) {
   setVal("bulletId", b.id); setVal("bulletName", `${b.brand} ${b.caliber || ""} ${b.weight_gr} gr ${b.line || ""}`.replace(/\s+/g, " ").trim().slice(0, 100));
   setVal("bcBands", bandStr(b.g1_bands)); $("useBands").value = "";
   closeDB(); $("loadDetails").open = true; renderBulletInfo(); updateDirty(); schedule();
+  const nRc = recipeMatches().length;
+  if (nRc && !recipeText(pick(LOAD_F))) { toast(`Filled from ${b.brand} ${b.weight_gr} gr — ${nRc} saved recipe${nRc === 1 ? "" : "s"} for this bullet`); setTimeout(openRecipes, 60); return; }
   toast(`Filled from ${b.brand} ${b.weight_gr} gr — now enter your MV and Save`);
   setTimeout(() => { $("mv").focus(); $("mv").select?.(); }, 60);
 }
@@ -1920,7 +1964,142 @@ try {
   console.error(e);
   statusEl.textContent = "Couldn't load the ballistics engine (offline?). Connect once and reload."; statusEl.classList.add("bad");
 }
-window.__bc = { P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+
+/* ---------------- saved recipes by projectile · copy load ---------------- */
+var RC = [], cpAll = false, cpMv = "est";
+function fnum(v) { const x = parseFloat(v); return isFinite(x) ? x : null; }
+function normName(t) { return String(t || "").toLowerCase().replace(/[^a-z0-9.]+/g, " ").trim(); }
+function sameDia(a, b) { const x = fnum(a.diameter), y = fnum(b.diameter); return x != null && y != null && Math.abs(x - y) < 0.0015; }
+function dia3(d) { const x = fnum(d); return x == null ? "" : x.toFixed(3).replace(/^0/, "") + '"'; }
+// how two loads' projectiles match: "db" (same database bullet) | "name" | "spec" (diameter + weight + BC) | ""
+function projMatch(a, b) {
+  if (!sameDia(a, b)) return "";                       // caliber compatibility first
+  if (a.bulletId && b.bulletId) return a.bulletId === b.bulletId ? "db" : "";
+  if (normName(a.bulletName) && normName(a.bulletName) === normName(b.bulletName)) return "name";
+  const wa = fnum(a.weight), wb = fnum(b.weight), ba = fnum(a.bc), bb = fnum(b.bc);
+  if (wa == null || wb == null || Math.abs(wa - wb) > 0.5) return "";
+  if (ba == null || bb == null || (a.drag || "G7") !== (b.drag || "G7") || Math.abs(ba - bb) > 0.02 * Math.max(ba, bb)) return "";
+  return "spec";
+}
+function projLabel(o) {
+  return o.bulletName ? `${o.bulletName}` : `${o.weight || "?"} gr ${dia3(o.diameter) || "?"} bullet` + (o.bc ? ` · BC ${o.bc} ${o.drag || ""}` : "");
+}
+// best chrono session for a saved load: lowest SD with 3+ shots, preferring sessions shot with the load's current recipe
+function bestSession(rid, l) {
+  const ss = LOG.filter(x => x.rifleId === rid && x.loadId === l.id && x.stats && x.stats.n);
+  if (!ss.length) return null;
+  const sameRc = ss.filter(x => x.recipe && same(x.recipe.ldCharge, l.ldCharge) && String(x.recipe.ldPowder || "").trim() === String(l.ldPowder || "").trim());
+  const pool = sameRc.length ? sameRc : ss, g3 = pool.filter(x => x.stats.n >= 3);
+  const best = (g3.length ? g3.sort((a, b) => a.stats.sd - b.stats.sd) : pool.sort((a, b) => b.stats.n - a.stats.n))[0];
+  return { s: best, n: ss.length, thisRecipe: !!sameRc.length };
+}
+function recipeMatches(cur = pick(LOAD_F), withStats) {
+  const me = curLoad(), r0 = curRifle(), out = [];
+  P.rifles.forEach(r => r.loads.forEach(l => {
+    if (l === me || !recipeText(l)) return;
+    const m = projMatch(cur, l); if (m) out.push({ r, l, m, best: withStats ? bestSession(r.id, l) : null });
+  }));
+  return out.sort((a, b) => (b.r === r0) - (a.r === r0) || (a.best?.s.stats.n >= 3 ? a.best.s.stats.sd : 99) - (b.best?.s.stats.n >= 3 ? b.best.s.stats.sd : 99) || a.l.name.localeCompare(b.l.name));
+}
+function paintRecipeBtns() {
+  const n = recipeMatches().length, t = `📖 Use a saved recipe for this bullet (${n})`;
+  ["rcFind", "rcBulletBtn"].forEach(id => { $(id).hidden = !n; $(id).textContent = t; });
+}
+function openOvl(id) { $(id).classList.add("show"); document.body.style.overflow = "hidden"; }
+function closeOvl(id) { $(id).classList.remove("show"); document.body.style.overflow = ""; }
+function openRecipes() {
+  const cur = pick(LOAD_F), r0 = curRifle(), myBar = num("barrel");
+  RC = recipeMatches(cur, true);
+  $("rcFor").textContent = `For ${projLabel(cur)} · ${RC.length} saved recipe${RC.length === 1 ? "" : "s"}`;
+  $("rcList").innerHTML = RC.length ? RC.map((x, i) => {
+    const bar = fnum(x.r.barrel), st = x.best?.s.stats, other = x.r !== r0;
+    const where = `${x.r.name} · ${x.l.name} · ${x.r.gunKind === "handgun" ? "Handgun" : "Rifle"}${bar ? ` · ${bar}" barrel` : ""}`;
+    const extra = x.l.ldKind !== "factory" ? [x.l.ldCase ? x.l.ldCase + (x.l.ldFired ? ` ×${x.l.ldFired}` : "") : "", n3(x.l.ldCBTO) ? `CBTO ${n3(x.l.ldCBTO)}"` : "", n3(x.l.ldJump) ? `jump ${n3(x.l.ldJump)}"` : ""].filter(Boolean).join(" · ") : "";
+    let warn = "";
+    if (other) warn = bar && myBar && Math.abs(bar - myBar) >= 0.5 ? `⚠ ${bar}" barrel vs your ${myBar}" — velocity will differ (≈${myBar > bar ? "+" : "−"}${Math.round(Math.abs(myBar - bar) * 25)} fps). Work up again.`
+      : `⚠ Another gun${bar ? "" : " (barrel length not set)"} — chamber and velocity may differ. Work up again.`;
+    const stats = st ? `${Math.round(st.avg)} fps<small>SD ${st.n > 1 ? st.sd.toFixed(1) : "—"} · ${st.n} shot${st.n === 1 ? "" : "s"}${x.best.n > 1 ? ` · best of ${x.best.n}` : ""}${x.best.thisRecipe ? "" : " · older recipe"}</small>`
+      : x.l.mv ? `${x.l.mv} fps<small class="none">saved MV${({ measured: " (chrono)", factory: " (box)", estimate: " (est.)" })[x.l.mvSource] || ""}</small>` : `<small class="none">no chrono data</small>`;
+    return `<button type="button" class="rcItem" data-i="${i}"><span>${escapeHtml(recipeText(x.l))}${x.m === "spec" ? '<span class="tag">same weight + BC</span>' : ""}</span><span class="s">${stats}</span>` +
+      `<span class="d">${escapeHtml(where)}${extra ? "<br>" + escapeHtml(extra) : ""}</span>${warn ? `<span class="w">${escapeHtml(warn)}</span>` : ""}</button>`;
+  }).join("") : `<div class="hint">No saved recipes for this bullet yet. Save load data on a load that uses this bullet and it shows up here for every gun of the same bullet diameter.</div>`;
+  openOvl("rcSheet");
+}
+function applySavedRecipe(x) {
+  const curRt = recipeText(pick(LOAD_F)), rt = recipeText(x.l);
+  if (curRt && curRt !== rt && !confirm(`Replace this load's data (${curRt}) with ${rt} from “${x.r.name} · ${x.l.name}”?`)) return;
+  REC_F.forEach(f => setVal(f, (x.l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : x.l[f]));
+  paintLdKind(); closeOvl("rcSheet"); $("recipeDetails").open = true; updateDirty();
+  toast(curLoad() ? `Recipe from ${x.r.name} applied — tap 💾 Save to keep it` : `Recipe from ${x.r.name} applied`);
+  setTimeout(() => $("recipeDetails").scrollIntoView({ block: "start", behavior: "smooth" }), 50);
+}
+$("rcFind").onclick = $("rcBulletBtn").onclick = () => openRecipes();
+$("rcClose").onclick = () => closeOvl("rcSheet");
+$("rcList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (b) applySavedRecipe(RC[+b.dataset.i]); });
+
+// copy load: MV handling for another gun (uses the barrel-length estimate: ref MV + Δbarrel × fps/in)
+function copyMV(src, sg, tg, mode) {
+  const o = { mv: src.mv, mvSource: src.mvSource, refMV: src.refMV, refBarrel: src.refBarrel, note: "" }, mv = fnum(src.mv);
+  if (mv == null) return o;
+  const sb = fnum(sg.barrel), tb = fnum(tg.barrel), k = fnum(src.fpsPerInch) ?? 25;
+  const fromRef = src.mvSource === "estimate" && fnum(src.refMV) && fnum(src.refBarrel);
+  const base = fromRef ? fnum(src.refMV) : mv, bb = fromRef ? fnum(src.refBarrel) : sb;
+  if (src.mvSource === "factory") { o.note = `box MV ${mv} fps kept`; return o; }
+  if (mode === "est" && bb && tb && Math.abs(tb - bb) >= 0.25) {
+    const est = Math.round(base + (tb - bb) * k);
+    Object.assign(o, { mv: String(est), mvSource: "estimate", refMV: String(base), refBarrel: String(bb), note: `MV ${est} fps est. for ${tb}" (${base} @ ${bb}")` });
+    return o;
+  }
+  if (src.mvSource === "measured") Object.assign(o, { mvSource: "estimate", refMV: String(mv), refBarrel: sb ? String(sb) : (src.refBarrel || "") });
+  o.note = `MV ${mv} fps kept${src.mvSource === "measured" ? ", marked estimated" : ""}` + (mode === "est" && !(bb && tb) ? " (set both barrel lengths to estimate)" : mode === "est" && bb && tb ? " (same barrel length)" : "");
+  return o;
+}
+function gunDias(g) { return [...new Set(g.loads.map(l => fnum(l.diameter)).filter(x => x != null).map(x => x.toFixed(3)))]; }
+function openCopy() {
+  const l = curLoad(); if (!l) { toast("Pick a load first"); return; }
+  const cur = pick(LOAD_F), rt = recipeText(cur);
+  $("cpTitle").textContent = `📑 Copy “${l.name}”`;
+  $("cpFor").textContent = `${projLabel(cur)} · ${cur.mv || "?"} fps${rt ? " · " + rt : ""}`;
+  cpAll = false; renderCopy(); openOvl("cpSheet");
+}
+function renderCopy() {
+  const src = pick(LOAD_F), r0 = curRifle(), others = P.rifles.filter(g => g !== r0);
+  const fits = g => { const d = gunDias(g); return !d.length || d.some(x => Math.abs(+x - (fnum(src.diameter) ?? -1)) < 0.0015); };
+  const nFit = others.filter(fits).length, show = cpAll ? others : others.filter(fits);
+  $("cpMv").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cpMv));
+  $("cpMvRow").hidden = !show.length || src.mvSource === "factory" || !fnum(src.mv);
+  $("cpList").innerHTML = show.length ? show.map(g => {
+    const d = gunDias(g), bar = fnum(g.barrel), m = copyMV(src, r0, g, cpMv), ok = fits(g);
+    const info = [g.gunKind === "handgun" ? "Handgun" : "Rifle", bar ? `${bar}" barrel` : "barrel not set", g.loads.length ? `${g.loads.length} load${g.loads.length === 1 ? "" : "s"}` + (d.length ? ", bullets " + d.map(dia3).join(", ") : "") : "no loads yet"].join(" · ");
+    return `<button type="button" class="rcItem" data-id="${escapeHtml(g.id)}"><span>${escapeHtml(g.name)}</span><span class="s">Copy →</span><span class="d">${escapeHtml(info)}${m.note ? "<br>" + escapeHtml(m.note) : ""}</span>` +
+      (ok ? "" : `<span class="w">⚠ Different bullet diameter (${escapeHtml(d.map(dia3).join(", "))}) — make sure this is the right gun</span>`) + "</button>";
+  }).join("") : `<div class="hint">${others.length ? `No other guns with ${dia3(src.diameter) || "this"} bullets.` : "No other guns saved yet — add one with ＋ New under Gun."}</div>`;
+  const hid = others.length - nFit;
+  $("cpAllBtn").hidden = !hid; $("cpAllBtn").textContent = cpAll ? "Show only guns with the same bullet diameter" : `Show all guns (${hid} with other bullet diameters)`;
+}
+function copyName(g, base) { let n = `${base} (copy)`.slice(0, 60), i = 2; while (g.loads.some(x => x.name === n)) n = `${base} (copy ${i++})`.slice(0, 60); return n; }
+function copyLoadTo(tg) {
+  const r0 = curRifle(), l = curLoad(); if (!l || !tg) return;
+  if (isDirty(l, LOAD_F) && confirm(`“${l.name}” has unsaved changes. Save them to “${l.name}” as well?\n(Cancel = the changes go only into the copy.)`)) Object.assign(l, pick(LOAD_F));
+  const src = pick(LOAD_F), c = { ...src, id: uid(), name: copyName(tg, l.name) };
+  let note = "";
+  if (tg !== r0) { const m = copyMV(src, r0, tg, cpMv); ["mv", "mvSource", "refMV", "refBarrel"].forEach(k => c[k] = m[k] ?? ""); note = m.note; }
+  tg.loads.push(c); tg.lastLoadId = c.id;
+  if (tg !== r0) { P.lastRifleId = tg.id; applyRifle(); }
+  savePresets(); renderPickers(); applyLoad(); closeOvl("cpSheet"); updateDirty(); schedule();
+  $("recipeDetails").open = true;
+  toast(tg === r0 ? `Duplicated as “${c.name}” — change the charge and 💾 Save` : `Copied to ${tg.name} as “${c.name}”${note ? " · " + note : ""}`);
+  setTimeout(() => { $("loadSel").scrollIntoView({ block: "center", behavior: "smooth" }); if (tg === r0) { $("ldKind").value !== "factory" && $("ldCharge").focus({ preventScroll: true }); } }, 60);
+  return c;
+}
+$("loadCopy").onclick = openCopy;
+$("cpClose").onclick = () => closeOvl("cpSheet");
+$("cpDup").onclick = () => copyLoadTo(curRifle());
+$("cpAllBtn").onclick = () => { cpAll = !cpAll; renderCopy(); };
+$("cpMv").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cpMv = b.dataset.v; renderCopy(); });
+$("cpList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (b) copyLoadTo(P.rifles.find(g => g.id === b.dataset.id)); });
+document.addEventListener("keydown", e => { if (e.key !== "Escape") return; ["rcSheet", "cpSheet"].forEach(id => $(id).classList.contains("show") && closeOvl(id)); });
+window.__bc = { P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

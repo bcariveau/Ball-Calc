@@ -314,9 +314,124 @@ button.sm { min-height: 44px; padding: 8px 12px; }
 .stepper button { width: 44px; min-width: 44px; }
 .tg { min-height: 44px; min-width: 44px; padding: 4px 9px; }
 .x { width: 44px; min-height: 44px; }
-.shot { grid-template-columns: 30px 1fr auto auto auto 44px; }
 #themeBar button { min-height: 52px; }
 #toast.act button { min-height: 44px; }
+
+/* ---- targets round ---- */
+:root, html[data-theme=dark] { --s1: #ff8a80; --s2: #82b1ff; --s3: #ffd54f; --s4: #ea80fc; --s5: #80deea; --s6: #ffab40; }
+html[data-theme=light] { --s1: #c62828; --s2: #1565c0; --s3: #8a5300; --s4: #7b1fa2; --s5: #00796b; --s6: #bf360c; }
+html[data-theme=night] { --s1: #ff3b2f; --s2: #ff8a5c; --s3: #ffb199; --s4: #ff6a9c; --s5: #ffc29e; --s6: #e0503f; }
+.ms.s1 { fill: var(--s1); } .ms.s2 { fill: var(--s2); } .ms.s3 { fill: var(--s3); } .ms.s4 { fill: var(--s4); } .ms.s5 { fill: var(--s5); } .ms.s6 { fill: var(--s6); }
+.mr.s1 { stroke: var(--s1); } .mr.s2 { stroke: var(--s2); } .mr.s3 { stroke: var(--s3); } .mr.s4 { stroke: var(--s4); } .mr.s5 { stroke: var(--s5); } .mr.s6 { stroke: var(--s6); }
+.ms polygon, .ms rect, .ms circle { stroke: var(--card); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.ms.dim, .aim.dim { opacity: 0.35; }
+svg .mr { fill: none; stroke-width: 1.6px; stroke-dasharray: 3 2; }
+svg .selr { fill: none; stroke: var(--accent); stroke-width: 3px; }
+svg .hn { fill: var(--text); font-weight: 700; paint-order: stroke; stroke: var(--card); stroke-width: 3px; vector-effect: non-scaling-stroke; }
+svg .sheet { fill: var(--card); }
+svg .g0 { stroke: var(--muted); stroke-width: 1.4px; } svg .g1 { stroke: var(--hint); stroke-width: 1px; opacity: 0.8; } svg .g2 { stroke: var(--grid2); stroke-width: 1px; }
+svg .b1 { fill: none; stroke: var(--muted); stroke-width: 2px; } svg .b2 { fill: none; stroke: var(--hint); stroke-width: 1px; }
+svg .pl { fill: var(--grid2); stroke: var(--muted); stroke-width: 2px; } svg .pll { fill: var(--muted); }
+svg .aim line, svg .aim circle { stroke: var(--text); stroke-width: 1.6px; fill: none; }
+svg .ghost { fill: none; stroke: var(--accent); stroke-width: 2px; stroke-dasharray: 2 2; }
+svg.mk { width: 14px; height: 14px; flex: 0 0 14px; vertical-align: -2px; margin-right: 4px; }
+#shotBan { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); width: min(560px, calc(100vw - 12px)); z-index: 60; background: var(--card); color: var(--text); border: 2px solid var(--accent); border-radius: 14px; box-shadow: 0 8px 26px rgba(0,0,0,.45); padding: 6px 8px 8px; transition: opacity .4s; box-sizing: border-box; }
+#shotBan.fade { opacity: 0; pointer-events: none; }
+#shotBan.dock { position: static; transform: none; width: auto; box-shadow: none; margin: 4px 0 8px; }
+#shotBan.dis #sbV { text-decoration: line-through; color: var(--hint); }
+#sbMain { display: grid; grid-template-columns: auto 1fr; gap: 0 10px; align-items: center; width: 100%; margin: 0; padding: 4px 6px; background: none; color: var(--text); text-align: left; border-radius: 10px; min-height: 60px; }
+#sbV { grid-row: 1 / 3; font-size: 2.4rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+#sbV::after { content: " fps"; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+#sbN { font-size: 0.9rem; font-weight: 700; } #sbSt { font-size: 0.8rem; color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+#sbActs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+#sbActs button { flex: 1 1 auto; width: auto; margin: 0; min-height: 44px; padding: 6px 8px; font-size: 0.82rem; font-weight: 700; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 9px; }
+#sbActs button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+#sbActs button[data-a=x].on { background: var(--danger-bg); color: var(--err); border-color: var(--danger-b); }
+#slStrBar { margin: 8px 0 4px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
+#slStrBar .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+#tgHdrT { font-weight: 800; font-size: 1rem; } #tgHdrS { color: var(--muted); font-size: 0.76rem; }
+#slStrBar .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; } #slStrBar .row button { flex: 1 1 40%; margin: 0; }
+.tgChk { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 0.86rem; cursor: pointer; }
+.tgChk input { width: 22px; height: 22px; flex: 0 0 22px; margin: 0; accent-color: var(--accent); }
+.shot { grid-template-columns: 30px 1fr 44px 44px; }
+.shot .tgs { grid-column: 2 / -1; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.shot .tgs .sl { font-size: 0.74rem; color: var(--muted); display: inline-flex; align-items: center; }
+.shot.dis .v, .shot.dis .dv { text-decoration: line-through; color: var(--hint); }
+.shot button.xd.on { color: var(--err); }
+.sgh { margin-top: 10px; padding: 6px 0 2px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; border-bottom: 2px solid var(--border); }
+.sgh small { font-weight: 500; color: var(--muted); margin-left: 6px; }
+.scRow { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.sc { width: auto; margin: 0; min-height: 44px; padding: 6px 10px; font-size: 0.8rem; font-weight: 600; background: var(--input); color: var(--muted); border: 1px solid var(--border); border-radius: 999px; display: inline-flex; align-items: center; }
+.sc.on { color: var(--text); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+svg.tgS, #tgSvg { width: 100%; aspect-ratio: 1; display: block; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+#tgEd { z-index: 31; } #tgEd > *, #slEditor > #slStrBar, #slEditor > #slTgView, #slEditor > #sbDock { flex-shrink: 0; }
+#tgEd .tgSet { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } #tgEd .tgSet .full { grid-column: 1 / -1; }
+#tgSum { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin: 0 0 8px; padding: 8px 12px; text-align: left; font-size: 0.9rem; font-weight: 700; line-height: 1.3; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; }
+#tgSum .t { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; } #tgSum .i { flex: 0 0 auto; color: var(--accent); font-size: 1rem; }
+#tgEd.setc .tgSet, #tgEd.meas #tgSum { display: none; }
+#tgEd .dd { display: flex; gap: 6px; } #tgEd .dd input { flex: 1 1 auto; min-width: 0; } #tgEd .dd select { flex: 0 0 64px; width: 64px; }
+#tgEd .seg { display: flex; width: 100%; margin-top: 8px; } #tgEd .seg button { flex: 1; }
+#tgTip { margin: 6px 0; font-weight: 600; color: var(--text); font-size: 0.85rem; min-height: 1.2em; }
+#tgWrap { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
+#tgSvg { touch-action: none; cursor: crosshair; }
+#tgLoupe { position: absolute; width: 112px; height: 112px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,.5); pointer-events: none; background: var(--card); z-index: 2; }
+#tgZbar { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; flex-wrap: wrap; }
+#tgZbar button { width: 44px; min-width: 44px; min-height: 44px; margin: 0; padding: 0; font-size: 1.3rem; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; }
+#tgZbar #tgZfit { width: auto; padding: 0 12px; font-size: 0.85rem; font-weight: 700; }
+#tgZoomT { min-width: 40px; text-align: center; font-size: 0.85rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+#tgZbar .zh { flex: 1 1 120px; font-size: 0.74rem; color: var(--muted); }
+svg .hl { stroke: var(--text); stroke-width: 1px; opacity: 0.75; } svg .hl.dim, svg .hn.dim { opacity: 0.45; }
+#tgDialBox > label { display: block; } #tgDialBox .dd { display: flex; gap: 6px; align-items: center; } #tgDialBox .dd input { flex: 1 1 auto; min-width: 0; margin: 0; } #tgDialBox .dd select { flex: 0 0 74px; margin: 0; } #tgDialBox .dd button { flex: 0 0 auto; width: auto; margin: 0; min-height: 44px; padding: 0 10px; }
+#tgDialH { margin-top: 3px; } #tgRes .pt { color: var(--muted); }
+#tgList { margin-top: 6px; }
+.lr { display: grid; grid-template-columns: 1fr 52px; gap: 6px; margin-top: 6px; }
+.lr .lrM { margin: 0; min-height: 48px; display: grid; grid-template-columns: 34px auto 1fr auto; gap: 8px; align-items: center; text-align: left; padding: 4px 8px; background: var(--input); color: var(--text); border: 1px solid var(--border); font-size: 0.9rem; font-weight: 700; border-radius: 9px; }
+.lr.on .lrM { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.lr .hn { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 800; box-sizing: border-box; }
+.lr.np .hn, .lr.rdu .hn { background: transparent; color: var(--text); border: 2px dashed var(--muted); }
+.lr .rk { color: var(--muted); font-size: 0.74rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.lr i { font-style: normal; }
+.lr .lrX { margin: 0; width: 52px; min-height: 48px; padding: 0; font-size: 1.3rem; font-weight: 800; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 9px; }
+.lr.dis .rv { text-decoration: line-through; color: var(--hint); }
+.lsub { margin-top: 12px; font-size: 0.78rem; font-weight: 700; color: var(--muted); }
+.lmenu { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; padding: 8px; border: 1px solid var(--accent); border-radius: 10px; background: var(--card); }
+.lmenu button { flex: 1 1 40%; width: auto; margin: 0; min-height: 44px; padding: 4px 10px; font-size: 0.84rem; font-weight: 700; background: var(--input); color: var(--text); border: 1px solid var(--border); }
+.lmenu button.on { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.lmenu button.danger { background: var(--danger-bg); color: var(--err); border-color: var(--danger-b); }
+.lmenu button.ghost { flex: 1 1 100%; } .lmenu small { color: var(--muted); font-weight: 500; }
+.lmT { flex: 1 1 100%; font-size: 0.8rem; font-weight: 700; color: var(--text); }
+.slRow { display: grid; grid-template-columns: minmax(0, 1fr) 78px; gap: 6px; margin: 0 0 6px; } .slRow .slItem { margin: 0; }
+.slTh { margin: 0; width: 78px; min-height: 44px; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 0.66rem; font-weight: 700; line-height: 1.15; text-align: center; }
+.slTh svg.th { width: 56px; height: 56px; border-radius: 6px; flex: 0 0 auto; }
+#tgLoupe svg { width: 100%; height: 100%; display: block; }
+#tgLoupe::after { content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border: 1px solid var(--text); border-radius: 50%; }
+#tgEd.meas .tgSet { display: none; } #tgEd.meas #tgWrap { max-width: 220px; margin: 0 auto; }
+#tgTools { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; } #tgTools button, #tgTools input { margin: 0; } #tgTools #tgUndo { flex: 0 0 auto; width: auto; }
+#tgTools input { flex: 1 1 90px; min-width: 0; width: 90px; } #tgTools #tgAddShot { flex: 1 1 auto; width: auto; }
+#tgMeas { margin-top: 8px; padding: 8px; border: 2px solid var(--accent); border-radius: 12px; }
+#tgMeasT { font-weight: 800; font-size: 1.1rem; text-align: center; margin-bottom: 6px; }
+#tgMeas .mrow { display: grid; grid-template-columns: 1fr 1.3fr; gap: 6px; margin-top: 6px; align-items: stretch; }
+#tgMeas .seg button { font-size: 1.05rem; font-weight: 800; min-height: 52px; }
+#tgMeas .mval { margin: 0; min-height: 52px; font-size: 1.2rem; font-weight: 800; background: var(--input); color: var(--text); border: 2px solid var(--border); border-radius: 8px; font-variant-numeric: tabular-nums; }
+#tgMPf { text-align: center; min-height: 1.1em; margin: -2px 0 6px; } #tgMeas .mval.pf { border-style: dashed; }
+#tgMeas .mval.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+#tgKeys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+#tgKeys button { margin: 0; min-height: 50px; font-size: 1.3rem; font-weight: 700; background: var(--input); color: var(--text); border: 1px solid var(--border); }
+#tgMeas .nav { display: grid; grid-template-columns: 1fr 1.4fr 1.4fr; gap: 6px; margin-top: 8px; } #tgMeas .nav button { margin: 0; min-height: 54px; }
+.hc { width: auto; margin: 0; min-height: 44px; min-width: 44px; padding: 4px 9px; font-size: 0.8rem; font-weight: 600; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 9px; display: inline-flex; gap: 5px; align-items: center; }
+.hc b { font-size: 1rem; } .hc i { font-style: normal; } .hc.on { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.rd { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 6px; }
+.rd .rdPick { margin: 0; min-height: 44px; display: grid; grid-template-columns: 36px auto 1fr; gap: 8px; align-items: center; text-align: left; padding: 4px 8px; background: var(--input); color: var(--text); border: 1px solid var(--border); font-size: 0.86rem; font-weight: 600; }
+.rd .hn { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 800; }
+.rd.un .hn { background: transparent; color: var(--text); border: 2px dashed var(--muted); box-sizing: border-box; }
+.rd .rk { color: var(--muted); font-size: 0.74rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+.rd .rdX { margin: 0; width: auto; min-width: 88px; padding: 4px 10px; font-size: 0.8rem; background: var(--input); color: var(--text); border: 1px solid var(--border); }
+.rd.dis .rv { text-decoration: line-through; color: var(--hint); }
+#tgRes .resG { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+#tgRes .resG > div { background: var(--input); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; }
+#tgRes .resG .w2 { grid-column: 1 / -1; } #tgRes .resG span { font-size: 0.72rem; color: var(--muted); } #tgRes .resG b { font-size: 1.05rem; } #tgRes .resG small { font-size: 0.76rem; color: var(--muted); }
+#tgRes .zc { margin-top: 8px; padding: 8px; border: 1px solid var(--accent); border-radius: 8px; font-size: 0.9rem; } #tgRes .zc small { display: block; color: var(--muted); margin-top: 2px; }
+#tgRes .w { color: var(--warn); }
 .mvChk { min-height: 44px; align-items: center; }
 .hint .info { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; min-height: 44px; margin: -14px -10px -14px -6px; padding: 0; vertical-align: middle; background: none; border: 0; color: var(--accent); font-size: 1rem; font-weight: 700; border-radius: 50%; }
 .hint .info.on { color: var(--text); }
@@ -837,17 +952,56 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
     <div class="hint" style="margin-top:10px">Copies the bullet, BC, drag model, MV and load data. Zero, sight height, twist and barrel stay with each gun. Chrono sessions are not copied. The copy opens on its gun, ready to edit.</div>
   </div>
 </div>
+<div id="tgEd" class="ovl" role="dialog" aria-modal="true" aria-label="Target">
+  <h3><span id="tgEdT">Target</span><button class="sm" type="button" id="tgEdDone">✓ Done</button></h3>
+  <button type="button" id="tgSum" aria-expanded="false" aria-controls="tgSetBox"></button>
+  <div class="tgSet" id="tgSetBox">
+    <div class="full"><label for="tgStrSel">String</label><select id="tgStrSel"></select></div>
+    <div><label for="tgTpl">Template</label><select id="tgTpl"><option value="grid1">1″ grid</option><option value="moa">MOA grid</option><option value="mil">MIL grid</option><option value="bull">Bullseye</option><option value="steel">Steel plate</option></select></div>
+    <div><label for="tgDist">Distance</label><div class="dd"><input type="number" inputmode="decimal" id="tgDist" min="5" max="3000"><select id="tgDu" aria-label="Distance unit"><option value="yd">yd</option><option value="m">m</option></select></div></div>
+    <div class="full"><label for="tgU">Measure in</label><select id="tgU"><option value="in">inches</option><option value="cm">cm</option></select></div>
+    <div class="full" id="tgDialBox"><label for="tgDialV">Elevation dialed (<span id="tgDialU">mil</span>)</label><div class="dd"><select id="tgDialD" aria-label="Up or down"><option value="U">U ▲</option><option value="D">D ▼</option></select><input type="number" inputmode="decimal" id="tgDialV" min="0" max="300" step="0.05" placeholder="what you dialed"><button type="button" class="sm ghost" id="tgDialApp">App dope</button></div><div class="hint" id="tgDialH"></div></div>
+  </div>
+  <div class="seg" id="tgMode" role="group" aria-label="Marking mode"><button type="button" data-v="aim">⊕ Aim point</button><button type="button" data-v="hole">● Holes</button><button type="button" data-v="meas">📏 Measure</button></div>
+  <div id="tgTip"></div>
+  <div id="tgZbar" role="group" aria-label="Zoom"><button type="button" id="tgZout" aria-label="Zoom out" disabled>－</button><span id="tgZoomT">×1</span><button type="button" id="tgZin" aria-label="Zoom in">＋</button><button type="button" id="tgZfit" disabled>Fit</button><span class="zh">Pinch to zoom · two fingers to pan</span></div>
+  <div id="tgWrap"><svg id="tgSvg" viewBox="-6 -6 12 12" role="img" aria-label="Target sheet: tap to mark"></svg><div id="tgLoupe" hidden><svg id="tgLoupeSvg" viewBox="0 0 1 1" aria-hidden="true"></svg></div></div>
+  <div id="tgTools"><button type="button" class="sm ghost" id="tgUndo" disabled>↶ Undo</button><input type="text" inputmode="decimal" id="tgAddV" placeholder="fps (optional)" aria-label="Velocity for the added shot (optional)"><button type="button" class="sm ghost" id="tgAddShot">＋ Add shot</button></div>
+  <div id="tgMeas" hidden>
+    <div id="tgMeasT"></div><div id="tgMPf" class="hint"></div>
+    <div id="tgMeasBody">
+      <div class="mrow"><div class="seg" id="tgMH" role="group" aria-label="Left or right"><button type="button" data-v="L">◀ L</button><button type="button" data-v="R">R ▶</button></div><button type="button" class="mval" id="tgMX" aria-label="Horizontal distance"></button></div>
+      <div class="mrow"><div class="seg" id="tgMV" role="group" aria-label="Up or down"><button type="button" data-v="U">▲ U</button><button type="button" data-v="D">▼ D</button></div><button type="button" class="mval" id="tgMY" aria-label="Vertical distance"></button></div>
+      <div class="mrow"><span class="hint" style="align-self:center">Aim point → hole center</span><div class="seg" id="tgMU" role="group" aria-label="Units"><button type="button" data-v="in">in</button><button type="button" data-v="cm">cm</button></div></div>
+      <div id="tgKeys"><button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" data-k=".">.</button><button type="button" data-k="0">0</button><button type="button" data-k="back" aria-label="Backspace">⌫</button></div>
+      <div class="nav"><button type="button" class="ghost" id="tgMPrev">‹ Prev</button><button type="button" id="tgMNext">Next ›</button><button type="button" class="ghost" id="tgMDone">✓ Done measuring</button></div>
+    </div>
+  </div>
+  <div class="sub" style="margin-top:12px">Holes ↔ readings</div>
+  <div class="hint">One row per hole, numbered as on the target. Tap ⋯ to re-pair, measure or remove; readings with no hole are listed below.</div>
+  <div id="tgList"></div>
+  <div id="tgRes"></div>
+</div>
+<div id="shotBan" hidden role="status" aria-live="polite"><button type="button" id="sbMain" aria-label="Open the session"><span id="sbV"></span><span id="sbN"></span><span id="sbSt"></span></button>
+  <div id="sbActs"><button type="button" data-a="x">Discard</button><button type="button" data-a="cold" aria-pressed="false">Cold bore</button><button type="button" data-a="clean" aria-pressed="false">Clean bore</button><button type="button" data-a="fl" aria-pressed="false">Flier</button><button type="button" data-a="mark" hidden>🎯 Mark impact</button></div></div>
 <div id="slEditor" class="ovl" role="dialog" aria-modal="true" aria-label="Chronograph session">
   <h3><span id="slEdTitle">Session</span><button class="sm ghost" type="button" id="slEdClose">✕ Close</button></h3>
+  <div id="sbDock"></div>
   <div class="summary" id="slEdFor"></div>
   <div id="slEdRecipe"></div>
   <button class="sm ghost" type="button" id="slMoveBtn">↔ Move / reassign (gun, load)</button>
   <button class="sm ghost" type="button" id="slEdRecipeBtn"></button>
   <div class="hint" id="slEdRadar"></div>
   <div class="stats" id="slStats"></div>
+  <div id="slStrBar"><div class="hd"><span id="tgHdrT">String 1 · Target A</span><span id="tgHdrS"></span></div>
+    <div class="row"><button type="button" class="sm ghost" id="tgNewStr">＋ New string <small>(same sheet)</small></button><button type="button" class="sm ghost" id="tgNewTgt">＋ New target <small>(fresh sheet)</small></button></div>
+    <div class="row"><button type="button" class="sm" id="tgMarkBtn">🎯 Mark holes</button></div>
+    <label class="tgl" for="tgMarkEach"><span>Mark each shot<small>Adds 🎯 Mark impact to the shot banner</small></span><input type="checkbox" id="tgMarkEach" role="switch"></label></div>
   <div id="slAddRow"><input type="text" inputmode="decimal" autocomplete="off" id="slVel" placeholder="fps" enterkeyhint="done" aria-label="Velocity (fps)"><button type="button" id="slAdd">＋ Add</button></div>
-  <div class="hint">Type a velocity and tap Add (or Enter). You can paste several at once, e.g. "2701 2698 2710". Tap Cold/Clean to flag a shot.</div>
+  <div class="hint">Type a velocity and tap Add (or Enter). You can paste several at once, e.g. "2701 2698 2710". Tap Cold/Clean/Flier to tag a shot, ⊘ to discard a double read (kept, grayed, left out of stats).</div>
   <div id="slShots"></div>
+  <div class="sub" style="margin-top:10px">Targets</div>
+  <div id="slTgView"></div>
   <details style="margin-top:10px"><summary>Session details (date, notes, weather, barrel)</summary>
     <div class="grid">
       <div class="full"><label for="slDate">Date / time</label><input type="datetime-local" id="slDate"></div>
@@ -1888,17 +2042,22 @@ async function loadLog() {
   try { d = await idbGet("shotlog"); } catch {}
   if (!Array.isArray(d)) d = load(K_LOG, []);
   LOG = (Array.isArray(d) ? d : []).map(cleanSession).filter(Boolean);
+  try { if (await tgRestore()) await saveLog(); } catch {}   // re-attach targets/tags if the stable page re-saved without them
 }
 async function saveLog() {
   try { await idbPut("shotlog", LOG); localStorage.removeItem(K_LOG); }
   catch { store(K_LOG, LOG); }
+  try { await tgSaveSidecar(); } catch {}
 }
 const nOrNull = v => { const n = parseFloat(v); return isFinite(n) ? n : null; };
 const sstr = (v, n) => v == null ? "" : String(v).slice(0, n);
 function cleanSession(x) {
   if (!x || typeof x !== "object" || !Array.isArray(x.shots)) return null;
-  const shots = x.shots.map(sh => ({ v: nOrNull(sh && sh.v), t: sstr(sh && sh.t, 20), note: sstr(sh && sh.note, 200), cold: !!(sh && sh.cold), clean: !!(sh && sh.clean) }))
-    .filter(sh => sh.v != null && sh.v >= 50 && sh.v <= 6000).map(sh => { ["t", "note"].forEach(k => { if (!sh[k]) delete sh[k]; }); ["cold", "clean"].forEach(k => { if (!sh[k]) delete sh[k]; }); return sh; });
+  const seenId = new Set();
+  const shots = x.shots.map(sh => ({ v: nOrNull(sh && sh.v), t: sstr(sh && sh.t, 20), note: sstr(sh && sh.note, 200), cold: !!(sh && sh.cold), clean: !!(sh && sh.clean),
+      id: sstr(sh && sh.id, 20), str: sstr(sh && sh.str, 20), x: !!(sh && sh.x), fl: !!(sh && sh.fl) }))
+    .filter(sh => sh.v != null && sh.v >= 50 && sh.v <= 6000).map(sh => { ["t", "note", "id", "str"].forEach(k => { if (!sh[k]) delete sh[k]; }); ["cold", "clean", "x", "fl"].forEach(k => { if (!sh[k]) delete sh[k]; });
+      if (sh.id) { if (seenId.has(sh.id)) sh.id = uid(); seenId.add(sh.id); } return sh; });
   const d = new Date(x.date); const wx = x.wx || {};
   const out = { id: sstr(x.id, 40) || uid(), rifleId: sstr(x.rifleId, 40), loadId: sstr(x.loadId, 40), date: isNaN(d) ? new Date().toISOString() : d.toISOString(),
     source: ["manual", "athlon", "bluetooth"].includes(x.source) ? x.source : "manual", shots, notes: sstr(x.notes, 300),
@@ -1907,11 +2066,12 @@ function cleanSession(x) {
   if (x.title) out.title = sstr(x.title, 120);
   { const rc = cleanRecipe(x.recipe); if (rc) out.recipe = rc; }
   if (x.device && typeof x.device === "object") out.device = { avg: nOrNull(x.device.avg), sd: nOrNull(x.device.sd), es: nOrNull(x.device.es), unit: sstr(x.device.unit, 8) };
+  { const tg = cleanTg(x.tg, seenId); if (tg) { out.tg = tg; shots.forEach(sh => { if (sh.str && !tg.strings.some(q => q.id === sh.str)) delete sh.str; }); } else shots.forEach(sh => { delete sh.str; }); }   // targets (additive)
   out.stats = shotStats(shots);
   return out;
 }
 function shotStats(shots) {
-  const v = shots.map(s => s.v).filter(x => x != null), n = v.length;
+  const v = shots.filter(s => !s.x).map(s => s.v).filter(x => x != null), n = v.length;   // discarded (double reads) stay visible but out of stats
   if (!n) return { n: 0 };
   const avg = v.reduce((a, b) => a + b, 0) / n, min = Math.min(...v), max = Math.max(...v);
   const sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - avg) ** 2, 0) / (n - 1)) : 0;   // sample SD (n−1)
@@ -1930,10 +2090,10 @@ function renderLog() {
   const all = list.flatMap(s => s.shots), st = shotStats(all);
   $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} · ${st.n} shots for “${l.name}” · all-shot avg ${st.avg.toFixed(0)} fps, SD ${st.sd.toFixed(1)}`
     : `No sessions yet for “${l.name}”. Tap ＋ Session to type velocities, or import an Athlon file.`;
-  $("slList").innerHTML = list.slice().reverse().map(s => `<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
+  $("slList").innerHTML = list.slice().reverse().map(s => `${tgThumbA(s)}<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
     <span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
     <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
-    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es ?? "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`).join("") + orphanHTML(orph);
+    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>${tgThumbB(s)}`).join("") + orphanHTML(orph);
   paintSel();
   $("slChartBox").style.display = list.length ? "block" : "none";
   if (list.length) drawLogChart(list);
@@ -1958,7 +2118,7 @@ function renderCompare() {
       if (c != null) prev = { c, avg: s.stats.avg };
       return `<tr data-id="${escapeHtml(s.id)}"${best != null && s.stats.n > 2 && s.stats.sd === best ? ' class="best" title="Lowest SD (3+ shots)"' : ""}>${cmpScope === "gun" ? `<td class="l">${escapeHtml(lname(s))}</td>` : ""}
         <td>${c != null ? n1(c) : rc.ldKind === "factory" ? "fact." : "—"}</td><td class="l">${escapeHtml((rc.ldKind === "factory" ? rc.ldProduct || rc.ldMaker : rc.ldPowder) || "—")}</td>
-        <td>${n3(rc.ldCOAL) || "—"}</td><td>${s.stats.n}</td><td>${s.stats.avg.toFixed(0)}</td><td>${s.stats.n > 1 ? s.stats.sd.toFixed(1) : "—"}</td><td>${s.stats.n > 1 ? s.stats.es.toFixed(1) : "—"}</td>
+        <td>${n3(rc.ldCOAL) || "—"}</td><td>${s.stats.n}</td><td>${s.stats.avg.toFixed(0)}</td><td>${s.stats.n > 1 ? s.stats.sd.toFixed(1) : "—"}</td><td>${s.stats.n > 1 ? fpsT(s.stats.es) : "—"}</td>
         <td>${fpg}</td><td>${(s.wx.powder ?? s.wx.temp) != null ? fmt(s.wx.powder ?? s.wx.temp, 0) : "—"}</td><td>${escapeHtml(new Date(s.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</td></tr>`; }).join("") + "</tbody></table>" +
     `<div class="hint">Sorted by charge (from each session's saved recipe). Highlighted = lowest SD with 3+ shots. fps/gr = velocity gain per grain from the previous charge. Tap a row to open it.</div>`;
 }
@@ -1973,20 +2133,21 @@ function orphanHTML(list) {
   return `<div class="slGrp">⚠ Unassigned sessions (${list.length}) — their gun or load was deleted. Tap one and use ↔ Move to give it a home.</div>` + list.map(s => {
     const h = sessHome(s), was = [s.recipe?.gunName, s.recipe?.loadName].filter(Boolean).join(" · ");
     return `<button type="button" class="slItem orphan" data-id="${escapeHtml(s.id)}"><span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
-    <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}</span><span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es ?? "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
+    <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}</span><span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
   }).join("");
 }
 function sessionsCSV() {
   const q = v => { const s = v == null ? "" : String(v); return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const cols = ["date", "gun", "gun_type", "load", "source", "shots", "avg_fps", "sd", "es", "min", "max", "velocities_fps", "bullet", "weight_gr", "bc", "drag", "muzzle_velocity_preset",
     "ammo", "powder", "charge_gr", "primer", "case", "times_fired", "trim_in", "coal_in", "cbto_in", "jump_in", "case_prep", "factory_brand", "factory_product", "lot", "load_notes",
-    "session_notes", "temp_f", "humidity", "pressure_inhg", "altitude_ft", "barrel_in", "powder_temp_f", "temp_sens_fps_per_10f", "chrono_temp_f", "mv_at_powder_temp"];
+    "session_notes", "temp_f", "humidity", "pressure_inhg", "altitude_ft", "barrel_in", "powder_temp_f", "temp_sens_fps_per_10f", "chrono_temp_f", "mv_at_powder_temp", "strings", "targets", "discarded_shots", "shot_detail"];
   const rows = LOG.slice().sort((a, b) => a.date.localeCompare(b.date)).map(s => {
     const r = P.rifles.find(x => x.id === s.rifleId), l = r?.loads.find(x => x.id === s.loadId), rc = s.recipe || {};
     return [s.date, r?.name || rc.gunName, r?.gunKind || rc.gunKind, l?.name || (rc.loadName ? rc.loadName + (r ? " (deleted load)" : " (deleted gun)") : "(unassigned)"), s.source, s.stats.n, s.stats.avg, s.stats.sd, s.stats.es, s.stats.min, s.stats.max,
       s.shots.map(x => x.v).join(" "), rc.bulletName || (rc.weight ? rc.weight + " gr" : ""), rc.weight, rc.bc, rc.drag, rc.mv,
       rc.ldKind === "factory" ? "factory" : rc.ldKind ? "handload" : "", rc.ldPowder, rc.ldCharge, rc.ldPrimer, rc.ldCase, rc.ldFired, rc.ldTrim, rc.ldCOAL, rc.ldCBTO, rc.ldJump, rc.ldPrep,
-      rc.ldMaker, rc.ldProduct, rc.ldLot, rc.ldNotes, s.notes, s.wx.temp, s.wx.humidity, s.wx.pressure, s.wx.altitude, s.barrel, s.wx.powder, rc.ptSens, rc.mvTemp, rc.mvAdj].map(q).join(",");
+      rc.ldMaker, rc.ldProduct, rc.ldLot, rc.ldNotes, s.notes, s.wx.temp, s.wx.humidity, s.wx.pressure, s.wx.altitude, s.barrel, s.wx.powder, rc.ptSens, rc.mvTemp, rc.mvAdj,
+      tgView(s).strings.length, tgView(s).targets.length, s.shots.filter(x => x.x).length, shotDetail(s)].map(q).join(",");
   });
   return cols.join(",") + "\n" + rows.join("\n") + "\n";
 }
@@ -2045,6 +2206,7 @@ function openEditor(sess) {
   setVal("slTemp", ED.wx.temp); setVal("slPowder", ED.wx.powder); setVal("slHum", ED.wx.humidity); setVal("slPress", ED.wx.pressure); setVal("slAlt", ED.wx.altitude); setVal("slBarrel", ED.barrel);
   $("slSource").value = SRC_LBL[ED.source] || ED.source; $("slDel").style.display = ED._new ? "none" : ""; paintEdRecipe();
   $("slDevStats").textContent = ED.device && ED.device.avg != null ? `Device-reported: avg ${ED.device.avg}, SD ${ED.device.sd}, ES ${ED.device.es} ${ED.device.unit} (the app recomputes stats from the shots, SD uses n−1).` : "";
+  if (BAN.sid && BAN.sid !== ED.id) banHide();
   $("slEditor").classList.add("show"); document.body.style.overflow = "hidden"; renderEditor();
   if (ED._new) setTimeout(() => $("slVel").focus(), 50);
 }
@@ -2068,32 +2230,40 @@ $("slEdRecipeBtn").onclick = () => {
 };
 function renderEditor() {
   const st = shotStats(ED.shots), f = v => v == null ? "—" : (+v).toFixed(1);
-  $("slStats").innerHTML = [["Avg fps", st.n ? st.avg.toFixed(1) : "—"], ["SD", st.n > 1 ? f(st.sd) : "—"], ["ES", st.n > 1 ? f(st.es) : "—"],
-    ["Shots", st.n], ["Min", st.n ? f(st.min) : "—"], ["Max", st.n ? f(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
-  $("slShots").innerHTML = ED.shots.map((s, i) => ({ s, i })).reverse().map(({ s, i }) => `<div class="shot" data-i="${i}">
-    <span class="n">#${i + 1}</span><span><span class="v">${s.v.toFixed(1)}</span> <span class="dv">${st.n > 1 ? (s.v - st.avg >= 0 ? "+" : "") + (s.v - st.avg).toFixed(1) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
-    <button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold">Cold</button><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean">Clean</button>
-    <button type="button" class="tg${s.note ? " on" : ""}" data-f="noteT" aria-label="Note">✎</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
-    ${s.note || s._showNote ? `<span></span><input class="note" type="text" maxlength="200" placeholder="shot note" value="${escapeHtml(s.note || "")}">` : ""}</div>`).join("") ||
+  $("slStats").innerHTML = [["Avg fps", st.n ? fpsT(st.avg) : "—"], ["SD", st.n > 1 ? f(st.sd) : "—"], ["ES", st.n > 1 ? fpsT(st.es) : "—"],
+    ["Shots", st.n], ["Min", st.n ? fpsT(st.min) : "—"], ["Max", st.n ? fpsT(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
+  const tv = tgView(ED), multi = tv.strings.length > 1;
+  const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}">
+    <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "discarded" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
+    <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot (double read)" title="${s.x ? "Restore" : "Discard (stays visible, out of stats)"}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
+    <div class="tgs"><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold">Cold</button><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean">Clean</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl">Flier</button>
+    <button type="button" class="tg${s.note ? " on" : ""}" data-f="noteT" aria-label="Note">✎</button>${multi ? `<span class="sl">${mkGlyph(si)}S${si + 1}</span>` : ""}</div>
+    ${s.note || s._showNote ? `<input class="note" type="text" maxlength="200" placeholder="shot note" value="${escapeHtml(s.note || "")}">` : ""}</div>`;
+  const all = ED.shots.map((s, i) => ({ s, i }));
+  $("slShots").innerHTML = (multi ? tv.strings.map((q, si) => ({ q, si })).reverse().map(({ q, si }) => { const mine = all.filter(o => strOf(ED, o.s) === q.id), sst = shotStats(mine.map(o => o.s));
+      return `<div class="sgh">${mkGlyph(si)}String ${si + 1} · Target ${tgtLetter(tv, q.tid)}<small>${mine.length} shot${mine.length === 1 ? "" : "s"}${sst.n ? ` · avg ${fpsT(sst.avg)}` : ""}${sst.n > 1 ? ` · SD ${sst.sd.toFixed(1)} · ES ${fpsT(sst.es)}` : ""}</small></div>` + mine.reverse().map(o => row(o, sst, si)).join(""); }).join("")
+    : all.reverse().map(o => row(o, st, 0)).join("")) ||
     `<div class="hint" style="padding:8px 0">No shots yet.</div>`;
+  paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
   $("slUseMV").disabled = !st.n;
 }
 function addVelocities(text) {
   const vals = String(text).split(/[\s,;]+/).map(parseFloat).filter(v => isFinite(v) && v >= 50 && v <= 6000);
-  vals.forEach(v => ED.shots.push({ v: +v.toFixed(1) })); if (vals.length) edDirty = true; return vals.length;
+  vals.forEach(v => ED.shots.push({ v: +v.toFixed(1), id: uid(), ...(ED.tg ? { str: ED.tg.cur } : {}) })); if (vals.length) edDirty = true; return vals.length;
 }
 function addFromInput() {
   const t = $("slVel").value; if (!t.trim()) return;
   if (!addVelocities(t)) { toast("Enter a velocity in fps (50–6000)"); return; }
-  $("slVel").value = ""; renderEditor(); $("slVel").focus();
+  $("slVel").value = ""; renderEditor(); banShow(ED.id, ED.shots[ED.shots.length - 1].id); $("slVel").focus();
 }
 $("slAdd").onclick = addFromInput;
 $("slVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addFromInput(); } });
-$("slVel").addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData)?.getData("text") || ""; if (/[\s,;]/.test(t.trim())) { e.preventDefault(); addVelocities(t); renderEditor(); } });
+$("slVel").addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData)?.getData("text") || ""; if (/[\s,;]/.test(t.trim())) { e.preventDefault(); if (addVelocities(t)) { renderEditor(); banShow(ED.id, ED.shots[ED.shots.length - 1].id); } } });
 $("slShots").addEventListener("click", e => {
   const b = e.target.closest("button"), row = e.target.closest(".shot"); if (!b || !row) return;
   const i = +row.dataset.i, s = ED.shots[i], f = b.dataset.f;
-  if (f === "del") ED.shots.splice(i, 1); else if (f === "noteT") s._showNote = !s._showNote; else s[f] = !s[f];
+  if (f === "del") { if (s.id) unpair(ED, s.id); ED.shots.splice(i, 1); } else if (f === "noteT") s._showNote = !s._showNote;
+  else { s[f] = !s[f]; if (!s[f]) delete s[f]; else if (f === "x" && s.id) unpair(ED, s.id); }
   edDirty = true; renderEditor();
 });
 $("slShots").addEventListener("change", e => { if (e.target.classList.contains("note")) { const i = +e.target.closest(".shot").dataset.i; ED.shots[i].note = e.target.value.trim(); edDirty = true; } });
@@ -2110,6 +2280,8 @@ async function commitEditor() {
 function closeEditor(force) {
   if (!force && edDirty && ED && ED.shots.length && !confirm("Discard unsaved changes to this session?")) return;
   $("slEditor").classList.remove("show"); document.body.style.overflow = ""; ED = null; edDirty = false;
+  if ($("tgEd").classList.contains("show")) { $("tgEd").classList.remove("show"); TE = null; }
+  if ($("shotBan").classList.contains("dock")) banHide();
 }
 $("slEdClose").onclick = () => closeEditor();
 $("slSave").onclick = async () => { if (!ED.shots.length) { toast("Add at least one shot"); return; } const c = await commitEditor(); closeEditor(true); toast(`Session saved · ${c.stats.n} shots, avg ${c.stats.avg.toFixed(0)} fps`); };
@@ -2130,15 +2302,26 @@ document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (
 /* Live-session hook used by the Bluetooth radar (and usable by other sources): call with velocities as they arrive.
    shots: number (fps) | array of numbers | array of { v, mps?: true, t? }. Opens/extends a live session for the current load and autosaves. */
 async function addShotsToLiveSession(shots, opts = {}) {
-  const source = opts.source || "bluetooth";
+  const source = opts.source || "bluetooth", open = opts.open !== false;
+  const mk = () => (Array.isArray(shots) ? shots : [shots]).map(x => typeof x === "number" ? { v: x } : x)
+    .map(x => ({ v: +((+x.v) * (x.mps ? MPS : 1)).toFixed(1), id: uid(), ...(x.t ? { t: String(x.t) } : {}) })).filter(x => x.v >= 50 && x.v <= 6000);
+  if (!open && !(ED && ED.source === source)) {   // background live session: no editor, the banner shows the shot
+    const k = curKeyIds(); if (!k.loadId) return null;
+    let L = LIVE && LIVE.source === source && LOG.find(s => s.id === LIVE.id && s.rifleId === k.rifleId && s.loadId === k.loadId);
+    if (!L) { L = cleanSession(newSession(source)); LOG.push(L); LIVE = { id: L.id, source }; }
+    const arr = mk(); arr.forEach(x => { if (L.tg) x.str = L.tg.cur; }); L.shots.push(...arr);
+    const i = LOG.indexOf(L); LOG[i] = cleanSession(L); await saveLog(); slKey = null; maybeRenderLog();
+    if (arr.length && opts.banner !== false) banShow(L.id, arr[arr.length - 1].id);
+    return L.id;
+  }
   if (!ED || ED.source !== source) {
     if (ED) { if (ED.shots.length) await commitEditor(); closeEditor(true); }   // keep whatever was open, then start the live session
     openEditor(null); if (!ED) return null; ED.source = source; $("slSource").value = SRC_LBL[source] || source;
     if (source === "bluetooth") setTimeout(() => { if (document.activeElement === $("slVel")) $("slVel").blur(); }, 80);   // no keyboard pop-up for radar shots
   }
-  const arr = (Array.isArray(shots) ? shots : [shots]).map(x => typeof x === "number" ? { v: x } : x)
-    .map(x => ({ v: +((+x.v) * (x.mps ? MPS : 1)).toFixed(1), ...(x.t ? { t: String(x.t) } : {}) })).filter(x => x.v >= 50 && x.v <= 6000);
-  ED.shots.push(...arr); renderEditor(); await commitEditor(); $("slDel").style.display = "";
+  const arr = mk(); arr.forEach(x => { if (ED.tg) x.str = ED.tg.cur; });
+  ED.shots.push(...arr); renderEditor(); await commitEditor(); $("slDel").style.display = ""; LIVE = { id: ED.id, source };
+  if (arr.length && opts.banner !== false) banShow(ED.id, arr[arr.length - 1].id);
   return ED.id;
 }
 
@@ -2315,6 +2498,7 @@ const K_RSEEN = "bcalc.radar.seen.v1";
 try { RD.seen = JSON.parse(localStorage.getItem(K_RSEEN) || "[]"); if (!Array.isArray(RD.seen)) RD.seen = []; } catch { RD.seen = []; }
 const hasBT = !!(navigator.bluetooth && window.isSecureContext);
 function radarPaint() {
+  wakeSync();
   const st = $("radarStatus"), c = $("radarConnect"), rc = $("radarReconnect"), dc = $("radarDisconnect");
   if (!hasBT) {
     c.disabled = true; c.hidden = true; rc.hidden = true; dc.hidden = true; $("radarMore").hidden = true;
@@ -2323,7 +2507,7 @@ function radarPaint() {
   }
   $("radarMore").hidden = RD.status === "idle" && !RD.opened;
   const name = RD.dev?.name || "radar", bt = RD.battery != null ? ` · 🔋 ${RD.battery}%` : "", fw = RD.fw ? ` · fw ${RD.fw}` : "";
-  const last = RD.last ? ` · last ${RD.last.fps.toFixed(1)} fps (#${RD.last.n})` : "";
+  const last = RD.last ? ` · last ${fpsT(RD.last.fps)} fps (#${RD.last.n})` : "";
   const wait = RD.pending.length ? ` · ${RD.pending.length} shot${RD.pending.length > 1 ? "s" : ""} waiting: pick a load` : "";
   const txt = {
     idle: "Not connected.", connecting: `Connecting to ${name}…`, connected: `🟢 Connected: ${name}${bt}${fw}${last}${wait}`,
@@ -2348,8 +2532,8 @@ async function radarFlush() {
     while (RD.pending.length) {
       const s = RD.pending[0];
       // radar shot #1 = a new string on the radar → start a new app session if the live one already has radar shots
-      if (s.n === 1 && ED && ED.source === "bluetooth" && ED.shots.length) closeEditor(true);
-      const id = await addShotsToLiveSession([{ v: s.fps, t: s.timeStr ? s.timeStr.slice(11) : "" }], { source: "bluetooth" });
+      if (s.n === 1) { const L = LIVE && LOG.find(q => q.id === LIVE.id); if (ED && ED.source === "bluetooth" && ED.shots.length) { closeEditor(true); LIVE = null; } else if (L && L.shots.length) LIVE = null; }
+      const id = await addShotsToLiveSession([{ v: s.fps, t: s.timeStr ? s.timeStr.slice(11) : "" }], { source: "bluetooth", open: false });
       if (!id) break;
       RD.pending.shift();
     }
@@ -2366,8 +2550,8 @@ function radarFrame(f) {
   try { localStorage.setItem(K_RSEEN, JSON.stringify(RD.seen)); } catch {}
   RD.last = { n: s.n, fps: s.fps };
   RD.pending.push({ n: s.n, fps: s.fps, timeStr: p.timeStr });
-  if (!curLoad()) toast(`Radar shot ${s.fps.toFixed(1)} fps held: pick a load to log it`);
-  else toast(`📡 Shot #${s.n}: ${s.fps.toFixed(1)} fps`);
+  if (!curLoad()) toast(`Radar shot ${fpsT(s.fps)} fps held: pick a load to log it`);
+  else toast(`📡 Shot #${s.n}: ${fpsT(s.fps)} fps`);
   if (navigator.vibrate) try { navigator.vibrate(40); } catch {}
   radarFlush();
 }
@@ -2484,8 +2668,8 @@ function mvAdjOn() { return !!num("ptSens") && num("mvTemp") != null && powderT(
 function mvAt(Tp, base) { return mvAdjust(base, num("ptSens"), num("mvTemp"), Tp); }
 function chronoFrom(mvToday, Tp) { return mvAdjOn() ? mvToday - num("ptSens") / 10 * (Tp - num("mvTemp")) : mvToday; }
 function curCond() { return { temp: num("temp"), hum: num("humidity"), alt: num("altitude"), press: num("pressure") }; }
-function zeroCond() {   // null = zero in today's conditions
-  const c = curCond(), zt = num("zTemp"), zp = num("zPress"), za = num("zAlt"), zh = num("zHum");
+function zeroCond(c0) {   // null = zero in today's conditions (or the given ones)
+  const c = c0 || curCond(), zt = num("zTemp"), zp = num("zPress"), za = num("zAlt"), zh = num("zHum");
   if (zt == null && zp == null && za == null && zh == null) return null;
   return { temp: zt ?? c.temp, hum: zh ?? c.hum, alt: za ?? c.alt, press: zp != null ? zp : za != null ? null : c.press };
 }
@@ -2506,10 +2690,10 @@ async function solveShot(o = {}) {
       weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) })
     : new DragModel({ bc: num("bc") * k, dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
       weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
-  const Tp = powderT(), zc = zeroCond(), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
+  const Tp = o.Tp != null ? o.Tp : powderT(), zc = zeroCond(o.cond), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
   const mvNow = mvAt(Tp, base), mvZero = zc ? mvAt(num("zTemp") ?? Tp, base) : mvNow;
   const weapon = new Weapon({ sightHeight: UNew.Inch(effSH()), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
-  const atmo = mkAtmo(curCond()), calc = new Calculator();
+  const atmo = mkAtmo(o.cond || curCond()), calc = new Calculator();
   const zShot = new Shot({ weapon, ammo: new Ammo({ dm, mv: UNew.FPS(mvZero) }), atmo: zc ? mkAtmo(zc) : atmo });
   await calc.setWeaponZero(zShot, UNew.Yard(num("zero")));
   const ammo = new Ammo({ dm, mv: UNew.FPS(mvNow) });
@@ -2612,12 +2796,12 @@ $("trWhat").addEventListener("click", e => { const b = e.target.closest("button"
 function openTrue() {
   if (!B || !lastRun) { toast("Fix the inputs so a solution shows first"); return; }
   if (!curLoad()) { toast("Pick or save a load first (Gear tab)"); return; }
-  TR.unit = S.ang; if (!val("trRange")) setVal("trRange", num("target") || 600); setVal("trAngle", 0);
+  TR.cond = null; TR.unit = S.ang; if (!val("trRange")) setVal("trRange", num("target") || 600); setVal("trAngle", 0);
   $("trFor").textContent = `${curLoad().name} · MV ${Math.round(lastRun.mvNow)} fps today · BC ${val("bc")} ${$("drag").value} · ${val("temp")}°F`;
   $("trOut").textContent = ""; $("trSave").disabled = true; TR.res = null; trPaint(); openOvl("trSheet");
 }
 async function predAt(d, o) {
-  const sv = await solveShot({ ...o, winds: [] }), look = TR.look || 0, cosA = Math.cos(look * Math.PI / 180);
+  const sv = await solveShot({ ...(TR.cond || {}), ...o, winds: [] }), look = TR.look || 0, cosA = Math.cos(look * Math.PI / 180);
   if (look) sv.shot.lookAngle = B.UNew.Degree(look);
   const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(d * cosA), trajectoryStep: B.UNew.Yard(d * cosA), raiseRangeError: false });
   const p = r.samples[r.samples.length - 1]; if (!p || Math.abs(p.distance.In(B.Distance.Yard) - d * cosA) > 1) return null;
@@ -2646,11 +2830,11 @@ async function solveTrue() {
 }
 function scaleBands(str, k) { return String(str || "").replace(/([\d.]+)@/g, (m, b) => (parseFloat(b) * k).toFixed(3) + "@"); }
 function saveTrue() {
-  const r = TR.res, l = curLoad(); if (!r || !l) return;
+  const r = TR.res, l = curLoad(); if (!r || !l) return; const tpS = TR.cond && TR.cond.Tp != null ? TR.cond.Tp : powderT();
   const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }), U = r.unit === "IN" ? '" low' : " " + r.unit;
-  if (r.what === "mv") { setVal("mv", Math.round(chronoFrom(r.x, powderT()))); $("mvSource").value = "trued"; }
+  if (r.what === "mv") { setVal("mv", Math.round(chronoFrom(r.x, tpS))); $("mvSource").value = "trued"; }
   else { setVal("bc", (r.bc0 * r.x).toFixed(3)); if (val("bcBands")) $("bcBands").value = scaleBands(val("bcBands"), r.x); }
-  $("trued").value = `Trued at ${r.d} yd on ${date}: ${r.what === "mv" ? `MV ${Math.round(r.x)} fps @ ${fmt(powderT(), 0)}°F` : `BC ×${r.x.toFixed(3)}`} (observed ${r.obs}${U}${TR.look ? `, ${fmt(TR.look, 0)}° angle` : ""})`;
+  $("trued").value = `Trued at ${r.d} yd on ${date}: ${r.what === "mv" ? `MV ${Math.round(r.x)} fps @ ${fmt(tpS, 0)}°F` : `BC ×${r.x.toFixed(3)}`} (observed ${r.obs}${U}${TR.look ? `, ${fmt(TR.look, 0)}° angle` : ""})`;
   updateDirty(); renderBulletInfo(); closeOvl("trSheet"); schedule(); toast(`Saved to “${l.name}” · ${$("trued").value}`);
 }
 $("trueBtn").onclick = openTrue;
@@ -2851,6 +3035,658 @@ function paintRO() {
   $("sightHeight").hidden = shO; $("turret").hidden = !!o;
   if (o) { $("turretCustom").hidden = true; $("turretCustomU").hidden = true; }
 }
+
+/* ---------------- targets: live shot banner, strings + targets, hole marking, measured offsets, pairing, results, overlays ---------------- */
+// Data (all additive; old code ignores it): shot += { id, str (string id), x (discarded), fl (flier) };
+// session.tg = { targets: [{ id, tpl, dist, du "yd"|"m", u "in"|"cm" }], strings: [{ id, tid, aim {x,y} in, holes: [{ id, x, y (sheet in), m? {x,y} measured offset from aim in (R+, U+), sh shot id | null, nr? }] }], cur, mark }.
+// A sidecar copy (IndexedDB "shotlog.tg") restores it if the stable page re-saves the log without these fields.
+var TG_TPL = { grid1: "1\u2033 grid", moa: "MOA grid", mil: "MIL grid", bull: "Bullseye", steel: "Steel plate" };
+var TG_SHAPES = ["circle", "square", "triangle", "diamond", "pentagon", "cross", "star", "hex"];
+var TGX_KEY = "shotlog.tg", TGX_LS = "bcalc.shotlog.tg.v1";
+var TE = null, TV = { sid: null, hide: new Set() }, BAN = { sid: null, shid: null, t: 0 }, LIVE = null, WL = null, WLbusy = false;
+
+function tgFin(v) { return typeof v === "number" && isFinite(v) && Math.abs(v) < 1e5 ? Math.round(v * 1000) / 1000 : null; }
+function tgPt(p) { if (!p || typeof p !== "object") return null; const x = tgFin(p.x), y = tgFin(p.y); return x == null || y == null ? null : { x, y }; }
+function cleanTg(t, ids) {
+  if (!t || typeof t !== "object" || !Array.isArray(t.targets) || !Array.isArray(t.strings)) return null;
+  const targets = t.targets.filter(g => g && typeof g === "object").slice(0, 60).map(g => ({ id: sstr(g.id, 20) || uid(), tpl: TG_TPL[g.tpl] ? g.tpl : "grid1",
+    dist: nOrNull(g.dist), du: g.du === "m" ? "m" : "yd", u: g.u === "cm" ? "cm" : "in" }));
+  if (!targets.length) return null;
+  const tids = new Set(targets.map(g => g.id)), used = new Set();
+  const strings = t.strings.filter(s => s && typeof s === "object").slice(0, 300).map(s => ({ id: sstr(s.id, 20) || uid(), tid: tids.has(s.tid) ? s.tid : targets[0].id, aim: tgPt(s.aim),
+    holes: (Array.isArray(s.holes) ? s.holes : []).filter(h => h && typeof h === "object").slice(0, 200).map(h => {
+      const p = tgPt(h) || { x: 0, y: 0 }, m = tgPt(h.m); let sh = h.sh != null && ids.has(String(h.sh)) ? String(h.sh) : null;
+      if (sh && used.has(sh)) sh = null; if (sh) used.add(sh);   // one reading ↔ one hole
+      const o = { id: sstr(h.id, 20) || uid(), x: p.x, y: p.y, sh }; if (m) o.m = m; if (!sh && h.nr) o.nr = true; if (h.ad && !m) o.ad = true; return o; }) }))
+    .map((st, i) => { const d = cleanDial(t.strings.filter(q => q && typeof q === "object")[i].dial); if (d) st.dial = d; return st; });
+  if (!strings.length) return null;
+  return { targets, strings, cur: strings.some(s => s.id === t.cur) ? t.cur : strings[strings.length - 1].id, mark: !!t.mark };
+}
+function cleanDial(d) {   // elevation dialed for a string: e in unit u (turret reading, display unit at the time), c clicks, k tracking factor, wx conditions + angle then
+  if (!d || typeof d !== "object") return null; const e = tgFin(d.e); if (e == null) return null;
+  const o = { e, u: d.u === "MOA" ? "MOA" : "MIL", src: d.src === "app" ? "app" : "user" }, c = tgFin(d.c), k = tgFin(d.k);
+  if (c != null) o.c = Math.round(c); if (typeof d.cl === "string" && d.cl) o.cl = sstr(d.cl, 24); if (k != null && k >= 0.8 && k <= 1.2) o.k = k;
+  if (d.wx && typeof d.wx === "object") { const w = {}; ["temp", "hum", "alt", "press", "tp", "look", "yd"].forEach(q => { const v = tgFin(d.wx[q]); if (v != null) w[q] = v; }); o.wx = w; }
+  if (typeof d.at === "number" && isFinite(d.at) && d.at > 0) o.at = Math.round(d.at);
+  return o;
+}
+function angConv(v, from, to) { return from === to ? v : from === "MIL" ? v * 3.437747 : v / 3.437747; }
+function fpsT(v) { return String(Math.round(v)); }   // speeds shown to the whole fps (stored precision kept)
+function tgDefDist() { const d = num("target"); return d > 0 ? d : 100; }
+function tgView(s) { return s.tg || { targets: [{ id: "_t", tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: "_s", tid: "_t", aim: null, holes: [] }], cur: "_s", mark: false, virt: true }; }
+function tgEnsure(s) {
+  s.shots.forEach(x => { if (!x.id) x.id = uid(); });
+  if (!s.tg) { const tid = uid(), sid = uid(); s.tg = { targets: [{ id: tid, tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: sid, tid, aim: null, holes: [] }], cur: sid, mark: false }; }
+  return s.tg;
+}
+function strOf(s, x) { const t = tgView(s); return x.str && t.strings.some(q => q.id === x.str) ? x.str : t.strings[0].id; }
+function readings(s, sid) { return s.shots.filter(x => strOf(s, x) === sid); }
+function strNo(t, sid) { return t.strings.findIndex(q => q.id === sid) + 1; }
+function tgtLetter(t, tid) { const i = t.targets.findIndex(q => q.id === tid); return i < 26 ? String.fromCharCode(65 + Math.max(0, i)) : "T" + (i + 1); }
+function tgYd(g) { const d = +g.dist || 0; return g.du === "m" ? d * 1.0936133 : d; }
+function inPerU(u, yd) { return (u === "MIL" ? 3.6 : 1.0471976) * yd / 100; }   // inches per 1 mil / 1 MOA at that distance
+function hoff(st, h) { return h.m ? { x: h.m.x, y: h.m.y } : st.aim ? { x: h.x - st.aim.x, y: h.y - st.aim.y } : { x: h.x, y: h.y }; }   // measured wins
+function hpos(st, h) { const a = st.aim || { x: 0, y: 0 }; return h.m ? { x: a.x + h.m.x, y: a.y + h.m.y } : { x: h.x, y: h.y }; }
+function unpair(s, shid) { if (s.tg) s.tg.strings.forEach(st => st.holes.forEach(h => { if (h.sh === shid) h.sh = null; })); }
+function grpStats(pts) {
+  const n = pts.length; if (!n) return null;
+  const cx = pts.reduce((a, p) => a + p.x, 0) / n, cy = pts.reduce((a, p) => a + p.y, 0) / n; let es = 0;
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) es = Math.max(es, Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y));
+  return { n, cx, cy, es, mr: pts.reduce((a, p) => a + Math.hypot(p.x - cx, p.y - cy), 0) / n };
+}
+function pearson(a, b) {
+  const n = a.length; if (n < 2) return 0; const ma = a.reduce((x, y) => x + y, 0) / n, mb = b.reduce((x, y) => x + y, 0) / n; let ab = 0, aa = 0, bb = 0;
+  for (let i = 0; i < n; i++) { ab += (a[i] - ma) * (b[i] - mb); aa += (a[i] - ma) ** 2; bb += (b[i] - mb) ** 2; }
+  return aa && bb ? ab / Math.sqrt(aa * bb) : 0;
+}
+function velVert(s, st) {   // fast high / slow low? needs ≥3 paired, kept shots
+  const pr = st.holes.map(h => ({ h, x: h.sh && s.shots.find(q => q.id === h.sh) })).filter(o => o.x && !o.x.x).map(o => ({ v: o.x.v, y: hoff(st, o.h).y }));
+  if (pr.length < 3) return { n: pr.length, r: null };
+  return { n: pr.length, r: pearson(pr.map(p => p.v), pr.map(p => p.y)) };
+}
+function lenTxt(inch, u) { return u === "cm" ? `${(inch * 2.54).toFixed(1)} cm` : `${inch.toFixed(2)}\u2033`; }
+function angU(u) { return u === "MIL" ? "mil" : "MOA"; }
+function tsFor(rid) {   // the turret of the session's gun (its optic, else the gun's own setting, else the display unit)
+  const r = P.rifles.find(x => x.id === rid);
+  if (r && curRifle() === r) return turretSpec();
+  const o = r && r.opticId && (P.optics || []).find(x => x.id === r.opticId), key = o ? o.opTurret : r && r.turret;
+  const tk = o ? parseFloat(o.opTrack) : NaN, k = tk >= 0.8 && tk <= 1.2 ? tk : 1;
+  if (key && TURRETS[key]) { const [u, v, lbl] = TURRETS[key]; return { u, v, lbl, k }; }
+  if (key === "custom") { const v = parseFloat(o ? o.opTurretV : r.turretV), u = (o ? o.opTurretU : r.turretU) === "moa" ? "MOA" : "MIL"; if (v > 0) return { u, v, lbl: `${v} ${angU(u)}`, k }; }
+  return S.ang === "MOA" ? { u: "MOA", v: 0.25, lbl: "\u00bc MOA", k } : { u: "MIL", v: 0.1, lbl: "0.1 mil", k };
+}
+function tgNice(x) { const p = Math.pow(10, Math.floor(Math.log10(x))), f = x / p; return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p; }
+
+/* sidecar: survives a re-save by the stable page (which drops unknown fields) */
+function tgSidecar() {
+  const m = {};
+  LOG.forEach(s => { if (s.tg || s.shots.some(x => x.id || x.x || x.fl)) m[s.id] = { sh: s.shots.map(x => ({ v: x.v, id: x.id, str: x.str, x: x.x, fl: x.fl })), tg: s.tg || null }; });
+  return m;
+}
+async function tgSaveSidecar() { const m = tgSidecar(); try { await idbPut(TGX_KEY, m); localStorage.removeItem(TGX_LS); } catch { store(TGX_LS, m); } }
+async function tgRestore() {
+  let sc = null; try { sc = await idbGet(TGX_KEY); } catch {} if (!sc || typeof sc !== "object") sc = load(TGX_LS, null);
+  if (!sc || typeof sc !== "object") return 0; let n = 0;
+  LOG.forEach((s, k) => {
+    const e = sc[s.id]; if (!e || s.tg || s.shots.some(x => x.id)) return;   // intact (saved by this page)
+    const sh = Array.isArray(e.sh) ? e.sh : []; let j = 0;
+    s.shots.forEach(x => { for (let q = j; q < sh.length; q++) if (sh[q] && sh[q].v === x.v) { const o = sh[q]; if (o.id) x.id = o.id; if (o.str) x.str = o.str; if (o.x) x.x = true; if (o.fl) x.fl = true; j = q + 1; break; } });
+    if (e.tg) s.tg = e.tg; LOG[k] = cleanSession(s); n++;
+  });
+  return n;
+}
+
+/* ---- SVG target drawing (sheet inches; y up) ---- */
+function shpPath(k, x, y, r) {   // SVG coords (y down)
+  const P2 = pts => `<polygon points="${pts.map(p => p.map(v => v.toFixed(3)).join(",")).join(" ")}"/>`, rg = (n, rr, a0) => Array.from({ length: n }, (_, i) => [x + rr * Math.cos(a0 + i * 2 * Math.PI / n), y + rr * Math.sin(a0 + i * 2 * Math.PI / n)]);
+  switch (k) {
+    case "square": return `<rect x="${(x - r * 0.85).toFixed(3)}" y="${(y - r * 0.85).toFixed(3)}" width="${(r * 1.7).toFixed(3)}" height="${(r * 1.7).toFixed(3)}"/>`;
+    case "triangle": return P2(rg(3, r * 1.2, -Math.PI / 2));
+    case "diamond": return P2(rg(4, r * 1.2, -Math.PI / 2));
+    case "pentagon": return P2(rg(5, r * 1.1, -Math.PI / 2));
+    case "hex": return P2(rg(6, r * 1.05, 0));
+    case "star": return P2(Array.from({ length: 10 }, (_, i) => { const rr = i % 2 ? r * 0.55 : r * 1.3, a = -Math.PI / 2 + i * Math.PI / 5; return [x + rr * Math.cos(a), y + rr * Math.sin(a)]; }));
+    case "cross": { const a = r * 1.1, w = r * 0.42; return P2([[x - a, y - a + w], [x - a + w, y - a], [x, y - w], [x + a - w, y - a], [x + a, y - a + w], [x + w, y], [x + a, y + a - w], [x + a - w, y + a], [x, y + w], [x - a + w, y + a], [x - a, y + a - w], [x - w, y]]); }
+    default: return `<circle cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${r.toFixed(3)}"/>`;
+  }
+}
+function mkGlyph(i) { return `<svg class="mk" viewBox="-6 -6 12 12" aria-hidden="true"><g class="ms s${i % 6 + 1}">${shpPath(TG_SHAPES[i % 8], 0, 0, 4)}</g></svg>`; }
+function tplGrid(tpl, yd, span, u, ext) {   // returns { step, svg } in drawing units (inches, or MOA/mil when u is angular); ext = half-extent to cover
+  const h = ext || span / 2, L = (a, b, c, d, cl) => `<line class="${cl}" x1="${a.toFixed(3)}" y1="${b.toFixed(3)}" x2="${c.toFixed(3)}" y2="${d.toFixed(3)}" vector-effect="non-scaling-stroke"/>`;
+  const grid = (step, major, lbl) => { let s = ""; const n = Math.ceil(h / step); for (let i = -n; i <= n; i++) { const v = i * step, cl = i === 0 ? "g0" : major && i % major === 0 ? "g1" : "g2"; s += L(v, -h, v, h, cl) + L(-h, v, h, v, cl); } return s; };
+  if (u) { const st = tgNice(span / 8); return { step: st, unit: u, svg: grid(st, 0) }; }
+  if (tpl === "moa") { const st = inPerU("MOA", yd); return { step: st, unit: "MOA", svg: grid(st, 5) }; }
+  if (tpl === "mil") { const st = inPerU("MIL", yd) * 0.2; return { step: st, unit: "0.2mil", svg: grid(st, 5) }; }
+  if (tpl === "bull") { const st = Math.max(1, tgNice(span / 14)); let s = ""; for (let i = 6; i >= 1; i--) s += `<circle class="${i <= 2 ? "b1" : "b2"}" cx="0" cy="0" r="${(i * st).toFixed(3)}" vector-effect="non-scaling-stroke"/>`; return { step: st, unit: "ring", svg: s + L(-h, 0, h, 0, "g2") + L(0, -h, 0, h, "g2") }; }
+  if (tpl === "steel") { const d = Math.max(6, Math.round(2 * inPerU("MOA", yd))); return { step: d, unit: "plate", svg: `<circle class="pl" cx="0" cy="0" r="${(d / 2).toFixed(3)}" vector-effect="non-scaling-stroke"/><text class="pll" x="0" y="${(d / 2 + span * 0.05).toFixed(3)}" font-size="${(span * 0.035).toFixed(3)}" text-anchor="middle">${d}\u2033 plate</text>` }; }
+  const st = span > 48 ? tgNice(span / 24) : 1; return { step: st, unit: "in", svg: grid(st, st === 1 ? 6 : 0) };
+}
+// layers: [{ i (string index for color/shape), aim {x,y}|null, holes: [{ p {x,y}, n, meas, sel, id }], dim }]
+function tgLabels(layers, r, fs) {   // place hole numbers so they don't sit on each other or on holes (current string first); far ones get a leader line
+  const all = [], out = new Map(), boxes = [];
+  layers.forEach((Ly, li) => Ly.holes.forEach((H, hi) => all.push({ k: li + ":" + hi, x: H.p.x, y: -H.p.y, w: fs * (0.62 * String(H.n).length + 0.45), dim: !!Ly.dim })));
+  const hit = (b) => boxes.some(q => Math.abs(q.x - b.x) * 2 < q.w + b.w && Math.abs(q.y - b.y) * 2 < q.h + b.h) || all.some(p => Math.abs(p.x - b.x) < b.w / 2 + r * 0.95 && Math.abs(p.y - b.y) < b.h / 2 + r * 0.95);
+  const dirs = [[1, -1], [-1, -1], [1, 1], [-1, 1], [1, 0], [-1, 0], [0, -1], [0, 1]];
+  [...all].sort((a, b) => a.dim - b.dim).forEach(p => {
+    let best = null;
+    for (const m of [1, 1.8, 2.7, 3.7, 4.8, 6]) { for (const [dx, dy] of dirs) { const n = Math.hypot(dx, dy), d = r + fs * 0.55 * m;
+      const b = { x: p.x + dx / n * (d + p.w * 0.3 * Math.abs(dx / n)), y: p.y + dy / n * d, w: p.w, h: fs * 1.4 }; if (!hit(b)) { best = { ...b, m, dx: dx / n, dy: dy / n }; break; } } if (best) break; }
+    if (!best) { const n = Math.SQRT2; best = { x: p.x + (r + fs) / n, y: p.y - (r + fs) / n, w: p.w, h: fs * 1.4, m: 1, dx: 1 / n, dy: -1 / n }; }
+    boxes.push(best);
+    const lead = best.m > 1, o = { x: best.x, y: best.y, lead };
+    if (lead) { o.lx = p.x + best.dx * r * 1.1; o.ly = p.y + best.dy * r * 1.1; o.ex = best.x - best.dx * fs * 0.45; o.ey = best.y - best.dy * fs * 0.45; }
+    out.set(p.k, o);
+  });
+  return out;
+}
+function tgSvg(o) {
+  const S2 = o.span, h = S2 / 2, cx = o.cx || 0, cy = o.cy || 0, r = S2 / 58 * (o.mk || 1), fs = Math.max(r * 1.9, (o.px || 0) * 13), g = tplGrid(o.tpl, o.yd, o.gspan || S2, o.u, h + Math.max(Math.abs(cx), Math.abs(cy)));
+  let s = `<rect class="sheet" x="${(cx - h).toFixed(3)}" y="${(-cy - h).toFixed(3)}" width="${S2.toFixed(3)}" height="${S2.toFixed(3)}"/>`;
+  s += `<g class="grid" data-step="${g.step.toFixed(4)}" data-unit="${g.unit}" transform="translate(${(0).toFixed(3)},0)">${g.svg}</g>`;
+  const LB = tgLabels(o.layers, r, fs);
+  o.layers.forEach((Ly, li) => {
+    const sh = TG_SHAPES[Ly.i % 8], cl = `ms s${Ly.i % 6 + 1}${Ly.dim ? " dim" : ""}`;
+    if (Ly.aim) { const ax = Ly.aim.x, ay = -Ly.aim.y, a = r * 2.6;
+      s += `<g class="aim${Ly.dim ? " dim" : ""}" data-s="${Ly.sid || ""}"><line x1="${(ax - a).toFixed(3)}" y1="${ay.toFixed(3)}" x2="${(ax + a).toFixed(3)}" y2="${ay.toFixed(3)}" vector-effect="non-scaling-stroke"/><line x1="${ax.toFixed(3)}" y1="${(ay - a).toFixed(3)}" x2="${ax.toFixed(3)}" y2="${(ay + a).toFixed(3)}" vector-effect="non-scaling-stroke"/><circle cx="${ax.toFixed(3)}" cy="${ay.toFixed(3)}" r="${(r * 1.3).toFixed(3)}" vector-effect="non-scaling-stroke"/></g>`; }
+    Ly.holes.forEach((H, hi) => { const x = H.p.x, y = -H.p.y, L = LB.get(li + ":" + hi);
+      s += `<g class="hole${H.sel ? " sel" : ""}${H.meas ? " meas" : ""}" data-h="${H.id || ""}" data-n="${H.n}">` +
+        (H.sel ? `<circle class="selr" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(r * 2.3).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
+        (H.meas ? `<circle class="mr s${Ly.i % 6 + 1}" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(r * 1.75).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
+        `<g class="${cl}">${shpPath(sh, x, y, r)}</g>` + (L.lead ? `<line class="hl${Ly.dim ? " dim" : ""}" x1="${L.lx.toFixed(3)}" y1="${L.ly.toFixed(3)}" x2="${L.ex.toFixed(3)}" y2="${L.ey.toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
+        `<text class="hn${Ly.dim ? " dim" : ""}" x="${L.x.toFixed(3)}" y="${L.y.toFixed(3)}" font-size="${fs.toFixed(3)}" text-anchor="middle" dominant-baseline="central">${H.n}</text></g>`; });
+  });
+  return { vb: `${(cx - h).toFixed(3)} ${(-cy - h).toFixed(3)} ${S2.toFixed(3)} ${S2.toFixed(3)}`, html: s, grid: g };
+}
+
+/* ---- live shot banner ---- */
+function banSess() { return ED && ED.id === BAN.sid ? ED : LOG.find(s => s.id === BAN.sid); }
+function banDocked() { return !!(ED && ED.id === BAN.sid && $("slEditor").classList.contains("show") && !$("tgEd").classList.contains("show")); }
+function banShow(sid, shid) { BAN.sid = sid; BAN.shid = shid; if ($("tgEd").classList.contains("show")) { if (TE && ED && ED.id === sid) teRender(); return; } banPaint(); banArm(); }
+function banHide() { const el = $("shotBan"); clearTimeout(BAN.t); el.hidden = true; el.classList.remove("fade"); if (el.parentElement !== document.body) document.body.appendChild(el); el.classList.remove("dock"); BAN.sid = null; }
+function banPaint() {
+  const el = $("shotBan"); if (!BAN.sid) return;
+  const s = banSess(), x = s && s.shots.find(q => q.id === BAN.shid); if (!x) { banHide(); return; }
+  const t = tgView(s), sid = strOf(s, x), rd = readings(s, sid), st = shotStats(rd), k = rd.indexOf(x) + 1;
+  $("sbV").textContent = fpsT(x.v);
+  $("sbN").textContent = `Shot ${k} · String ${strNo(t, sid)} · Target ${tgtLetter(t, t.strings.find(q => q.id === sid).tid)}`;
+  $("sbSt").textContent = st.n ? `avg ${fpsT(st.avg)} · ES ${st.n > 1 ? fpsT(st.es) : "—"} · SD ${st.n > 1 ? st.sd.toFixed(1) : "—"}${st.n < rd.length ? ` · ${rd.length - st.n} discarded` : ""}` : "no kept shots";
+  el.querySelectorAll("#sbActs button[data-a]").forEach(b => { const a = b.dataset.a; if (a === "mark") { b.hidden = !t.mark; return; }
+    const on = !!x[a]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (a === "x") b.textContent = on ? "↺ Restore" : "Discard"; });
+  el.classList.toggle("dis", !!x.x);
+  const dock = banDocked();
+  if (dock && el.parentElement !== $("sbDock")) $("sbDock").appendChild(el);
+  if (!dock && el.parentElement !== document.body) document.body.appendChild(el);
+  el.classList.toggle("dock", dock); el.hidden = false;
+}
+function banArm() {
+  const el = $("shotBan"); el.classList.remove("fade"); clearTimeout(BAN.t); if (el.classList.contains("dock")) return;
+  BAN.t = setTimeout(() => { el.classList.add("fade"); BAN.t = setTimeout(() => { if (!el.classList.contains("dock")) { el.hidden = true; el.classList.remove("fade"); } }, 450); }, 5000);
+}
+async function mutSess(id, fn) {
+  if (ED && ED.id === id) { fn(ED); edDirty = true; renderEditor(); if (ED.source === "bluetooth" && !ED._new) await commitEditor(); return; }
+  const i = LOG.findIndex(s => s.id === id); if (i < 0) return;
+  fn(LOG[i]); LOG[i] = cleanSession(LOG[i]); await saveLog(); slKey = null; maybeRenderLog();
+}
+async function banOpen() {
+  if (ED && ED.id === BAN.sid) { if ($("tgEd").classList.contains("show")) return; banPaint(); return; }
+  const s = LOG.find(q => q.id === BAN.sid); if (!s) return;
+  if (ED) { if (edDirty && ED.shots.length) await commitEditor(); closeEditor(true); }
+  const keep = { ...BAN }; openEditor(s); BAN.sid = keep.sid; BAN.shid = keep.shid; banPaint();
+}
+$("sbMain").onclick = () => banOpen();
+$("sbActs").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-a]"); if (!b) return; e.stopPropagation(); const a = b.dataset.a, sid = BAN.sid, shid = BAN.shid;
+  if (a === "mark") { await banOpen(); if (!ED) return; const x = ED.shots.find(q => q.id === shid); if (x) openTgEd(strOf(ED, x), { pairNext: shid }); return; }
+  await mutSess(sid, s => { const x = s.shots.find(q => q.id === shid); if (!x) return; x[a] = !x[a]; if (!x[a]) delete x[a]; else if (a === "x") unpair(s, x.id); });
+  BAN.sid = sid; BAN.shid = shid; banPaint(); banArm();
+});
+
+/* ---- wake lock while a radar session is live ---- */
+async function wakeSync() {
+  const want = typeof RD !== "undefined" && RD.status === "connected" && document.visibilityState === "visible";
+  if (WLbusy || !navigator.wakeLock) return; WLbusy = true;
+  try {
+    if (want && !WL) { WL = await navigator.wakeLock.request("screen"); WL.addEventListener("release", () => { WL = null; }); }
+    else if (!want && WL) { const w = WL; WL = null; await w.release(); }
+  } catch { WL = null; } finally { WLbusy = false; }
+}
+document.addEventListener("visibilitychange", () => wakeSync());
+
+/* ---- session editor: string bar + overlays ---- */
+function paintStrBar() {
+  if (!ED) return; const t = tgView(ED), cur = t.strings.find(q => q.id === t.cur), n = strNo(t, cur.id), rd = readings(ED, cur.id);
+  $("tgHdrT").textContent = `String ${n} · Target ${tgtLetter(t, cur.tid)}`;
+  $("tgHdrS").textContent = `${rd.length} shot${rd.length === 1 ? "" : "s"} · ${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}${t.strings.length > 1 ? ` · ${t.strings.length} strings` : ""}`;
+  $("tgMarkEach").checked = !!t.mark;
+  $("tgMarkBtn").textContent = `🎯 Mark holes · String ${n}`;
+}
+function paintTgView() {
+  if (!ED) return; const box = $("slTgView"), t = tgView(ED);
+  if (TV.sid !== ED.id) { TV.sid = ED.id; TV.hide = new Set(); }
+  const any = t.strings.some(st => st.holes.length);
+  if (!any) { box.innerHTML = `<div class="hint">No holes marked yet. Tap 🎯 Mark holes after a string (or turn on Mark each shot).</div>`; return; }
+  const vis = t.strings.map((st, i) => ({ st, i, g: t.targets.find(q => q.id === st.tid) })).filter(o => o.st.holes.length);
+  const shown = vis.filter(o => !TV.hide.has(o.st.id));
+  const yds = [...new Set(shown.map(o => Math.round(tgYd(o.g))))], ts = tsFor(ED.rifleId), ang = yds.length > 1 ? ts.u : null, lu = shown[0]?.g.u || "in";
+  const conv = (p, g) => ang ? { x: p.x / inPerU(ang, tgYd(g)), y: p.y / inPerU(ang, tgYd(g)) } : p;
+  let mx = 0; const layers = shown.map(o => ({ i: o.i, sid: o.st.id, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = conv(hoff(o.st, h), o.g); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: k + 1, meas: !!h.m, id: h.id }; }) }));
+  const span = Math.max(ang ? 2 : 3, mx * 2.5), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers, px: span / Math.max(200, box.clientWidth || 380) });
+  const chips = vis.map(o => { const on = !TV.hide.has(o.st.id), gs = grpStats(o.st.holes.map(h => hoff(o.st, h)));
+    return `<button type="button" class="sc${on ? " on" : ""}" data-s="${escapeHtml(o.st.id)}" aria-pressed="${on}">${mkGlyph(o.i)}S${o.i + 1} · ${tgtLetter(t, o.st.tid)} · ${fmt(o.g.dist, 0)} ${o.g.du}${gs && gs.n > 1 ? ` · ${lenTxt(gs.es, o.g.u)}` : ""}</button>`; }).join("");
+  box.innerHTML = `<div class="scRow" role="group" aria-label="Show or hide strings">${chips}</div>` +
+    (shown.length ? `<svg id="slTgSvg" class="tgS" viewBox="${sv.vb}" role="img" aria-label="Overlay of ${shown.length} string${shown.length > 1 ? "s" : ""}, aligned on their aim points">${sv.html}</svg>` : `<div class="hint">All strings hidden — tap a chip to show it.</div>`) +
+    `<div class="hint" id="slTgNote">${shown.length ? `Aligned on each string's aim point · grid ${fmt(sv.grid.step, 2)} ${ang ? angU(ang) : "in"}${ang ? ` · <b>different distances (${yds.join(", ")} yd) — plotted in ${angU(ang)}</b> so groups compare by angle` : ""}` : ""}</div>`;
+}
+$("slTgView").addEventListener("click", e => { const b = e.target.closest(".sc"); if (!b) return; const id = b.dataset.s; TV.hide.has(id) ? TV.hide.delete(id) : TV.hide.add(id); paintTgView(); });
+function tgAfterEdit() { edDirty = true; if (ED.source === "bluetooth" && !ED._new) commitEditor(); renderEditor(); }
+function tgNewString(newTarget) {
+  if (!ED) return; const t = tgEnsure(ED), cur = t.strings.find(s => s.id === t.cur), rdN = readings(ED, cur.id).length, empty = !cur.holes.length && !rdN;
+  const needMark = !empty && !cur.holes.length && rdN > 0, curNo = strNo(t, cur.id);
+  if (newTarget) {
+    const g0 = t.targets.find(g => g.id === cur.tid), g = { ...g0, id: uid() }; t.targets.push(g);
+    if (empty) { const old = cur.tid; cur.tid = g.id; cur.aim = null; if (!t.strings.some(s => s.tid === old)) t.targets = t.targets.filter(q => q.id !== old); }
+    else { const s = { id: uid(), tid: g.id, aim: null, holes: [] }; t.strings.push(s); t.cur = s.id; }
+  } else {
+    if (empty) { toast(`String ${curNo} has no shots yet`); return; }
+    const s = { id: uid(), tid: cur.tid, aim: null, holes: [] }; t.strings.push(s); t.cur = s.id;
+  }
+  tgAfterEdit();
+  const nc = t.strings.find(s => s.id === t.cur), msg = `String ${strNo(t, nc.id)} · Target ${tgtLetter(t, nc.tid)}${newTarget ? " (fresh sheet)" : " (same sheet, new aim point)"}`;
+  if (needMark) toast(`${msg} — String ${curNo} has no holes marked`, { label: "Mark holes", fn: () => openTgEd(cur.id) }); else toast(msg);
+  tgAutoDial(ED, nc);
+}
+$("tgNewStr").onclick = () => tgNewString(false);
+$("tgNewTgt").onclick = () => tgNewString(true);
+$("tgMarkBtn").onclick = () => { if (!ED) return; const t = tgEnsure(ED); openTgEd(t.cur); };
+$("tgMarkEach").onchange = e => { if (!ED) return; tgEnsure(ED).mark = e.target.checked; tgAfterEdit(); if (BAN.sid === ED.id) banPaint(); };
+
+/* ---- elevation dialed per string (defaults to the app's dope at that moment) ---- */
+function tgSame() { return !!(ED && curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId); }
+async function tgDope(yd) {   // the dope the app shows now (conditions + shot angle on the Dope tab) at yd, as the turret reading (÷ tracking) + clicks
+  if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return null;
+  try {
+    const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    if (look) sv.shot.lookAngle = B.UNew.Degree(look);
+    const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
+    const p = r.samples[r.samples.length - 1]; if (!p || Math.abs(p.distance.In(B.Distance.Yard) - yd * cosA) > 1) return null;
+    const a = angs(p), ts = turretSpec(), c = curCond(), e = Math.round(a.ec * ts.v * 1e6) / 1e6;   // whole clicks × click size, in the turret's unit
+    return cleanDial({ e, u: ts.u, c: a.ec, cl: ts.lbl, k: ts.k || 1, src: "app", wx: { temp: c.temp, hum: c.hum, alt: c.alt, press: c.press, tp: powderT(), look, yd }, at: Date.now() });
+  } catch { return null; }
+}
+function tgWxSnap(yd) { const c = curCond(); return { temp: c.temp, hum: c.hum, alt: c.alt, press: c.press, tp: powderT(), look: num("shotAngle") || 0, yd }; }
+function tgRecent(s) { const t = new Date(s && s.date).getTime(); return !isFinite(t) || Date.now() - t < 864e5; }
+async function tgAutoDial(sess, st) {   // when a string is started or first marked
+  if (!sess || !st || st.dial || !tgSame() || ED !== sess) return;
+  const g = sess.tg.targets.find(q => q.id === st.tid), d = await tgDope(tgYd(g) || tgDefDist());
+  if (!d || st.dial || ED !== sess) return;
+  st.dial = d; edDirty = true; if (!sess._new && sess.source === "bluetooth") commitEditor();
+  if (TE && teStr() === st) teRender();
+}
+async function tgRedope(g) {   // distance changed: an unedited app-dope dial follows it (an edited one is the shooter's and stays)
+  if (!ED || !g || !tgSame()) return; const sess = ED, d = await tgDope(tgYd(g)); if (!d || ED !== sess) return;
+  let n = 0; sess.tg.strings.forEach(st => { if (st.tid === g.id && st.dial && st.dial.src === "app") { st.dial = { ...d }; n++; } });
+  if (n) { tgAfterEditQuiet(); if (TE) teRender(); }
+}
+function dialDec(v) { return Math.abs(v * 10 - Math.round(v * 10)) < 1e-9 ? 1 : 2; }   // 0.1 mil / ½ MOA → 1 decimal; ¼ MOA, 0.05 mil, ⅛ MOA → 2 (never thousandths)
+function dialView(d, ts) {   // the dial as read on the turret: app dope (incl. older raw ones) at whole clicks; an edited value as typed (≤2 decimals)
+  ts = ts || (ED ? tsFor(ED.rifleId) : turretSpec()); const u = ts.u, raw = angConv(d.e, d.u, u);
+  let v, s, c;
+  if (d.src === "app") { c = Math.round(raw / ts.v); v = c * ts.v; s = Math.abs(v).toFixed(dialDec(ts.v)); }
+  else { v = raw; s = String(+Math.abs(v).toFixed(2)); c = d.u === u && d.c != null ? d.c : Math.round(raw / ts.v); }
+  const dir = v < 0 || (v === 0 && raw < 0) ? "D" : "U";
+  return { v, s, c, dir, u, txt: `${dir} ${s} ${angU(u)}` };
+}
+function dialTxt(d) { return dialView(d).txt; }   // "U 11.00 MOA" / "U 2.8 mil"
+function teDialPaint() {
+  const st = teStr(), d = st.dial, ts = tsFor(ED.rifleId), U = ts.u, dv = d && dialView(d, ts);
+  $("tgDialU").textContent = angU(U); $("tgDialV").step = String(ts.v);
+  if (document.activeElement !== $("tgDialV")) setVal("tgDialV", dv ? dv.s : "");
+  $("tgDialD").value = dv ? dv.dir : "U";
+  const w = d && d.wx, wx = w ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", `${fmt(w.look || 0, 0)}° angle`].filter(Boolean).join(" · ") : "";
+  $("tgDialH").innerHTML = d ? `= ${dv.dir} ${Math.abs(dv.c)} clicks (${escapeHtml(ts.lbl)})${d.k && d.k !== 1 ? ` · tracking ×${fmt(d.k, 3)}` : ""} · ${d.src === "app" ? "app dope, whole clicks" : "edited"}${wx ? ` · saved with ${wx}` : ""}`
+    : `Not saved — enter what you dialed${tgSame() ? " or tap App dope" : ""}. Truing then falls back to today's prediction.`;
+}
+async function teDialSet(raw, dir) {
+  const st = teStr(); if (!st) return; const v = parseFloat(raw);
+  if (raw === "" || raw == null) { if (st.dial) { teSnap(); delete st.dial; tgAfterEditQuiet(); } teRender(); return; }
+  if (!(v >= 0 && v <= 300)) { toast("Elevation 0–300"); teDialPaint(); return; }
+  const ts = tsFor(ED.rifleId), U = ts.u, e = dir === "D" ? -v : v, old = st.dial, ov = old && dialView(old, ts);
+  if (ov && +ov.s === v && ov.dir === dir) { teDialPaint(); return; }   // unchanged (an app dial shown at clicks keeps its stored value)
+  teSnap(); st.dial = cleanDial({ e, u: U, c: Math.round(e / ts.v), cl: ts.lbl, k: old && old.k || ts.k || 1, src: "user",
+    wx: old && old.wx || tgWxSnap(tgYd(teTgt())), at: old && old.at || Date.now() });
+  tgAfterEditQuiet(); teRender();
+}
+$("tgDialV").addEventListener("change", e => teDialSet(e.target.value.trim(), $("tgDialD").value));
+$("tgDialD").onchange = () => teDialSet($("tgDialV").value.trim(), $("tgDialD").value);
+$("tgDialApp").onclick = async () => {
+  if (!TE) return; const st = teStr(), d = await tgDope(tgYd(teTgt()));
+  if (!d) { toast(tgSame() ? "No dope at that distance — check the inputs on the Dope tab" : "Pick this session's gun + load on Gear to use its dope"); return; }
+  teSnap(); st.dial = d; tgAfterEditQuiet(); teRender(); toast(`Dial set to the app's dope: ${dialTxt(d)} (${Math.abs(d.c)} clicks)`);
+};
+
+function teSumPaint() {   // one tappable line for String/Template/Distance/Measure in/Elevation dialed
+  const st = teStr(), g = teTgt(), d = st.dial, o = $("tgTpl").querySelector(`option[value="${g.tpl}"]`), dv = d && dialView(d);
+  const parts = [o ? o.textContent : g.tpl, g.dist > 0 ? `${fmt(g.dist, 0)} ${g.du}` : "distance?"]; if (g.u === "cm") parts.push("cm");
+  parts.push(dv ? `${dv.dir} ${dv.s} ${angU(dv.u)} (${Math.abs(dv.c)})` : "dial?");
+  const open = !!TE.setOpen, b = $("tgSum");
+  b.innerHTML = `<span class="t">${escapeHtml(parts.join(" · "))}</span><span class="i" aria-hidden="true">${open ? "▴" : "✎"}</span>`;
+  b.setAttribute("aria-expanded", String(open)); b.setAttribute("aria-label", `Setup: ${parts.join(", ")}. ${open ? "Tap to collapse" : "Tap to edit"}`);
+  $("tgEd").classList.toggle("setc", !open);
+}
+$("tgSum").onclick = () => { if (!TE) return; TE.setOpen = !TE.setOpen; teSumPaint(); if (TE.setOpen) $("tgStrSel").focus({ preventScroll: true }); };
+
+/* ---- target editor ---- */
+function teStr() { return ED && ED.tg && ED.tg.strings.find(s => s.id === TE.str); }
+function teTgt() { const st = teStr(); return st && ED.tg.targets.find(g => g.id === st.tid); }
+function teSnap() { TE.undo.push(JSON.stringify({ tg: ED.tg, shots: ED.shots })); if (TE.undo.length > 60) TE.undo.shift(); $("tgUndo").disabled = false; }
+function teNextReading(st) {
+  const used = new Set(); ED.tg.strings.forEach(q => q.holes.forEach(h => h.sh && used.add(h.sh)));
+  if (TE.pairNext && !used.has(TE.pairNext)) { const id = TE.pairNext; TE.pairNext = null; return id; }
+  const x = readings(ED, st.id).find(q => !q.x && !used.has(q.id)); return x ? x.id : null;
+}
+function openTgEd(strId, opts = {}) {
+  if (!ED) return; const t = tgEnsure(ED); if (!t.strings.some(s => s.id === strId)) strId = t.cur;
+  banHide();   // the editor is now the focus; the banner would sit over its buttons
+  const st = t.strings.find(s => s.id === strId);
+  const g = t.targets.find(q => q.id === st.tid), fresh = !t.strings.some(s => s.tid === g.id && (s.aim || s.holes.length || s.dial));
+  const willDial = !st.dial && !st.holes.length && tgRecent(ED) && tgSame();   // the app's dope fills it in a moment
+  TE = { str: strId, mode: st.aim ? "hole" : "aim", sel: null, undo: [], drag: null, span: null, pairNext: opts.pairNext || null, m: null,
+    setOpen: fresh && !(g.dist > 0 || tgDefDist() > 0) || fresh && !st.dial && !willDial, fresh };   // collapsed unless a new target is missing something
+  if (!(g.dist > 0)) g.dist = tgDefDist();
+  $("tgEd").classList.add("show"); $("tgEd").scrollTop = 0; $("tgUndo").disabled = true;
+  if (BAN.sid === ED.id) banPaint();
+  teRender();
+  if (!st.holes.length && !st.dial && tgRecent(ED)) tgAutoDial(ED, st).then(() => { if (TE && TE.fresh && teStr() === st && !st.dial && !TE.setOpen) { TE.setOpen = true; teRender(); } });   // first marked: default to the dope at this moment (no dope → open the setup)
+}
+async function closeTgEd() {
+  if (!TE) return; if (TE.mode === "meas") teMeasCommit();
+  $("tgEd").classList.remove("show"); $("tgLoupe").hidden = true; TE = null;
+  edDirty = true; if (ED && !ED._new) await commitEditor(); if (ED) renderEditor();
+  if (ED && BAN.sid === ED.id) banPaint();
+}
+function teSpan(t, g) {
+  const yd = tgYd(g) || 100; let base = Math.max(12, 10 * inPerU("MOA", yd)), mx = 0;
+  t.strings.filter(s => s.tid === g.id).forEach(s => { if (s.aim) mx = Math.max(mx, Math.abs(s.aim.x), Math.abs(s.aim.y)); s.holes.forEach(h => { const p = hpos(s, h); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); }); });
+  return Math.max(base, mx * 2.3);
+}
+function teDraw() {
+  const t = ED.tg, st = teStr(), g = teTgt(), yd = tgYd(g) || 100;
+  if (!TE.drag || !TE.span) TE.span = teSpan(t, g);
+  const layers = t.strings.map((s, i) => ({ s, i })).filter(o => o.s.tid === g.id).map(o => ({ i: o.i, sid: o.s.id, dim: o.s.id !== st.id, aim: o.s.aim,
+    holes: o.s.holes.map((h, k) => ({ p: hpos(o.s, h), n: k + 1, meas: !!h.m, sel: o.s.id === st.id && h.id === TE.sel, id: o.s.id === st.id ? h.id : "" })) }));
+  layers.sort((a, b) => (a.dim ? 0 : 1) - (b.dim ? 0 : 1));
+  const z = TE.zoom || 1, c = teCenter(z), W = TE.span / z;
+  const sv = tgSvg({ span: W, gspan: TE.span, cx: c.x, cy: c.y, tpl: g.tpl, yd, layers, mk: Math.max(0.5, 1 / Math.sqrt(z)), px: W / Math.max(120, $("tgSvg").clientWidth || 380) });
+  $("tgZoomT").textContent = `×${+z.toFixed(1)}`; $("tgZin").disabled = z >= 8; $("tgZout").disabled = z <= 1; $("tgZfit").disabled = z <= 1;
+  const svg = $("tgSvg"); svg.setAttribute("viewBox", sv.vb); svg.innerHTML = sv.html; TE.vb = sv; TE.grid = sv.grid;
+  return sv;
+}
+function teCenter(z) {   // view center (sheet in), kept inside the sheet
+  if (z <= 1) return { x: 0, y: 0 }; const st = teStr(), c = TE.zc || (st && st.aim) || { x: 0, y: 0 }, lim = TE.span / 2 - TE.span / z / 2;
+  return { x: Math.max(-lim, Math.min(lim, c.x)), y: Math.max(-lim, Math.min(lim, c.y)) };
+}
+function teZoomTo(z) { z = Math.max(1, Math.min(8, z)); TE.zoom = z; TE.zc = z <= 1 ? null : teCenter(z); teDraw(); }   // ＋/－ keep the current center (the aim point when starting from ×1)
+function teRender() {
+  if (!TE || !ED) return; const t = ED.tg, st = teStr(), g = teTgt(), n = strNo(t, st.id);
+  $("tgEdT").textContent = `String ${n} · Target ${tgtLetter(t, g.id)}`;
+  $("tgTpl").value = g.tpl; setVal("tgDist", g.dist ?? ""); $("tgDu").value = g.du; $("tgU").value = g.u;
+  $("tgStrSel").innerHTML = t.strings.map((s, i) => `<option value="${escapeHtml(s.id)}">String ${i + 1} · Target ${tgtLetter(t, s.tid)}</option>`).join(""); $("tgStrSel").value = st.id;
+  $("tgEd").classList.toggle("meas", TE.mode === "meas"); teSumPaint();
+  $("tgMode").querySelectorAll("button").forEach(b => { const on = b.dataset.v === TE.mode; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+  const rd = readings(ED, st.id), pn = TE.pairNext && rd.findIndex(x => x.id === TE.pairNext) + 1;
+  $("tgTip").textContent = TE.mode === "aim" ? `Tap the aim point for String ${n} (drag to adjust).`
+    : TE.mode === "meas" ? (st.holes.length ? "Measure from the aim point to the center of each hole." : "Tap holes first (or ＋ Add shot), then measure them.")
+    : !st.aim ? "Set the aim point first (⊕ Aim point)." : pn ? `Tap where shot ${pn} hit.` : "Tap each hole in the order fired · drag a hole to adjust · tap its center (or its row below) to select it.";
+  teDraw(); teMeasPaint(); tePair(); teDialPaint(); teResults();
+}
+function teMeasPaint() {
+  const box = $("tgMeas"), st = teStr(); box.hidden = TE.mode !== "meas"; if (box.hidden) return;
+  if (!st.holes.length) { $("tgMeasT").textContent = "No holes yet"; $("tgMeasBody").hidden = true; return; }
+  $("tgMeasBody").hidden = false;
+  if (!TE.m || TE.m.i >= st.holes.length) teMeasEnter(Math.min(TE.m ? TE.m.i : 0, st.holes.length - 1), true);
+  const m = TE.m, u = teTgt().u;
+  $("tgMeasT").textContent = `Hole ${m.i + 1} of ${st.holes.length}${st.holes[m.i].m ? " · 📏 measured" : st.holes[m.i].ad ? " · not placed yet" : " · 👆 tapped"}`;
+  $("tgMPf").textContent = m.fr && (m.fr.xs || m.fr.ys) ? (st.holes[m.i].m ? "Showing the saved measurement — type to replace it." : "Pre-filled from where you tapped — type to replace, or Next to keep it.") : "";
+  [["tgMH", m.hd], ["tgMV", m.vd], ["tgMU", u]].forEach(([id, v]) => $(id).querySelectorAll("button").forEach(b => { const on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }));
+  $("tgMX").textContent = `${m.xs || "0"} ${u}`; $("tgMY").textContent = `${m.ys || "0"} ${u}`;
+  $("tgMX").classList.toggle("on", m.f === "x"); $("tgMY").classList.toggle("on", m.f === "y"); $("tgMX").classList.toggle("pf", !!(m.fr && m.fr.xs)); $("tgMY").classList.toggle("pf", !!(m.fr && m.fr.ys));
+  $("tgMNext").textContent = m.i < st.holes.length - 1 ? `Next · hole ${m.i + 2} ›` : "Next ›";
+}
+function teMeasEnter(i, quiet) {
+  // pre-fill with the measured offset, else the tapped one (so you only correct it); only never-tapped holes (＋ Add shot) start at 0
+  const st = teStr(), h = st.holes[i], u = teTgt().u, k = u === "cm" ? 2.54 : 1, o = h.m || (h.ad ? null : hoff(st, h));
+  const f = v => v == null ? "" : String(+(Math.abs(v) * k).toFixed(2));
+  TE.m = { i, f: "x", xs: o ? f(o.x) : "", ys: o ? f(o.y) : "", hd: o && o.x < 0 ? "L" : "R", vd: o && o.y < 0 ? "D" : "U", dirty: false, fr: { xs: !!o, ys: !!o } };   // fr: pre-filled, the first digit replaces it
+  TE.sel = h.id; if (!quiet) teRender();
+}
+function teMeasCommit() {
+  const m = TE && TE.m, st = TE && teStr(); if (!m || !st || !st.holes[m.i] || !m.dirty || (m.xs === "" && m.ys === "")) return false;   // untouched pre-fill stays 👆 tapped
+  const k = teTgt().u === "cm" ? 1 / 2.54 : 1, x = (parseFloat(m.xs) || 0) * k * (m.hd === "L" ? -1 : 1), y = (parseFloat(m.ys) || 0) * k * (m.vd === "D" ? -1 : 1), h = st.holes[m.i];
+  if (h.m && Math.abs(h.m.x - x) < 1e-6 && Math.abs(h.m.y - y) < 1e-6) return false;
+  teSnap(); h.m = { x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 }; delete h.ad; m.dirty = false; TE.span = null; return true;
+}
+$("tgMeas").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || !TE || !TE.m) return; const m = TE.m, st = teStr();
+  if (b.closest("#tgMH")) { if (m.hd !== b.dataset.v) m.dirty = true; m.hd = b.dataset.v; } else if (b.closest("#tgMV")) { if (m.vd !== b.dataset.v) m.dirty = true; m.vd = b.dataset.v; }
+  else if (b.closest("#tgMU")) { const g = teTgt(); if (g.u !== b.dataset.v) { const k = b.dataset.v === "cm" ? 2.54 : 1 / 2.54, cv2 = s => s === "" ? "" : String(+(parseFloat(s) * k).toFixed(2)); m.xs = cv2(m.xs); m.ys = cv2(m.ys); g.u = b.dataset.v; } }
+  else if (b.id === "tgMX") m.f = "x"; else if (b.id === "tgMY") m.f = "y";
+  else if (b.dataset.k != null) { const k = b.dataset.k, f = m.f === "x" ? "xs" : "ys"; let v = m[f];
+    if (k === "back") v = v.slice(0, -1); else if (k === ".") { if (!v.includes(".")) v = (v || "0") + "."; } else if (m.fr && m.fr[f]) v = k; else if (v.length < 6) v = v === "0" ? k : v + k;
+    if (k === ".") { if (m.fr && m.fr[f]) v = "0."; } if (m.fr) m.fr[f] = false; m[f] = v; m.dirty = true; }
+  else if (b.id === "tgMNext") { teMeasCommit(); if (m.i < st.holes.length - 1) { teMeasEnter(m.i + 1); return; } toast(`All ${st.holes.length} holes done — tap ✓ Done`); }
+  else if (b.id === "tgMPrev") { teMeasCommit(); if (m.i > 0) { teMeasEnter(m.i - 1); return; } }
+  else if (b.id === "tgMDone") { teMeasCommit(); TE.mode = "hole"; TE.m = null; teRender(); tgAfterEditQuiet(); return; }
+  else return;
+  teRender();
+});
+function tgAfterEditQuiet() { edDirty = true; }
+function tePair() {   // one list: a row per hole (number, fps or "no reading", 📏/👆, ⋯), then readings with no hole (discarded double reads included)
+  const st = teStr(), rd = readings(ED, st.id), rk = new Map(rd.map((x, k) => [x.id, k + 1])), used = new Set(), M = TE.menu;
+  ED.tg.strings.forEach(q => q.holes.forEach(h => h.sh && used.add(h.sh)));
+  const tags = x => [x.cold && "cold bore", x.clean && "clean bore", x.fl && "flier"].filter(Boolean).join(" · "), E = escapeHtml, B2 = (m, t, cl, ex) => `<button type="button" class="${cl || ""}" data-m="${m}"${ex || ""}>${t}</button>`;
+  let h = st.holes.map((ho, i) => { const x = ho.sh && ED.shots.find(q => q.id === ho.sh), op = M && M.k === "h" && M.id === ho.id, tg = x && tags(x);
+    let r = `<div class="lr${ho.id === TE.sel ? " on" : ""}${x ? "" : " np"}" data-h="${E(ho.id)}"><button type="button" class="lrM" aria-pressed="${ho.id === TE.sel}" aria-label="Hole ${i + 1}"><span class="hn">${i + 1}</span><span class="rv">${x ? `${fpsT(x.v)} fps` : ho.nr ? "no reading" : "unpaired"}</span><span class="rk">${x ? `reading ${rk.get(x.id) || "?"}${tg ? " · " + tg : ""}` : ho.nr ? "" : "tap ⋯ to pair"}</span><i title="${ho.m ? "measured" : "tapped"}">${ho.m ? "📏" : "👆"}</i></button><button type="button" class="lrX" aria-label="Hole ${i + 1} options" aria-expanded="${!!op}">⋯</button></div>`;
+    if (op) r += `<div class="lmenu" role="menu" aria-label="Hole ${i + 1}">` + (M.step === "pair"
+      ? `<div class="lmT">Pair hole ${i + 1} to a reading:</div>` + (rd.filter(q => !q.x).map(q => { const oh = st.holes.findIndex(z => z.sh === q.id); return B2("pk", `Reading ${rk.get(q.id)} · ${fpsT(q.v)} fps${oh >= 0 ? ` <small>(hole ${oh + 1})</small>` : ""}`, q.id === ho.sh ? "on" : "", ` data-s="${E(q.id)}"`); }).join("") || `<div class="hint">No kept readings in this string.</div>`) + B2("back", "‹ Back", "ghost")
+      : B2("pair", "↔ Re-pair to reading") + B2("nr", "No reading") + B2("meas", "📏 Measure") + B2("del", "Remove hole", "danger")) + `</div>`;
+    return r; }).join("");
+  const un = rd.filter(x => !used.has(x.id));
+  if (un.length) h += `<div class="lsub">Readings without a hole</div>` + un.map(x => { const op = M && M.k === "r" && M.id === x.id, tg = tags(x);
+    let r = `<div class="lr rdu${x.x ? " dis" : ""}" data-s="${E(x.id)}"><button type="button" class="lrM" aria-label="Reading ${rk.get(x.id)} options"><span class="hn">–</span><span class="rv">${fpsT(x.v)} fps</span><span class="rk">reading ${rk.get(x.id)}${x.x ? " · discarded" : " · no hole"}${tg ? " · " + tg : ""}</span><i></i></button><button type="button" class="lrX" aria-label="Reading ${rk.get(x.id)} options" aria-expanded="${!!op}">⋯</button></div>`;
+    if (op) r += `<div class="lmenu" role="menu" aria-label="Reading ${rk.get(x.id)}">` + (M.step === "pair"
+      ? `<div class="lmT">Pair reading ${rk.get(x.id)} (${fpsT(x.v)} fps) to hole:</div>` + (st.holes.map((z, j) => { const zx = z.sh && ED.shots.find(q => q.id === z.sh); return B2("ph", `Hole ${j + 1} · ${zx ? `${fpsT(zx.v)} fps` : z.nr ? "no reading" : "unpaired"}`, "", ` data-h="${E(z.id)}"`); }).join("") || `<div class="hint">No holes yet — tap the target first.</div>`) + B2("back", "‹ Back", "ghost")
+      : (x.x ? "" : B2("pair", "↔ Pair to hole")) + B2("x", x.x ? "↺ Restore" : "Discard (double read)", x.x ? "" : "danger")) + `</div>`;
+    return r; }).join("");
+  $("tgList").innerHTML = h || `<div class="hint">No holes or readings yet.</div>`;
+}
+$("tgList").addEventListener("click", e => {
+  if (!TE) return; const b = e.target.closest("button"); if (!b) return; const row = b.closest(".lr"), st = teStr();
+  if (row) {
+    const hid = row.dataset.h, sid = row.dataset.s;
+    if (b.classList.contains("lrX") || (sid && b.classList.contains("lrM"))) { const k = hid ? "h" : "r", id = hid || sid; TE.menu = TE.menu && TE.menu.k === k && TE.menu.id === id ? null : { k, id }; if (hid) TE.sel = hid; teRender(); return; }
+    if (hid) { TE.menu = null; TE.sel = TE.sel === hid ? null : hid;
+      if (TE.mode === "meas" && TE.sel) { teMeasCommit(); teMeasEnter(st.holes.findIndex(h => h.id === TE.sel)); return; } teRender(); }
+    return;
+  }
+  const M = TE.menu, m = b.dataset.m; if (!M || !m) return;
+  if (m === "back") { M.step = null; tePair(); return; }
+  if (m === "pair") { M.step = "pair"; tePair(); return; }
+  if (M.k === "h") { const h = st.holes.find(q => q.id === M.id), i = st.holes.indexOf(h); if (!h) return;
+    if (m === "pk") { const id = b.dataset.s; teSnap(); unpair(ED, id); h.sh = id; delete h.nr; }   // explicit: only this hole and the reading's old hole change
+    else if (m === "nr") { teSnap(); h.sh = null; h.nr = true; }
+    else if (m === "del") { teSnap(); st.holes.splice(i, 1); TE.sel = null; TE.m = null; TE.span = null; }
+    else if (m === "meas") { TE.menu = null; if (TE.mode === "meas") teMeasCommit(); TE.mode = "meas"; teMeasEnter(i); return; }
+    TE.menu = null; tgAfterEditQuiet(); teRender(); return; }
+  const x = ED.shots.find(q => q.id === M.id); if (!x) return;
+  if (m === "x") { teSnap(); x.x = !x.x; if (!x.x) delete x.x; else unpair(ED, x.id); TE.menu = null; tgAfterEditQuiet(); teRender(); renderEditor(); return; }
+  if (m === "ph") { const h = st.holes.find(q => q.id === b.dataset.h); if (!h) return; teSnap(); unpair(ED, x.id); h.sh = x.id; delete h.nr; TE.menu = null; TE.sel = h.id; tgAfterEditQuiet(); teRender(); }
+});
+$("tgAddShot").onclick = () => {
+  if (!TE) return; const st = teStr(), raw = $("tgAddV").value.trim(), v = parseFloat(raw);
+  if (raw && !(v >= 50 && v <= 6000)) { toast("Velocity 50–6000 fps, or leave it blank for a hole with no reading"); return; }
+  teSnap(); const a = st.aim || { x: 0, y: 0 }, h = { id: uid(), x: a.x, y: a.y, sh: null, ad: true };   // ad: never tapped (measure starts at 0)
+  if (raw) { const x = { v: +v.toFixed(1), id: uid(), str: st.id }; ED.shots.push(x); h.sh = x.id; } else h.nr = true;
+  st.holes.push(h); TE.sel = h.id; $("tgAddV").value = ""; TE.span = null; tgAfterEditQuiet();
+  if (TE.mode === "meas") TE.m = null;
+  teRender(); renderEditor(); toast(`Hole ${st.holes.length} added at the aim point${raw ? ` with ${fpsT(v)} fps` : " (no reading)"} — drag it or measure it`);
+};
+$("tgUndo").onclick = () => { if (!TE || !TE.undo.length) return; const o = JSON.parse(TE.undo.pop()); ED.tg = o.tg; ED.shots = o.shots; TE.sel = null; TE.m = null; TE.span = null; $("tgUndo").disabled = !TE.undo.length; tgAfterEditQuiet(); teRender(); renderEditor(); };
+$("tgMode").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || !TE) return; if (TE.mode === "meas" && b.dataset.v !== "meas") teMeasCommit(); TE.mode = b.dataset.v; TE.m = null; if (TE.mode === "meas" && TE.sel) { const i = teStr().holes.findIndex(h => h.id === TE.sel); if (i >= 0) { teMeasEnter(i); return; } } teRender(); });
+$("tgTpl").onchange = e => { teSnap(); teTgt().tpl = e.target.value; TE.span = null; tgAfterEditQuiet(); teRender(); };
+$("tgDist").addEventListener("change", e => { const v = parseFloat(e.target.value); if (!(v >= 5 && v <= 3000)) { toast("Distance 5–3000"); setVal("tgDist", teTgt().dist); return; } teSnap(); teTgt().dist = v; TE.span = null; tgAfterEditQuiet(); teRender(); tgRedope(teTgt()); });
+$("tgDu").onchange = e => { teSnap(); teTgt().du = e.target.value; TE.span = null; tgAfterEditQuiet(); teRender(); tgRedope(teTgt()); };
+$("tgU").onchange = e => { teTgt().u = e.target.value; tgAfterEditQuiet(); teRender(); };
+$("tgStrSel").onchange = e => { if (TE.mode === "meas") teMeasCommit(); TE.str = e.target.value; TE.sel = null; TE.m = null; TE.span = null; TE.zc = null; TE.menu = null; const st = teStr(); if (TE.mode === "aim" && st.aim) TE.mode = "hole"; teRender(); };
+$("tgEdDone").onclick = () => closeTgEd();
+$("tgZin").onclick = () => { if (!TE) return; const z = TE.zoom || 1; if (z <= 1) TE.zc = null; teZoomTo(z * 2); };
+$("tgZout").onclick = () => { if (!TE) return; teZoomTo((TE.zoom || 1) / 2); };
+$("tgZfit").onclick = () => { if (!TE) return; TE.zc = null; teZoomTo(1); };
+window.addEventListener("keydown", e => { if (e.key === "Escape" && $("tgEd").classList.contains("show")) { e.stopImmediatePropagation(); e.preventDefault(); closeTgEd(); } }, true);
+
+/* pointer: tap to place, drag to adjust, loupe above the finger */
+function teXY(e) { const svg = $("tgSvg"), p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse()); return { x: Math.round(p.x * 1000) / 1000, y: Math.round(-p.y * 1000) / 1000 }; }
+function teLoupe(e, p) {
+  const lp = $("tgLoupe"), wrap = $("tgWrap").getBoundingClientRect(), D = 112; if (!p) { lp.hidden = true; return; }
+  let L = e.clientX - wrap.left - D / 2, T = e.clientY - wrap.top - D - 46; if (T < -wrap.top + 4) T = e.clientY - wrap.top + 40;
+  L = Math.max(0, Math.min(wrap.width - D, L)); lp.style.left = L + "px"; lp.style.top = T + "px"; lp.hidden = false;
+  const w = TE.span / (TE.zoom || 1) / 4; $("tgLoupeSvg").setAttribute("viewBox", `${(p.x - w / 2).toFixed(3)} ${(-p.y - w / 2).toFixed(3)} ${w.toFixed(3)} ${w.toFixed(3)}`); $("tgLoupeSvg").innerHTML = $("tgSvg").innerHTML;
+}
+function tePinchStart() {   // second finger: cancel any placement/drag in progress and start pinch-zoom / two-finger pan
+  const d = TE.drag; TE.drag = null; teLoupe(null, null);
+  if (d && (d.kind === "aim" || d.snapped) && TE.undo.length) { const o = JSON.parse(TE.undo.pop()); ED.tg = o.tg; ED.shots = o.shots; $("tgUndo").disabled = !TE.undo.length; if (d.kind === "aim") TE.mode = teStr().aim ? "hole" : "aim"; }
+  const [a, b] = [...TE.pts.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+  TE.pinch = { d0: Math.max(10, Math.hypot(a.x - b.x, a.y - b.y)), z0: TE.zoom || 1, m0: teXY({ clientX: mx, clientY: my }) };
+  teRender();
+}
+function tePinchMove() {
+  const [a, b] = [...TE.pts.values()], P = TE.pinch, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, rc = $("tgSvg").getBoundingClientRect();
+  const z = Math.max(1, Math.min(8, P.z0 * Math.hypot(a.x - b.x, a.y - b.y) / P.d0)), W = TE.span / z;
+  TE.zoom = z; TE.zc = { x: P.m0.x - ((mx - rc.left) / rc.width - 0.5) * W, y: P.m0.y + ((my - rc.top) / rc.height - 0.5) * W }; TE.zc = teCenter(z); if (z <= 1) TE.zc = null; teDraw();
+}
+$("tgSvg").addEventListener("pointerdown", e => {
+  if (!TE) return; e.preventDefault(); TE.pts = TE.pts || new Map(); TE.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  try { $("tgSvg").setPointerCapture(e.pointerId); } catch {}
+  if (TE.pts.size === 2) { tePinchStart(); return; } if (TE.pts.size > 2 || TE.pinch) return;
+  const st = teStr(), p = teXY(e), pxIn = TE.span / (TE.zoom || 1) / Math.max(1, $("tgSvg").clientWidth);
+  if (TE.mode === "aim" || (!st.aim && TE.mode === "hole")) { teSnap(); TE.drag = { kind: "aim" }; st.aim = p; TE.mode = "aim"; teDraw(); teLoupe(e, p); return; }
+  // press on a hole + drag = move it; a tap right on its center (≤5 px) selects it; any other tap adds a hole (touching holes in a tight group stay addable)
+  let best = null, bd = (TE.mode === "meas" ? 24 : 16) * pxIn; st.holes.forEach(h => { const q = hpos(st, h), d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; best = h; } });
+  if (TE.mode === "meas") { TE.drag = null; if (best) { teMeasCommit(); teMeasEnter(st.holes.indexOf(best)); } return; }
+  if (best) TE.drag = { kind: "move", h: best, x0: e.clientX, y0: e.clientY, moved: false, snapped: false, onC: bd <= 5 * pxIn, p };
+  else TE.drag = { kind: "new", p };
+  teLoupe(e, best ? hpos(st, best) : p);
+});
+$("tgSvg").addEventListener("pointermove", e => {
+  if (!TE) return; if (TE.pts && TE.pts.has(e.pointerId)) TE.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (TE.pinch) { if (TE.pts.size >= 2) tePinchMove(); return; }
+  if (!TE.drag) return; const st = teStr(), p = teXY(e), d = TE.drag;
+  if (d.kind === "aim") { st.aim = p; teDraw(); teLoupe(e, p); return; }
+  if (d.kind === "new") { d.p = p; teDraw(); const g = $("tgSvg"); g.insertAdjacentHTML("beforeend", `<circle class="ghost" cx="${p.x}" cy="${-p.y}" r="${(TE.span / (TE.zoom || 1) / 58).toFixed(3)}" vector-effect="non-scaling-stroke"/>`); teLoupe(e, p); return; }
+  if (d.kind === "move") { if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 6) return; if (!d.snapped) { teSnap(); d.snapped = true; } d.moved = true; d.h.x = p.x; d.h.y = p.y; delete d.h.m; delete d.h.ad; teDraw(); teLoupe(e, p); }
+});
+function teUp(e) {
+  if (!TE) return; if (TE.pts) TE.pts.delete(e.pointerId);
+  if (TE.pinch) { if (!TE.pts || TE.pts.size < 2) { TE.pinch = null; if (TE.pts) TE.pts.clear(); teRender(); } return; }   // lifting after a pinch never places a hole
+  if (!TE.drag) return; const st = teStr(), d = TE.drag; TE.drag = null; teLoupe(e, null);
+  if (d.kind === "aim") { TE.mode = "hole"; tgAfterEditQuiet(); teRender(); return; }
+  if (d.kind === "new") { teSnap(); const h = { id: uid(), x: d.p.x, y: d.p.y, sh: teNextReading(st) }; st.holes.push(h); TE.sel = null; tgAfterEditQuiet(); teRender(); return; }
+  if (d.kind === "move") { if (d.moved) { tgAfterEditQuiet(); teRender(); return; }
+    if (d.onC) { TE.sel = TE.sel === d.h.id ? null : d.h.id; teRender(); return; }
+    teSnap(); st.holes.push({ id: uid(), x: d.p.x, y: d.p.y, sh: teNextReading(st) }); TE.sel = null; tgAfterEditQuiet(); teRender(); }
+}
+$("tgSvg").addEventListener("pointerup", teUp);
+$("tgSvg").addEventListener("pointercancel", e => { if (!TE) return; if (TE.pts) TE.pts.delete(e.pointerId); if (TE.pinch && (!TE.pts || TE.pts.size < 2)) { TE.pinch = null; teRender(); } if (TE.drag) { TE.drag = null; teLoupe(e, null); teRender(); } });
+
+/* results per string */
+function teResults() {
+  const st = teStr(), g = teTgt(), yd = tgYd(g), ts = tsFor(ED.rifleId), U = ts.u, box = $("tgRes");
+  const pts = st.holes.map(h => hoff(st, h)), gs = grpStats(pts), u = g.u;
+  if (!gs) { box.innerHTML = `<div class="hint">Results show once holes are marked.</div>`; return; }
+  const a = v => `${(v / inPerU(U, yd)).toFixed(2)} ${angU(U)}`, vv = velVert(ED, st), r = P.rifles.find(x => x.id === ED.rifleId), zr = r && parseFloat(r.zero);
+  const atZero = zr > 0 && Math.abs(yd - zr) <= Math.max(1, zr * 0.02), same = curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId;
+  let h = `<div class="sub">Results · String ${strNo(ED.tg, st.id)} · ${fmt(g.dist, 0)} ${g.du}</div><div class="resG">`;
+  h += `<div><span>Group (c-c)</span><b id="tgResES">${gs.n > 1 ? lenTxt(gs.es, u) : "—"}</b><small>${gs.n > 1 ? a(gs.es) : "needs 2+ holes"}</small></div>`;
+  h += `<div><span>Mean radius</span><b id="tgResMR">${gs.n > 1 ? lenTxt(gs.mr, u) : "—"}</b><small>${gs.n > 1 ? a(gs.mr) : ""}</small></div>`;
+  h += `<div class="w2"><span>Group center from aim</span><b id="tgResC">${gs.cy >= 0 ? "U" : "D"} ${lenTxt(Math.abs(gs.cy), u)} · ${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}</b><small id="tgResCA">${gs.cy >= 0 ? "U" : "D"} ${a(Math.abs(gs.cy))} · ${gs.cx >= 0 ? "R" : "L"} ${a(Math.abs(gs.cx))}</small></div></div>`;
+  if (!st.aim && st.holes.some(x => !x.m)) h += `<div class="hint bad">No aim point set — tapped offsets are from the sheet center.</div>`;
+  // a warning needs 5+ paired shots with r ≥ 0.7; fewer shots (or a weaker r) give at most a muted "possible trend" note
+  h += `<div class="hint" id="tgVV">${vv.r == null ? `Velocity vs vertical needs 3+ paired shots (${vv.n} now).`
+    : vv.r >= 0.7 && vv.n >= 5 ? `<b class="w">⚠ Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.`
+    : vv.r >= 0.5 ? `<span class="pt">Possible velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — needs 5+ paired shots with r ≥ 0.7 to call it.</span>`
+    : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
+  if (atZero && gs.n) {
+    const k = ts.k || 1, e1 = -gs.cy / inPerU(ts.u, yd) / k, w1 = -gs.cx / inPerU(ts.u, yd), ce = Math.round(Math.abs(e1) / ts.v), cw = Math.round(Math.abs(w1) / ts.v);   // elevation ÷ tracking factor, as the dope does
+    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
+  } else if (gs.n > 1) {
+    const vU = S.ang, need = -gs.cy / inPerU(vU, yd), d = st.dial;
+    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
+    h += `<button type="button" id="tgTrue"${TE.atDist && same ? "" : " disabled"}>🎯 Send vertical to Truing (${gs.cy >= 0 ? "group high" : "group low"} ${lenTxt(Math.abs(gs.cy), u)} = ${need >= 0 ? "U" : "D"} ${Math.abs(need).toFixed(2)} ${angU(vU)})</button>`;
+    h += `<div class="hint">${d ? `Sends dialed − offset (the elevation that would have centered the group) with this string's saved conditions and angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}Only the vertical offset is sent. Horizontal (${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}) is never sent — it's mostly wind.${same ? "" : " <b>Pick this session's gun + load on Gear to send it.</b>"}</div>`;
+  }
+  box.innerHTML = h;
+}
+$("tgRes").addEventListener("change", e => { if (e.target.id === "tgAtDist" && TE) { TE.atDist = e.target.checked; teResults(); } });
+$("tgRes").addEventListener("click", e => { if (e.target.closest("#tgTrue")) tgSendTrue(); });
+async function tgSendTrue() {
+  if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(st.holes.map(h => hoff(st, h))), yd = Math.round(tgYd(g)), sn = strNo(ED.tg, st.id);
+  if (!gs || gs.n < 2 || curRifle()?.id !== ED.rifleId || curLoad()?.id !== ED.loadId) return;
+  if (yd < 50 || yd > 3000) { toast("Truing needs 50–3000 yd"); return; }
+  await closeTgEd(); if (ED) { if (edDirty && ED.shots.length) await commitEditor(); closeEditor(true); }
+  setTab("dope"); openTrue(); if (!$("trSheet").classList.contains("show")) return;
+  const U = S.ang, corr = gs.cy / inPerU(U, yd), d = st.dial;
+  TR.unit = U; trPaint(); setVal("trRange", yd);
+  if (d) {   // dialed − offset: the elevation that would have centered the group, under the conditions + angle saved with the string
+    const w = d.wx || {}, look = Math.max(-60, Math.min(60, w.look || 0)), dialT = angConv(d.e, d.u, U) * (d.k || 1), obs = dialT - corr;
+    TR.look = look; setVal("trAngle", look);
+    TR.cond = w.temp != null || w.alt != null || w.press != null || w.hum != null ? { cond: { temp: w.temp ?? null, hum: w.hum ?? null, alt: w.alt ?? null, press: w.press ?? null }, ...(w.tp != null ? { Tp: w.tp } : {}) } : null;
+    setVal("trObs", obs.toFixed(2));
+    const cTxt = TR.cond ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", w.tp != null ? `powder ${fmt(w.tp, 0)}°F` : ""].filter(Boolean).join(" · ") : "";
+    if (TR.cond) $("trFor").textContent += ` · using the string's conditions: ${cTxt}`;
+    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d)}${d.k && d.k !== 1 ? ` (×${fmt(d.k, 3)} tracking = ${dialT.toFixed(2)} ${angU(U)})` : ""}, group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} (${Math.abs(corr).toFixed(2)} ${angU(U)}) at ${yd} yd → <b>${obs.toFixed(2)} ${angU(U)}</b> would have centered it. ${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only (horizontal is mostly wind). Tap Solve.`;
+  } else {   // old strings: today's prediction (current behavior)
+    TR.look = 0; setVal("trAngle", 0); TR.cond = null;
+    const pred = await predAt(yd, {}); if (!pred) { $("trOut").innerHTML = `<span class="bad">${yd} yd is beyond this bullet's reach.</span>`; return; }
+    const obs = pred[U] - corr; setVal("trObs", obs.toFixed(2));
+    $("trOut").innerHTML = `From the target: group center ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → the app's ${pred[U].toFixed(2)} ${angU(U)} would have needed <b>${obs.toFixed(2)} ${angU(U)}</b>. <span class="w">No dial was saved with this string, so this uses today's prediction with today's weather and angle.</span> Vertical only (horizontal is mostly wind). Tap Solve.`;
+  }
+  toast("Vertical offset sent to Truing — check it and tap Solve");
+}
+
+/* CSV detail */
+function shotDetail(s) {
+  const t = tgView(s), out = [];
+  t.strings.forEach((st, si) => {
+    const g = t.targets.find(q => q.id === st.tid), tag = `S${si + 1}/${tgtLetter(t, st.tid)}@${fmt(g.dist, 0)}${g.du}`, hn = new Map(st.holes.map((h, i) => [h.id, i + 1])), byShot = new Map(st.holes.filter(h => h.sh).map(h => [h.sh, h]));
+    const off = h => { const o = hoff(st, h); return `${o.x >= 0 ? "R" : "L"}${Math.abs(o.x).toFixed(2)} ${o.y >= 0 ? "U" : "D"}${Math.abs(o.y).toFixed(2)} in ${h.m ? "measured" : "tapped"}`; };
+    readings(s, st.id).forEach((x, k) => { const h = byShot.get(x.id);
+      out.push([tag, `#${k + 1}`, `${x.v} fps`, h ? `hole ${hn.get(h.id)} ${off(h)}` : "", x.x ? "discarded" : "", x.cold ? "cold bore" : "", x.clean ? "clean bore" : "", x.fl ? "flier" : ""].filter(Boolean).join(" ")); });
+    st.holes.filter(h => !h.sh).forEach(h => out.push(`${tag} hole ${hn.get(h.id)} no reading ${off(h)}`));
+  });
+  return out.join(" | ");
+}
+
+/* Log rows: small group thumbnail (latest target with holes, around the aim point) + group size */
+function tgThumb(s) {
+  const t = s && s.tg; if (!t) return null;
+  const last = [...t.strings].reverse().find(q => q.holes.length); if (!last) return null;
+  const g = t.targets.find(q => q.id === last.tid), strs = t.strings.map((st, i) => ({ st, i })).filter(o => o.st.tid === g.id && o.st.holes.length);
+  let mx = 0; const layers = strs.map(o => ({ i: o.i, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = hoff(o.st, h); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: "" }; }) }));
+  const span = Math.max(2, mx * 2.4), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: "in", layers, mk: 3.2 });
+  const gs = grpStats(last.holes.map(h => hoff(last, h))), U = tsFor(s.rifleId).u, yd = tgYd(g);
+  const size = gs && gs.n > 1 ? `${lenTxt(gs.es, g.u)} · ${(gs.es / inPerU(U, yd)).toFixed(2)} ${angU(U)}` : `${last.holes.length} hole`;
+  return { svg: `<svg class="tgS th" viewBox="${sv.vb}" aria-hidden="true">${sv.html.replace(/<text[^>]*>[^<]*<\/text>/g, "")}</svg>`, size, n: gs ? gs.n : 0 };
+}
+function tgThumbA(s) { return tgThumb(s) ? `<div class="slRow">` : ""; }
+function tgThumbB(s) {
+  const th = tgThumb(s); if (!th) return "";
+  return `<button type="button" class="slTh" data-id="${escapeHtml(s.id)}" aria-label="Open the targets for this session (group ${escapeHtml(th.size)})">${th.svg}<span>${th.size}</span></button></div>`;
+}
+$("slList").addEventListener("click", e => {
+  const b = e.target.closest(".slTh"); if (!b) return; e.stopPropagation();
+  if (typeof SEL !== "undefined" && SEL) { SEL.has(b.dataset.id) ? SEL.delete(b.dataset.id) : SEL.add(b.dataset.id); paintSel(); return; }
+  const s = LOG.find(q => q.id === b.dataset.id); if (!s) return; openEditor(s);
+  requestAnimationFrame(() => { const v = $("slTgView"); if (v) v.scrollIntoView({ block: "start" }); });
+});
 
 /* ---------------- wiring ---------------- */
 let calcT;
@@ -3199,7 +4035,7 @@ $("slList").addEventListener("pointerdown", e => { const b = e.target.closest(".
 ["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slList").addEventListener(ev, () => clearTimeout(lpT)));
 $("slList").addEventListener("contextmenu", e => { if (e.target.closest(".slItem")) e.preventDefault(); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("mvSheet").classList.contains("show")) { e.stopImmediatePropagation(); closeOvl("mvSheet"); } }, true);
-window.__bc = { millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+window.__bc = { tgView, tgEnsure, cleanTg, cleanDial, tgDope, tgThumb, velVert, tgLabels, get TR() { return TR; }, grpStats, pearson, inPerU, shotDetail, banHide, openTgEd, mutSess, get BAN() { return BAN; }, get TE() { return TE; }, get LIVE() { return LIVE; }, get WL() { return WL; }, wakeSync,  millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

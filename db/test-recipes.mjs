@@ -23,9 +23,11 @@ await ctx.addInitScript(`if (!sessionStorage.getItem("seeded")) { sessionStorage
   localStorage.setItem("bcalc.presets.v1", ${JSON.stringify(JSON.stringify(PRE))}); localStorage.setItem("bcalc.shotlog.v1", ${JSON.stringify(JSON.stringify(LOG))}); }`);
 const p = await ctx.newPage();
 p.on("console", m => { if (m.type() === "error" || m.type() === "warning") errs.push(m.type() + ": " + m.text()); }); p.on("pageerror", e => errs.push("PAGEERR " + e.message));
-const dialogs = []; let dialogAnswer = true;
-p.on("dialog", d => { dialogs.push(d.message()); dialogAnswer ? d.accept() : d.dismiss(); });
+const dialogs = []; let dialogAnswer = true, promptText = "";
+p.on("dialog", d => { dialogs.push(d.message()); d.type() === "prompt" ? d.accept(promptText) : dialogAnswer ? d.accept() : d.dismiss(); });
+const menu = async id => { await p.click("#" + id.match(/^(rifle|load|range)/)[1] + "Menu"); await p.waitForSelector("#pkMenu.show"); await p.click("#" + id); };
 await p.goto(URL_); await p.waitForFunction(() => document.getElementById("status").textContent.startsWith("Done"), null, { timeout: 30000 });
+await p.click("#tabBtnGear");   // presets + load data live on the Gear tab
 const preset = () => p.evaluate(() => JSON.parse(localStorage.getItem("bcalc.presets.v1")));
 
 /* matching rules */
@@ -51,31 +53,41 @@ await p.screenshot({ path: OUT + "screenshot-saved-recipes.png" });
 
 /* apply */
 await p.click('#rcList .rcItem[data-i="1"]'); await p.waitForTimeout(100);
-const ap = await p.evaluate(() => ({ ch: ldCharge.value, pw: ldPowder.value, pr: ldPrimer.value, coal: ldCOAL.value, cbto: ldCBTO.value, mv: mv.value, dirty: loadDirty.textContent, open: rcSheet.classList.contains("show") }));
-ok("tap applies recipe (not MV), marks unsaved, closes sheet", ap.ch === "41.8" && ap.pw === "Hodgdon H4350" && ap.pr.startsWith("Federal 210M") && ap.coal === "2.810" && ap.cbto === "2.220" && ap.mv === "2700" && ap.dirty.includes("unsaved") && !ap.open && dialogs.length === 0, JSON.stringify(ap));
-ok("saved preset untouched until Save", (await preset()).rifles[0].loads[1].ldCharge === undefined);
-await p.click("#loadSave");
-ok("Save keeps applied recipe", (await preset()).rifles[0].loads[1].ldCharge === "41.8");
+const ap = await p.evaluate(() => ({ ch: ldCharge.value, pw: ldPowder.value, pr: ldPrimer.value, coal: ldCOAL.value, cbto: ldCBTO.value, mv: mv.value, dirty: loadSaved.textContent, open: rcSheet.classList.contains("show") }));
+ok("tap applies recipe (not MV), autosaves (✓ Saved), closes sheet", ap.ch === "41.8" && ap.pw === "Hodgdon H4350" && ap.pr.startsWith("Federal 210M") && ap.coal === "2.810" && ap.cbto === "2.220" && ap.mv === "2700" && ap.dirty.includes("Saved") && !ap.open && dialogs.length === 0, JSON.stringify(ap));
+ok("applied recipe autosaved to storage", (await preset()).rifles[0].loads[1].ldCharge === "41.8");
 await p.click("#rcFind"); await p.click('#rcList .rcItem[data-i="0"]'); await p.waitForTimeout(100);
 ok("replacing existing data asks first", dialogs.length === 1 && dialogs[0].includes("Replace") && (await p.inputValue("#ldCharge")) === "42.5");
 dialogAnswer = false; await p.click("#rcFind"); await p.click('#rcList .rcItem[data-i="2"]'); await p.waitForTimeout(100); dialogAnswer = true;
 ok("cancel keeps current data", (await p.inputValue("#ldPowder")) === "Hodgdon H4350" && (await p.inputValue("#ldCharge")) === "42.5" && dialogs.length === 2);
 if (await p.isVisible("#rcSheet")) await p.click("#rcClose");
-// revert to saved
+// switching loads keeps the autosaved data
 await p.selectOption("#loadSel", "A"); await p.selectOption("#loadSel", "E");
+ok("autosaved recipe survives switching loads", (await p.inputValue("#ldCharge")) === "42.5");
 
-/* picking the bullet from the database opens the recipes (new empty load) */
+/* picking the bullet from the database opens the recipes (new empty load, made via the ⋯ menu) */
+promptText = "Scratch load"; await menu("loadNew"); promptText = "";
+ok("⋯ New load added + selected", (await p.evaluate(() => loadSel.selectedOptions[0].text)) === "Scratch load");
 await p.evaluate(() => { for (const id of ["bulletId", "bulletName", "ldPowder", "ldCharge", "ldPrimer", "ldCOAL", "ldCBTO", "ldJump"]) document.getElementById(id).value = ""; document.getElementById("weight").value = "150"; document.getElementById("diameter").value = "0.308"; document.getElementById("weight").dispatchEvent(new Event("input", { bubbles: true })); });
 ok("no matches for a different bullet → buttons hidden", await p.evaluate(() => rcFind.hidden && rcBulletBtn.hidden));
 await p.click("#loadDetails > summary"); await p.click("#dbOpen"); await p.waitForSelector("#dbList .dbItem", { timeout: 20000 });
 await p.evaluate(() => { const c = document.getElementById("dbCal"); c.value = ""; c.dispatchEvent(new Event("change")); }); await p.fill("#dbQ", "26331"); await p.waitForTimeout(300); console.log("db:", await p.textContent("#dbStatus"), await p.$$eval("#dbList .dbItem", a => a.slice(0,3).map(x => x.dataset.id))); await p.click('#dbList .dbItem[data-id="hornady-26331"]');
 await p.waitForSelector("#rcSheet.show", { timeout: 3000 });
-ok("DB pick with no load data → saved recipes sheet opens", (await p.$$eval("#rcList .rcItem", a => a.length)) === 3);
+// 4 now: "ELD-M new" autosaved the 42.5 gr recipe applied above, so it is a saved recipe too
+ok("DB pick with no load data → saved recipes sheet opens", (await p.$$eval("#rcList .rcItem", a => a.length)) === 4);
 if (await p.isVisible("#rcSheet")) await p.click("#rcClose");
+// ⋯ Delete (with confirm) + Undo toast, then delete again for real
+let dN0 = dialogs.length; await menu("loadDel"); await p.waitForTimeout(100);
+ok("⋯ Delete asks to confirm, offers Undo", dialogs.length === dN0 + 1 && dialogs.at(-1).includes("Delete load") && (await p.textContent("#toast")).includes("Undo") && !(await p.evaluate(() => window.__bc.P.rifles[0].loads.some(l => l.name === "Scratch load"))));
+await p.click("#toast button"); await p.waitForTimeout(100);
+ok("Undo restores the deleted load", await p.evaluate(() => window.__bc.P.rifles[0].loads.some(l => l.name === "Scratch load") && loadSel.selectedOptions[0].text === "Scratch load"));
+await menu("loadDel"); await p.waitForTimeout(100);
+ok("deleted for real", await p.evaluate(() => !window.__bc.P.rifles[0].loads.some(l => l.name === "Scratch load") && !JSON.parse(localStorage.getItem("bcalc.presets.v1")).rifles[0].loads.some(l => l.name === "Scratch load")));
+await p.evaluate(() => document.getElementById("toast").classList.remove("show"));
 await p.selectOption("#loadSel", "A");
 
 /* copy sheet */
-await p.click("#loadCopy"); await p.waitForSelector("#cpSheet.show");
+await menu("loadCopy"); await p.waitForSelector("#cpSheet.show");
 let guns = await p.$$eval("#cpList .rcItem", a => a.map(x => x.innerText.replace(/\s+/g, " ")));
 console.log(guns.join("\n"));
 ok("copy list: same-diameter guns + empty gun, .308 hidden", guns.length === 2 && guns[0].startsWith("Bergara HMR") && guns[0].includes("2 loads, bullets .264") && guns[1].includes("no loads yet") && guns[1].startsWith("New build") && !guns.join().includes("AR-10"));
@@ -90,26 +102,26 @@ const logN = await p.evaluate(() => window.__bc.log.length);
 await p.click('#cpList .rcItem[data-id="g2"]'); await p.waitForTimeout(150);
 let st = await p.evaluate(() => { const P = window.__bc.P, r = P.rifles.find(g => g.id === P.lastRifleId), l = r.loads.find(x => x.id === r.lastLoadId);
   return { gun: r.name, name: l.name, mv: l.mv, src: l.mvSource, refMV: l.refMV, refB: l.refBarrel, ch: l.ldCharge, pw: l.ldPowder, bid: l.bulletId, form: { sel: loadSel.selectedOptions[0].text, gun: rifleSel.selectedOptions[0].text, mv: mv.value, ch: ldCharge.value, barrel: barrel.value },
-    sess: window.__bc.log.filter(s => s.loadId === l.id).length, log: window.__bc.log.length, open: cpSheet.classList.contains("show"), dirty: loadDirty.textContent }; });
+    sess: window.__bc.log.filter(s => s.loadId === l.id).length, log: window.__bc.log.length, open: cpSheet.classList.contains("show") }; });
 ok("copied to other gun, opened there, MV re-estimated + flagged", st.gun === "Bergara HMR" && st.name === "ELD-M H4350 (copy)" && st.mv === "2610" && st.src === "estimate" && st.refMV === "2710" && st.refB === "24" && st.ch === "42.5" && st.pw === "Hodgdon H4350" && st.bid === "hornady-26331"
-  && st.form.sel === "ELD-M H4350 (copy)" && st.form.gun === "Bergara HMR" && st.form.mv === "2610" && st.form.barrel === "20" && !st.open && !st.dirty, JSON.stringify(st));
+  && st.form.sel === "ELD-M H4350 (copy)" && st.form.gun === "Bergara HMR" && st.form.mv === "2610" && st.form.barrel === "20" && !st.open, JSON.stringify(st));
 ok("shot log sessions not copied", st.sess === 0 && st.log === logN);
 ok("copy persisted; source untouched", await p.evaluate(() => { const P = JSON.parse(localStorage.getItem("bcalc.presets.v1")); const a = P.rifles[0].loads.find(l => l.id === "A"); return P.rifles[1].loads.length === 3 && a.mv === "2710" && a.mvSource === "measured"; }));
 // keep mode → New build
 await p.click("#rifleSel"); await p.selectOption("#rifleSel", "g1"); await p.selectOption("#loadSel", "A");
-await p.click("#loadCopy"); await p.click('#cpMv button[data-v="keep"]');
+await menu("loadCopy"); await p.click('#cpMv button[data-v="keep"]');
 ok("keep mode preview", (await p.textContent('#cpList .rcItem[data-id="g4"]')).includes("MV 2710 fps kept, marked estimated"));
 await p.click('#cpList .rcItem[data-id="g4"]'); await p.waitForTimeout(150);
 st = await p.evaluate(() => { const r = window.__bc.P.rifles.find(g => g.id === "g4"); return { n: r.loads.length, l: r.loads[0], cur: window.__bc.P.lastRifleId }; });
 ok("copy to empty gun with MV kept (marked estimated)", st.n === 1 && st.cur === "g4" && st.l.mv === "2710" && st.l.mvSource === "estimate" && st.l.refMV === "2710" && st.l.refBarrel === "24" && st.l.ldCharge === "42.5", JSON.stringify(st.l));
-// duplicate on this gun (twice), with an unsaved change → copy only
+// duplicate on this gun (twice); an edit autosaves first, so the copy and the source both carry it
 await p.selectOption("#rifleSel", "g1"); await p.selectOption("#loadSel", "A");
 await p.evaluate(() => { const e = document.getElementById("ldCharge"); e.value = "42.8"; e.dispatchEvent(new Event("input", { bubbles: true })); });
 dialogAnswer = false; const dN = dialogs.length;
-await p.click("#loadCopy"); await p.click("#cpDup"); await p.waitForTimeout(150); dialogAnswer = true;
+await menu("loadCopy"); await p.click("#cpDup"); await p.waitForTimeout(150); dialogAnswer = true;
 st = await p.evaluate(() => { const r = window.__bc.P.rifles[0]; const l = r.loads.find(x => x.id === r.lastLoadId); return { names: r.loads.map(x => x.name), name: l.name, ch: l.ldCharge, mv: l.mv, src: l.mvSource, srcCh: r.loads.find(x => x.id === "A").ldCharge, gun: window.__bc.P.lastRifleId, recOpen: recipeDetails.open, focus: document.activeElement.id }; });
-ok("duplicate on same gun keeps MV, asks about unsaved changes, opens copy for editing", dialogs.length === dN + 1 && dialogs.at(-1).includes("unsaved") && st.gun === "g1" && st.name === "ELD-M H4350 (copy)" && st.ch === "42.8" && st.srcCh === "42.5" && st.mv === "2710" && st.src === "measured" && st.recOpen, JSON.stringify(st));
-await p.selectOption("#loadSel", "A"); await p.click("#loadCopy"); await p.click("#cpDup"); await p.waitForTimeout(150);
+ok("duplicate on same gun keeps MV, no unsaved-changes prompt (autosaved), opens copy for editing", dialogs.length === dN && st.gun === "g1" && st.name === "ELD-M H4350 (copy)" && st.ch === "42.8" && st.srcCh === "42.8" && st.mv === "2710" && st.src === "measured" && st.recOpen, JSON.stringify(st));
+await p.selectOption("#loadSel", "A"); await menu("loadCopy"); await p.click("#cpDup"); await p.waitForTimeout(150);
 ok("second duplicate gets '(copy 2)'", (await p.evaluate(() => loadSel.selectedOptions[0].text)) === "ELD-M H4350 (copy 2)");
 // the copies now show up as saved recipes for this bullet
 await p.selectOption("#loadSel", "E");

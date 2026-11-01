@@ -20,47 +20,46 @@ const OLD = { version: 1, rifles: [{ id: "r1", name: "Old 6.5", sightHeight: "1.
 const OLDLOG = [{ id: "s1", rifleId: "r1", loadId: "l1", date: "2026-10-01T15:00:00.000Z", source: "manual", shots: [{ v: 2705 }, { v: 2712 }, { v: 2701 }], notes: "old", wx: {}, barrel: 26 }];
 let p = await newPage(`if (!sessionStorage.getItem("seeded")) { sessionStorage.setItem("seeded", "1"); localStorage.clear();
   localStorage.setItem("bcalc.presets.v1", ${JSON.stringify(JSON.stringify(OLD))}); localStorage.setItem("bcalc.shotlog.v1", ${JSON.stringify(JSON.stringify(OLDLOG))}); }`);
-await go(p);
+await go(p); await p.click("#tabBtnGear");
 const mig = await p.evaluate(() => { const P = window.__bc.P; return { v: P.version, gk: P.rifles[0].gunKind, lk: P.rifles[0].loads[0].ldKind, mv: P.rifles[0].loads[0].mv,
-  dirtyR: document.getElementById("rifleDirty").textContent, dirtyL: document.getElementById("loadDirty").textContent, log: window.__bc.log.length, rec: window.__bc.log[0]?.recipe,
+  dirtyR: document.getElementById("rifleSaved").classList.contains("show"), dirtyL: document.getElementById("loadSaved").classList.contains("show"), log: window.__bc.log.length, rec: window.__bc.log[0]?.recipe,
   saved: JSON.parse(localStorage.getItem("bcalc.presets.v1")).version, gunSel: document.getElementById("gunKind").value }; });
 ok("old presets load: version 2, gunKind rifle, ldKind hand, data kept", mig.v === 2 && mig.gk === "rifle" && mig.lk === "hand" && mig.mv === "2710" && mig.saved === 2, JSON.stringify(mig));
-ok("old presets: nothing flagged unsaved", !mig.dirtyR && !mig.dirtyL);
+ok("old presets: nothing re-saved on load (no ✓ Saved flash)", !mig.dirtyR && !mig.dirtyL);
 ok("old session (no recipe) still loads", mig.log === 1 && mig.rec === undefined);
 ok("old session list renders without recipe line", (await p.$$eval(".slItem .r", a => a.length)) === 0 && (await p.$$eval(".slItem", a => a.length)) === 1);
 
-/* 2) load data: fill, dirty, save, reload */
+/* 2) load data: fill, autosave, reload */
 await p.click("#recipeDetails > summary");
 await p.fill("#ldPowder", "Hodgdon H4350");
 await p.evaluate(() => { for (const [id, v] of [["ldCharge", "42.5"], ["ldCOAL", "2.800"]]) { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); } });
 await p.fill("#ldPrimer", "CCI BR-2 (large rifle bench rest)"); await p.fill("#ldCBTO", "2.215"); await p.fill("#ldJump", "0.020");
 await p.fill("#ldCase", "Lapua"); await p.fill("#ldFired", "3"); await p.fill("#ldTrim", "1.910"); await p.fill("#ldPrep", "annealed, mandrel"); await p.fill("#ldNotes", "lot 2391");
-ok("recipe edits flag the load unsaved", (await p.textContent("#loadDirty")).includes("unsaved"));
+ok("recipe edits autosave to the load + ✓ Saved", (await p.evaluate(() => window.__bc.P.rifles[0].loads[0].ldCharge)) === "42.5" && (await p.textContent("#loadSaved")).includes("Saved"));
 ok("load summary shows recipe", (await p.textContent("#loadRecipe")).includes('42.5 gr Hodgdon H4350 · CCI BR-2 · COAL 2.800"'), await p.textContent("#loadRecipe"));
 ok("datalists present", (await p.$$eval("#dlPowder option", a => a.length)) > 100 && (await p.$$eval("#dlPrimer option", a => a.length)) > 30);
 await p.evaluate(() => document.getElementById("loadDetails").scrollIntoView()); await p.waitForTimeout(200);
 await p.screenshot({ path: OUT + "screenshot-loaddata.png" });
-await p.click("#loadSave");
-ok("saved, no longer dirty", !(await p.textContent("#loadDirty")));
+ok("autosaved to storage (last field typed)", (await p.evaluate(() => JSON.parse(localStorage.getItem("bcalc.presets.v1")).rifles[0].loads[0].ldNotes)) === "lot 2391");
 // gun type → handgun label
 await p.click("#rifleDetails > summary"); await p.selectOption("#gunKind", "handgun");
-ok("handgun type flags gun unsaved + summary", (await p.textContent("#rifleDirty")).includes("unsaved") && (await p.textContent("#rifleSum")).startsWith("Handgun"));
-await p.click("#rifleSave");
+ok("handgun type autosaves gun + summary", (await p.evaluate(() => window.__bc.P.rifles[0].gunKind)) === "handgun" && (await p.textContent("#rifleSaved")).includes("Saved") && (await p.textContent("#rifleSum")).startsWith("Handgun"));
 await p.reload(); await ready(p);
 const after = await p.evaluate(() => { const l = window.__bc.P.rifles[0].loads[0]; return { ch: l.ldCharge, pw: l.ldPowder, coal: l.ldCOAL, pr: l.ldPrimer, gk: window.__bc.P.rifles[0].gunKind,
   form: document.getElementById("ldCharge").value, sum: document.getElementById("rifleSum").textContent }; });
 ok("recipe + gun type persist after reload", after.ch === "42.5" && after.pw === "Hodgdon H4350" && after.coal === "2.800" && after.gk === "handgun" && after.form === "42.5" && after.sum.startsWith("Handgun"), JSON.stringify(after));
 await p.click("#rifleDetails > summary"); await p.click("#recipeDetails > summary");
-await p.selectOption("#gunKind", "rifle"); await p.click("#rifleSave");
+await p.selectOption("#gunKind", "rifle");
 
 /* 3) snapshot into sessions */
+await p.click("#tabBtnLog");
 await p.click("#slNewBtn"); await p.waitForSelector("#slEditor.show");
 for (const v of ["2741", "2748", "2737", "2744"]) { await p.fill("#slVel", v); await p.press("#slVel", "Enter"); }
 ok("editor shows recipe for new session", (await p.textContent("#slEdRecipe")).includes("42.5 gr Hodgdon H4350") && (await p.textContent("#slEdRecipe")).includes("Lapua ×3"), await p.textContent("#slEdRecipe"));
 await p.screenshot({ path: OUT + "screenshot-session-recipe.png" });
 await p.click("#slSave"); await p.waitForTimeout(200);
 // change the load: 43.0 gr, save, then another session
-await p.evaluate(() => { const e = document.getElementById("ldCharge"); e.value = "43.0"; e.dispatchEvent(new Event("input", { bubbles: true })); }); await p.click("#loadSave");
+await p.evaluate(() => { const e = document.getElementById("ldCharge"); e.value = "43.0"; e.dispatchEvent(new Event("input", { bubbles: true })); });   // autosaves
 await p.click("#slNewBtn"); await p.waitForSelector("#slEditor.show");
 for (const v of ["2771", "2775", "2769"]) { await p.fill("#slVel", v); await p.press("#slVel", "Enter"); }
 await p.click("#slSave"); await p.waitForTimeout(200);
@@ -84,17 +83,20 @@ await p.click('#slCmpScope button[data-v="load"]');
 await p.evaluate(() => { document.getElementById("slSection").scrollIntoView(); document.getElementById("toast").classList.remove("show"); }); await p.waitForTimeout(400);
 await p.screenshot({ path: OUT + "screenshot-session-list.png" });
 // factory ammo
+await p.click("#tabBtnGear");
 await p.click('#ldKindSeg button[data-v="factory"]');
 ok("factory toggle shows factory fields", await p.isVisible("#ldMaker") && !(await p.isVisible("#ldPowder")));
 await p.fill("#ldMaker", "Federal"); await p.fill("#ldProduct", "Gold Medal Match"); await p.fill("#ldLot", "A123");
 ok("factory recipe text", (await p.textContent("#loadRecipe")).includes("Factory · Federal Gold Medal Match · lot A123"), await p.textContent("#loadRecipe"));
-await p.click('#ldKindSeg button[data-v="hand"]'); await p.click("#loadSave");
+await p.click('#ldKindSeg button[data-v="hand"]');
 
 /* 4) exports */
+await p.click("#tabBtnLog");
 let [dl] = await Promise.all([p.waitForEvent("download"), p.click("#slCsvBtn")]);
 const csv = fs.readFileSync(await dl.path(), "utf8").replace(/^\ufeff/, ""); const lines = csv.trim().split("\n"), hdr = lines[0].split(",");
 const iCh = hdr.indexOf("charge_gr"), iPw = hdr.indexOf("powder");
 ok("CSV has recipe columns + values", iCh > 0 && lines.length === 5 && lines.some(l => l.split(",")[iCh] === "42.5" && l.split(",")[iPw] === "Hodgdon H4350"), hdr.length + " cols");
+await p.click("#tabBtnGear");
 [dl] = await Promise.all([p.waitForEvent("download"), p.click("#exportBtn")]);
 const js = JSON.parse(fs.readFileSync(await dl.path(), "utf8"));
 ok("JSON export includes recipes + gunKind + load fields", js.shotSessions.filter(s => s.recipe?.ldPowder).length === 4 && js.rifles[0].gunKind === "rifle" && js.rifles[0].loads[0].ldPowder === "Hodgdon H4350");
@@ -107,12 +109,13 @@ ok("import roundtrip keeps recipes", (await p.evaluate(() => window.__bc.log.fil
 const lum = h => { const c = h.replace("#", "").match(/../g).map(x => parseInt(x, 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
 const cr = (a, b2) => { const [x, y] = [lum(a), lum(b2)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
 const shots = [];
+await p.click("#tabBtnDope");
 for (const t of ["dark", "light", "od", "fde", "night"]) {
   await p.click("#themeBtn"); await p.click(`#themeBar button[data-t="${t}"]`); await p.click("#themeBtn");
   const v = await p.evaluate(() => { const s = getComputedStyle(document.documentElement), g = n => s.getPropertyValue("--" + n).trim(); return { theme: document.documentElement.dataset.theme, meta: document.querySelector('meta[name="theme-color"]').content,
     bg: g("bg"), card: g("card"), text: g("text"), muted: g("muted"), hint: g("hint"), accent: g("accent"), on: g("on-accent"), warn: g("warn"), err: g("err"), input: g("input"), fav: document.getElementById("favicon").href.length }; });
   const c = { text: cr(v.text, v.card), muted: cr(v.muted, v.card), hint: cr(v.hint, v.card), accent: cr(v.accent, v.card), onAccent: cr(v.on, v.accent), warn: cr(v.warn, v.input), err: cr(v.err, v.card) };
-  ok(`theme ${t}: applied + readable`, v.theme === t && v.meta === v.bg && c.text >= 7 && c.muted >= 4.5 && c.hint >= 3 && c.accent >= 3 && c.onAccent >= 4.5 && c.warn >= 3 && c.err >= 3,
+  ok(`theme ${t}: applied + readable`, v.theme === t && v.meta === v.bg && c.text >= 7 && c.muted >= 4.5 && c.hint >= 4.5 && c.accent >= 3 && c.onAccent >= 4.5 && c.warn >= 3 && c.err >= 3,
     Object.entries(c).map(([k, x]) => k + " " + x.toFixed(1)).join(", "));
   await p.evaluate(() => { window.scrollTo(0, 0); document.getElementById("toast").classList.remove("show"); }); await p.waitForTimeout(400);
   const f = `/workspace/bt/ld/theme-${t}.png`; await p.screenshot({ path: f }); shots.push([t, f]);

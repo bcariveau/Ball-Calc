@@ -14,11 +14,11 @@
 <meta name="apple-mobile-web-app-title" content="Ball-Calc">
 <script>/* theme before first paint (no flash) */(function(){var C={"dark":"#0a1f14","light":"#eef1ec","od":"#1c2012","fde":"#241d14","night":"#000000"},t="dark";try{t=JSON.parse(localStorage.getItem("bcalc.theme.v1"))||"dark";}catch(e){}if(!C[t])t="dark";document.documentElement.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=C[t];})();</script>
 <style>
-:root, html[data-theme=dark] { --bg:#0a1f14;--card:#122a1e;--accent:#2ecc71;--text:#e8f5e9;--muted:#a5d6a7;--input:#1a3a2a;--border:#2d5a3d;--warn:#ffd54f;--err:#ff8a80;--on-accent:#0a1f14;--panel:#0e2418;--hover:#1f4a34;--chip:#14402b;--chip-b:#1f6b44;--warn-b:#6b5a1f;--danger-bg:#3a1a1a;--danger-b:#5a2d2d;--pos:#69f0ae;--hint:#7fa886;--faint:#6b8f71;--code:#08180f;--grid2:#4a6b52; color-scheme: dark; }
-html[data-theme=light] { --bg:#eef1ec;--card:#ffffff;--accent:#0a7a36;--text:#0b1a10;--muted:#2f4a37;--input:#f5f8f4;--border:#9fb3a5;--warn:#8a5300;--err:#b3261e;--on-accent:#ffffff;--panel:#e7ede8;--hover:#cfe6d6;--chip:#dcefe2;--chip-b:#7cbf95;--warn-b:#c9a45a;--danger-bg:#fde8e6;--danger-b:#e3a39d;--pos:#0a7a36;--hint:#3d5c46;--faint:#4f6b57;--code:#f0f3ef;--grid2:#9fb3a5; color-scheme: light; }
-html[data-theme=od] { --bg:#1c2012;--card:#262b19;--accent:#b5c96a;--text:#eef0dc;--muted:#c9cfa6;--input:#31371f;--border:#4d5532;--warn:#f2c14e;--err:#ff8f7a;--on-accent:#1c2012;--panel:#20251a;--hover:#3b4326;--chip:#343d1f;--chip-b:#6b7a3a;--warn-b:#7a6420;--danger-bg:#3d2018;--danger-b:#6b3a2c;--pos:#c8e07a;--hint:#a3aa80;--faint:#8d9470;--code:#161a0e;--grid2:#5d6640; color-scheme: dark; }
-html[data-theme=fde] { --bg:#241d14;--card:#30271b;--accent:#d9b77e;--text:#f5ecdc;--muted:#d8c6a4;--input:#3b3022;--border:#5c4a33;--warn:#ffcf66;--err:#ff9b85;--on-accent:#241d14;--panel:#2a2218;--hover:#4a3b28;--chip:#45371f;--chip-b:#8a6d40;--warn-b:#7d6223;--danger-bg:#43231b;--danger-b:#6e3a2d;--pos:#e6cf8f;--hint:#b7a382;--faint:#9c8a6c;--code:#1c160f;--grid2:#6e5a3f; color-scheme: dark; }
-html[data-theme=night] { --bg:#000000;--card:#0c0000;--accent:#ff3b2f;--text:#ff6a5c;--muted:#e0503f;--input:#1a0302;--border:#4f110b;--warn:#ff8a5c;--err:#ff4d4d;--on-accent:#000000;--panel:#070000;--hover:#2c0705;--chip:#220503;--chip-b:#6a150e;--warn-b:#6a2a10;--danger-bg:#2a0000;--danger-b:#5a0d0d;--pos:#ff8a7d;--hint:#cc4a3c;--faint:#ad3d31;--code:#050000;--grid2:#5a1610; color-scheme: dark; }
+:root, html[data-theme=dark] { --bg:#0a1f14;--card:#122a1e;--accent:#2ecc71;--text:#e8f5e9;--muted:#a5d6a7;--input:#1a3a2a;--border:#2d5a3d;--warn:#ffd54f;--err:#fd968c;--on-accent:#0a1f14;--panel:#0e2418;--hover:#1f4a34;--chip:#14402b;--chip-b:#1f6b44;--warn-b:#6b5a1f;--danger-bg:#3a1a1a;--danger-b:#5a2d2d;--pos:#69f0ae;--hint:#96b99c;--faint:#9cb6a0;--code:#08180f;--grid2:#4a6b52; color-scheme: dark; }
+html[data-theme=light] { --bg:#eef1ec;--card:#ffffff;--accent:#0a6f32;--text:#0b1a10;--muted:#2f4a37;--input:#f5f8f4;--border:#9fb3a5;--warn:#8a5300;--err:#b3261e;--on-accent:#ffffff;--panel:#e7ede8;--hover:#cfe6d6;--chip:#dcefe2;--chip-b:#7cbf95;--warn-b:#c9a45a;--danger-bg:#fde8e6;--danger-b:#e3a39d;--pos:#0a6f32;--hint:#3d5c46;--faint:#4b6653;--code:#f0f3ef;--grid2:#9fb3a5; color-scheme: light; }
+html[data-theme=od] { --bg:#1c2012;--card:#262b19;--accent:#b5c96a;--text:#eef0dc;--muted:#c9cfa6;--input:#31371f;--border:#4d5532;--warn:#f2c14e;--err:#ff8f7a;--on-accent:#1c2012;--panel:#20251a;--hover:#3b4326;--chip:#343d1f;--chip-b:#6b7a3a;--warn-b:#7a6420;--danger-bg:#3d2018;--danger-b:#6b3a2c;--pos:#c8e07a;--hint:#acb28b;--faint:#abb191;--code:#161a0e;--grid2:#5d6640; color-scheme: dark; }
+html[data-theme=fde] { --bg:#241d14;--card:#30271b;--accent:#d9b77e;--text:#f5ecdc;--muted:#d8c6a4;--input:#3b3022;--border:#5c4a33;--warn:#ffcf66;--err:#ff9b85;--on-accent:#241d14;--panel:#2a2218;--hover:#4a3b28;--chip:#45371f;--chip-b:#8a6d40;--warn-b:#7d6223;--danger-bg:#43231b;--danger-b:#6e3a2d;--pos:#e6cf8f;--hint:#bba787;--faint:#b7a98f;--code:#1c160f;--grid2:#6e5a3f; color-scheme: dark; }
+html[data-theme=night] { --bg:#000000;--card:#0c0000;--accent:#ff3b2f;--text:#ff6a5c;--muted:#e0503f;--input:#1a0302;--border:#4f110b;--warn:#ff8a5c;--err:#ff4d4d;--on-accent:#000000;--panel:#070000;--hover:#2c0705;--chip:#220503;--chip-b:#6a150e;--warn-b:#6a2a10;--danger-bg:#2a0000;--danger-b:#5a0d0d;--pos:#ff8a7d;--hint:#da5345;--faint:#d85447;--code:#050000;--grid2:#5a1610; color-scheme: dark; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
@@ -58,13 +58,13 @@ button.danger { background: var(--danger-bg); color: var(--err); border: 1px sol
 button.hot { box-shadow: 0 0 0 2px var(--warn); }
 .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .row > select { flex: 1 1 150px; }
-.picker .row > select { flex: 1 1 100%; }
-.picker .row > button { flex: 1 1 0; }
-.picker .row > button.danger { flex: 0 0 48px; }
+.picker .pkRow { flex-wrap: nowrap; }
+.picker .pkRow > select { flex: 1 1 auto; min-width: 0; }
 .picker { margin-bottom: 12px; }
 .picker:last-child { margin-bottom: 0; }
 .summary { font-size: 0.78rem; color: var(--muted); margin-top: 5px; }
-.dirty { color: var(--warn); font-size: 0.75rem; font-weight: 600; }
+.saved { color: var(--accent); font-size: 0.75rem; font-weight: 600; opacity: 0; transition: opacity .35s; }
+.saved.show { opacity: 1; }
 details { margin-top: 8px; }
 details > summary { cursor: pointer; color: var(--muted); font-size: 0.82rem; padding: 4px 0; }
 details[open] > summary { margin-bottom: 8px; }
@@ -89,7 +89,7 @@ details[open] > summary { margin-bottom: 8px; }
 .seg button.on { background: var(--accent); color: var(--on-accent); }
 #status { text-align: center; font-size: 0.85rem; color: var(--muted); margin: 8px 0; min-height: 1.2em; }
 #status.bad { color: var(--err); }
-#shotCard { display: none; background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+#shotCardOld { display: none; background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
 #shotCard .big { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center; margin: 6px 0; }
 #shotCard .big b { display: block; font-size: 1.6rem; color: var(--accent); }
 #shotCard .big span { font-size: 0.72rem; color: var(--muted); }
@@ -102,8 +102,6 @@ th, td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--bor
 th { color: var(--accent); font-weight: 600; position: sticky; top: 0; background: var(--card); }
 td:first-child, th:first-child { text-align: left; }
 tr.tgt td { background: var(--hover); }
-.neg { color: var(--err); }
-.pos { color: var(--pos); }
 .legend { font-size: 0.7rem; color: var(--hint); margin-top: 6px; }
 .chart-container { height: 220px; margin-top: 12px; background: var(--panel); border-radius: 8px; padding: 8px; }
 #chart { width: 100%; height: 100%; display: block; }
@@ -185,8 +183,6 @@ body.has-sensors .sensorbtn { display: inline-block; }
 #cpMvRow .seg { display: flex; flex: 1 1 100%; }
 #cpMvRow .seg button { flex: 1; padding: 8px 6px; }
 #cpAllBtn { width: 100%; margin-top: 2px; }
-#loadRow > button { padding-left: 4px; padding-right: 4px; font-size: 0.78rem; white-space: nowrap; }
-#loadRow > button.danger { flex: 0 0 42px; }
 /* move / reassign sessions */
 #mvSheet { z-index: 40; }
 #slMoveBtn { width: 100%; margin: 6px 0 2px; padding: 9px; }
@@ -264,25 +260,213 @@ body.has-sensors .sensorbtn { display: inline-block; }
 #radarRawPre { white-space: pre-wrap; word-break: break-all; font: 0.68rem/1.35 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); background: var(--code); border-radius: 6px; padding: 6px; margin: 6px 0 0; max-height: 220px; overflow: auto; }
 #slEdRadar { color: var(--accent); }
 footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16px 0 8px; }
+
+/* ===== review: tabs, dope card, menus, 44px targets ===== */
+body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+.tab { display: none; } .tab.on { display: block; }
+#tabBar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; display: flex; gap: 4px; max-width: 640px; margin: 0 auto; background: var(--card); border-top: 1px solid var(--border); padding: 4px 8px max(4px, env(safe-area-inset-bottom)); }
+#tabBar button { flex: 1; margin: 0; min-height: 56px; padding: 2px 4px; background: none; color: var(--muted); font-size: 0.82rem; font-weight: 700; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+#tabBar button .i { font-size: 1.3rem; line-height: 1.1; }
+#tabBar button[aria-selected="true"] { color: var(--accent); background: var(--chip); box-shadow: 0 0 0 1px var(--chip-b) inset; }
+#sheet { z-index: 28; }
+#slSelBar { bottom: calc(70px + env(safe-area-inset-bottom)); }
+#dopeCard { position: sticky; top: 0; z-index: 15; background: var(--panel); border: 1px solid var(--accent); border-radius: 14px; padding: 6px 10px 8px; margin: 0 0 6px; box-shadow: 0 6px 14px rgba(0,0,0,.28); }
+#dopeCard.stale .dcBig, #dopeCard.stale #dcBracket, #dopeCard.stale #dcInfo { opacity: .35; transition: opacity .12s; }
+.stale#results, .stale.chart-container { opacity: .35; transition: opacity .12s; }
+.dcTop { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--muted); }
+.dcTop .dcFor { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.ic { width: 44px; min-width: 44px; height: 44px; flex: 0 0 44px; padding: 0; margin: 0; font-size: 1.15rem; border-radius: 10px; }
+.dcBig { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center; }
+.dcBig > div { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 3px 4px 5px; min-width: 0; }
+.dcBig .k { display: block; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.dcBig b { display: block; font-size: 1.9rem; line-height: 1.15; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dcBig .c { display: block; font-size: 0.8rem; color: var(--text); font-weight: 600; min-height: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dcDist { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.dcDist .stepper { flex: 1; }
+.dcDist .stepper button { width: 64px; min-width: 64px; min-height: 50px; font-size: 1.8rem; font-weight: 700; }
+.dcDist .stepper input { font-size: 1.55rem; font-weight: 800; min-height: 50px; padding-top: 4px; padding-bottom: 4px; }
+.dcDist .u { font-weight: 700; color: var(--muted); }
+#dopeCard .err:empty { display: none; }
+#dcBracket { font-size: 0.8rem; text-align: center; margin-top: 5px; color: var(--text); font-variant-numeric: tabular-nums; }
+#dcBracket b { color: var(--accent); }
+#dcInfo { font-size: 0.76rem; text-align: center; color: var(--muted); margin-top: 2px; }
+#dcInfo .w { color: var(--warn); font-weight: 700; } #dcInfo .bad { color: var(--err); font-weight: 700; }
+#dcInfo button { margin-top: 4px; }
+#status { margin: 0 0 8px; font-size: 0.78rem; }
+details.section > summary { color: var(--accent); font-size: 1rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.advSum { color: var(--muted); font-size: 0.76rem; font-weight: 500; text-align: right; }
+.pkMenuBtn { width: 52px; min-width: 52px; flex: 0 0 52px; margin: 0; padding: 0; font-size: 1.5rem; line-height: 1; border-radius: 10px; }
+#pkMenu { position: fixed; inset: 0; z-index: 35; background: rgba(0,0,0,.5); display: none; align-items: flex-end; justify-content: center; }
+#pkMenu.show { display: flex; }
+#pkMenu .box { background: var(--card); width: 100%; max-width: 640px; border-radius: 16px 16px 0 0; border-top: 2px solid var(--accent); padding: 10px 12px max(12px, env(safe-area-inset-bottom)); }
+#pkMenu h3 { margin: 4px 6px 6px; font-size: 0.95rem; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#pkMenu .grp button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; color: var(--text); border: 0; border-radius: 10px; padding: 10px; margin: 0; font-size: 1rem; font-weight: 600; min-height: 48px; }
+#pkMenu .grp button:active { background: var(--hover); }
+#pkMenu .grp button.del { color: var(--err); }
+#pkMenu .sep { height: 1px; background: var(--border); margin: 10px 0; }
+#pkMenu #pkCancel { margin-top: 8px; }
+#radarNo { margin: 6px 0 0; }
+/* tap targets: 44px minimum */
+button, select, summary, input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]) { min-height: 44px; }
+details > summary { display: flex; align-items: center; gap: 6px; }
+button.sm { min-height: 44px; padding: 8px 12px; }
+.seg button { min-height: 44px; padding: 8px 12px; }
+.stepper button { width: 44px; min-width: 44px; }
+.tg { min-height: 44px; min-width: 44px; padding: 4px 9px; }
+.x { width: 44px; min-height: 44px; }
+.shot { grid-template-columns: 30px 1fr auto auto auto 44px; }
+#themeBar button { min-height: 52px; }
+#toast.act button { min-height: 44px; }
+.mvChk { min-height: 44px; align-items: center; }
+.hint .info { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; min-height: 44px; margin: -14px -10px -14px -6px; padding: 0; vertical-align: middle; background: none; border: 0; color: var(--accent); font-size: 1rem; font-weight: 700; border-radius: 50%; }
+.hint .info.on { color: var(--text); }
+.hint.sh:not(.open) .h1 { display: inline-block; max-width: calc(100% - 34px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+.hint.sh { position: relative; }
+#chart { width: 100%; height: 100%; display: block; }
+/* Phase B: clicks, warnings, truing, dope card */
+#themeBtn { min-width: 44px; min-height: 44px; }
+.dcBig .clk { display: block; font-size: 0.74rem; color: var(--muted); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.dcBig .clk:empty { display: none; }
+#dcWarn { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px; font-size: 0.76rem; margin-top: 2px; }
+#dcWarn:empty { display: none; }
+#dcWarn span { color: var(--muted); } #dcWarn .w { color: var(--warn); font-weight: 700; } #dcWarn .bad { color: var(--err); font-weight: 700; }
+#dopeCard.stale #dcWarn { opacity: .35; }
+#results tr.trans td { color: var(--warn); }
+#results td .T { font-size: .68em; font-weight: 800; color: var(--warn); margin-left: 2px; vertical-align: super; }
+#results td.ck { color: var(--muted); font-size: .86em; }
+#dopeTools { margin-top: 8px; } #dopeTools button { flex: 1 1 45%; }
+#trOut { font-size: .9rem; } #trOut b { color: var(--accent); } #trOut .bad { color: var(--err); font-weight: 700; }
+#truedNote { color: var(--accent); }
+.dcvRow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.dcvMaxL { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--text); }
+.dcvMaxL input { width: 92px; }
+#dcvPrint { flex: 1 1 120px; width: auto; }
+#dcPrint { background: #fff; color: #000; padding: 8px; border-radius: 8px; margin: 0 auto; font-family: system-ui, sans-serif; }
+#dcPrint.wrist { width: 3.4in; max-width: 100%; font-size: 8.5pt; }
+#dcPrint.full { width: 100%; font-size: 11pt; }
+#dcPrint .hd { margin-bottom: 4px; line-height: 1.25; } #dcPrint .hd b { font-size: 1.1em; }
+#dcPrint table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 1em; margin: 0; }
+#dcPrint th, #dcPrint td { border: 1px solid #000; padding: 2px 3px; text-align: center; color: #000; background: #fff; font-weight: 600; }
+#dcPrint th { background: #e6e6e6; font-weight: 800; font-size: .9em; }
+#dcPrint tr:nth-child(even) td { background: #f2f2f2; }
+#dcPrint tr.trans td { background: #ddd; font-style: italic; }
+#dcPrint td.r { font-weight: 800; }
+#dcPrint .ft { font-size: .8em; margin-top: 3px; }
+@media print {
+  @page { margin: 0.35in; }
+  html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+  body > *:not(#dcView) { display: none !important; }
+  #dcView { display: block !important; position: static !important; inset: auto; padding: 0 !important; background: #fff !important; max-width: none; overflow: visible; }
+  #dcView .dcvCtl { display: none !important; }
+  #dcPrint { margin: 0; padding: 0; border-radius: 0; }
+  #dcPrint.wrist { width: 3.4in; } #dcPrint.full { width: 100%; }
+}
 </style>
 </head>
 <body>
 <header id="appHead"><div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="23" stroke="var(--logo-fg, #e8f5e9)" stroke-width="3"/><path d="M32 5v11M32 48v11M5 32h11M48 32h11" stroke="var(--logo-fg, #e8f5e9)" stroke-width="3"/><path d="M32 23v2M32 39v2M23 32h2M39 32h2" stroke="var(--logo-fg, #e8f5e9)" stroke-width="2" opacity=".55"/><path d="M3 59C9 24 25 4 32 32" pathLength="100" stroke="var(--logo-bg, #0a1f14)" stroke-width="7" stroke-dasharray="0 38 62 0"/><path d="M3 59C9 24 25 4 32 32" pathLength="100" stroke="var(--logo-ac, #2ecc71)" stroke-width="2.4" stroke-dasharray="0.1 6.5" opacity=".75"/><path d="M3 59C9 24 25 4 32 32" pathLength="100" stroke="var(--logo-ac, #2ecc71)" stroke-width="3.4" stroke-dasharray="0 40 60 0"/></g><circle cx="32" cy="32" r="4.4" fill="var(--logo-ac, #2ecc71)" stroke="var(--logo-bg, #0a1f14)" stroke-width="1.5"/></svg><div><h1>Ball<span>-</span>Calc</h1><div class="tag">Ballistics · Loads · Chrono</div></div></div><button class="sm ghost" type="button" id="themeBtn" aria-label="Color scheme" aria-expanded="false" title="Color scheme">🎨</button></header>
 <div id="themeBar" role="group" aria-label="Color scheme" hidden><button type="button" data-t="dark" aria-label="Dark color scheme"><i style="background:linear-gradient(135deg,#0a1f14 0 55%,#2ecc71 55%)"></i>Dark</button><button type="button" data-t="light" aria-label="Daylight color scheme"><i style="background:linear-gradient(135deg,#eef1ec 0 55%,#0a7a36 55%)"></i>Daylight</button><button type="button" data-t="od" aria-label="OD Green color scheme"><i style="background:linear-gradient(135deg,#1c2012 0 55%,#b5c96a 55%)"></i>OD Green</button><button type="button" data-t="fde" aria-label="Desert FDE color scheme"><i style="background:linear-gradient(135deg,#241d14 0 55%,#d9b77e 55%)"></i>Desert FDE</button><button type="button" data-t="night" aria-label="Night red color scheme"><i style="background:linear-gradient(135deg,#000000 0 55%,#ff3b2f 55%)"></i>Night red</button></div>
 
+<!-- ===== Dope tab ===== -->
+<main>
+<section class="tab" id="tabDope" data-tab="dope" role="tabpanel" aria-labelledby="tabBtnDope">
+<div id="dopeCard" aria-live="polite">
+  <div class="dcTop"><span class="dcFor" id="dcFor"></span><button class="ghost ic" type="button" id="calcBtn" aria-label="Recalculate" title="Recalculate">↻</button></div>
+  <div class="dcBig">
+    <div><span class="k" id="dcElevK">Dial</span><b id="dcElev">—</b><span class="c" id="dcElevC"></span><span class="clk" id="dcElevClk"></span></div>
+    <div><span class="k" id="dcWindK">Wind hold</span><b id="dcWind">—</b><span class="c" id="dcWindC"></span><span class="clk" id="dcWindClk"></span></div>
+  </div>
+  <div class="dcDist"><div class="stepper" data-step="25" data-min="25" data-max="3000"><input type="number" inputmode="numeric" id="target" value="500" aria-label="Target distance in yards"></div><span class="u">yd</span></div>
+  <div class="err" id="e-target"></div>
+  <div id="dcBracket"></div>
+  <div id="dcInfo"></div>
+  <div id="dcWarn"></div>
+</div>
+<div id="status">Loading ballistics engine…</div>
+
+<div class="section" id="windSec">
+  <h2>Wind &amp; angle</h2>
+  <div class="windbox">
+    <canvas id="dial" aria-label="Wind direction dial: drag to set where the wind comes from"></canvas>
+    <div>
+      <label for="windSpeed"><span>Wind speed (mph)</span><span class="chip" id="src-windSpeed"></span></label>
+      <div class="stepper" data-step="1" data-min="0" data-max="60"><input type="number" inputmode="decimal" id="windSpeed" value="10"></div>
+      <div class="err" id="e-windSpeed"></div>
+      <label for="windDir" style="margin-top:8px"><span>Wind from (°)</span><span class="chip" id="src-windDir"></span></label>
+      <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="windDir" value="90"></div>
+      <div class="err" id="e-windDir"></div>
+    </div>
+  </div>
+  <div id="dirText"></div>
+  <div class="hint">Drag the dial or the numbers (swipe left/right). 0° = wind in your face, 90° = from your right, 180° = from behind, 270° = from your left.</div>
+  <div class="grid" style="margin-top:10px">
+    <div class="full"><label for="shotAngle"><span>Shot angle (°, + up / − downhill)</span><button class="sm ghost sensorbtn" type="button" id="angleBtn">📐 Measure angle</button></label>
+      <div class="stepper" data-step="1" data-min="-60" data-max="60"><input type="number" inputmode="decimal" id="shotAngle" value="0"></div>
+      <div class="hint" id="sensorHint">Leave 0 for a flat shot. Target distance is the rangefinder (line-of-sight) distance.</div><div class="err" id="e-shotAngle"></div></div>
+  </div>
+</div>
+
+<div class="section" id="outSec">
+  <h2>Trajectory
+    <span class="row">
+      <span class="seg" id="angSeg"><button type="button" data-v="MOA">MOA</button><button type="button" data-v="MIL">MIL</button><span class="seg" id="viewSeg"><button type="button" data-v="dope">Dope</button><button type="button" data-v="full">Full</button></span>
+    </span>
+  </h2>
+  <div id="results"></div>
+  <div class="chart-container">
+    <canvas id="chart" aria-label="Drop versus range chart"></canvas>
+  </div>
+  <div class="grid" style="margin-top:10px">
+    <div><label for="maxRange">Table to (yd)</label>
+      <div class="stepper" data-step="50" data-min="100" data-max="3000"><input type="number" inputmode="numeric" id="maxRange" value="1000"></div><div class="err" id="e-maxRange"></div></div>
+    <div><label for="step">Every (yd)</label>
+      <div class="stepper" data-step="25" data-min="25" data-max="500"><input type="number" inputmode="numeric" id="step" value="100"></div><div class="err" id="e-step"></div></div>
+  </div>
+  <label class="mvChk" for="roundClk"><input type="checkbox" id="roundClk"><span>Round to the nearest turret click<small>Shows the dial value you can actually set on your turret (set the click value under Gear → Gun details).</small></span></label>
+  <div class="row dcBtns" id="dopeTools"><button class="ghost" type="button" id="trueBtn">🎯 True MV / BC</button><button class="ghost" type="button" id="dcBtn">🖨 Dope card</button></div>
+</div>
+
+<details class="section" id="advCond">
+  <summary><span>Advanced conditions</span><span class="advSum" id="advSum"></span></summary>
+  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px"><span class="summary" style="margin:0">Live weather</span><button class="sm ghost" type="button" id="wxBtn">↻ Weather</button></div>
+  <div id="wxStatus">Weather not loaded yet.</div>
+  <div id="placeBox" class="row">
+    <input type="text" id="placeQ" placeholder="City or ZIP for weather" style="flex:1 1 160px">
+    <button class="sm ghost" type="button" id="placeGo">Find</button>
+  </div>
+  <div class="grid" style="margin-top:10px">
+    <div><label for="temp"><span>Temp (°F)</span><span class="chip" id="src-temp"></span></label>
+      <div class="stepper" data-step="1" data-min="-40" data-max="130"><input type="number" inputmode="numeric" id="temp" value="59"></div><div class="err" id="e-temp"></div></div>
+    <div><label for="humidity"><span>Humidity (%)</span><span class="chip" id="src-humidity"></span></label>
+      <div class="stepper" data-step="5" data-min="0" data-max="100"><input type="number" inputmode="numeric" id="humidity" value="50"></div><div class="err" id="e-humidity"></div></div>
+    <div><label for="altitude"><span>Altitude (ft)</span><span class="chip" id="src-altitude"></span></label>
+      <div class="stepper" data-step="100" data-min="-1500" data-max="15000"><input type="number" inputmode="numeric" id="altitude" value="0"></div><div class="err" id="e-altitude"></div></div>
+    <div><label for="pressure"><span>Station pressure (inHg)</span><span class="chip" id="src-pressure"></span></label>
+      <input type="number" inputmode="decimal" id="pressure" step="0.01" placeholder="blank = standard"><div class="err" id="e-pressure"></div></div>
+    <div class="full hint">Station pressure is the actual (not sea-level corrected) pressure where you are. Leave it blank to use standard pressure for your altitude.</div>
+    <div><label for="powderTemp"><span>Powder temp (°F)</span></label>
+      <div class="stepper" data-step="5" data-min="-40" data-max="160"><input type="number" inputmode="numeric" id="powderTemp" placeholder="= air temp"></div><div class="err" id="e-powderTemp"></div></div>
+    <div class="hint" id="ptHint" style="align-self:end"></div>
+    <div class="full"><label for="bearing"><span>Shooting direction (compass °)</span><button class="sm ghost sensorbtn" type="button" id="aimBtn">🧭 Aim at target</button></label>
+      <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="bearing" placeholder="optional, e.g. 270 = west"></div>
+      <div class="hint" id="bearingHint">Set this so the weather wind direction can be turned into wind relative to your shot.</div>
+      <div class="err" id="e-bearing"></div></div>
+  </div>
+</details>
+</section>
+
+<!-- ===== Gear tab ===== -->
+<section class="tab" id="tabGear" data-tab="gear" role="tabpanel" aria-labelledby="tabBtnGear">
 <!-- ===== Presets ===== -->
-<div class="section">
-  <h2>Setup <span class="row"><button class="sm ghost" id="exportBtn" type="button">⇩ Export</button><button class="sm ghost" id="importBtn" type="button">⇧ Import</button></span></h2>
+<div class="section" id="gearSec">
+  <h2>Gear <span class="row"><button class="sm ghost" id="exportBtn" type="button">⇩ Export</button><button class="sm ghost" id="importBtn" type="button">⇧ Import</button></span></h2>
   <input type="file" id="importFile" accept="application/json,.json" hidden>
 
   <div class="picker">
-    <div class="lbl"><span>Gun</span><span class="dirty" id="rifleDirty"></span></div>
-    <div class="row">
+    <div class="lbl"><span>Gun</span><span class="saved" id="rifleSaved" aria-live="polite"></span></div>
+    <div class="row pkRow">
       <select id="rifleSel" aria-label="Gun"></select>
-      <button class="sm ghost" type="button" id="rifleNew" title="Save current gun fields as a new gun">＋ New</button>
-      <button class="sm ghost" type="button" id="rifleSave">💾 Save</button>
-      <button class="sm ghost" type="button" id="rifleRename">✎ Rename</button>
-      <button class="sm danger" type="button" id="rifleDel" aria-label="Delete gun">🗑</button>
+      <button class="ghost pkMenuBtn" type="button" id="rifleMenu" aria-label="Gun actions" aria-haspopup="dialog" title="Gun: new, duplicate, rename, delete">⋯</button>
     </div>
     <div class="summary" id="rifleSum"></div>
     <details id="rifleDetails">
@@ -292,20 +476,28 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
         <div><label for="sightHeight">Sight height (in)</label><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
         <div><label for="zero">Zero range (yd)</label><div class="stepper" data-step="25" data-min="10" data-max="1000"><input type="number" inputmode="numeric" id="zero" value="100"></div><div class="err" id="e-zero"></div></div>
         <div><label for="barrel">Barrel length (in)</label><input type="number" inputmode="decimal" id="barrel" step="0.5" placeholder="optional, e.g. 20"><div class="err" id="e-barrel"></div></div>
-        <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift (needs bullet length).</div><div class="err" id="e-twist"></div></div>
+        <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift and the stability check (needs bullet length).</div><div class="err" id="e-twist"></div></div>
+        <div class="full"><label for="turret">Turret click value</label><select id="turret"><option value="">Same as display unit (0.1 mil / ¼ MOA)</option><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div>
+        <div id="turretCustom" hidden><label for="turretV">Click value</label><input type="number" inputmode="decimal" id="turretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-turretV"></div></div>
+        <div id="turretCustomU" hidden><label for="turretU">Click unit</label><select id="turretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
+        <div class="full"><details id="zeroDetails"><summary>Zero conditions <span class="rsum" id="zeroSum">same as today</span></summary>
+          <div class="grid">
+            <div><label for="zTemp">Temp (°F)</label><input type="number" inputmode="numeric" id="zTemp" placeholder="blank = today"><div class="err" id="e-zTemp"></div></div>
+            <div><label for="zHum">Humidity (%)</label><input type="number" inputmode="numeric" id="zHum" placeholder="blank = today"><div class="err" id="e-zHum"></div></div>
+            <div><label for="zAlt">Altitude (ft)</label><input type="number" inputmode="numeric" id="zAlt" placeholder="blank = today"><div class="err" id="e-zAlt"></div></div>
+            <div><label for="zPress">Station pressure (inHg)</label><input type="number" inputmode="decimal" id="zPress" step="0.01" placeholder="blank = today"><div class="err" id="e-zPress"></div></div>
+            <div class="full"><button class="sm ghost" type="button" id="zUseCur" style="width:100%;padding:10px">📋 Use current conditions</button></div>
+            <div class="full hint">The zero is solved under these conditions (and the powder temp they imply), then today's shot uses today's conditions. Leave blank to zero in today's conditions.</div>
+          </div></details></div>
       </div>
     </details>
   </div>
 
   <div class="picker">
-    <div class="lbl"><span>Load (ammo for this gun)</span><span class="dirty" id="loadDirty"></span></div>
-    <div class="row" id="loadRow">
+    <div class="lbl"><span>Load (ammo for this gun)</span><span class="saved" id="loadSaved" aria-live="polite"></span></div>
+    <div class="row pkRow">
       <select id="loadSel" aria-label="Load"></select>
-      <button class="sm ghost" type="button" id="loadNew">＋ New</button>
-      <button class="sm ghost" type="button" id="loadSave">💾 Save</button>
-      <button class="sm ghost" type="button" id="loadRename">✎ Rename</button>
-      <button class="sm ghost" type="button" id="loadCopy" aria-label="Copy load">📑 Copy</button>
-      <button class="sm danger" type="button" id="loadDel" aria-label="Delete load">🗑</button>
+      <button class="ghost pkMenuBtn" type="button" id="loadMenu" aria-label="Load actions" aria-haspopup="dialog" title="Load: new, duplicate, rename, delete">⋯</button>
     </div>
     <div class="summary" id="loadSum"></div>
     <details id="loadDetails">
@@ -320,8 +512,13 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
         <div><label for="weight">Bullet weight (gr)</label><input type="number" inputmode="decimal" id="weight" step="1" value="168"><div class="err" id="e-weight"></div></div>
         <div><label for="diameter">Diameter (in)</label><input type="number" inputmode="decimal" id="diameter" step="0.001" value="0.308"><div class="err" id="e-diameter"></div></div>
         <div><label for="mv">Muzzle velocity (fps)</label><input type="number" inputmode="numeric" id="mv" step="5" value="2750"><div class="err" id="e-mv"></div></div>
-        <div><label for="mvSource">MV is…</label><select id="mvSource"><option value="">(not set)</option><option value="measured">Chronographed</option><option value="factory">Box / factory</option><option value="estimate">Estimated</option></select></div>
+        <div><label for="mvSource">MV is…</label><select id="mvSource"><option value="">(not set)</option><option value="measured">Chronographed</option><option value="factory">Box / factory</option><option value="estimate">Estimated</option><option value="trued">Trued from drops</option></select></div>
         <div><label for="length">Bullet length (in)</label><input type="number" inputmode="decimal" id="length" step="0.01" value="1.215" placeholder="optional"><div class="err" id="e-length"></div></div>
+        <div><label for="tipLen">Plastic tip (in)</label><input type="number" inputmode="decimal" id="tipLen" step="0.01" placeholder="tipped bullets"><div class="err" id="e-tipLen"></div></div>
+        <div><label for="ptSens">Temp sensitivity (fps per 10°F)</label><input type="number" inputmode="decimal" id="ptSens" step="1" placeholder="0 = off"><div class="err" id="e-ptSens"></div></div>
+        <div><label for="mvTemp">Chrono temp (°F)</label><input type="number" inputmode="numeric" id="mvTemp" placeholder="when MV was measured"><div class="err" id="e-mvTemp"></div></div>
+        <div class="full hint">Many powders shift 1–2 fps per °F (10–20 per 10°F). MV used = chrono MV + sensitivity × (powder temp − chrono temp) ÷ 10; leave sensitivity blank or 0 to turn it off. Tip length (blank = estimated for tipped bullets) refines the stability check.</div>
+        <div class="full summary" id="truedNote" hidden></div><input type="hidden" id="trued">
         <div class="full" id="bandsRow" style="display:none"><label for="useBands">Sierra velocity-banded G1</label><select id="useBands"><option value="">Use single BC above</option><option value="1">Use velocity bands (G1 only)</option></select><div class="hint" id="bandsTxt"></div></div>
         <div class="full hint">BC must match the drag model printed on the box (G1 vs G7). Bullet length is optional; it enables spin drift. Factory BCs are often optimistic — true them against real drops.</div>
         <div class="full"><details id="mvEstBox"><summary>Estimate MV for a different barrel (no chronograph)</summary>
@@ -360,20 +557,17 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
       </div>
       <div class="grid" style="margin-top:10px">
         <div class="full"><label for="ldNotes">Load notes</label><input type="text" id="ldNotes" maxlength="300" placeholder="seating die setting, powder lot, pressure signs…"></div>
-        <div class="full hint">Tap 💾 Save above to keep it with this load. Every chrono session keeps its own copy of the recipe, so later edits don't change old sessions. Always work up from published load data.</div>
+        <div class="full hint">Changes save to this load automatically. Every chrono session keeps its own copy of the recipe, so later edits don't change old sessions. Always work up from published load data.</div>
       </div>
       <datalist id="dlPowder"><option value="Hodgdon H4350"><option value="Hodgdon Varget"><option value="Hodgdon H4895"><option value="Hodgdon H322"><option value="Hodgdon H335"><option value="Hodgdon BL-C(2)"><option value="Hodgdon Benchmark"><option value="Hodgdon CFE 223"><option value="Hodgdon CFE BLK"><option value="Hodgdon CFE Pistol"><option value="Hodgdon H380"><option value="Hodgdon H414"><option value="Hodgdon H4831"><option value="Hodgdon H4831SC"><option value="Hodgdon H1000"><option value="Hodgdon Retumbo"><option value="Hodgdon H50BMG"><option value="Hodgdon Superformance"><option value="Hodgdon LEVERevolution"><option value="Hodgdon H110"><option value="Hodgdon Lil&#x27;Gun"><option value="Hodgdon Titegroup"><option value="Hodgdon HP-38"><option value="Hodgdon Clays"><option value="Hodgdon Universal"><option value="Hodgdon Longshot"><option value="Hodgdon US 869"><option value="IMR 3031"><option value="IMR 4064"><option value="IMR 4166"><option value="IMR 4198"><option value="IMR 4227"><option value="IMR 4320"><option value="IMR 4350"><option value="IMR 4451"><option value="IMR 4831"><option value="IMR 4895"><option value="IMR 7828"><option value="IMR 7977"><option value="IMR 8133"><option value="IMR 8208 XBR"><option value="IMR Enduron 4166"><option value="IMR Red"><option value="IMR Unequal"><option value="IMR Trail Boss"><option value="Alliant Reloder 7"><option value="Alliant Reloder 10x"><option value="Alliant Reloder 15"><option value="Alliant Reloder 16"><option value="Alliant Reloder 17"><option value="Alliant Reloder 19"><option value="Alliant Reloder 22"><option value="Alliant Reloder 23"><option value="Alliant Reloder 25"><option value="Alliant Reloder 26"><option value="Alliant Reloder 33"><option value="Alliant AR-Comp"><option value="Alliant Power Pro 2000-MR"><option value="Alliant Power Pro Varmint"><option value="Alliant Bullseye"><option value="Alliant Red Dot"><option value="Alliant Green Dot"><option value="Alliant Unique"><option value="Alliant Herco"><option value="Alliant Blue Dot"><option value="Alliant 2400"><option value="Alliant Power Pistol"><option value="Alliant Sport Pistol"><option value="Alliant BE-86"><option value="Alliant 300-MP"><option value="Alliant 20/28"><option value="Vihtavuori N110"><option value="Vihtavuori N120"><option value="Vihtavuori N130"><option value="Vihtavuori N133"><option value="Vihtavuori N135"><option value="Vihtavuori N140"><option value="Vihtavuori N150"><option value="Vihtavuori N160"><option value="Vihtavuori N165"><option value="Vihtavuori N170"><option value="Vihtavuori N540"><option value="Vihtavuori N550"><option value="Vihtavuori N555"><option value="Vihtavuori N560"><option value="Vihtavuori N565"><option value="Vihtavuori N568"><option value="Vihtavuori N570"><option value="Vihtavuori 3N37"><option value="Vihtavuori 3N38"><option value="Vihtavuori N310"><option value="Vihtavuori N320"><option value="Vihtavuori N330"><option value="Vihtavuori N340"><option value="Vihtavuori N350"><option value="Vihtavuori N105"><option value="Accurate No. 2"><option value="Accurate No. 5"><option value="Accurate No. 7"><option value="Accurate No. 9"><option value="Accurate LT-30"><option value="Accurate LT-32"><option value="Accurate 1680"><option value="Accurate 2015"><option value="Accurate 2200"><option value="Accurate 2230"><option value="Accurate 2460"><option value="Accurate 2495"><option value="Accurate 2520"><option value="Accurate 4064"><option value="Accurate 4350"><option value="Accurate 2700"><option value="Accurate MagPro"><option value="Ramshot TAC"><option value="Ramshot X-Terminator"><option value="Ramshot Big Game"><option value="Ramshot Hunter"><option value="Ramshot Magnum"><option value="Ramshot Enforcer"><option value="Ramshot Silhouette"><option value="Ramshot True Blue"><option value="Ramshot Competition"><option value="Ramshot Zip"><option value="Winchester 231"><option value="Winchester 244"><option value="Winchester 296"><option value="Winchester 748"><option value="Winchester 760"><option value="Winchester StaBall 6.5"><option value="Winchester StaBall HD"><option value="Winchester StaBall Match"><option value="Winchester WST"><option value="Winchester Super Handicap"><option value="Winchester AutoComp"><option value="Norma 203B"><option value="Norma URP"><option value="Norma MRP"><option value="Shooters World Precision Rifle"><option value="Shooters World Match Rifle"></datalist><datalist id="dlPrimer"><option value="CCI 200 (large rifle)"><option value="CCI 250 (large rifle magnum)"><option value="CCI BR-2 (large rifle bench rest)"><option value="CCI 400 (small rifle)"><option value="CCI 450 (small rifle magnum)"><option value="CCI BR-4 (small rifle bench rest)"><option value="CCI 41 (small rifle, 5.56)"><option value="CCI 500 (small pistol)"><option value="CCI 550 (small pistol magnum)"><option value="CCI 300 (large pistol)"><option value="CCI 350 (large pistol magnum)"><option value="CCI 34 (large rifle, 7.62)"><option value="Federal 205 (small rifle)"><option value="Federal 205M (small rifle match)"><option value="Federal GM205M (small rifle match)"><option value="Federal 210 (large rifle)"><option value="Federal 210M (large rifle match)"><option value="Federal GM210M (large rifle match)"><option value="Federal 215 (large rifle magnum)"><option value="Federal 215M (large rifle magnum match)"><option value="Federal 100 (small pistol)"><option value="Federal 100M (small pistol match)"><option value="Federal 200 (small pistol magnum)"><option value="Federal 150 (large pistol)"><option value="Federal 155 (large pistol magnum)"><option value="Winchester WSR (small rifle)"><option value="Winchester WSRM (small rifle magnum)"><option value="Winchester WLR (large rifle)"><option value="Winchester WLRM (large rifle magnum)"><option value="Winchester WSP (small pistol)"><option value="Winchester WSPM (small pistol magnum)"><option value="Winchester WLP (large pistol)"><option value="Remington 6½ (small rifle)"><option value="Remington 7½ BR (small rifle bench rest)"><option value="Remington 9½ (large rifle)"><option value="Remington 9½M (large rifle magnum)"><option value="Remington 1½ (small pistol)"><option value="Remington 5½ (small pistol magnum)"><option value="Remington 2½ (large pistol)"><option value="Murom KVB-223 (small rifle)"><option value="Fiocchi SRP (small rifle)"><option value="Fiocchi LRP (large rifle)"><option value="Fiocchi SPP (small pistol)"><option value="Fiocchi LPP (large pistol)"><option value="PMC / Murom KVB-7 (large rifle)"></datalist><datalist id="dlCase"><option value="Lapua"><option value="Peterson"><option value="Alpha Munitions"><option value="Hornady"><option value="Norma"><option value="Nosler"><option value="Starline"><option value="Winchester"><option value="Remington"><option value="Federal"><option value="ADG"><option value="Sig Sauer"><option value="Gunwerks"><option value="Bertram"><option value="PPU"><option value="Fiocchi"><option value="Speer"><option value="Blazer Brass"><option value="Lake City"><option value="Mixed range brass"></datalist><datalist id="dlMaker"><option value="Hornady"><option value="Federal"><option value="Federal Premium"><option value="Winchester"><option value="Remington"><option value="Sierra"><option value="Nosler"><option value="Berger"><option value="Black Hills"><option value="Sig Sauer"><option value="Norma"><option value="Lapua"><option value="PPU"><option value="Fiocchi"><option value="Barnes"><option value="CCI"><option value="Speer"><option value="Aguila"><option value="Magtech"><option value="Blazer"><option value="Underwood"><option value="HSM"><option value="Prvi Partizan"><option value="Wolf"><option value="Browning"></datalist>
     </details>
   </div>
 
   <div class="picker">
-    <div class="lbl"><span>Shooting range / location</span><span class="dirty" id="rangeDirty"></span></div>
-    <div class="row">
+    <div class="lbl"><span>Shooting range / location</span><span class="saved" id="rangeSaved" aria-live="polite"></span></div>
+    <div class="row pkRow">
       <select id="rangeSel" aria-label="Range"></select>
-      <button class="sm ghost" type="button" id="rangeNew">＋ New</button>
-      <button class="sm ghost" type="button" id="rangeSave">💾 Save</button>
-      <button class="sm ghost" type="button" id="rangeRename">✎ Rename</button>
-      <button class="sm danger" type="button" id="rangeDel" aria-label="Delete range">🗑</button>
+      <button class="ghost pkMenuBtn" type="button" id="rangeMenu" aria-label="Range actions" aria-haspopup="dialog" title="Range: new, duplicate, rename, delete">⋯</button>
     </div>
     <div class="summary" id="rangeSum"></div>
     <details id="rangeDetails">
@@ -382,22 +576,28 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
         <div><label for="rangeLat">Latitude</label><input type="number" inputmode="decimal" id="rangeLat" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLat"></div></div>
         <div><label for="rangeLon">Longitude</label><input type="number" inputmode="decimal" id="rangeLon" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLon"></div></div>
         <div class="full"><button class="sm ghost" type="button" id="rangeHere">📍 Use my current location</button></div>
-        <div class="full hint">A range saves its location (for weather), shooting direction, altitude and default target distance (set those below, then tap Save). Leave lat/lon blank to use your phone's location.</div>
+        <div class="full hint">A range saves its location (for weather), shooting direction, altitude and default target distance (set them on the Dope tab; changes save automatically). Leave lat/lon blank to use your phone's location.</div>
       </div>
     </details>
   </div>
 </div>
+</section>
 
+<!-- ===== Log tab ===== -->
+<section class="tab" id="tabLog" data-tab="log" role="tabpanel" aria-labelledby="tabBtnLog">
 <!-- ===== Shot log ===== -->
 <div class="section" id="slSection">
   <h2>Shot log <span class="row"><button class="sm ghost" type="button" id="slImportBtn">⇧ Athlon file</button><button class="sm" type="button" id="slNewBtn">＋ Session</button></span></h2>
   <div id="radarBox">
     <div class="row"><button class="sm" type="button" id="radarConnect">📡 Connect radar</button><button class="sm ghost" type="button" id="radarReconnect" hidden>↻ Reconnect</button><button class="sm ghost" type="button" id="radarDisconnect" hidden>Disconnect</button></div>
+    <div class="summary bad" id="radarNo" hidden></div>
+    <div id="radarMore" hidden>
     <div class="summary" id="radarStatus">Not connected.</div>
     <div class="hint" id="radarHint">Athlon Rangecraft Velocity PRO over Bluetooth (Chrome on Android). Close Athlon's own app first: the radar talks to one app at a time. Each shot drops into a live session for the selected load.</div>
     <details id="radarRaw"><summary>Raw packets (<span id="radarRawN">0</span>)</summary>
       <div class="row" style="margin-top:4px"><button class="sm ghost" type="button" id="radarCopy">📋 Copy</button><button class="sm ghost" type="button" id="radarClear">Clear</button></div>
       <pre id="radarRawPre"></pre></details>
+    </div>
   </div>
   <input type="file" id="slFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
   <div class="summary" id="slSum">Chronograph sessions for the selected load.</div>
@@ -410,77 +610,68 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
   <div id="slSelBar" hidden><span class="n" id="slSelN">0 selected</span><button class="sm ghost" type="button" id="slSelAll">All</button><button class="sm" type="button" id="slSelMove" disabled>↔ Move…</button><button class="sm ghost" type="button" id="slSelDone">Done</button></div>
   <div class="row slTools"><button class="sm ghost" type="button" id="slCsvBtn">⇩ Shot log CSV (all sessions)</button><button class="sm ghost" type="button" id="slSelBtn">☑ Select</button></div>
 </div>
+</section>
+</main>
 
-<!-- ===== Conditions ===== -->
-<div class="section">
-  <h2>Conditions <button class="sm ghost" type="button" id="wxBtn">↻ Weather</button></h2>
-  <div id="wxStatus">Weather not loaded yet.</div>
-  <div id="placeBox" class="row">
-    <input type="text" id="placeQ" placeholder="City or ZIP for weather" style="flex:1 1 160px">
-    <button class="sm ghost" type="button" id="placeGo">Find</button>
+<nav id="tabBar" role="tablist" aria-label="Sections">
+  <button type="button" role="tab" id="tabBtnDope" data-tab="dope" aria-controls="tabDope"><span class="i">🎯</span>Dope</button>
+  <button type="button" role="tab" id="tabBtnGear" data-tab="gear" aria-controls="tabGear"><span class="i">🧰</span>Gear</button>
+  <button type="button" role="tab" id="tabBtnLog" data-tab="log" aria-controls="tabLog"><span class="i">📈</span>Log</button>
+</nav>
+
+<div id="pkMenu" role="dialog" aria-modal="true" aria-labelledby="pkTitle"><div class="box">
+  <h3 id="pkTitle">Actions</h3>
+  <div class="grp" data-k="rifle">
+    <button type="button" id="rifleNew">＋ New gun</button>
+    <button type="button" id="rifleDup">⧉ Duplicate gun (with its loads)</button>
+    <button type="button" id="rifleRename">✎ Rename gun</button>
+    <div class="sep"></div>
+    <button type="button" class="del" id="rifleDel">🗑 Delete gun…</button>
   </div>
+  <div class="grp" data-k="load">
+    <button type="button" id="loadNew">＋ New load</button>
+    <button type="button" id="loadCopy">📑 Duplicate / copy to another gun…</button>
+    <button type="button" id="loadMove">↔ Move to another gun…</button>
+    <button type="button" id="loadRename">✎ Rename load</button>
+    <div class="sep"></div>
+    <button type="button" class="del" id="loadDel">🗑 Delete load…</button>
+  </div>
+  <div class="grp" data-k="range">
+    <button type="button" id="rangeNew">＋ New range</button>
+    <button type="button" id="rangeDup">⧉ Duplicate range</button>
+    <button type="button" id="rangeRename">✎ Rename range</button>
+    <div class="sep"></div>
+    <button type="button" class="del" id="rangeDel">🗑 Delete range…</button>
+  </div>
+  <button type="button" class="ghost" id="pkCancel">Cancel</button>
+</div></div>
 
-  <div class="windbox">
-    <canvas id="dial" aria-label="Wind direction dial: drag to set where the wind comes from"></canvas>
-    <div>
-      <label for="windSpeed"><span>Wind speed (mph)</span><span class="chip" id="src-windSpeed"></span></label>
-      <div class="stepper" data-step="1" data-min="0" data-max="60"><input type="number" inputmode="decimal" id="windSpeed" value="10"></div>
-      <div class="err" id="e-windSpeed"></div>
-      <label for="windDir" style="margin-top:8px"><span>Wind from (°)</span><span class="chip" id="src-windDir"></span></label>
-      <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="windDir" value="90"></div>
-      <div class="err" id="e-windDir"></div>
+<div id="trSheet" class="ovl" role="dialog" aria-modal="true" aria-label="True muzzle velocity or BC">
+  <h3><span>🎯 True to an observed drop</span><button class="sm ghost" type="button" id="trClose">✕ Close</button></h3>
+  <div class="summary" id="trFor"></div>
+  <div class="list">
+    <div class="grid">
+      <div><label for="trRange">Range (yd)</label><input type="number" inputmode="numeric" id="trRange"><div class="err" id="e-trRange"></div></div>
+      <div><label for="trObs">Observed</label><input type="number" inputmode="decimal" id="trObs" step="0.05" placeholder="e.g. 7.4"><div class="err" id="e-trObs"></div></div>
+      <div class="full"><span class="seg" id="trUnit" role="group" aria-label="Observed unit"><button type="button" data-v="MIL">mil dialed</button><button type="button" data-v="MOA">MOA dialed</button><button type="button" data-v="IN">inches low</button></span></div>
+      <div class="full"><span class="seg" id="trWhat" role="group" aria-label="What to solve"><button type="button" data-v="mv">Solve MV</button><button type="button" data-v="bc">Solve BC scale</button></span></div>
+      <div class="full"><button type="button" id="trGo">Solve</button></div>
+      <div class="full" id="trOut" aria-live="polite"></div>
+      <div class="full"><button type="button" class="ghost" id="trSave" disabled>💾 Save to this load</button></div>
+      <div class="full hint">Shoot at a known range in today's conditions and enter the elevation that actually centered the group (or how many inches low the shots landed with the predicted dial). Solve MV at medium range (supersonic); solve a BC scale at long range once MV is right.</div>
     </div>
   </div>
-  <div id="dirText"></div>
-  <div class="hint">Drag the dial or the numbers (swipe left/right). 0° = wind in your face, 90° = from your right, 180° = from behind, 270° = from your left.</div>
-
-  <div class="grid" style="margin-top:10px">
-    <div class="full"><label for="bearing"><span>Shooting direction (compass °)</span><button class="sm ghost sensorbtn" type="button" id="aimBtn">🧭 Aim at target</button></label>
-      <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="bearing" placeholder="optional, e.g. 270 = west"></div>
-      <div class="hint" id="bearingHint">Set this so the weather wind direction can be turned into wind relative to your shot.</div>
-      <div class="err" id="e-bearing"></div></div>
-    <div class="full"><label for="shotAngle"><span>Shot angle (°, + up / − downhill)</span><button class="sm ghost sensorbtn" type="button" id="angleBtn">📐 Measure angle</button></label>
-      <div class="stepper" data-step="1" data-min="-60" data-max="60"><input type="number" inputmode="decimal" id="shotAngle" value="0"></div>
-      <div class="hint" id="sensorHint">Leave 0 for a flat shot. Target distance is the rangefinder (line-of-sight) distance.</div><div class="err" id="e-shotAngle"></div></div>
-    <div><label for="temp"><span>Temp (°F)</span><span class="chip" id="src-temp"></span></label>
-      <div class="stepper" data-step="1" data-min="-40" data-max="130"><input type="number" inputmode="numeric" id="temp" value="59"></div><div class="err" id="e-temp"></div></div>
-    <div><label for="humidity"><span>Humidity (%)</span><span class="chip" id="src-humidity"></span></label>
-      <div class="stepper" data-step="5" data-min="0" data-max="100"><input type="number" inputmode="numeric" id="humidity" value="50"></div><div class="err" id="e-humidity"></div></div>
-    <div><label for="altitude"><span>Altitude (ft)</span><span class="chip" id="src-altitude"></span></label>
-      <div class="stepper" data-step="100" data-min="-1500" data-max="15000"><input type="number" inputmode="numeric" id="altitude" value="0"></div><div class="err" id="e-altitude"></div></div>
-    <div><label for="pressure"><span>Station pressure (inHg)</span><span class="chip" id="src-pressure"></span></label>
-      <input type="number" inputmode="decimal" id="pressure" step="0.01" placeholder="blank = standard"><div class="err" id="e-pressure"></div></div>
-    <div class="full hint">Station pressure is the actual (not sea-level corrected) pressure where you are. Leave it blank to use standard pressure for your altitude.</div>
+</div>
+<div id="dcView" class="ovl" role="dialog" aria-modal="true" aria-label="Printable dope card">
+  <h3 class="dcvCtl"><span>🖨 Dope card</span><button class="sm ghost" type="button" id="dcvClose">✕ Close</button></h3>
+  <div class="dcvCtl dcvRow">
+    <span class="seg" id="dcvStep" role="group" aria-label="Range step"><button type="button" data-v="25">25 yd</button><button type="button" data-v="50">50 yd</button><button type="button" data-v="100">100 yd</button></span>
+    <span class="seg" id="dcvSize" role="group" aria-label="Card size"><button type="button" data-v="wrist">Wrist coach</button><button type="button" data-v="full">Full page</button></span>
+    <label class="dcvMaxL" for="dcvMax">to <input type="number" inputmode="numeric" id="dcvMax" step="50"> yd</label>
+    <button type="button" id="dcvPrint">🖨 Print</button>
   </div>
+  <div id="dcPrint" class="wrist"></div>
 </div>
-
-<!-- ===== Output ===== -->
-<div class="section">
-  <h2>Output
-    <span class="row">
-      <span class="seg" id="angSeg"><button type="button" data-v="MOA">MOA</button><button type="button" data-v="MIL">MIL</button></span>
-      <span class="seg" id="viewSeg"><button type="button" data-v="dope">Dope</button><button type="button" data-v="full">Full</button></span>
-    </span>
-  </h2>
-  <div class="grid">
-    <div class="full"><label for="target">Target distance (yd)</label>
-      <div class="stepper" data-step="25" data-min="25" data-max="3000"><input type="number" inputmode="numeric" id="target" value="500"></div><div class="err" id="e-target"></div></div>
-    <div><label for="maxRange">Table to (yd)</label>
-      <div class="stepper" data-step="50" data-min="100" data-max="3000"><input type="number" inputmode="numeric" id="maxRange" value="1000"></div><div class="err" id="e-maxRange"></div></div>
-    <div><label for="step">Every (yd)</label>
-      <div class="stepper" data-step="25" data-min="25" data-max="500"><input type="number" inputmode="numeric" id="step" value="100"></div><div class="err" id="e-step"></div></div>
-  </div>
-</div>
-
-<div id="shotCard"></div>
-<button id="calcBtn" type="button">Calculate Trajectory</button>
-<div id="status">Loading ballistics engine…</div>
-
-<div id="results"></div>
-<div class="chart-container">
-  <canvas id="chart"></canvas>
-</div>
-
 <div id="toast"></div>
 <div id="sheet" role="dialog" aria-modal="true">
   <h3 id="sheetTitle"></h3>
@@ -504,7 +695,7 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
 <div id="rcSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Saved recipes for this bullet">
   <h3><span>📖 Saved recipes</span><button class="sm ghost" type="button" id="rcClose">✕ Close</button></h3>
   <div class="summary" id="rcFor"></div>
-  <div class="hint">Recipes saved on any of your guns for this same bullet (same database bullet, or same diameter, weight and BC). Tap one to put it in this load's data, then 💾 Save. Velocities from another gun or barrel will differ — always work up again.</div>
+  <div class="hint">Recipes saved on any of your guns for this same bullet (same database bullet, or same diameter, weight and BC). Tap one to put it in this load's data (saved automatically). Velocities from another gun or barrel will differ — always work up again.</div>
   <div class="list" id="rcList"></div>
 </div>
 <div id="cpSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Copy load">
@@ -536,6 +727,7 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
       <div class="full"><label for="slDate">Date / time</label><input type="datetime-local" id="slDate"></div>
       <div class="full"><label for="slNotes">Notes</label><input type="text" id="slNotes" maxlength="300" placeholder="powder lot, seating depth, conditions…"></div>
       <div><label for="slTemp">Temp (°F)</label><input type="number" inputmode="decimal" id="slTemp"></div>
+      <div><label for="slPowder">Powder temp (°F)</label><input type="number" inputmode="decimal" id="slPowder"></div>
       <div><label for="slHum">Humidity (%)</label><input type="number" inputmode="decimal" id="slHum"></div>
       <div><label for="slPress">Pressure (inHg)</label><input type="number" inputmode="decimal" id="slPress" step="0.01"></div>
       <div><label for="slAlt">Altitude (ft)</label><input type="number" inputmode="numeric" id="slAlt"></div>
@@ -546,8 +738,10 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
   </details>
   <div class="row" style="margin-top:10px">
     <button type="button" id="slUseMV" class="ghost" style="flex:1 1 100%">Use avg as MV (Chronographed)</button>
-    <button type="button" class="danger" id="slDel" style="flex:0 0 auto;width:auto;padding:14px">🗑 Delete</button>
-    <button type="button" id="slSave" style="flex:1">💾 Save session</button>
+    <button type="button" id="slSave" style="flex:1 1 100%">💾 Save session</button>
+  </div>
+  <div class="row" style="margin-top:28px;justify-content:flex-end">
+    <button type="button" class="danger" id="slDel" style="flex:0 0 auto;width:auto;padding:10px 16px">🗑 Delete session…</button>
   </div>
 </div>
 <div id="mvSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Move session">
@@ -580,7 +774,6 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
 </footer>
 <script type="module">
 const $ = id => document.getElementById(id);
-const btn = $("calcBtn");
 const statusEl = $("status");
 const resultsDiv = $("results");
 
@@ -592,13 +785,13 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 
 // load data (recipe) fields: handload or factory ammo
 const REC_F = ["ldKind", "ldPowder", "ldCharge", "ldPrimer", "ldCOAL", "ldCBTO", "ldJump", "ldCase", "ldFired", "ldTrim", "ldPrep", "ldMaker", "ldProduct", "ldLot", "ldNotes"];
-const RIFLE_F = ["gunKind", "sightHeight", "zero", "twist", "barrel"];
-const LOAD_F = ["bc", "drag", "weight", "diameter", "mv", "length", "mvSource", "refMV", "refBarrel", "fpsPerInch", "bulletId", "bulletName", "bcBands", "useBands", ...REC_F];
-const LONG_F = { bulletName: 100, bcBands: 200, bulletId: 80, ldPowder: 60, ldPrimer: 60, ldCase: 60, ldMaker: 60, ldProduct: 80, ldLot: 40, ldPrep: 200, ldNotes: 300 };
-const F_DEF = { drag: "G7", gunKind: "rifle", ldKind: "hand" };   // defaults for presets saved before a field existed
+const RIFLE_F = ["gunKind", "sightHeight", "zero", "twist", "barrel", "turret", "turretV", "turretU", "zTemp", "zPress", "zAlt", "zHum"];
+const LOAD_F = ["bc", "drag", "weight", "diameter", "mv", "length", "mvSource", "refMV", "refBarrel", "fpsPerInch", "bulletId", "bulletName", "bcBands", "useBands", "ptSens", "mvTemp", "tipLen", "trued", ...REC_F];
+const LONG_F = { trued: 160, bulletName: 100, bcBands: 200, bulletId: 80, ldPowder: 60, ldPrimer: 60, ldCase: 60, ldMaker: 60, ldProduct: 80, ldLot: 40, ldPrep: 200, ldNotes: 300 };
+const F_DEF = { drag: "G7", gunKind: "rifle", ldKind: "hand", turretU: "mil" };   // defaults for presets saved before a field existed
 const RANGE_F = ["bearing", "altitude", "target", "rangeLat", "rangeLon"];
 const WX_F = ["windSpeed", "windDir", "temp", "humidity", "altitude", "pressure"];
-const ALL_F = [...RIFLE_F, ...LOAD_F, ...RANGE_F, "windSpeed", "windDir", "temp", "humidity", "pressure", "maxRange", "step"];
+const ALL_F = [...RIFLE_F, ...LOAD_F, ...RANGE_F, "windSpeed", "windDir", "temp", "humidity", "pressure", "powderTemp", "maxRange", "step"];
 
 function seed() {
   return {
@@ -686,37 +879,50 @@ function renderPickers() {
   fillOptions($("rangeSel"), P.ranges, curRange(), "Current location (no saved range)");
   updateDirty();
 }
-function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); applyGunKind(); }
+function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; applyGunKind(); }
 function applyGunKind() { const hg = $("gunKind").value === "handgun"; $("barrel").placeholder = hg ? "optional, e.g. 4.25" : "optional, e.g. 20"; }
-function applyLoad() { const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); paintLdKind(); renderBulletInfo(); }
+function applyLoad() { const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); }
 function applyRange() {
   const g = curRange();
   if (g) {
     ["bearing", "target", "rangeLat", "rangeLon"].forEach(f => setVal(f, g[f]));
     manual.delete("altitude"); manual.delete("windDir");
   }
+  formFor.g = g?.id || null;
   applyAuto();
 }
 const same = (a, b) => String(a ?? "").trim() === String(b ?? "").trim() || (parseFloat(a) === parseFloat(b));
 function isDirty(obj, fields) { return !!obj && fields.some(f => !same((obj[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : obj[f], $(f).value)); }
+// autosave: the form always belongs to the preset ids in formFor (set when a preset is put on screen),
+// so switching or deleting a preset never writes the old form into another one.
+var formFor = { r: null, l: null, g: null }, savedT = {};
+function autosave() {
+  const r = curRifle(), l = curLoad(), g = curRange(), done = [];
+  if (r && formFor.r === r.id && isDirty(r, RIFLE_F)) { Object.assign(r, pick(RIFLE_F)); done.push("rifle"); }
+  if (l && formFor.l === l.id && isDirty(l, LOAD_F)) { Object.assign(l, pick(LOAD_F)); done.push("load"); }
+  if (g && formFor.g === g.id) {
+    let ch = false;
+    ["bearing", "target", "rangeLat", "rangeLon"].forEach(f => { if (!same(g[f], $(f).value)) { g[f] = $(f).value; ch = true; } });
+    if (manual.has("altitude") && !same(g.altitude, $("altitude").value)) { g.altitude = $("altitude").value; ch = true; }   // blank = use weather
+    if (ch) done.push("range");
+  }
+  if (!done.length) return false;
+  savePresets(); done.forEach(flashSaved); return true;
+}
+function flashSaved(k) { const el = $(k + "Saved"); if (!el) return; el.textContent = "✓ Saved"; el.classList.add("show"); clearTimeout(savedT[k]); savedT[k] = setTimeout(() => el.classList.remove("show"), 1500); }
 function updateDirty() {
   const r = curRifle(), l = curLoad(), g = curRange();
-  const rd = isDirty(r, RIFLE_F), ld = isDirty(l, LOAD_F);
-  // range altitude: blank in preset means "use weather", so don't flag it
-  const gd = !!g && RANGE_F.some(f => !(f === "altitude" && String(g.altitude ?? "") === "") && !same(g[f], $(f).value));
+  autosave();
   maybeRenderLog();
-  $("rifleDirty").textContent = rd ? "● unsaved changes" : "";
-  $("loadDirty").textContent = ld ? "● unsaved changes" : "";
-  $("rangeDirty").textContent = gd ? "● unsaved changes" : "";
-  $("rifleSave").classList.toggle("hot", rd); $("loadSave").classList.toggle("hot", ld); $("rangeSave").classList.toggle("hot", gd);
-  ["rifleSave", "rifleRename", "rifleDel"].forEach(id => $(id).disabled = !r);
-  ["loadSave", "loadRename", "loadDel", "loadCopy"].forEach(id => $(id).disabled = !l);
+  ["rifleDup", "rifleRename", "rifleDel"].forEach(id => $(id).disabled = !r);
+  ["loadRename", "loadDel", "loadCopy"].forEach(id => $(id).disabled = !l);
+  $("loadMove").disabled = !l || P.rifles.length < 2;
   paintRecipeBtns();
   $("loadNew").disabled = !r;
-  ["rangeSave", "rangeRename", "rangeDel"].forEach(id => $(id).disabled = !g);
+  ["rangeDup", "rangeRename", "rangeDel"].forEach(id => $(id).disabled = !g);
   const tw = num("twist");
   $("rifleSum").textContent = `${val("sightHeight") || "?"}" sight height · ${val("zero") || "?"} yd zero` + (tw ? ` · 1:${Math.abs(tw)}" ${tw < 0 ? "LH" : "RH"} twist` : "");
-  const mvs = { measured: " (chrono)", factory: " (box)", estimate: " (est.)" }[$("mvSource").value] || "";
+  const mvs = { measured: " (chrono)", factory: " (box)", estimate: " (est.)", trued: " (trued)" }[$("mvSource").value] || "";
   $("loadSum").textContent = (val("bulletName") ? val("bulletName") + " · " : `${val("weight") || "?"} gr · `) + `${val("bc") || "?"} ${$("drag").value}${bandsOn() ? " banded" : ""} · ${val("mv") || "?"} fps${mvs}`;
   if (val("barrel")) $("rifleSum").textContent += ` · ${val("barrel")}" barrel`;
   $("rifleSum").textContent = ($("gunKind").value === "handgun" ? "Handgun · " : "Rifle · ") + $("rifleSum").textContent;
@@ -728,6 +934,7 @@ function updateDirty() {
     (b != null ? `Facing ${fmt(b, 0)}° ${compass(b)}` : "No shooting direction set") +
     (val("altitude") ? ` · ${val("altitude")} ft` : "") + (val("target") ? ` · target ${val("target")} yd` : "") +
     (g && val("rangeLat") && val("rangeLon") ? ` · ${(+val("rangeLat")).toFixed(3)}, ${(+val("rangeLon")).toFixed(3)}` : "");
+  paintGearExtra();
 }
 /* load data (recipe) */
 const n3 = v => { const x = parseFloat(v); return isFinite(x) ? x.toFixed(3) : ""; };
@@ -744,14 +951,15 @@ function recipeText(o, long) {   // o: load preset, form pick, or session snapsh
     o.ldCase ? o.ldCase + (o.ldFired ? ` ×${o.ldFired}` : "") : (o.ldFired ? `fired ×${o.ldFired}` : ""), n3(o.ldTrim) ? `trim ${n3(o.ldTrim)}"` : "", o.ldPrep || "");
   return a.filter(Boolean).join(" · ");
 }
-const SNAP_F = ["loadName", "gunName", "gunKind", "bulletName", "weight", "bc", "drag", "mv", "diameter", ...REC_F];
+const SNAP_F = ["loadName", "gunName", "gunKind", "bulletName", "weight", "bc", "drag", "mv", "diameter", "ptSens", "mvTemp", "mvAdj", ...REC_F];
 // copy of the load as it is right now (form values if it's the load on screen, else the saved preset)
 function recipeSnapshot(rifleId, loadId) {
   const r = P.rifles.find(x => x.id === rifleId), l = r?.loads.find(x => x.id === loadId); if (!l) return null;
   const onScreen = curLoad() === l, src = onScreen ? pick(LOAD_F) : l, g = onScreen ? $("gunKind").value : (r.gunKind || "rifle");
   const s = { loadName: l.name, gunName: r.name, gunKind: g, at: new Date().toISOString() };
-  ["bulletName", "weight", "bc", "drag", "mv", "diameter", ...REC_F].forEach(k => { const v = String(src[k] ?? "").trim(); if (v) s[k] = v; });
+  ["bulletName", "weight", "bc", "drag", "mv", "diameter", "ptSens", "mvTemp", ...REC_F].forEach(k => { const v = String(src[k] ?? "").trim(); if (v) s[k] = v; });
   if (!s.ldKind) s.ldKind = "hand";
+  { const a = mvAdjust(parseFloat(s.mv), parseFloat(s.ptSens), parseFloat(s.mvTemp), powderT()); if (a != null && Math.round(a) !== Math.round(parseFloat(s.mv))) s.mvAdj = String(Math.round(a)); }   // MV at today's powder temp
   return s;
 }
 function cleanRecipe(x) {
@@ -773,36 +981,55 @@ $("rifleSel").onchange = e => { P.lastRifleId = e.target.value; applyRifle(); re
 $("loadSel").onchange = e => { const r = curRifle(); if (r) r.lastLoadId = e.target.value; applyLoad(); savePresets(); updateDirty(); schedule(); };
 $("rangeSel").onchange = e => { P.lastRangeId = e.target.value || null; applyRange(); savePresets(); updateDirty(); refreshWeather(); schedule(); };
 
-$("rifleNew").onclick = () => { const n = askName("Name for the new gun (uses the gun details below):", ""); if (!n) return;
+function pkRefresh() { savePresets(); renderPickers(); applyRifle(); applyLoad(); updateDirty(); slKey = null; maybeRenderLog(); schedule(); }
+$("rifleNew").onclick = () => { const n = askName("Name for the new gun (starts from the gun details on screen):", ""); if (!n) return;
   const r = { id: uid(), name: n, ...pick(RIFLE_F), loads: [] };
   const l = curLoad(); if (l) { const c = { ...pick(LOAD_F), id: uid(), name: l.name }; r.loads.push(c); r.lastLoadId = c.id; }
-  P.rifles.push(r); P.lastRifleId = r.id; savePresets(); renderPickers(); toast(`Gun “${n}” saved${r.loads.length ? " (current load copied)" : ""}`); };
-$("rifleSave").onclick = () => { const r = curRifle(); if (!r) return; Object.assign(r, pick(RIFLE_F)); savePresets(); updateDirty(); toast(`Saved “${r.name}”`); };
-$("rifleRename").onclick = () => { const r = curRifle(); if (!r) return; const n = askName("Rename gun:", r.name); if (!n) return; r.name = n; savePresets(); renderPickers(); };
-$("rifleDel").onclick = () => { const r = curRifle(); if (!r || !confirm(`Delete gun “${r.name}” and its ${r.loads.length} load(s)?`)) return;
-  P.rifles = P.rifles.filter(x => x !== r); P.lastRifleId = P.rifles[0]?.id || null; savePresets(); renderPickers(); applyRifle(); applyLoad(); updateDirty(); toast("Gun deleted"); };
+  P.rifles.push(r); P.lastRifleId = r.id; pkRefresh(); toast(`Gun “${n}” added${r.loads.length ? " (current load copied)" : ""}`); };
+$("rifleDup").onclick = () => { const r = curRifle(); if (!r) return;
+  const c = JSON.parse(JSON.stringify(r)); c.id = uid(); let n = `${r.name} (copy)`.slice(0, 60), k = 2; while (P.rifles.some(x => x.name === n)) n = `${r.name} (copy ${k++})`.slice(0, 60); c.name = n;
+  c.loads.forEach(l => { const nid = uid(); if (l.id === r.lastLoadId) c.lastLoadId = nid; l.id = nid; });
+  P.rifles.push(c); P.lastRifleId = c.id; pkRefresh(); toast(`Duplicated as “${n}” (${c.loads.length} load${c.loads.length === 1 ? "" : "s"}; chrono sessions stay with the original)`); };
+$("rifleRename").onclick = () => { const r = curRifle(); if (!r) return; const n = askName("Rename gun:", r.name); if (!n) return; r.name = n; savePresets(); renderPickers(); flashSaved("rifle"); };
+$("rifleDel").onclick = () => { const r = curRifle(); if (!r || !confirm(`Delete gun “${r.name}” and its ${r.loads.length} load(s)?\nChrono sessions are kept as unassigned.`)) return;
+  const i = P.rifles.indexOf(r); P.rifles.splice(i, 1); P.lastRifleId = P.rifles[0]?.id || null; pkRefresh();
+  toast(`Gun “${r.name}” deleted`, { label: "Undo", fn: () => { P.rifles.splice(Math.min(i, P.rifles.length), 0, r); P.lastRifleId = r.id; pkRefresh(); toast(`Gun “${r.name}” restored`); } }); };
 
-$("loadNew").onclick = () => { const r = curRifle(); if (!r) return; const n = askName(`Name for the new load on “${r.name}” (uses the load details below):`, ""); if (!n) return;
-  const l = { id: uid(), name: n, ...pick(LOAD_F) }; r.loads.push(l); r.lastLoadId = l.id; savePresets(); renderPickers(); toast(`Load “${n}” saved`); };
-$("loadSave").onclick = () => { const l = curLoad(); if (!l) return; Object.assign(l, pick(LOAD_F)); savePresets(); updateDirty(); toast(`Saved “${l.name}”`); };
-$("loadRename").onclick = () => { const l = curLoad(); if (!l) return; const n = askName("Rename load:", l.name); if (!n) return; l.name = n; savePresets(); renderPickers(); };
-$("loadDel").onclick = () => { const r = curRifle(), l = curLoad(); if (!l || !confirm(`Delete load “${l.name}”?`)) return;
-  r.loads = r.loads.filter(x => x !== l); r.lastLoadId = r.loads[0]?.id || null; savePresets(); renderPickers(); applyLoad(); updateDirty(); toast("Load deleted"); };
+$("loadNew").onclick = () => { const r = curRifle(); if (!r) return; const n = askName(`Name for the new load on “${r.name}” (starts from the load details on screen):`, ""); if (!n) return;
+  const l = { id: uid(), name: n, ...pick(LOAD_F) }; r.loads.push(l); r.lastLoadId = l.id; pkRefresh(); toast(`Load “${n}” added`); };
+$("loadRename").onclick = () => { const l = curLoad(); if (!l) return; const n = askName("Rename load:", l.name); if (!n) return; l.name = n; savePresets(); renderPickers(); flashSaved("load"); };
+$("loadDel").onclick = () => { const r = curRifle(), l = curLoad(); if (!l || !confirm(`Delete load “${l.name}”?\nChrono sessions are kept as unassigned.`)) return;
+  const i = r.loads.indexOf(l); r.loads.splice(i, 1); r.lastLoadId = r.loads[0]?.id || null; pkRefresh();
+  toast(`Load “${l.name}” deleted`, { label: "Undo", fn: () => { if (!P.rifles.includes(r)) return; r.loads.splice(Math.min(i, r.loads.length), 0, l); r.lastLoadId = l.id; P.lastRifleId = r.id; pkRefresh(); toast(`Load “${l.name}” restored`); } }); };
+$("loadMove").onclick = () => openCopy("move");
 
 $("rangeNew").onclick = () => { const n = askName("Name for the new range (saves shooting direction, altitude, target distance and location):", ""); if (!n) return;
-  const g = { id: uid(), name: n, ...pick(RANGE_F) }; P.ranges.push(g); P.lastRangeId = g.id; savePresets(); renderPickers();
-  toast(`Range “${n}” saved`); if (!g.rangeLat) $("rangeDetails").open = true; };
-$("rangeSave").onclick = () => { const g = curRange(); if (!g) return; Object.assign(g, pick(RANGE_F)); savePresets(); updateDirty(); toast(`Saved “${g.name}”`); refreshWeather(); };
-$("rangeRename").onclick = () => { const g = curRange(); if (!g) return; const n = askName("Rename range:", g.name); if (!n) return; g.name = n; savePresets(); renderPickers(); };
+  const g = { id: uid(), name: n, ...pick(RANGE_F) }; P.ranges.push(g); P.lastRangeId = g.id; formFor.g = g.id; savePresets(); renderPickers();
+  toast(`Range “${n}” added`); if (!g.rangeLat) $("rangeDetails").open = true; };
+$("rangeDup").onclick = () => { const g = curRange(); if (!g) return; const c = { ...g, id: uid(), name: `${g.name} (copy)`.slice(0, 60) }; P.ranges.push(c); P.lastRangeId = c.id; formFor.g = c.id; savePresets(); renderPickers(); toast(`Duplicated as “${c.name}”`); };
+$("rangeRename").onclick = () => { const g = curRange(); if (!g) return; const n = askName("Rename range:", g.name); if (!n) return; g.name = n; savePresets(); renderPickers(); flashSaved("range"); };
 $("rangeDel").onclick = () => { const g = curRange(); if (!g || !confirm(`Delete range “${g.name}”?`)) return;
-  P.ranges = P.ranges.filter(x => x !== g); P.lastRangeId = null; savePresets(); renderPickers(); refreshWeather(); toast("Range deleted"); };
+  const i = P.ranges.indexOf(g); P.ranges.splice(i, 1); P.lastRangeId = null; formFor.g = null; savePresets(); renderPickers(); refreshWeather();
+  toast(`Range “${g.name}” deleted`, { label: "Undo", fn: () => { P.ranges.splice(Math.min(i, P.ranges.length), 0, g); P.lastRangeId = g.id; savePresets(); renderPickers(); applyRange(); refreshWeather(); schedule(); toast(`Range “${g.name}” restored`); } }); };
+// ⋯ menus
+function openPk(k) {
+  const o = k === "rifle" ? curRifle() : k === "load" ? curLoad() : curRange(), t = { rifle: "Gun", load: "Load", range: "Range" }[k];
+  $("pkTitle").textContent = o ? `${t}: ${o.name}` : t;
+  document.querySelectorAll("#pkMenu .grp").forEach(g => g.hidden = g.dataset.k !== k);
+  $("pkMenu").classList.add("show"); setTimeout(() => $("pkMenu").querySelector(`.grp[data-k="${k}"] button:not(:disabled)`)?.focus({ preventScroll: true }), 30);
+}
+function closePk() { $("pkMenu").classList.remove("show"); }
+["rifle", "load", "range"].forEach(k => $(k + "Menu").onclick = () => openPk(k));
+// capture: close the menu first, then the item's own handler runs (prompts/confirms appear over the page)
+$("pkMenu").addEventListener("click", e => { if (e.target === $("pkMenu") || e.target.closest(".grp button, #pkCancel")) closePk(); }, true);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("pkMenu").classList.contains("show")) closePk(); });
 $("rangeHere").onclick = async () => {
   try {
     const c = await getPosition();
     setVal("rangeLat", c.lat.toFixed(5)); setVal("rangeLon", c.lon.toFixed(5));
     try { const e = await fetchJSON(`https://api.open-meteo.com/v1/elevation?latitude=${c.lat}&longitude=${c.lon}`);
       if (e.elevation?.[0] != null) { setVal("altitude", Math.round(e.elevation[0] * 3.28084)); manual.add("altitude"); } } catch {}
-    updateDirty(); toast(curRange() ? "Location filled — tap Save to keep it" : "Location filled — tap ＋ New to save as a range");
+    updateDirty(); toast(curRange() ? `Location saved to “${curRange().name}”` : "Location filled — use ⋯ › New range to save it as a range");
   } catch (e) { toast("Couldn't get location: " + e.message); }
 };
 
@@ -1047,7 +1274,9 @@ const RULES = {
   length: [0, 3, false], barrel: [4, 40, false], refMV: [300, 5000, false], refBarrel: [4, 40, false], fpsPerInch: [0, 100, false], sightHeight: [0, 10, true], zero: [10, 3000, true], twist: [-40, 40, false],
   windSpeed: [0, 80, true], windDir: [0, 360, true], bearing: [0, 360, false], temp: [-40, 140, true], humidity: [0, 100, true],
   altitude: [-1500, 20000, true], pressure: [15, 32, false, "inHg, e.g. 29.92"], target: [10, 3000, false], maxRange: [50, 3000, true], step: [5, 1000, true],
-  shotAngle: [-60, 60, false], rangeLat: [-90, 90, false], rangeLon: [-180, 180, false]
+  shotAngle: [-60, 60, false], rangeLat: [-90, 90, false], rangeLon: [-180, 180, false],
+  ptSens: [-100, 100, false, "fps per 10°F, e.g. 15"], mvTemp: [-40, 160, false], powderTemp: [-40, 160, false], tipLen: [0, 1, false],
+  zTemp: [-40, 140, false], zHum: [0, 100, false], zAlt: [-1500, 20000, false], zPress: [15, 32, false, "inHg, e.g. 29.92"], turretV: [0.001, 5, false]
 };
 function validate() {
   const bad = [];
@@ -1072,62 +1301,75 @@ async function calculate() {
   const bad = validate();
   if (bad.length) {
     statusEl.textContent = `Fix ${bad.length} highlighted field${bad.length > 1 ? "s" : ""} to calculate.`; statusEl.classList.add("bad");
+    noResult(bad);
     if (bad.some(f => RIFLE_F.includes(f))) $("rifleDetails").open = true;
+    if (bad.some(f => /^z[A-Z]/.test(f))) $("zeroDetails").open = true;
     if (bad.some(f => LOAD_F.includes(f))) $("loadDetails").open = true;
     if (bad.some(f => f.startsWith("range"))) $("rangeDetails").open = true;
     return;
   }
   const seq = ++calcSeq;
-  btn.disabled = true; statusEl.classList.remove("bad"); statusEl.textContent = "Calculating…";
-  const { Calculator, Shot, Weapon, Ammo, DragModel, DragTables, Atmo, Wind, UNew } = B;
+  statusEl.classList.remove("bad"); statusEl.textContent = "Calculating…";
+  const { UNew } = B;
   try {
     const twist = num("twist") || 0, length = num("length") || 0;
-    const mkShot = () => {
-      const pts = bandsOn() ? bandPoints() : null;
-      const dm = pts ? B.DragModelMultiBC({ bcPoints: pts.map(p => new B.BCPoint({ BC: p.bc, V: UNew.FPS(p.v) })), dragTable: DragTables.G1,
-          weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) })
-        : new DragModel({ bc: num("bc"), dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
-        weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
-      const ammo = new Ammo({ dm, mv: UNew.FPS(num("mv")) });
-      const weapon = new Weapon({ sightHeight: UNew.Inch(num("sightHeight")), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
-      const atmoOpts = { altitude: UNew.Foot(num("altitude")), temperature: UNew.Fahrenheit(num("temp")), humidity: num("humidity") / 100 };
-      if (num("pressure") != null) atmoOpts.pressure = UNew.InHg(num("pressure"));
-      const ws = num("windSpeed");
-      // UI: 0° = wind from the target (headwind), 90° = from shooter's right.
-      // js-ballistics: 0° = wind from behind (tailwind), 90° = from shooter's left. So add 180°.
-      const winds = ws > 0 ? [new Wind({ velocity: UNew.MPH(ws), directionFrom: UNew.Degree(norm360(num("windDir") + 180)) })] : [];
-      return new Shot({ weapon, ammo, atmo: new Atmo(atmoOpts), winds });
-    };
-    const shot = mkShot();
-    const calc = new Calculator();
-    await calc.setWeaponZero(shot, UNew.Yard(num("zero")));
+    // zero solved under the gun's zero conditions (if set), then fired with today's conditions + powder temp MV
+    const sv = await solveShot(), { calc, shot } = sv;
     // Zero is found on the flat (look angle 0); then apply the up/down-hill angle for this shot.
     // With a look angle the library steps in horizontal distance, so scale by cos() to land on round line-of-sight ranges.
     const look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     if (look) shot.lookAngle = UNew.Degree(look);
-    const result = await calc.fire({ shot, trajectoryRange: UNew.Yard(num("maxRange") * cosA), trajectoryStep: UNew.Yard(num("step") * cosA), raiseRangeError: false });
-    let tgt = null; const td = num("target");
-    if (td) {
-      const r2 = await calc.fire({ shot, trajectoryRange: UNew.Yard(td * cosA), trajectoryStep: UNew.Yard(td * cosA), raiseRangeError: false });
+    const runTo = (sh, to, st) => calc.fire({ shot: sh, trajectoryRange: UNew.Yard(to * cosA), trajectoryStep: UNew.Yard(st * cosA), raiseRangeError: false });
+    const result = await runTo(shot, num("maxRange"), num("step"));
+    const at = async (sh, d) => {   // one sample exactly at line-of-sight distance d
+      const r2 = await calc.fire({ shot: sh, trajectoryRange: UNew.Yard(d * cosA), trajectoryStep: UNew.Yard(d * cosA), raiseRangeError: false });
       const last = r2.samples[r2.samples.length - 1];
-      if (last && Math.abs(last.distance.In(B.Distance.Yard) - td * cosA) < 1) tgt = last;
+      return last && Math.abs(last.distance.In(B.Distance.Yard) - d * cosA) < 1 ? last : null;
+    };
+    const withWind = w => sv.withWind(w, look);
+    const WF = windAt(10, 90);   // 10 mph full value (from 3 o'clock)
+    const sN = (await runTo(withWind([]), num("maxRange"), num("step"))).samples, sF = (await runTo(withWind(WF), num("maxRange"), num("step"))).samples;
+    let tgt = null, tgtN = null, tgtW = null, tgtF = null; const td = num("target"), ws = num("windSpeed") || 0, wd = num("windDir") || 0;
+    if (td) {
+      tgt = await at(shot, td);
+      if (tgt) { tgtN = await at(withWind([]), td); tgtW = await at(withWind(windAt(10, wd)), td); tgtF = await at(withWind(WF), td); }   // no wind / 10 mph same direction / 10 mph full value
     }
+    // transonic: first range where velocity drops below Mach 1.2 of the local speed of sound
+    const vT = 1.2 * shot.atmo.mach.In(B.Velocity.FPS), tEnd = Math.min(3000, Math.max(num("maxRange"), td || 0));
+    const fine = (await runTo(withWind([]), tEnd, Math.max(5, Math.min(10, tEnd / 200)))).samples;
+    let trans = null;
+    for (let i = 0; i < fine.length; i++) { const v1 = fine[i].velocity.In(B.Velocity.FPS); if (v1 < vT) {
+      const r1 = fine[i].distance.In(B.Distance.Yard) / cosA; if (!i) { trans = { range: 0, vel: v1 }; break; }
+      const v0 = fine[i - 1].velocity.In(B.Velocity.FPS), r0 = fine[i - 1].distance.In(B.Distance.Yard) / cosA;
+      trans = { range: Math.round(r0 + (r1 - r0) * (v0 - vT) / (v0 - v1)), vel: vT }; break; } }
     if (seq !== calcSeq) return;
-    lastRun = { samples: result.samples, tgt, td, look };
+    lastRun = { samples: result.samples, sN, sF, tgt, tgtN, tgtW, tgtF, td, look, ws, wd, vT, trans, mvNow: sv.mvNow, mvZero: sv.mvZero, Tp: sv.Tp, zc: sv.zc,
+      sg: millerSG(sv.mvNow, { temp: num("temp"), press: num("pressure"), alt: num("altitude") }), aT: num("temp"), ctx: { calc, shot, at, withWind, windAt, cosA } };
     renderAll();
     statusEl.textContent = `Done — ${result.samples.length} points` + (result.error ? ` · bullet stopped early (${result.error.message || "out of range"})` : "") +
-      (twist && !length ? " · add bullet length for spin drift" : "");
+      (twist && !length ? " · add bullet length for spin drift + stability" : "");
     saveSettings();
   } catch (err) {
     console.error(err);
-    statusEl.textContent = "Error: " + (err.message || err); statusEl.classList.add("bad");
-  } finally { btn.disabled = false; }
+    statusEl.textContent = "Error: " + (err.message || err); statusEl.classList.add("bad"); noResult();
+  }
 }
 let lastRun = null;
-function renderAll() { if (!lastRun) return; renderShotCard(lastRun.tgt, lastRun.td); renderTable(lastRun.samples); renderChart(lastRun.samples); }
+function renderAll() { if (!lastRun) return; setStale(false); renderCard(); renderTable(lastRun.samples); renderChart(lastRun.samples); }
+function setStale(on) { $("dopeCard").classList.toggle("stale", on); resultsDiv.classList.toggle("stale", on); document.querySelector(".chart-container").classList.toggle("stale", on); }
+// never show old numbers: blank the card, table and chart when the inputs can't be solved
+function noResult(bad) {
+  lastRun = null; setStale(false);
+  $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; $("dcElevC").textContent = ""; $("dcWindC").textContent = ""; $("dcBracket").textContent = ""; ["dcElevClk", "dcWindClk", "dcWarn"].forEach(id => $(id).textContent = "");
+  $("dcInfo").innerHTML = bad && bad.length ? `<span class="bad">Fix ${bad.length} field${bad.length > 1 ? "s" : ""}: ${bad.map(f => escapeHtml(fieldName(f))).join(", ")}</span><br><button class="sm ghost" type="button" id="dcFix">Go to field</button>` : `<span class="bad">No result</span>`;
+  if ($("dcFix")) $("dcFix").onclick = () => goToField(bad[0]);
+  resultsDiv.innerHTML = ""; renderChart(null);
+}
+function fieldName(f) { const l = document.querySelector(`label[for="${f}"]`); return (l ? (l.querySelector("span")?.textContent || l.textContent) : f).replace(/\s*\(.*$/, "").trim() || f; }
+function goToField(f) { const el = $(f); if (!el) return; const t = el.closest(".tab"); if (t) setTab(t.dataset.tab); el.closest("details:not([open])") && (el.closest("details").open = true); setTimeout(() => { el.scrollIntoView({ block: "center" }); el.focus({ preventScroll: true }); }, 40); }
 
 function pointVals(p) {
-  const { Distance, Velocity, Angular } = B; const A = S.ang === "MIL" ? Angular.MIL : Angular.MOA;
+  const { Distance, Velocity, Angular } = B; const A = S.ang === "MIL" ? Angular.MRad : Angular.MOA;
   return {
     range: Math.round(p.distance.In(Distance.Yard) / Math.cos((lastRun?.look || 0) * Math.PI / 180)) || 0, drop: p.slantHeight.In(Distance.Inch), drift: p.windage.In(Distance.Inch),
     elev: -p.dropAngle.In(A), wind: -p.windageAngle.In(A), vel: p.velocity.In(Velocity.FPS), energy: p.energy.footPound, tof: p.time
@@ -1135,50 +1377,86 @@ function pointVals(p) {
 }
 const ud = (v, d) => Math.abs(v) < 0.05 ? "0.0" : `${v > 0 ? "U" : "D"} ${Math.abs(v).toFixed(d)}`;
 const lr = (v, d) => Math.abs(v) < 0.05 ? "0.0" : `${v > 0 ? "R" : "L"} ${Math.abs(v).toFixed(d)}`;
-function renderShotCard(p, td) {
-  const card = $("shotCard");
-  if (!p) { card.style.display = td ? "block" : "none"; card.innerHTML = td ? `<div class="sub">Target ${td} yd is beyond where the bullet can reach.</div>` : ""; return; }
-  const v = pointVals(p), u = S.ang, d = u === "MIL" ? 1 : 1;
-  card.style.display = "block";
-  card.innerHTML = `<div class="sub">Dial for <b style="color:var(--text)">${v.range.toFixed(0)} yd</b>${curRange() ? " at " + escapeHtml(curRange().name) : ""}${lastRun?.look ? ` · ${Math.abs(lastRun.look)}° ${lastRun.look > 0 ? "uphill" : "downhill"}` : ""}</div>
-    <div class="big"><div><b>${ud(v.elev, u === "MIL" ? 1 : 1)}</b><span>Elevation ${u}</span></div><div><b>${lr(v.wind, d)}</b><span>Windage ${u}</span></div></div>
-    <div class="sub">Drop ${v.drop.toFixed(1)}" · drift ${lr(v.drift, 1).replace(/^([LR]) (.*)$/, "$2\" $1")} · ${v.vel.toFixed(0)} fps · ${v.energy.toFixed(0)} ft·lb · ${v.tof.toFixed(2)} s</div>`;
+const CLOCK = d => { const h = Math.round(norm360(d) / 30) % 12; return h === 0 ? 12 : h; };
+function windHoldAt(spd) {   // windage (angle, display unit) at the target for a given wind speed, same direction
+  const R = lastRun; if (!R?.tgtN || !R?.tgtW) return null;
+  const n = pointVals(R.tgtN).wind, w10 = pointVals(R.tgtW).wind; return n + (w10 - n) * spd / 10;
+}
+function renderCard() {
+  const R = lastRun, u = S.ang, ts = turretSpec();
+  $("dcFor").textContent = [curRifle()?.name, curLoad()?.name, curRange()?.name].filter(Boolean).join(" · ") || "Gun and load not saved yet";
+  $("dcElevK").textContent = `Dial · ${u}`; $("dcWindK").textContent = `Wind hold · ${u}`;
+  paintWarn(); paintPt();
+  if (!R.tgt) {
+    $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; ["dcElevC", "dcWindC", "dcElevClk", "dcWindClk", "dcBracket"].forEach(id => $(id).textContent = "");
+    $("dcInfo").innerHTML = R.td ? `<span class="bad">${R.td} yd is beyond where this bullet can reach.</span>` : "Set a target distance.";
+    return;
+  }
+  const v = pointVals(R.tgt), a = angs(R.tgt), dd = angDec(ts);
+  $("dcElev").textContent = ud(a.e, dd); $("dcWind").textContent = lr(a.w, dd);
+  $("dcElevClk").textContent = `${clkTxt(a.ec, "U", "D")} · ${ts.lbl}`; $("dcWindClk").textContent = clkTxt(a.wc, "R", "L");
+  $("dcElevC").textContent = `${v.range} yd${R.look ? ` · ${Math.abs(R.look)}° ${R.look > 0 ? "up" : "down"}` : ""}`;
+  $("dcWindC").textContent = R.ws ? `${fmt(R.ws, 1)} mph @ ${CLOCK(R.wd)} o'clock` : "no wind (spin drift only)";
+  const call = R.ws, lo = Math.max(0, call - 2), hi = call + 2;
+  if (windHoldAt(0) != null) $("dcBracket").innerHTML = `Wind ${fmt(lo, 1)} / <b>${fmt(call, 1)}</b> / ${fmt(hi, 1)} mph → ${lr(windHoldAt(lo), 1)} · <b>${lr(a.w, dd)}</b> · ${lr(windHoldAt(hi), 1)}`;
+  else $("dcBracket").textContent = "";
+  const pm = perMph(R.tgtN, R.tgtF);
+  $("dcInfo").innerHTML = `MV ${Math.round(R.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(R.Tp, 0)}°F powder` : ""} · ${v.vel.toFixed(0)} fps · ${v.energy.toFixed(0)} ft·lb · ${v.tof.toFixed(2)} s · drop ${v.drop.toFixed(1)}"` +
+    (pm != null ? ` · 1 mph full = ${pm.toFixed(u === "MIL" ? 2 : 2)} ${u}` : "");
 }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function renderTable(samples) {
-  const u = S.ang, d = u === "MIL" ? 1 : 1, td = num("target"), full = S.view === "full";
-  let near = -1;
-  if (td) { let best = Infinity; samples.forEach((p, i) => { const r = Math.abs(p.distance.In(B.Distance.Yard) / Math.cos((lastRun?.look || 0) * Math.PI / 180) - td); if (r < best) { best = r; near = i; } }); }
-  let html = `<table class="${full ? "full" : "dope"}"><thead><tr><th>Range</th><th>Elev ${u}</th><th>Wind ${u}</th>` +
+  const R = lastRun, u = S.ang, full = S.view === "full", ts = turretSpec(), dd = angDec(ts);
+  const rows = samples.map((p, i) => ({ p, n: R.sN?.[i], f: R.sF?.[i] }));
+  if (R.tgt) {   // the exact target distance is always a row (highlighted)
+    const tr = pointVals(R.tgt).range, k = rows.findIndex(r => pointVals(r.p).range >= tr);
+    if (k >= 0 && pointVals(rows[k].p).range === tr) rows[k] = { p: R.tgt, n: R.tgtN, f: R.tgtF, tgt: true };
+    else { const row = { p: R.tgt, n: R.tgtN, f: R.tgtF, tgt: true }; k < 0 ? rows.push(row) : rows.splice(k, 0, row); }
+  }
+  const vT = R.vT || 0;
+  let html = `<table class="${full ? "full" : "dope"}"><thead><tr><th>Range</th><th>Elev ${u}</th><th title="Turret clicks (${escapeHtml(ts.lbl)})">Clicks</th><th>Wind ${u}</th><th title="Full-value wind per 1 mph">1 mph</th>` +
     (full ? `<th>Drop in</th><th>Drift in</th><th>Vel fps</th><th>Energy</th><th>TOF s</th>` : `<th>Drop in</th>`) + `</tr></thead><tbody>`;
-  samples.forEach((p, i) => {
-    const v = pointVals(p);
-    html += `<tr class="${i === near ? "tgt" : ""}"><td>${v.range.toFixed(0)} yd</td><td>${ud(v.elev, d)}</td><td>${lr(v.wind, d)}</td>` +
-      `<td class="${v.drop < 0 ? "neg" : v.drop > 0 ? "pos" : ""}">${(Math.abs(v.drop) < 0.05 ? 0 : v.drop).toFixed(1)}</td>` +
+  rows.forEach(r => {
+    const v = pointVals(r.p), a = angs(r.p), pm = perMph(r.n, r.f), tr = vT && v.vel < vT;
+    html += `<tr class="${[r.tgt ? "tgt" : "", tr ? "trans" : ""].join(" ").trim()}"><td>${v.range.toFixed(0)} yd${tr ? '<span class="T" title="Transonic (below Mach 1.2)">T</span>' : ""}</td><td>${ud(a.e, dd)}</td><td class="ck">${clkShort(a.ec, "U", "D")}</td><td>${lr(a.w, dd)}</td><td class="ck">${pm != null ? pm.toFixed(2) : "—"}</td>` +
+      `<td>${(Math.abs(v.drop) < 0.05 ? 0 : v.drop).toFixed(1)}</td>` +
       (full ? `<td>${lr(v.drift, 1)}</td><td>${v.vel.toFixed(0)}</td><td>${v.energy.toFixed(0)}</td><td>${v.tof.toFixed(2)}</td>` : "") + `</tr>`;
   });
-  html += `</tbody></table><div class="legend">Elev = dial U (up) / D (down). Wind = dial L/R to correct (includes spin drift). Drop/drift in inches relative to line of sight.</div>`;
+  html += `</tbody></table><div class="legend">Elev = dial U (up) / D (down); Clicks in your turret's unit (${escapeHtml(ts.lbl)}). Wind = dial L/R to correct (includes spin drift); 1 mph = full-value hold per mph (${u}). Highlighted row = target. <b style="color:var(--warn)">T</b> = transonic (below Mach 1.2 ≈ ${Math.round(vT)} fps at ${fmt(R.aT, 0)}°F). Drop/drift in inches relative to line of sight.</div>`;
   resultsDiv.innerHTML = html;
 }
+function niceStep(span, n) { const raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))); for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) return m * p; return 10 * p; }
 function renderChart(samples) {
   const canvas = $("chart"); const ctx = canvas.getContext("2d");
   const dpr = window.devicePixelRatio || 1, width = canvas.offsetWidth, height = canvas.offsetHeight;
+  if (!width || !height) return;
   canvas.width = width * dpr; canvas.height = height * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = cv("panel"); ctx.fillRect(0, 0, width, height);
   if (!samples || samples.length < 2) return;
-  const Y = B.Distance.Yard, In = B.Distance.Inch;
-  const cosA = Math.cos((lastRun?.look || 0) * Math.PI / 180), xs = samples.map(p => p.distance.In(Y) / cosA), drops = samples.map(p => p.slantHeight.In(In));
-  const minD = Math.min(0, ...drops), maxD = Math.max(0, ...drops), rd = Math.max(maxD - minD, 1), maxX = Math.max(...xs, 1);
-  const X = r => 20 + (r / maxX) * (width - 40), YY = dv => height - 30 - ((dv - minD) / rd) * (height - 55);
-  ctx.strokeStyle = cv("grid2"); ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
-  ctx.beginPath(); ctx.moveTo(20, YY(0)); ctx.lineTo(width - 20, YY(0)); ctx.stroke(); ctx.setLineDash([]);
+  const Yd = B.Distance.Yard, In = B.Distance.Inch;
+  const cosA = Math.cos((lastRun?.look || 0) * Math.PI / 180), xs = samples.map(p => p.distance.In(Yd) / cosA), drops = samples.map(p => p.slantHeight.In(In));
+  const maxX = Math.max(...xs, 1);
+  let minD = Math.min(0, ...drops), maxD = Math.max(0, ...drops);
+  const ys = niceStep(Math.max(maxD - minD, 1), 4); minD = Math.floor(minD / ys) * ys; maxD = Math.ceil(maxD / ys) * ys; if (maxD === minD) maxD = minD + ys;
+  const L = 44, Rm = 10, T = 22, Bm = 22;
+  const X = r => L + (r / maxX) * (width - L - Rm), YY = dv => T + (maxD - dv) / (maxD - minD) * (height - T - Bm);
+  ctx.font = "11px system-ui, sans-serif"; ctx.lineWidth = 1;
+  // y grid + inch labels
+  ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (let v = minD; v <= maxD + 1e-9; v += ys) { const y = YY(v); ctx.strokeStyle = cv("border"); ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(width - Rm, y); ctx.stroke(); ctx.globalAlpha = 1; ctx.fillStyle = cv("hint"); ctx.fillText(`${Math.round(v)}"`, L - 5, y); }
+  // x ticks + yard labels
+  const xstep = niceStep(maxX, Math.max(3, Math.min(8, Math.floor((width - L) / 55)))); ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  for (let r = 0; r <= maxX + 1e-9; r += xstep) { const x = X(r); ctx.strokeStyle = cv("border"); ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, height - Bm); ctx.stroke(); ctx.globalAlpha = 1; ctx.fillStyle = cv("hint"); ctx.fillText(String(Math.round(r)), x, height - 7); }
+  // line of sight
+  ctx.strokeStyle = cv("grid2"); ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(L, YY(0)); ctx.lineTo(width - Rm, YY(0)); ctx.stroke(); ctx.setLineDash([]);
+  if (typeof chartExtras === "function") chartExtras(ctx, X, T, height - Bm);
   ctx.strokeStyle = cv("accent"); ctx.lineWidth = 2.5; ctx.beginPath();
-  samples.forEach((p, i) => { const x = X(xs[i]), y = YY(drops[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
+  samples.forEach((p, i) => { const x = X(xs[i]), y = YY(drops[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.lineWidth = 1;
   const td = num("target");
-  if (td && td <= maxX) { ctx.strokeStyle = cv("warn"); ctx.beginPath(); ctx.moveTo(X(td), 26); ctx.lineTo(X(td), height - 22); ctx.stroke(); }
-  ctx.fillStyle = cv("muted"); ctx.font = "12px system-ui"; ctx.textAlign = "left"; ctx.fillText("Drop vs range (in)", 12, 16);
-  ctx.textAlign = "right"; ctx.fillText(`0–${maxX.toFixed(0)} yd · ${minD.toFixed(0)}"`, width - 12, 16);
-  ctx.textAlign = "right"; ctx.fillStyle = cv("faint"); ctx.fillText("line of sight", width - 22, YY(0) + 14);
+  if (td && td <= maxX) { ctx.strokeStyle = cv("warn"); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X(td), T); ctx.lineTo(X(td), height - Bm); ctx.stroke(); ctx.lineWidth = 1;
+    if (lastRun?.tgt) { const dv = lastRun.tgt.slantHeight.In(In); ctx.fillStyle = cv("warn"); ctx.beginPath(); ctx.arc(X(td), YY(dv), 4, 0, 7); ctx.fill(); ctx.textAlign = X(td) > width - 70 ? "right" : "left"; ctx.fillText(`${dv.toFixed(0)}" @ ${td}`, X(td) + (X(td) > width - 70 ? -7 : 7), YY(dv) - 7); } }
+  ctx.fillStyle = cv("muted"); ctx.font = "12px system-ui, sans-serif"; ctx.textAlign = "left"; ctx.fillText("Drop (in) vs range (yd)", 8, 15);
+  ctx.textAlign = "right"; ctx.fillStyle = cv("hint"); ctx.font = "11px system-ui, sans-serif"; ctx.fillText("line of sight", width - Rm - 2, YY(0) - 5);
 }
 
 /* ---------------- phone sensors: compass aim & shot angle ---------------- */
@@ -1372,7 +1650,7 @@ function pickBullet(id) {
   closeDB(); $("loadDetails").open = true; renderBulletInfo(); updateDirty(); schedule();
   const nRc = recipeMatches().length;
   if (nRc && !recipeText(pick(LOAD_F))) { toast(`Filled from ${b.brand} ${b.weight_gr} gr — ${nRc} saved recipe${nRc === 1 ? "" : "s"} for this bullet`); setTimeout(openRecipes, 60); return; }
-  toast(`Filled from ${b.brand} ${b.weight_gr} gr — now enter your MV and Save`);
+  toast(`Filled from ${b.brand} ${b.weight_gr} gr — now enter your MV`);
   setTimeout(() => { $("mv").focus(); $("mv").select?.(); }, 60);
 }
 $("dbList").addEventListener("click", e => { const it = e.target.closest(".dbItem"); if (it) pickBullet(it.dataset.id); });
@@ -1431,7 +1709,7 @@ function cleanSession(x) {
   const d = new Date(x.date); const wx = x.wx || {};
   const out = { id: sstr(x.id, 40) || uid(), rifleId: sstr(x.rifleId, 40), loadId: sstr(x.loadId, 40), date: isNaN(d) ? new Date().toISOString() : d.toISOString(),
     source: ["manual", "athlon", "bluetooth"].includes(x.source) ? x.source : "manual", shots, notes: sstr(x.notes, 300),
-    wx: { temp: nOrNull(wx.temp), humidity: nOrNull(wx.humidity), pressure: nOrNull(wx.pressure), altitude: nOrNull(wx.altitude) }, barrel: nOrNull(x.barrel) };
+    wx: { temp: nOrNull(wx.temp), humidity: nOrNull(wx.humidity), pressure: nOrNull(wx.pressure), altitude: nOrNull(wx.altitude), powder: nOrNull(wx.powder) }, barrel: nOrNull(x.barrel) };
   if (x.importKey) out.importKey = sstr(x.importKey, 2000);
   if (x.title) out.title = sstr(x.title, 120);
   { const rc = cleanRecipe(x.recipe); if (rc) out.recipe = rc; }
@@ -1481,14 +1759,14 @@ function renderCompare() {
   const sds = rows.filter(s => s.stats.n > 2).map(s => s.stats.sd), best = sds.length ? Math.min(...sds) : null;
   const lname = s => r?.loads.find(l => l.id === s.loadId)?.name || s.recipe?.loadName || "?";
   let prev = null;
-  $("slCmpTbl").innerHTML = `<table><thead><tr>${cmpScope === "gun" ? "<th>Load</th>" : ""}<th>Charge</th><th>Powder</th><th>COAL</th><th>n</th><th>Avg</th><th>SD</th><th>ES</th><th>fps/gr</th><th>Date</th></tr></thead><tbody>` +
+  $("slCmpTbl").innerHTML = `<table><thead><tr>${cmpScope === "gun" ? "<th>Load</th>" : ""}<th>Charge</th><th>Powder</th><th>COAL</th><th>n</th><th>Avg</th><th>SD</th><th>ES</th><th>fps/gr</th><th title="Powder temp (air temp if not set)">°F</th><th>Date</th></tr></thead><tbody>` +
     rows.map(s => { const c = ch(s), rc = s.recipe || {};
       const fpg = c != null && prev && prev.c != null && c !== prev.c ? ((s.stats.avg - prev.avg) / (c - prev.c)).toFixed(0) : "";
       if (c != null) prev = { c, avg: s.stats.avg };
       return `<tr data-id="${escapeHtml(s.id)}"${best != null && s.stats.n > 2 && s.stats.sd === best ? ' class="best" title="Lowest SD (3+ shots)"' : ""}>${cmpScope === "gun" ? `<td class="l">${escapeHtml(lname(s))}</td>` : ""}
         <td>${c != null ? n1(c) : rc.ldKind === "factory" ? "fact." : "—"}</td><td class="l">${escapeHtml((rc.ldKind === "factory" ? rc.ldProduct || rc.ldMaker : rc.ldPowder) || "—")}</td>
         <td>${n3(rc.ldCOAL) || "—"}</td><td>${s.stats.n}</td><td>${s.stats.avg.toFixed(0)}</td><td>${s.stats.n > 1 ? s.stats.sd.toFixed(1) : "—"}</td><td>${s.stats.n > 1 ? s.stats.es.toFixed(1) : "—"}</td>
-        <td>${fpg}</td><td>${escapeHtml(new Date(s.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</td></tr>`; }).join("") + "</tbody></table>" +
+        <td>${fpg}</td><td>${(s.wx.powder ?? s.wx.temp) != null ? fmt(s.wx.powder ?? s.wx.temp, 0) : "—"}</td><td>${escapeHtml(new Date(s.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</td></tr>`; }).join("") + "</tbody></table>" +
     `<div class="hint">Sorted by charge (from each session's saved recipe). Highlighted = lowest SD with 3+ shots. fps/gr = velocity gain per grain from the previous charge. Tap a row to open it.</div>`;
 }
 $("slCmpScope").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cmpScope = b.dataset.v; renderCompare(); });
@@ -1509,13 +1787,13 @@ function sessionsCSV() {
   const q = v => { const s = v == null ? "" : String(v); return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const cols = ["date", "gun", "gun_type", "load", "source", "shots", "avg_fps", "sd", "es", "min", "max", "velocities_fps", "bullet", "weight_gr", "bc", "drag", "muzzle_velocity_preset",
     "ammo", "powder", "charge_gr", "primer", "case", "times_fired", "trim_in", "coal_in", "cbto_in", "jump_in", "case_prep", "factory_brand", "factory_product", "lot", "load_notes",
-    "session_notes", "temp_f", "humidity", "pressure_inhg", "altitude_ft", "barrel_in"];
+    "session_notes", "temp_f", "humidity", "pressure_inhg", "altitude_ft", "barrel_in", "powder_temp_f", "temp_sens_fps_per_10f", "chrono_temp_f", "mv_at_powder_temp"];
   const rows = LOG.slice().sort((a, b) => a.date.localeCompare(b.date)).map(s => {
     const r = P.rifles.find(x => x.id === s.rifleId), l = r?.loads.find(x => x.id === s.loadId), rc = s.recipe || {};
     return [s.date, r?.name || rc.gunName, r?.gunKind || rc.gunKind, l?.name || (rc.loadName ? rc.loadName + (r ? " (deleted load)" : " (deleted gun)") : "(unassigned)"), s.source, s.stats.n, s.stats.avg, s.stats.sd, s.stats.es, s.stats.min, s.stats.max,
       s.shots.map(x => x.v).join(" "), rc.bulletName || (rc.weight ? rc.weight + " gr" : ""), rc.weight, rc.bc, rc.drag, rc.mv,
       rc.ldKind === "factory" ? "factory" : rc.ldKind ? "handload" : "", rc.ldPowder, rc.ldCharge, rc.ldPrimer, rc.ldCase, rc.ldFired, rc.ldTrim, rc.ldCOAL, rc.ldCBTO, rc.ldJump, rc.ldPrep,
-      rc.ldMaker, rc.ldProduct, rc.ldLot, rc.ldNotes, s.notes, s.wx.temp, s.wx.humidity, s.wx.pressure, s.wx.altitude, s.barrel].map(q).join(",");
+      rc.ldMaker, rc.ldProduct, rc.ldLot, rc.ldNotes, s.notes, s.wx.temp, s.wx.humidity, s.wx.pressure, s.wx.altitude, s.barrel, s.wx.powder, rc.ptSens, rc.mvTemp, rc.mvAdj].map(q).join(",");
   });
   return cols.join(",") + "\n" + rows.join("\n") + "\n";
 }
@@ -1562,7 +1840,7 @@ const toLocalInput = iso => { const d = new Date(iso); d.setMinutes(d.getMinutes
 function newSession(source = "manual") {
   const { rifleId, loadId } = curKeyIds();
   return { id: uid(), rifleId, loadId, date: new Date().toISOString(), source, shots: [], notes: "", recipe: recipeSnapshot(rifleId, loadId),
-    wx: { temp: num("temp"), humidity: num("humidity"), pressure: num("pressure"), altitude: num("altitude") }, barrel: num("barrel"), _new: true };
+    wx: { temp: num("temp"), humidity: num("humidity"), pressure: num("pressure"), altitude: num("altitude"), powder: powderT() }, barrel: num("barrel"), _new: true };
 }
 function openEditor(sess) {
   if (!sess && !curLoad()) { toast("Pick a load first"); return; }
@@ -1571,7 +1849,7 @@ function openEditor(sess) {
   $("slEdTitle").textContent = ED._new ? "New session" : "Session";
   paintEdFor();
   $("slDate").value = toLocalInput(ED.date); $("slNotes").value = ED.notes || "";
-  setVal("slTemp", ED.wx.temp); setVal("slHum", ED.wx.humidity); setVal("slPress", ED.wx.pressure); setVal("slAlt", ED.wx.altitude); setVal("slBarrel", ED.barrel);
+  setVal("slTemp", ED.wx.temp); setVal("slPowder", ED.wx.powder); setVal("slHum", ED.wx.humidity); setVal("slPress", ED.wx.pressure); setVal("slAlt", ED.wx.altitude); setVal("slBarrel", ED.barrel);
   $("slSource").value = SRC_LBL[ED.source] || ED.source; $("slDel").style.display = ED._new ? "none" : ""; paintEdRecipe();
   $("slDevStats").textContent = ED.device && ED.device.avg != null ? `Device-reported: avg ${ED.device.avg}, SD ${ED.device.sd}, ES ${ED.device.es} ${ED.device.unit} (the app recomputes stats from the shots, SD uses n−1).` : "";
   $("slEditor").classList.add("show"); document.body.style.overflow = "hidden"; renderEditor();
@@ -1626,10 +1904,10 @@ $("slShots").addEventListener("click", e => {
   edDirty = true; renderEditor();
 });
 $("slShots").addEventListener("change", e => { if (e.target.classList.contains("note")) { const i = +e.target.closest(".shot").dataset.i; ED.shots[i].note = e.target.value.trim(); edDirty = true; } });
-["slDate", "slNotes", "slTemp", "slHum", "slPress", "slAlt", "slBarrel"].forEach(id => $(id).addEventListener("input", () => edDirty = true));
+["slDate", "slNotes", "slTemp", "slPowder", "slHum", "slPress", "slAlt", "slBarrel"].forEach(id => $(id).addEventListener("input", () => edDirty = true));
 function readEditor() {
   const d = new Date($("slDate").value); if (!isNaN(d)) ED.date = d.toISOString();
-  ED.notes = $("slNotes").value.trim(); ED.wx = { temp: num("slTemp"), humidity: num("slHum"), pressure: num("slPress"), altitude: num("slAlt") }; ED.barrel = num("slBarrel");
+  ED.notes = $("slNotes").value.trim(); ED.wx = { temp: num("slTemp"), humidity: num("slHum"), pressure: num("slPress"), altitude: num("slAlt"), powder: num("slPowder") }; ED.barrel = num("slBarrel");
 }
 async function commitEditor() {
   readEditor(); const c = cleanSession(ED); if (!c) return null;
@@ -1647,10 +1925,11 @@ $("slUseMV").onclick = async () => {
   if (!ED.shots.length) return;
   const c = await commitEditor(), mv = Math.round(c.stats.avg);
   const r = P.rifles.find(x => x.id === c.rifleId), l = r?.loads.find(x => x.id === c.loadId);
-  if (l) { l.mv = String(mv); l.mvSource = "measured"; savePresets(); }
-  if (l && curLoad() === l) { setVal("mv", mv); $("mvSource").value = "measured"; }
+  const pt = c.wx.powder ?? c.wx.temp;   // chrono temp = powder temp of this session (for temp-sensitivity)
+  if (l) { l.mv = String(mv); l.mvSource = "measured"; if (pt != null) l.mvTemp = String(pt); savePresets(); }
+  if (l && curLoad() === l) { setVal("mv", mv); $("mvSource").value = "measured"; if (pt != null) setVal("mvTemp", pt); }
   closeEditor(true); updateDirty(); schedule();
-  toast(`MV set to ${mv} fps (Chronographed, ${c.stats.n} shots, SD ${c.stats.sd})`);
+  toast(`MV set to ${mv} fps (Chronographed, ${c.stats.n} shots, SD ${c.stats.sd}${pt != null ? `, at ${pt}°F` : ""})`);
 };
 $("slNewBtn").onclick = () => openEditor(null);
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("slEditor").classList.contains("show")) closeEditor(); else if ($("slImport").classList.contains("show")) closeImport(); });
@@ -1845,10 +2124,11 @@ const hasBT = !!(navigator.bluetooth && window.isSecureContext);
 function radarPaint() {
   const st = $("radarStatus"), c = $("radarConnect"), rc = $("radarReconnect"), dc = $("radarDisconnect");
   if (!hasBT) {
-    c.disabled = true; rc.hidden = true; dc.hidden = true;
-    st.textContent = !window.isSecureContext ? "Bluetooth needs the https site (bcariveau.github.io/Ball-Calc)." : "This browser has no Web Bluetooth. Use Chrome on Android (iPhone browsers and Firefox can't connect); the Athlon file import still works.";
-    st.className = "summary bad"; return;
+    c.disabled = true; c.hidden = true; rc.hidden = true; dc.hidden = true; $("radarMore").hidden = true;
+    const m = !window.isSecureContext ? "📡 Radar needs the https site — use ⇧ Athlon file to import shots." : "📡 Radar needs Chrome on Android — use ⇧ Athlon file to import shots.";
+    st.textContent = m; st.className = "summary bad"; $("radarNo").textContent = m; $("radarNo").hidden = false; return;
   }
+  $("radarMore").hidden = RD.status === "idle" && !RD.opened;
   const name = RD.dev?.name || "radar", bt = RD.battery != null ? ` · 🔋 ${RD.battery}%` : "", fw = RD.fw ? ` · fw ${RD.fw}` : "";
   const last = RD.last ? ` · last ${RD.last.fps.toFixed(1)} fps (#${RD.last.n})` : "";
   const wait = RD.pending.length ? ` · ${RD.pending.length} shot${RD.pending.length > 1 ? "s" : ""} waiting: pick a load` : "";
@@ -1965,6 +2245,7 @@ function adoptDevice(d) {
 }
 $("radarConnect").onclick = async () => {
   if (!hasBT) return;
+  RD.opened = true; radarPaint();
   if (navigator.bluetooth.getAvailability) { try { if (!(await navigator.bluetooth.getAvailability())) { const m = "Bluetooth isn't available to Chrome. Turn on Bluetooth and Location, and allow Chrome the Nearby devices permission."; toast(m); $("radarStatus").textContent = m; $("radarStatus").className = "summary bad"; } } catch {} }
   let d;
   try {
@@ -2003,13 +2284,255 @@ if (hasBT && navigator.bluetooth.getDevices) {   // remembered permission → of
 radarPaint();
 window.__radarFlush = radarFlush;
 
+/* ---------------- Phase B: powder temp, zero conditions, turret clicks, stability, truing, dope card ---------------- */
+function powderT() { const p = num("powderTemp"); return p != null ? p : num("temp"); }
+function mvAdjust(mv, sens, t0, Tp) { return isFinite(mv) && isFinite(sens) && sens && isFinite(t0) && isFinite(Tp) ? mv + sens / 10 * (Tp - t0) : (isFinite(mv) ? mv : null); }
+function mvAdjOn() { return !!num("ptSens") && num("mvTemp") != null && powderT() != null; }
+function mvAt(Tp, base) { return mvAdjust(base, num("ptSens"), num("mvTemp"), Tp); }
+function chronoFrom(mvToday, Tp) { return mvAdjOn() ? mvToday - num("ptSens") / 10 * (Tp - num("mvTemp")) : mvToday; }
+function curCond() { return { temp: num("temp"), hum: num("humidity"), alt: num("altitude"), press: num("pressure") }; }
+function zeroCond() {   // null = zero in today's conditions
+  const c = curCond(), zt = num("zTemp"), zp = num("zPress"), za = num("zAlt"), zh = num("zHum");
+  if (zt == null && zp == null && za == null && zh == null) return null;
+  return { temp: zt ?? c.temp, hum: zh ?? c.hum, alt: za ?? c.alt, press: zp != null ? zp : za != null ? null : c.press };
+}
+function mkAtmo(c) {
+  const { UNew } = B, o = { altitude: UNew.Foot(c.alt ?? 0), temperature: UNew.Fahrenheit(c.temp ?? 59), humidity: (c.hum ?? 0) / 100 };
+  if (c.press != null) o.pressure = UNew.InHg(c.press);
+  return new B.Atmo(o);
+}
+// UI: 0° = wind from the target (headwind), 90° = from shooter's right.
+// js-ballistics: 0° = wind from behind (tailwind), 90° = from shooter's left. So add 180°.
+function windAt(ws, dir) { return ws > 0 ? [new B.Wind({ velocity: B.UNew.MPH(ws), directionFrom: B.UNew.Degree(norm360(dir + 180)) })] : []; }
+// zeroed shot: o.mv = MV at today's powder temp (truing), o.bcScale, o.winds
+async function solveShot(o = {}) {
+  const { Calculator, Shot, Weapon, Ammo, DragModel, DragTables, UNew } = B;
+  const twist = num("twist") || 0, length = num("length") || 0, k = o.bcScale || 1;
+  const pts = bandsOn() ? bandPoints() : null;
+  const dm = pts ? B.DragModelMultiBC({ bcPoints: pts.map(p => new B.BCPoint({ BC: p.bc * k, V: UNew.FPS(p.v) })), dragTable: DragTables.G1,
+      weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) })
+    : new DragModel({ bc: num("bc") * k, dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
+      weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
+  const Tp = powderT(), zc = zeroCond(), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
+  const mvNow = mvAt(Tp, base), mvZero = zc ? mvAt(num("zTemp") ?? Tp, base) : mvNow;
+  const weapon = new Weapon({ sightHeight: UNew.Inch(num("sightHeight")), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
+  const atmo = mkAtmo(curCond()), calc = new Calculator();
+  const zShot = new Shot({ weapon, ammo: new Ammo({ dm, mv: UNew.FPS(mvZero) }), atmo: zc ? mkAtmo(zc) : atmo });
+  await calc.setWeaponZero(zShot, UNew.Yard(num("zero")));
+  const ammo = new Ammo({ dm, mv: UNew.FPS(mvNow) });
+  const shot = new Shot({ weapon, ammo, atmo, winds: o.winds ?? windAt(num("windSpeed"), num("windDir")) });
+  const withWind = (w, look) => { const s2 = new Shot({ weapon, ammo, atmo, winds: w }); if (look) s2.lookAngle = UNew.Degree(look); return s2; };
+  return { calc, shot, mvNow, mvZero, zc, Tp, withWind };
+}
+// turret: click value + unit, independent of the display unit
+const TURRETS = { "0.1mil": ["MIL", 0.1, "0.1 mil"], "0.05mil": ["MIL", 0.05, "0.05 mil"], "0.25moa": ["MOA", 0.25, "¼ MOA"], "0.125moa": ["MOA", 0.125, "⅛ MOA"], "0.5moa": ["MOA", 0.5, "½ MOA"] };
+function turretSpec() {
+  const t = $("turret").value;
+  if (t === "custom") { const v = num("turretV"), u = $("turretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) return { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
+  if (TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; return { u, v, lbl }; }
+  return S.ang === "MIL" ? { u: "MIL", v: 0.1, lbl: "0.1 mil", auto: true } : { u: "MOA", v: 0.25, lbl: "¼ MOA", auto: true };
+}
+const MOA_PER_MIL = 3.437747;
+function angs(p) {   // dial angles in the display unit (optionally rounded to whole clicks) + clicks in the turret unit
+  const A = B.Angular, ts = turretSpec(), TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA;
+  const ec = Math.round(-p.dropAngle.In(TU) / ts.v), wc = Math.round(-p.windageAngle.In(TU) / ts.v);
+  let e = -p.dropAngle.In(DU), w = -p.windageAngle.In(DU);
+  if (S.round) { const k = ts.u === S.ang ? 1 : S.ang === "MOA" ? MOA_PER_MIL : 1 / MOA_PER_MIL; e = ec * ts.v * k; w = wc * ts.v * k; }
+  return { e, w, ec, wc };
+}
+function angDec(ts) { if (!S.round) return 1; const k = ts.u === S.ang ? 1 : 0; return k && Math.abs(ts.v * 10 - Math.round(ts.v * 10)) < 1e-9 ? 1 : 2; }
+function clkTxt(n, pos, neg) { return n === 0 ? "0 clicks" : `${n > 0 ? pos : neg} ${Math.abs(n)} click${Math.abs(n) === 1 ? "" : "s"}`; }
+function clkShort(n, pos, neg) { return n === 0 ? "0" : `${n > 0 ? pos : neg}${Math.abs(n)}`; }
+function perMph(n, f) {   // full-value wind per 1 mph in the display unit (from the 10 mph run)
+  if (!n || !f) return null; const A = S.ang === "MIL" ? B.Angular.MRad : B.Angular.MOA;
+  return Math.abs(f.windageAngle.In(A) - n.windageAngle.In(A)) / 10;
+}
+// Miller twist rule with velocity + temperature/pressure corrections; Courtney–Miller plastic-tip form when tipped
+const TIPPED = /\b(eld(-?[mxv]t?)?|v-?max|a-?tip|sst|ballistic tip|nbt|ttsx|tipped|tmk|accubond|ftx|polymer tip)\b/i;
+function millerSG(mv, c) {
+  const m = num("weight"), d = num("diameter"), L = num("length"), tw = Math.abs(num("twist") || 0);
+  if (!tw) return { none: "twist" }; if (!L) return { none: "length" }; if (!m || !d || !mv) return { none: "bullet" };
+  let tip = num("tipLen"), assumed = false;
+  if (tip == null && TIPPED.test(val("bulletName"))) { tip = +(0.45 * d).toFixed(3); assumed = true; }
+  tip = Math.max(0, Math.min(tip || 0, L * 0.4));
+  const t = tw / d, l = L / d, lm = (L - tip) / d;
+  const T = c.temp ?? 59, P = c.press ?? 29.92 * Math.pow(1 - 6.8753e-6 * (c.alt || 0), 5.2559);
+  const sg = 30 * m / (t * t * d * d * d * l * (1 + lm * lm)) * Math.cbrt(mv / 2800) * ((T + 460) / 519) * (29.92 / P);
+  return { sg, tip, assumed };
+}
+function paintWarn() {
+  const R = lastRun, out = []; if (!R) { $("dcWarn").innerHTML = ""; return; }
+  const g = R.sg;
+  if (g && g.sg != null) {
+    const t = `SG ${g.sg.toFixed(2)}`, why = `Miller stability ${g.sg.toFixed(2)} at ${Math.round(R.mvNow)} fps, ${fmt(R.aT, 0)}°F${g.tip ? `, ${g.assumed ? "assumed " : ""}${g.tip}" plastic tip` : ""}`;
+    out.push(g.sg < 1 ? `<span class="bad" title="${escapeHtml(why)}">✖ ${t} unstable — bullet may tumble</span>` : g.sg < 1.4 ? `<span class="w" title="${escapeHtml(why)}">⚠ ${t} marginal (&lt;1.4) — BC may suffer</span>` : `<span title="${escapeHtml(why)}">${t} stable${g.assumed ? " (tip est.)" : ""}</span>`);
+  } else if (g && g.none && num("twist")) out.push(`<span>Stability: ${g.none === "length" ? "bullet length unknown — add it under Gear" : "needs bullet data"}</span>`);
+  if (R.trans) {
+    const past = R.td && R.trans.range <= R.td;
+    out.push(`<span class="${past ? "w" : ""}">${past ? "⚠ " : ""}${R.trans.range ? `Transonic at ${R.trans.range} yd` : "Transonic from the muzzle"} (&lt;${Math.round(R.vT)} fps = Mach 1.2 @ ${fmt(R.aT, 0)}°F)${past ? " — before target" : ""}</span>`);
+  }
+  if (R.zc) out.push(`<span>Zeroed @ ${fmt(R.zc.temp, 0)}°F${num("zAlt") != null ? ` · ${fmt(R.zc.alt, 0)} ft` : ""}${R.zc.press != null ? ` · ${R.zc.press.toFixed(2)} inHg` : ""}</span>`);
+  $("dcWarn").innerHTML = out.join("");
+}
+function paintPt() {
+  const R = lastRun, el = $("ptHint"); if (!el) return;
+  el.textContent = !num("ptSens") ? "Powder temp only matters when the load has a temperature sensitivity (Gear → Load details)."
+    : num("mvTemp") == null ? "Set the chrono temp on the load to use powder temp."
+    : R ? `MV used: ${Math.round(R.mvNow)} fps (chrono ${val("mv")} fps @ ${val("mvTemp")}°F, ${val("ptSens")} fps/10°F).` : "";
+}
+function paintGearExtra() {
+  const t = $("turret").value === "custom"; $("turretCustom").hidden = !t; $("turretCustomU").hidden = !t;
+  const zc = zeroCond();
+  $("zeroSum").textContent = zc ? [num("zTemp") != null ? `${val("zTemp")}°F` : "", num("zHum") != null ? `${val("zHum")}%` : "", num("zAlt") != null ? `${val("zAlt")} ft` : "", num("zPress") != null ? `${val("zPress")} inHg` : ""].filter(Boolean).join(" · ") : "same as today";
+  const tn = val("trued"); $("truedNote").hidden = !tn; $("truedNote").textContent = tn ? "🎯 " + tn : "";
+}
+$("zUseCur").onclick = () => {
+  setVal("zTemp", val("temp")); setVal("zHum", val("humidity")); setVal("zAlt", val("altitude")); setVal("zPress", val("pressure"));
+  updateDirty(); schedule(); toast(`Zero conditions set to today's: ${val("temp")}°F · ${val("altitude") || 0} ft${val("pressure") ? " · " + val("pressure") + " inHg" : ""}`);
+};
+$("roundClk").checked = !!S.round;
+function chartExtras(ctx, X, top, bottom) {
+  const R = lastRun; if (!R?.trans || R.trans.range > num("maxRange")) return;
+  const x = X(R.trans.range); ctx.save(); ctx.strokeStyle = cv("err"); ctx.setLineDash([3, 4]); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = cv("err"); ctx.font = "bold 11px system-ui, sans-serif"; ctx.textAlign = x > ctx.canvas.width / (window.devicePixelRatio || 1) - 80 ? "right" : "left"; ctx.textBaseline = "top";
+  ctx.fillText("Mach 1.2", x + (ctx.textAlign === "right" ? -4 : 4), top + 2); ctx.restore();
+}
+/* truing: solve MV or a BC scale so the predicted elevation matches what was observed */
+var TR = { unit: "MIL", what: "mv", res: null };
+function trPaint() { [["trUnit", "unit"], ["trWhat", "what"]].forEach(([id, k]) => $(id).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === TR[k]))); }
+$("trUnit").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; TR.unit = b.dataset.v; TR.res = null; $("trSave").disabled = true; trPaint(); });
+$("trWhat").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; TR.what = b.dataset.v; TR.res = null; $("trSave").disabled = true; trPaint(); });
+function openTrue() {
+  if (!B || !lastRun) { toast("Fix the inputs so a solution shows first"); return; }
+  if (!curLoad()) { toast("Pick or save a load first (Gear tab)"); return; }
+  TR.unit = S.ang; if (!val("trRange")) setVal("trRange", num("target") || 600);
+  $("trFor").textContent = `${curLoad().name} · MV ${Math.round(lastRun.mvNow)} fps today · BC ${val("bc")} ${$("drag").value} · ${val("temp")}°F`;
+  $("trOut").textContent = ""; $("trSave").disabled = true; TR.res = null; trPaint(); openOvl("trSheet");
+}
+async function predAt(d, o) {
+  const sv = await solveShot({ ...o, winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+  if (look) sv.shot.lookAngle = B.UNew.Degree(look);
+  const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(d * cosA), trajectoryStep: B.UNew.Yard(d * cosA), raiseRangeError: false });
+  const p = r.samples[r.samples.length - 1]; if (!p || Math.abs(p.distance.In(B.Distance.Yard) - d * cosA) > 1) return null;
+  return { MIL: -p.dropAngle.In(B.Angular.MRad), MOA: -p.dropAngle.In(B.Angular.MOA), IN: -p.slantHeight.In(B.Distance.Inch), mv: sv.mvNow };
+}
+async function solveTrue() {
+  const d = num("trRange"), obs = num("trObs"), out = $("trOut");
+  $("e-trRange").textContent = d >= 50 && d <= 3000 ? "" : "50–3000 yd"; $("e-trObs").textContent = obs > 0 ? "" : "Enter what you observed";
+  if (!(d >= 50 && d <= 3000) || !(obs > 0)) return null;
+  if (validate().length) { out.innerHTML = `<span class="bad">Fix the highlighted fields first.</span>`; return null; }
+  out.textContent = "Solving…"; $("trGo").disabled = true;
+  try {
+    const before = await predAt(d, {}); if (!before) { out.innerHTML = `<span class="bad">${d} yd is beyond this bullet's reach.</span>`; return null; }
+    const mv0 = before.mv, isMV = TR.what === "mv";
+    const f = async x => { const r = await predAt(d, isMV ? { mv: x } : { bcScale: x }); return r ? r[TR.unit] - obs : 1e9; };   // more MV / BC → less drop
+    let lo = isMV ? mv0 * 0.7 : 0.5, hi = isMV ? mv0 * 1.3 : 1.6, it = 0;
+    if (!(await f(lo) > 0 && await f(hi) < 0)) { out.innerHTML = `<span class="bad">That observation needs more than a ${isMV ? "±30% MV" : "0.5–1.6× BC"} change. Check the range and unit.</span>`; return null; }
+    while (it++ < 40 && hi - lo > (isMV ? 0.2 : 0.0002)) { const mid = (lo + hi) / 2; (await f(mid)) > 0 ? lo = mid : hi = mid; }
+    const x = (lo + hi) / 2, after = await predAt(d, isMV ? { mv: x } : { bcScale: x }), U = TR.unit === "IN" ? '"' : " " + TR.unit;
+    TR.res = { what: TR.what, x, d, obs, unit: TR.unit, before: before[TR.unit], after: after[TR.unit], it, mv0, bc0: num("bc") };
+    out.innerHTML = `Predicted ${before[TR.unit].toFixed(2)}${U} at ${d} yd, observed ${obs}${U}.<br>` + (isMV
+      ? `<b>MV ${Math.round(mv0)} → ${Math.round(x)} fps</b> today (${x >= mv0 ? "+" : ""}${Math.round(x - mv0)} fps)`
+      : `<b>BC × ${x.toFixed(3)}</b> → ${(num("bc") * x).toFixed(3)} ${$("drag").value}`) + ` · now predicts ${after[TR.unit].toFixed(2)}${U} (${it} iterations).`;
+    $("trSave").disabled = false; return TR.res;
+  } finally { $("trGo").disabled = false; }
+}
+function scaleBands(str, k) { return String(str || "").replace(/([\d.]+)@/g, (m, b) => (parseFloat(b) * k).toFixed(3) + "@"); }
+function saveTrue() {
+  const r = TR.res, l = curLoad(); if (!r || !l) return;
+  const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }), U = r.unit === "IN" ? '" low' : " " + r.unit;
+  if (r.what === "mv") { setVal("mv", Math.round(chronoFrom(r.x, powderT()))); $("mvSource").value = "trued"; }
+  else { setVal("bc", (r.bc0 * r.x).toFixed(3)); if (val("bcBands")) $("bcBands").value = scaleBands(val("bcBands"), r.x); }
+  $("trued").value = `Trued at ${r.d} yd on ${date}: ${r.what === "mv" ? `MV ${Math.round(r.x)} fps @ ${fmt(powderT(), 0)}°F` : `BC ×${r.x.toFixed(3)}`} (observed ${r.obs}${U})`;
+  updateDirty(); renderBulletInfo(); closeOvl("trSheet"); schedule(); toast(`Saved to “${l.name}” · ${$("trued").value}`);
+}
+$("trueBtn").onclick = openTrue;
+$("trClose").onclick = () => closeOvl("trSheet");
+$("trGo").onclick = () => solveTrue();
+$("trSave").onclick = saveTrue;
+/* printable dope card */
+var DCV = { step: "50", size: "wrist" };
+function dcvPaint() { [["dcvStep", "step"], ["dcvSize", "size"]].forEach(([id, k]) => $(id).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === DCV[k]))); $("dcPrint").className = DCV.size; }
+$("dcvStep").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; DCV.step = b.dataset.v; dcvPaint(); renderDopeCard(); });
+$("dcvSize").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; DCV.size = b.dataset.v; dcvPaint(); });
+$("dcvMax").addEventListener("change", () => renderDopeCard());
+function openDopeCard() {
+  if (!B || !lastRun) { toast("Fix the inputs so a solution shows first"); return; }
+  if (!val("dcvMax")) setVal("dcvMax", Math.max(num("maxRange") || 1000, num("target") || 0));
+  dcvPaint(); openOvl("dcView"); return renderDopeCard();
+}
+async function renderDopeCard() {
+  const el = $("dcPrint"), st = +DCV.step, max = Math.min(3000, Math.max(st, num("dcvMax") || 1000));
+  if (!B || validate().length) { el.textContent = "Fix the highlighted fields first."; return; }
+  const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180), { UNew } = B;
+  if (look) sv.shot.lookAngle = UNew.Degree(look);
+  const run = sh => sv.calc.fire({ shot: sh, trajectoryRange: UNew.Yard(max * cosA), trajectoryStep: UNew.Yard(st * cosA), raiseRangeError: false }).then(r => r.samples);
+  const sN = await run(sv.shot), sF = await run(sv.withWind(windAt(10, 90), look));
+  const ts = turretSpec(), u = S.ang, A = B.Angular, DU = u === "MIL" ? A.MRad : A.MOA, TU = ts.u === "MIL" ? A.MRad : A.MOA, vT = 1.2 * sv.shot.atmo.mach.In(B.Velocity.FPS);
+  const r = curRifle(), l = curLoad(), zc = sv.zc, p = num("pressure");
+  const cond = `${val("temp")}°F · ${p != null ? p.toFixed(2) + " inHg" : (val("altitude") || 0) + " ft std"} · ${val("humidity")}% RH${look ? ` · ${look}° angle` : ""}`;
+  let rows = "";
+  sN.forEach((q, i) => {
+    const range = Math.round(q.distance.In(B.Distance.Yard) / cosA); if (range < st / 2) return;
+    const e = -q.dropAngle.In(DU), ec = Math.round(-q.dropAngle.In(TU) / ts.v), f = sF[i];
+    const w = f ? Math.abs(f.windageAngle.In(DU) - q.windageAngle.In(DU)) : null, wc = f ? Math.round(Math.abs(f.windageAngle.In(TU) - q.windageAngle.In(TU)) / ts.v) : null;
+    const vel = q.velocity.In(B.Velocity.FPS);
+    rows += `<tr class="${vel < vT ? "trans" : ""}"><td class="r">${range}</td><td>${(Math.abs(e) < 0.05 ? 0 : e).toFixed(1)}</td><td>${ec}</td><td>${w != null ? w.toFixed(1) : "—"}</td><td>${wc ?? "—"}</td><td>${Math.round(vel)}</td></tr>`;
+  });
+  el.innerHTML = `<div class="hd"><b>${escapeHtml(r?.name || "Gun")} · ${escapeHtml(l?.name || "Load")}</b><br>${escapeHtml(val("bulletName") || `${val("weight")} gr`)} · BC ${escapeHtml(val("bc"))} ${$("drag").value} · MV ${Math.round(sv.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(sv.Tp, 0)}°F` : ""}<br>
+    Zero ${val("zero")} yd${zc ? ` @ ${fmt(zc.temp, 0)}°F` : ""} · SH ${val("sightHeight")}" · turret ${escapeHtml(ts.lbl)}<br>${escapeHtml(cond)} · ${escapeHtml(new Date().toLocaleDateString())}</div>
+    <table><thead><tr><th>Yd</th><th>Elev ${u}</th><th>Clk</th><th>10 mph ${u}</th><th>Clk</th><th>fps</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="ft">Elev = dial up. 10 mph = full-value crosswind hold (no spin drift). Clk = ${escapeHtml(ts.lbl)} clicks. Shaded = transonic (&lt;${Math.round(vT)} fps).</div>`;
+}
+$("dcBtn").onclick = () => openDopeCard();
+$("dcvClose").onclick = () => closeOvl("dcView");
+$("dcvPrint").onclick = () => window.print();
+
 /* ---------------- wiring ---------------- */
 let calcT;
-function schedule() { clearTimeout(calcT); calcT = setTimeout(calculate, 350); }
+function schedule() { clearTimeout(calcT); if (B) setStale(true); paintAdv(); calcT = setTimeout(calculate, 300); }
+function paintAdv() {
+  const p = num("pressure");
+  $("advSum").textContent = `${val("temp") || "?"}°F · ${val("humidity") || "?"}% · ${val("altitude") || "0"} ft · ${p != null ? p.toFixed(2) + " inHg" : "std pressure"}` + (val("powderTemp") ? ` · powder ${val("powderTemp")}°F` : "");
+}
+// tabs (remembered)
+const TABS = ["dope", "gear", "log"];
+function setTab(t, persist = true) {
+  if (!TABS.includes(t)) t = "dope";
+  document.querySelectorAll("main > .tab").forEach(x => x.classList.toggle("on", x.dataset.tab === t));
+  document.querySelectorAll("#tabBar button").forEach(b => { const on = b.dataset.tab === t; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; });
+  document.body.dataset.tab = t;
+  if (persist && S.tab !== t) { S.tab = t; store(K_SETTINGS, S); }
+  if (t === "dope" && lastRun) renderChart(lastRun.samples);
+  if (t === "dope") drawDial();
+  if (t === "log") { slKey = null; maybeRenderLog(); }
+}
+$("tabBar").addEventListener("click", e => { const b = e.target.closest("button[data-tab]"); if (!b) return; if (b.dataset.tab !== S.tab) window.scrollTo(0, 0); setTab(b.dataset.tab); });
+$("tabBar").addEventListener("keydown", e => { if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return; const i = TABS.indexOf(S.tab), n = TABS[(i + (e.key === "ArrowRight" ? 1 : 2)) % 3]; setTab(n); $("tabBtn" + n[0].toUpperCase() + n.slice(1)).focus(); });
+// long helper paragraphs: first sentence on one line, ⓘ expands the rest
+function shortenHints() {
+  document.querySelectorAll(".hint:not([data-sh])").forEach(h => {
+    h.dataset.sh = "1";
+    if (h.id || h.children.length) return;
+    const t = h.textContent.replace(/\s+/g, " ").trim(); if (t.length < 70) return;
+    const m = /^(.{12,}?[.!?:])\s+(.+)$/.exec(t); let first, rest;
+    if (m) { first = m[1]; rest = m[2]; } else { const k = t.lastIndexOf(" ", 60); if (k < 20) return; first = t.slice(0, k) + "…"; rest = "…" + t.slice(k + 1); }
+    h.textContent = ""; h.classList.add("sh");
+    const a = document.createElement("span"); a.className = "h1"; a.textContent = first;
+    const b = document.createElement("button"); b.type = "button"; b.className = "info"; b.textContent = "ⓘ"; b.setAttribute("aria-label", "More about this"); b.setAttribute("aria-expanded", "false");
+    const r = document.createElement("span"); r.className = "more"; r.hidden = true; r.textContent = " " + rest;
+    b.onclick = () => { r.hidden = !r.hidden; h.classList.toggle("open", !r.hidden); b.classList.toggle("on", !r.hidden); b.setAttribute("aria-expanded", String(!r.hidden)); };
+    h.append(a, b, r);
+  });
+}
+var shT = 0;
+new MutationObserver(() => { clearTimeout(shT); shT = setTimeout(shortenHints, 40); }).observe(document.body, { childList: true, subtree: true });
 document.addEventListener("input", e => {
-  const id = e.target.id; if (!id || id === "placeQ" || id.startsWith("db") || id.startsWith("sl")) return;
+  const id = e.target.id; if (!id || id === "placeQ" || id.startsWith("db") || id.startsWith("sl") || /^(tr[A-Z]|dcv)/.test(id)) return;
   if (id.startsWith("ld")) { updateDirty(); return; }   // load data: no effect on the trajectory
   if (id === "gunKind") applyGunKind();
+  if (id === "roundClk") { S.round = e.target.checked; saveSettings(); renderAll(); return; }
   if (id === "mv" && $("mvSource").value === "estimate") $("mvSource").value = "";
   if (["bc", "weight", "diameter"].includes(id) && val("bulletId")) markEdited();
   if (WX_F.includes(id)) manual.add(id);
@@ -2022,7 +2545,7 @@ document.addEventListener("change", e => {
   if (id === "drag") { swapModel(); updateDirty(); schedule(); }
   if (id === "mvSource" || id === "useBands") { renderBulletInfo(); updateDirty(); schedule(); }
 });
-btn.addEventListener("click", calculate);
+$("calcBtn").addEventListener("click", () => { clearTimeout(calcT); calculate(); });
 function seg(id, key) {
   const el = $(id);
   const paint = () => el.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === S[key]));
@@ -2031,6 +2554,7 @@ function seg(id, key) {
 }
 seg("angSeg", "ang"); seg("viewSeg", "view");
 window.addEventListener("resize", () => lastRun && renderChart(lastRun.samples));
+setTab(S.tab || "dope", false); shortenHints(); paintAdv();
 
 /* ---------------- start ---------------- */
 for (const [f, v] of Object.entries(S.values || {})) if ($(f) && v != null) $(f).value = v;
@@ -2039,6 +2563,7 @@ renderPickers(); applyRifle(); applyLoad();
 if (val("bulletId")) loadDB().then(renderBulletInfo).catch(() => {});
 if (curRange()) applyRange(); else applyAuto();
 if (!P.rifles.length) $("rifleDetails").open = true;
+paintAdv();
 drawDial();
 refreshWeather();
 try {
@@ -2115,7 +2640,7 @@ function applySavedRecipe(x) {
   if (curRt && curRt !== rt && !confirm(`Replace this load's data (${curRt}) with ${rt} from “${x.r.name} · ${x.l.name}”?`)) return;
   REC_F.forEach(f => setVal(f, (x.l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : x.l[f]));
   paintLdKind(); closeOvl("rcSheet"); $("recipeDetails").open = true; updateDirty();
-  toast(curLoad() ? `Recipe from ${x.r.name} applied — tap 💾 Save to keep it` : `Recipe from ${x.r.name} applied`);
+  toast(curLoad() ? `Recipe from ${x.r.name} applied and saved` : `Recipe from ${x.r.name} applied`);
   setTimeout(() => $("recipeDetails").scrollIntoView({ block: "start", behavior: "smooth" }), 50);
 }
 $("rcFind").onclick = $("rcBulletBtn").onclick = () => openRecipes();
@@ -2140,10 +2665,13 @@ function copyMV(src, sg, tg, mode) {
   return o;
 }
 function gunDias(g) { return [...new Set(g.loads.map(l => fnum(l.diameter)).filter(x => x != null).map(x => x.toFixed(3)))]; }
-function openCopy() {
+var cpMode = "copy";
+function openCopy(mode) {
   const l = curLoad(); if (!l) { toast("Pick a load first"); return; }
+  cpMode = mode === "move" ? "move" : "copy";
   const cur = pick(LOAD_F), rt = recipeText(cur);
-  $("cpTitle").textContent = `📑 Copy “${l.name}”`;
+  $("cpTitle").textContent = cpMode === "move" ? `↔ Move “${l.name}” to another gun` : `📑 Copy “${l.name}”`;
+  $("cpDup").hidden = cpMode === "move";
   $("cpFor").textContent = `${projLabel(cur)} · ${cur.mv || "?"} fps${rt ? " · " + rt : ""}`;
   cpAll = false; renderCopy(); openOvl("cpSheet");
 }
@@ -2156,7 +2684,7 @@ function renderCopy() {
   $("cpList").innerHTML = show.length ? show.map(g => {
     const d = gunDias(g), bar = fnum(g.barrel), m = copyMV(src, r0, g, cpMv), ok = fits(g);
     const info = [g.gunKind === "handgun" ? "Handgun" : "Rifle", bar ? `${bar}" barrel` : "barrel not set", g.loads.length ? `${g.loads.length} load${g.loads.length === 1 ? "" : "s"}` + (d.length ? ", bullets " + d.map(dia3).join(", ") : "") : "no loads yet"].join(" · ");
-    return `<button type="button" class="rcItem" data-id="${escapeHtml(g.id)}"><span>${escapeHtml(g.name)}</span><span class="s">Copy →</span><span class="d">${escapeHtml(info)}${m.note ? "<br>" + escapeHtml(m.note) : ""}</span>` +
+    return `<button type="button" class="rcItem" data-id="${escapeHtml(g.id)}"><span>${escapeHtml(g.name)}</span><span class="s">${cpMode === "move" ? "Move →" : "Copy →"}</span><span class="d">${escapeHtml(info)}${m.note ? "<br>" + escapeHtml(m.note) : ""}</span>` +
       (ok ? "" : `<span class="w">⚠ Different bullet diameter (${escapeHtml(d.map(dia3).join(", "))}) — make sure this is the right gun</span>`) + "</button>";
   }).join("") : `<div class="hint">${others.length ? `No other guns with ${dia3(src.diameter) || "this"} bullets.` : "No other guns saved yet — add one with ＋ New under Gun."}</div>`;
   const hid = others.length - nFit;
@@ -2173,16 +2701,27 @@ function copyLoadTo(tg) {
   if (tg !== r0) { P.lastRifleId = tg.id; applyRifle(); }
   savePresets(); renderPickers(); applyLoad(); closeOvl("cpSheet"); updateDirty(); schedule();
   $("recipeDetails").open = true;
-  toast(tg === r0 ? `Duplicated as “${c.name}” — change the charge and 💾 Save` : `Copied to ${tg.name} as “${c.name}”${note ? " · " + note : ""}`);
+  toast(tg === r0 ? `Duplicated as “${c.name}” — change the charge (saves automatically)` : `Copied to ${tg.name} as “${c.name}”${note ? " · " + note : ""}`);
   setTimeout(() => { $("loadSel").scrollIntoView({ block: "center", behavior: "smooth" }); if (tg === r0) { $("ldKind").value !== "factory" && $("ldCharge").focus({ preventScroll: true }); } }, 60);
   return c;
 }
-$("loadCopy").onclick = openCopy;
+$("loadCopy").onclick = () => openCopy("copy");
+// move a load (and its chrono sessions) to another gun; MV follows the same barrel-length rule as copy
+function moveLoadTo(tg) {
+  const r0 = curRifle(), l = curLoad(); if (!l || !tg || tg === r0) return;
+  const m = copyMV(pick(LOAD_F), r0, tg, cpMv); ["mv", "mvSource", "refMV", "refBarrel"].forEach(k => l[k] = m[k] ?? "");
+  r0.loads = r0.loads.filter(x => x !== l); r0.lastLoadId = r0.loads[0]?.id || null;
+  tg.loads.push(l); tg.lastLoadId = l.id; P.lastRifleId = tg.id;
+  let n = 0; LOG.forEach(x => { if (x.rifleId === r0.id && x.loadId === l.id) { x.rifleId = tg.id; n++; } }); if (n) saveLog();
+  closeOvl("cpSheet"); pkRefresh();
+  toast(`Moved “${l.name}” to ${tg.name}${n ? ` with ${n} session${n === 1 ? "" : "s"}` : ""}${m.note ? " · " + m.note : ""}`);
+  return l;
+}
 $("cpClose").onclick = () => closeOvl("cpSheet");
 $("cpDup").onclick = () => copyLoadTo(curRifle());
 $("cpAllBtn").onclick = () => { cpAll = !cpAll; renderCopy(); };
 $("cpMv").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cpMv = b.dataset.v; renderCopy(); });
-$("cpList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (b) copyLoadTo(P.rifles.find(g => g.id === b.dataset.id)); });
+$("cpList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (!b) return; const g = P.rifles.find(x => x.id === b.dataset.id); cpMode === "move" ? moveLoadTo(g) : copyLoadTo(g); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; ["rcSheet", "cpSheet"].forEach(id => $(id).classList.contains("show") && closeOvl(id)); });
 
 /* ---------------- move / reassign sessions (single, live, bulk) ---------------- */
@@ -2294,7 +2833,7 @@ $("slList").addEventListener("pointerdown", e => { const b = e.target.closest(".
 ["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slList").addEventListener(ev, () => clearTimeout(lpT)));
 $("slList").addEventListener("contextmenu", e => { if (e.target.closest(".slItem")) e.preventDefault(); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("mvSheet").classList.contains("show")) { e.stopImmediatePropagation(); closeOvl("mvSheet"); } }, true);
-window.__bc = { P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+window.__bc = { millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

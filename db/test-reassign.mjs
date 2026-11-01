@@ -29,11 +29,12 @@ const p = await ctx.newPage();
 p.on("console", m => { if (m.type() === "error" || m.type() === "warning") errs.push(m.type() + ": " + m.text()); }); p.on("pageerror", e => errs.push("PAGEERR " + e.message));
 p.on("dialog", d => d.accept());
 const ready = () => p.waitForFunction(() => document.getElementById("status").textContent.startsWith("Done"), null, { timeout: 30000 });
-await p.goto(URL_); await ready();
+await p.goto(URL_); await ready(); await p.click("#tabBtnLog");   // shot log lives on the Log tab
 const sess = id => p.evaluate(id => { const s = window.__bc.log.find(x => x.id === id); return s && { r: s.rifleId, l: s.loadId, ch: s.recipe?.ldCharge, coal: s.recipe?.ldCOAL, pr: s.recipe?.ldPrimer, gn: s.recipe?.gunName, ln: s.recipe?.loadName, bar: s.barrel, n: s.shots.length, kind: s.recipe?.ldKind }; }, id);
 const diff = () => p.$$eval("#mvDiff tr", a => Object.fromEntries(a.map(r => [r.children[0].textContent, [r.children[1].textContent, r.children[3].textContent]])));
 const listIds = () => p.$$eval("#slList .slItem", a => a.map(x => x.dataset.id));
-const pickSel = async (gun, load) => { await p.selectOption("#rifleSel", gun); if (load) await p.selectOption("#loadSel", load); await p.waitForTimeout(80); };
+// gun/load pickers live on the Gear tab; come back to the Log tab afterwards
+const pickSel = async (gun, load) => { await p.click("#tabBtnGear"); await p.selectOption("#rifleSel", gun); if (load) await p.selectOption("#loadSel", load); await p.waitForTimeout(80); await p.click("#tabBtnLog"); };
 const undoToast = async () => { await p.waitForSelector("#toast.show #toastAct"); await p.click("#toastAct"); await p.waitForTimeout(150); };
 
 /* orphans */
@@ -71,14 +72,18 @@ ok("list for load A no longer has s2", !(await listIds()).includes("s2"));
 await pickSel("g1", "B");
 ok("list for load B has s2", (await listIds())[0] === "s2");
 
-/* 2) snapshot uses SAVED data, not unsaved on-screen edits */
-await p.evaluate(() => { const e = document.getElementById("ldCharge"); e.value = "50.0"; e.dispatchEvent(new Event("input", { bubbles: true })); });   // unsaved edit on B
+/* 2) snapshot uses the load's saved data; edits autosave, so a re-sync picks them up */
 await pickSel("g1", "A");
-await p.evaluate(() => { const e = document.getElementById("ldCharge"); e.value = "49.0"; e.dispatchEvent(new Event("input", { bubbles: true })); });   // unsaved edit on A (on screen)
+const setCh = v => p.evaluate(v => { const e = document.getElementById("ldCharge"); e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); }, v);
+await setCh("49.0");
+ok("on-screen edit autosaves to load A", (await p.evaluate(() => JSON.parse(localStorage.getItem("bcalc.presets.v1")).rifles[0].loads.find(l => l.id === "A").ldCharge)) === "49.0");
 await p.click('#slList .slItem[data-id="s1"]'); await p.click("#slMoveBtn"); await p.click('#mvLoads .rcItem[data-id="A"]');
 await p.click("#mvGo"); await p.waitForTimeout(150); await p.click("#slEdClose");
-ok("re-sync to own load uses saved 42.5, not on-screen 49.0", (await sess("s1")).ch === "42.5" && (await sess("s1")).coal === "2.800");
-await pickSel("g1", "B"); await pickSel("g1", "A");   // drop the unsaved form edits
+ok("re-sync to own load uses the (autosaved) 49.0 + keeps the rest", (await sess("s1")).ch === "49.0" && (await sess("s1")).coal === "2.800");
+await setCh("42.5");   // put load A back
+await p.click('#slList .slItem[data-id="s1"]'); await p.click("#slMoveBtn"); await p.click('#mvLoads .rcItem[data-id="A"]');
+await p.click("#mvGo"); await p.waitForTimeout(150); await p.click("#slEdClose");
+ok("re-sync again after reverting: 42.5", (await sess("s1")).ch === "42.5");
 
 /* 3) another gun: keep snapshot (unchecked) vs replace */
 await p.click('#slList .slItem[data-id="s3"]'); await p.click("#slMoveBtn");
@@ -106,11 +111,11 @@ await pickSel("g2", "C");
 await p.click("#slCmp > summary").catch(() => {}); await p.waitForTimeout(80);
 const cmp = await p.$$eval("#slCmpTbl tbody tr", a => a.map(r => r.dataset.id));
 ok("compare table on Bergara/C shows moved sessions", cmp.sort().join() === "s1,s3" && (await listIds()).slice(0, 2).join() === "s3,s1", cmp.join());
-await pickSel("g1", "B");
+await pickSel("g1", "B"); await p.click("#tabBtnGear");
 await p.click("#recipeDetails > summary"); await p.click("#rcFind"); await p.waitForSelector("#rcSheet.show");
 const rcRow = await p.$$eval("#rcList .rcItem", a => a.map(x => x.innerText.replace(/\s+/g, " ")).find(t => t.includes("Bergara ELD-M")));
 ok("saved-recipes best session for C now from moved session", rcRow.includes("2708 fps") && rcRow.includes("SD 3.1") && rcRow.includes("best of 2"), rcRow);
-await p.click("#rcClose");
+await p.click("#rcClose"); await p.click("#tabBtnLog");
 
 /* 5) bulk move via select mode: orphans → B, then undo */
 await p.click("#slSelBtn");
@@ -166,12 +171,13 @@ let [dl] = await Promise.all([p.waitForEvent("download"), p.click("#slCsvBtn")])
 const csv = fs.readFileSync(await dl.path(), "utf8").replace(/^\ufeff/, "").trim().split("\n"); const hdr = csv[0].split(",");
 const byVel = v => csv.find(l => l.includes(v))?.split(",");
 ok("CSV reflects moves + unassigned", byVel("2705 2711 2709")[hdr.indexOf("gun")] === "Bergara HMR" && byVel("2705 2711 2709")[hdr.indexOf("charge_gr")] === "41.8" && byVel("2601 2610 2598")[hdr.indexOf("load")] === "Old Sold load (deleted gun)");
+await p.click("#tabBtnGear");
 [dl] = await Promise.all([p.waitForEvent("download"), p.click("#exportBtn")]);
 const js = JSON.parse(fs.readFileSync(await dl.path(), "utf8"));
 ok("JSON export reflects moves", js.shotSessions.find(s => s.id === "s3").rifleId === "g2" && js.shotSessions.find(s => s.id === "s2").loadId === "B");
 
 /* 9) persistence */
-await p.reload(); await ready();
+await p.reload(); await ready(); await p.click("#tabBtnLog");
 const all = await p.evaluate(() => Object.fromEntries(window.__bc.log.map(s => [s.id, s.rifleId + "/" + s.loadId + "/" + (s.recipe?.ldCharge || "")])));
 ok("moves persist after reload", all.s1 === "g2/C/41.8" && all.s2 === "g1/B/43.0" && all.s3 === "g2/C/42.5" && all.s4 === "g1/A/42.5" && all.s5 === "gSold/Zgone2/40.0", JSON.stringify(all));
 

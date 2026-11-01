@@ -372,9 +372,34 @@ svg.tgS, #tgSvg { width: 100%; aspect-ratio: 1; display: block; border: 1px soli
 #tgWrap { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
 #tgSvg { touch-action: none; cursor: crosshair; }
 #tgLoupe { position: absolute; width: 112px; height: 112px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,.5); pointer-events: none; background: var(--card); z-index: 2; }
-#tgZoom { position: absolute; top: 6px; right: 6px; display: flex; flex-direction: column; gap: 6px; align-items: center; z-index: 1; }
-#tgZoom button { width: 44px; min-width: 44px; min-height: 44px; margin: 0; padding: 0; font-size: 1.3rem; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; opacity: 0.92; }
-#tgZoomT { font-size: 0.75rem; font-weight: 700; color: var(--text); background: var(--card); padding: 0 4px; border-radius: 4px; }
+#tgZbar { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; flex-wrap: wrap; }
+#tgZbar button { width: 44px; min-width: 44px; min-height: 44px; margin: 0; padding: 0; font-size: 1.3rem; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; }
+#tgZbar #tgZfit { width: auto; padding: 0 12px; font-size: 0.85rem; font-weight: 700; }
+#tgZoomT { min-width: 40px; text-align: center; font-size: 0.85rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+#tgZbar .zh { flex: 1 1 120px; font-size: 0.74rem; color: var(--muted); }
+svg .hl { stroke: var(--text); stroke-width: 1px; opacity: 0.75; } svg .hl.dim, svg .hn.dim { opacity: 0.45; }
+#tgDialBox > label { display: block; } #tgDialBox .dd { display: flex; gap: 6px; align-items: center; } #tgDialBox .dd input { flex: 1 1 auto; min-width: 0; margin: 0; } #tgDialBox .dd select { flex: 0 0 74px; margin: 0; } #tgDialBox .dd button { flex: 0 0 auto; width: auto; margin: 0; min-height: 44px; padding: 0 10px; }
+#tgDialH { margin-top: 3px; } #tgRes .pt { color: var(--muted); }
+#tgList { margin-top: 6px; }
+.lr { display: grid; grid-template-columns: 1fr 52px; gap: 6px; margin-top: 6px; }
+.lr .lrM { margin: 0; min-height: 48px; display: grid; grid-template-columns: 34px auto 1fr auto; gap: 8px; align-items: center; text-align: left; padding: 4px 8px; background: var(--input); color: var(--text); border: 1px solid var(--border); font-size: 0.9rem; font-weight: 700; border-radius: 9px; }
+.lr.on .lrM { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.lr .hn { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 800; box-sizing: border-box; }
+.lr.np .hn, .lr.rdu .hn { background: transparent; color: var(--text); border: 2px dashed var(--muted); }
+.lr .rk { color: var(--muted); font-size: 0.74rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.lr i { font-style: normal; }
+.lr .lrX { margin: 0; width: 52px; min-height: 48px; padding: 0; font-size: 1.3rem; font-weight: 800; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 9px; }
+.lr.dis .rv { text-decoration: line-through; color: var(--hint); }
+.lsub { margin-top: 12px; font-size: 0.78rem; font-weight: 700; color: var(--muted); }
+.lmenu { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; padding: 8px; border: 1px solid var(--accent); border-radius: 10px; background: var(--card); }
+.lmenu button { flex: 1 1 40%; width: auto; margin: 0; min-height: 44px; padding: 4px 10px; font-size: 0.84rem; font-weight: 700; background: var(--input); color: var(--text); border: 1px solid var(--border); }
+.lmenu button.on { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.lmenu button.danger { background: var(--danger-bg); color: var(--err); border-color: var(--danger-b); }
+.lmenu button.ghost { flex: 1 1 100%; } .lmenu small { color: var(--muted); font-weight: 500; }
+.lmT { flex: 1 1 100%; font-size: 0.8rem; font-weight: 700; color: var(--text); }
+.slRow { display: grid; grid-template-columns: minmax(0, 1fr) 78px; gap: 6px; margin: 0 0 6px; } .slRow .slItem { margin: 0; }
+.slTh { margin: 0; width: 78px; min-height: 44px; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 0.66rem; font-weight: 700; line-height: 1.15; text-align: center; }
+.slTh svg.th { width: 56px; height: 56px; border-radius: 6px; flex: 0 0 auto; }
 #tgLoupe svg { width: 100%; height: 100%; display: block; }
 #tgLoupe::after { content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border: 1px solid var(--text); border-radius: 50%; }
 #tgEd.meas .tgSet { display: none; } #tgEd.meas #tgWrap { max-width: 220px; margin: 0 auto; }
@@ -385,15 +410,13 @@ svg.tgS, #tgSvg { width: 100%; aspect-ratio: 1; display: block; border: 1px soli
 #tgMeas .mrow { display: grid; grid-template-columns: 1fr 1.3fr; gap: 6px; margin-top: 6px; align-items: stretch; }
 #tgMeas .seg button { font-size: 1.05rem; font-weight: 800; min-height: 52px; }
 #tgMeas .mval { margin: 0; min-height: 52px; font-size: 1.2rem; font-weight: 800; background: var(--input); color: var(--text); border: 2px solid var(--border); border-radius: 8px; font-variant-numeric: tabular-nums; }
+#tgMPf { text-align: center; min-height: 1.1em; margin: -2px 0 6px; } #tgMeas .mval.pf { border-style: dashed; }
 #tgMeas .mval.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 #tgKeys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
 #tgKeys button { margin: 0; min-height: 50px; font-size: 1.3rem; font-weight: 700; background: var(--input); color: var(--text); border: 1px solid var(--border); }
 #tgMeas .nav { display: grid; grid-template-columns: 1fr 1.4fr 1.4fr; gap: 6px; margin-top: 8px; } #tgMeas .nav button { margin: 0; min-height: 54px; }
-#tgHoles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .hc { width: auto; margin: 0; min-height: 44px; min-width: 44px; padding: 4px 9px; font-size: 0.8rem; font-weight: 600; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 9px; display: inline-flex; gap: 5px; align-items: center; }
 .hc b { font-size: 1rem; } .hc i { font-style: normal; } .hc.on { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
-#tgHoleAct { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; } #tgHoleAct button { flex: 1 1 auto; width: auto; margin: 0; }
-#tgHoleActT { flex: 1 1 100%; font-size: 0.8rem; color: var(--accent); font-weight: 700; }
 .rd { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 6px; }
 .rd .rdPick { margin: 0; min-height: 44px; display: grid; grid-template-columns: 36px auto 1fr; gap: 8px; align-items: center; text-align: left; padding: 4px 8px; background: var(--input); color: var(--text); border: 1px solid var(--border); font-size: 0.86rem; font-weight: 600; }
 .rd .hn { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 800; }
@@ -933,13 +956,15 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
     <div><label for="tgTpl">Template</label><select id="tgTpl"><option value="grid1">1″ grid</option><option value="moa">MOA grid</option><option value="mil">MIL grid</option><option value="bull">Bullseye</option><option value="steel">Steel plate</option></select></div>
     <div><label for="tgDist">Distance</label><div class="dd"><input type="number" inputmode="decimal" id="tgDist" min="5" max="3000"><select id="tgDu" aria-label="Distance unit"><option value="yd">yd</option><option value="m">m</option></select></div></div>
     <div class="full"><label for="tgU">Measure in</label><select id="tgU"><option value="in">inches</option><option value="cm">cm</option></select></div>
+    <div class="full" id="tgDialBox"><label for="tgDialV">Elevation dialed (<span id="tgDialU">mil</span>)</label><div class="dd"><select id="tgDialD" aria-label="Up or down"><option value="U">U ▲</option><option value="D">D ▼</option></select><input type="number" inputmode="decimal" id="tgDialV" min="0" max="300" step="0.05" placeholder="what you dialed"><button type="button" class="sm ghost" id="tgDialApp">App dope</button></div><div class="hint" id="tgDialH"></div></div>
   </div>
   <div class="seg" id="tgMode" role="group" aria-label="Marking mode"><button type="button" data-v="aim">⊕ Aim point</button><button type="button" data-v="hole">● Holes</button><button type="button" data-v="meas">📏 Measure</button></div>
   <div id="tgTip"></div>
-  <div id="tgWrap"><svg id="tgSvg" viewBox="-6 -6 12 12" role="img" aria-label="Target sheet: tap to mark"></svg><div id="tgZoom"><button type="button" id="tgZin" aria-label="Zoom in">＋</button><button type="button" id="tgZout" aria-label="Zoom out" disabled>－</button><span id="tgZoomT"></span></div><div id="tgLoupe" hidden><svg id="tgLoupeSvg" viewBox="0 0 1 1" aria-hidden="true"></svg></div></div>
+  <div id="tgZbar" role="group" aria-label="Zoom"><button type="button" id="tgZout" aria-label="Zoom out" disabled>－</button><span id="tgZoomT">×1</span><button type="button" id="tgZin" aria-label="Zoom in">＋</button><button type="button" id="tgZfit" disabled>Fit</button><span class="zh">Pinch to zoom · two fingers to pan</span></div>
+  <div id="tgWrap"><svg id="tgSvg" viewBox="-6 -6 12 12" role="img" aria-label="Target sheet: tap to mark"></svg><div id="tgLoupe" hidden><svg id="tgLoupeSvg" viewBox="0 0 1 1" aria-hidden="true"></svg></div></div>
   <div id="tgTools"><button type="button" class="sm ghost" id="tgUndo" disabled>↶ Undo</button><input type="text" inputmode="decimal" id="tgAddV" placeholder="fps (optional)" aria-label="Velocity for the added shot (optional)"><button type="button" class="sm ghost" id="tgAddShot">＋ Add shot</button></div>
   <div id="tgMeas" hidden>
-    <div id="tgMeasT"></div>
+    <div id="tgMeasT"></div><div id="tgMPf" class="hint"></div>
     <div id="tgMeasBody">
       <div class="mrow"><div class="seg" id="tgMH" role="group" aria-label="Left or right"><button type="button" data-v="L">◀ L</button><button type="button" data-v="R">R ▶</button></div><button type="button" class="mval" id="tgMX" aria-label="Horizontal distance"></button></div>
       <div class="mrow"><div class="seg" id="tgMV" role="group" aria-label="Up or down"><button type="button" data-v="U">▲ U</button><button type="button" data-v="D">▼ D</button></div><button type="button" class="mval" id="tgMY" aria-label="Vertical distance"></button></div>
@@ -949,10 +974,8 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
     </div>
   </div>
   <div class="sub" style="margin-top:12px">Holes ↔ readings</div>
-  <div class="hint">Tap a hole, then the reading that made it. Numbers match the holes.</div>
-  <div id="tgHoles"></div>
-  <div id="tgHoleAct" hidden><span id="tgHoleActT"></span><button type="button" class="sm ghost" id="tgNoRd">No reading</button><button type="button" class="sm danger" id="tgDelHole">Remove hole</button></div>
-  <div id="tgReads"></div>
+  <div class="hint">One row per hole, numbered as on the target. Tap ⋯ to re-pair, measure or remove; readings with no hole are listed below.</div>
+  <div id="tgList"></div>
   <div id="tgRes"></div>
 </div>
 <div id="shotBan" hidden role="status" aria-live="polite"><button type="button" id="sbMain" aria-label="Open the session"><span id="sbV"></span><span id="sbN"></span><span id="sbSt"></span></button>
@@ -969,7 +992,7 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
   <div id="slStrBar"><div class="hd"><span id="tgHdrT">String 1 · Target A</span><span id="tgHdrS"></span></div>
     <div class="row"><button type="button" class="sm ghost" id="tgNewStr">＋ New string <small>(same sheet)</small></button><button type="button" class="sm ghost" id="tgNewTgt">＋ New target <small>(fresh sheet)</small></button></div>
     <div class="row"><button type="button" class="sm" id="tgMarkBtn">🎯 Mark holes</button></div>
-    <label class="tgChk"><input type="checkbox" id="tgMarkEach"><span>Mark each shot <small class="hint">(adds Mark impact to the shot banner)</small></span></label></div>
+    <label class="tgl" for="tgMarkEach"><span>Mark each shot<small>Adds 🎯 Mark impact to the shot banner</small></span><input type="checkbox" id="tgMarkEach" role="switch"></label></div>
   <div id="slAddRow"><input type="text" inputmode="decimal" autocomplete="off" id="slVel" placeholder="fps" enterkeyhint="done" aria-label="Velocity (fps)"><button type="button" id="slAdd">＋ Add</button></div>
   <div class="hint">Type a velocity and tap Add (or Enter). You can paste several at once, e.g. "2701 2698 2710". Tap Cold/Clean/Flier to tag a shot, ⊘ to discard a double read (kept, grayed, left out of stats).</div>
   <div id="slShots"></div>
@@ -2063,10 +2086,10 @@ function renderLog() {
   const all = list.flatMap(s => s.shots), st = shotStats(all);
   $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} · ${st.n} shots for “${l.name}” · all-shot avg ${st.avg.toFixed(0)} fps, SD ${st.sd.toFixed(1)}`
     : `No sessions yet for “${l.name}”. Tap ＋ Session to type velocities, or import an Athlon file.`;
-  $("slList").innerHTML = list.slice().reverse().map(s => `<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
+  $("slList").innerHTML = list.slice().reverse().map(s => `${tgThumbA(s)}<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
     <span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
     <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
-    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es ?? "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`).join("") + orphanHTML(orph);
+    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>${tgThumbB(s)}`).join("") + orphanHTML(orph);
   paintSel();
   $("slChartBox").style.display = list.length ? "block" : "none";
   if (list.length) drawLogChart(list);
@@ -2091,7 +2114,7 @@ function renderCompare() {
       if (c != null) prev = { c, avg: s.stats.avg };
       return `<tr data-id="${escapeHtml(s.id)}"${best != null && s.stats.n > 2 && s.stats.sd === best ? ' class="best" title="Lowest SD (3+ shots)"' : ""}>${cmpScope === "gun" ? `<td class="l">${escapeHtml(lname(s))}</td>` : ""}
         <td>${c != null ? n1(c) : rc.ldKind === "factory" ? "fact." : "—"}</td><td class="l">${escapeHtml((rc.ldKind === "factory" ? rc.ldProduct || rc.ldMaker : rc.ldPowder) || "—")}</td>
-        <td>${n3(rc.ldCOAL) || "—"}</td><td>${s.stats.n}</td><td>${s.stats.avg.toFixed(0)}</td><td>${s.stats.n > 1 ? s.stats.sd.toFixed(1) : "—"}</td><td>${s.stats.n > 1 ? s.stats.es.toFixed(1) : "—"}</td>
+        <td>${n3(rc.ldCOAL) || "—"}</td><td>${s.stats.n}</td><td>${s.stats.avg.toFixed(0)}</td><td>${s.stats.n > 1 ? s.stats.sd.toFixed(1) : "—"}</td><td>${s.stats.n > 1 ? fpsT(s.stats.es) : "—"}</td>
         <td>${fpg}</td><td>${(s.wx.powder ?? s.wx.temp) != null ? fmt(s.wx.powder ?? s.wx.temp, 0) : "—"}</td><td>${escapeHtml(new Date(s.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</td></tr>`; }).join("") + "</tbody></table>" +
     `<div class="hint">Sorted by charge (from each session's saved recipe). Highlighted = lowest SD with 3+ shots. fps/gr = velocity gain per grain from the previous charge. Tap a row to open it.</div>`;
 }
@@ -2106,7 +2129,7 @@ function orphanHTML(list) {
   return `<div class="slGrp">⚠ Unassigned sessions (${list.length}) — their gun or load was deleted. Tap one and use ↔ Move to give it a home.</div>` + list.map(s => {
     const h = sessHome(s), was = [s.recipe?.gunName, s.recipe?.loadName].filter(Boolean).join(" · ");
     return `<button type="button" class="slItem orphan" data-id="${escapeHtml(s.id)}"><span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
-    <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}</span><span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es ?? "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
+    <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}</span><span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
   }).join("");
 }
 function sessionsCSV() {
@@ -2203,18 +2226,18 @@ $("slEdRecipeBtn").onclick = () => {
 };
 function renderEditor() {
   const st = shotStats(ED.shots), f = v => v == null ? "—" : (+v).toFixed(1);
-  $("slStats").innerHTML = [["Avg fps", st.n ? st.avg.toFixed(1) : "—"], ["SD", st.n > 1 ? f(st.sd) : "—"], ["ES", st.n > 1 ? f(st.es) : "—"],
-    ["Shots", st.n], ["Min", st.n ? f(st.min) : "—"], ["Max", st.n ? f(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
+  $("slStats").innerHTML = [["Avg fps", st.n ? fpsT(st.avg) : "—"], ["SD", st.n > 1 ? f(st.sd) : "—"], ["ES", st.n > 1 ? fpsT(st.es) : "—"],
+    ["Shots", st.n], ["Min", st.n ? fpsT(st.min) : "—"], ["Max", st.n ? fpsT(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
   const tv = tgView(ED), multi = tv.strings.length > 1;
   const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}">
-    <span class="n">#${i + 1}</span><span><span class="v">${s.v.toFixed(1)}</span> <span class="dv">${s.x ? "discarded" : sst.n > 1 ? (s.v - sst.avg >= 0 ? "+" : "") + (s.v - sst.avg).toFixed(1) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
+    <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "discarded" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
     <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot (double read)" title="${s.x ? "Restore" : "Discard (stays visible, out of stats)"}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
     <div class="tgs"><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold">Cold</button><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean">Clean</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl">Flier</button>
     <button type="button" class="tg${s.note ? " on" : ""}" data-f="noteT" aria-label="Note">✎</button>${multi ? `<span class="sl">${mkGlyph(si)}S${si + 1}</span>` : ""}</div>
     ${s.note || s._showNote ? `<input class="note" type="text" maxlength="200" placeholder="shot note" value="${escapeHtml(s.note || "")}">` : ""}</div>`;
   const all = ED.shots.map((s, i) => ({ s, i }));
   $("slShots").innerHTML = (multi ? tv.strings.map((q, si) => ({ q, si })).reverse().map(({ q, si }) => { const mine = all.filter(o => strOf(ED, o.s) === q.id), sst = shotStats(mine.map(o => o.s));
-      return `<div class="sgh">${mkGlyph(si)}String ${si + 1} · Target ${tgtLetter(tv, q.tid)}<small>${mine.length} shot${mine.length === 1 ? "" : "s"}${sst.n ? ` · avg ${sst.avg.toFixed(1)}` : ""}${sst.n > 1 ? ` · SD ${sst.sd.toFixed(1)} · ES ${sst.es.toFixed(1)}` : ""}</small></div>` + mine.reverse().map(o => row(o, sst, si)).join(""); }).join("")
+      return `<div class="sgh">${mkGlyph(si)}String ${si + 1} · Target ${tgtLetter(tv, q.tid)}<small>${mine.length} shot${mine.length === 1 ? "" : "s"}${sst.n ? ` · avg ${fpsT(sst.avg)}` : ""}${sst.n > 1 ? ` · SD ${sst.sd.toFixed(1)} · ES ${fpsT(sst.es)}` : ""}</small></div>` + mine.reverse().map(o => row(o, sst, si)).join(""); }).join("")
     : all.reverse().map(o => row(o, st, 0)).join("")) ||
     `<div class="hint" style="padding:8px 0">No shots yet.</div>`;
   paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
@@ -2480,7 +2503,7 @@ function radarPaint() {
   }
   $("radarMore").hidden = RD.status === "idle" && !RD.opened;
   const name = RD.dev?.name || "radar", bt = RD.battery != null ? ` · 🔋 ${RD.battery}%` : "", fw = RD.fw ? ` · fw ${RD.fw}` : "";
-  const last = RD.last ? ` · last ${RD.last.fps.toFixed(1)} fps (#${RD.last.n})` : "";
+  const last = RD.last ? ` · last ${fpsT(RD.last.fps)} fps (#${RD.last.n})` : "";
   const wait = RD.pending.length ? ` · ${RD.pending.length} shot${RD.pending.length > 1 ? "s" : ""} waiting: pick a load` : "";
   const txt = {
     idle: "Not connected.", connecting: `Connecting to ${name}…`, connected: `🟢 Connected: ${name}${bt}${fw}${last}${wait}`,
@@ -2523,8 +2546,8 @@ function radarFrame(f) {
   try { localStorage.setItem(K_RSEEN, JSON.stringify(RD.seen)); } catch {}
   RD.last = { n: s.n, fps: s.fps };
   RD.pending.push({ n: s.n, fps: s.fps, timeStr: p.timeStr });
-  if (!curLoad()) toast(`Radar shot ${s.fps.toFixed(1)} fps held: pick a load to log it`);
-  else toast(`📡 Shot #${s.n}: ${s.fps.toFixed(1)} fps`);
+  if (!curLoad()) toast(`Radar shot ${fpsT(s.fps)} fps held: pick a load to log it`);
+  else toast(`📡 Shot #${s.n}: ${fpsT(s.fps)} fps`);
   if (navigator.vibrate) try { navigator.vibrate(40); } catch {}
   radarFlush();
 }
@@ -2641,8 +2664,8 @@ function mvAdjOn() { return !!num("ptSens") && num("mvTemp") != null && powderT(
 function mvAt(Tp, base) { return mvAdjust(base, num("ptSens"), num("mvTemp"), Tp); }
 function chronoFrom(mvToday, Tp) { return mvAdjOn() ? mvToday - num("ptSens") / 10 * (Tp - num("mvTemp")) : mvToday; }
 function curCond() { return { temp: num("temp"), hum: num("humidity"), alt: num("altitude"), press: num("pressure") }; }
-function zeroCond() {   // null = zero in today's conditions
-  const c = curCond(), zt = num("zTemp"), zp = num("zPress"), za = num("zAlt"), zh = num("zHum");
+function zeroCond(c0) {   // null = zero in today's conditions (or the given ones)
+  const c = c0 || curCond(), zt = num("zTemp"), zp = num("zPress"), za = num("zAlt"), zh = num("zHum");
   if (zt == null && zp == null && za == null && zh == null) return null;
   return { temp: zt ?? c.temp, hum: zh ?? c.hum, alt: za ?? c.alt, press: zp != null ? zp : za != null ? null : c.press };
 }
@@ -2663,10 +2686,10 @@ async function solveShot(o = {}) {
       weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) })
     : new DragModel({ bc: num("bc") * k, dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
       weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
-  const Tp = powderT(), zc = zeroCond(), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
+  const Tp = o.Tp != null ? o.Tp : powderT(), zc = zeroCond(o.cond), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
   const mvNow = mvAt(Tp, base), mvZero = zc ? mvAt(num("zTemp") ?? Tp, base) : mvNow;
   const weapon = new Weapon({ sightHeight: UNew.Inch(effSH()), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
-  const atmo = mkAtmo(curCond()), calc = new Calculator();
+  const atmo = mkAtmo(o.cond || curCond()), calc = new Calculator();
   const zShot = new Shot({ weapon, ammo: new Ammo({ dm, mv: UNew.FPS(mvZero) }), atmo: zc ? mkAtmo(zc) : atmo });
   await calc.setWeaponZero(zShot, UNew.Yard(num("zero")));
   const ammo = new Ammo({ dm, mv: UNew.FPS(mvNow) });
@@ -2769,12 +2792,12 @@ $("trWhat").addEventListener("click", e => { const b = e.target.closest("button"
 function openTrue() {
   if (!B || !lastRun) { toast("Fix the inputs so a solution shows first"); return; }
   if (!curLoad()) { toast("Pick or save a load first (Gear tab)"); return; }
-  TR.unit = S.ang; if (!val("trRange")) setVal("trRange", num("target") || 600); setVal("trAngle", 0);
+  TR.cond = null; TR.unit = S.ang; if (!val("trRange")) setVal("trRange", num("target") || 600); setVal("trAngle", 0);
   $("trFor").textContent = `${curLoad().name} · MV ${Math.round(lastRun.mvNow)} fps today · BC ${val("bc")} ${$("drag").value} · ${val("temp")}°F`;
   $("trOut").textContent = ""; $("trSave").disabled = true; TR.res = null; trPaint(); openOvl("trSheet");
 }
 async function predAt(d, o) {
-  const sv = await solveShot({ ...o, winds: [] }), look = TR.look || 0, cosA = Math.cos(look * Math.PI / 180);
+  const sv = await solveShot({ ...(TR.cond || {}), ...o, winds: [] }), look = TR.look || 0, cosA = Math.cos(look * Math.PI / 180);
   if (look) sv.shot.lookAngle = B.UNew.Degree(look);
   const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(d * cosA), trajectoryStep: B.UNew.Yard(d * cosA), raiseRangeError: false });
   const p = r.samples[r.samples.length - 1]; if (!p || Math.abs(p.distance.In(B.Distance.Yard) - d * cosA) > 1) return null;
@@ -2803,11 +2826,11 @@ async function solveTrue() {
 }
 function scaleBands(str, k) { return String(str || "").replace(/([\d.]+)@/g, (m, b) => (parseFloat(b) * k).toFixed(3) + "@"); }
 function saveTrue() {
-  const r = TR.res, l = curLoad(); if (!r || !l) return;
+  const r = TR.res, l = curLoad(); if (!r || !l) return; const tpS = TR.cond && TR.cond.Tp != null ? TR.cond.Tp : powderT();
   const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }), U = r.unit === "IN" ? '" low' : " " + r.unit;
-  if (r.what === "mv") { setVal("mv", Math.round(chronoFrom(r.x, powderT()))); $("mvSource").value = "trued"; }
+  if (r.what === "mv") { setVal("mv", Math.round(chronoFrom(r.x, tpS))); $("mvSource").value = "trued"; }
   else { setVal("bc", (r.bc0 * r.x).toFixed(3)); if (val("bcBands")) $("bcBands").value = scaleBands(val("bcBands"), r.x); }
-  $("trued").value = `Trued at ${r.d} yd on ${date}: ${r.what === "mv" ? `MV ${Math.round(r.x)} fps @ ${fmt(powderT(), 0)}°F` : `BC ×${r.x.toFixed(3)}`} (observed ${r.obs}${U}${TR.look ? `, ${fmt(TR.look, 0)}° angle` : ""})`;
+  $("trued").value = `Trued at ${r.d} yd on ${date}: ${r.what === "mv" ? `MV ${Math.round(r.x)} fps @ ${fmt(tpS, 0)}°F` : `BC ×${r.x.toFixed(3)}`} (observed ${r.obs}${U}${TR.look ? `, ${fmt(TR.look, 0)}° angle` : ""})`;
   updateDirty(); renderBulletInfo(); closeOvl("trSheet"); schedule(); toast(`Saved to “${l.name}” · ${$("trued").value}`);
 }
 $("trueBtn").onclick = openTrue;
@@ -3030,10 +3053,21 @@ function cleanTg(t, ids) {
     holes: (Array.isArray(s.holes) ? s.holes : []).filter(h => h && typeof h === "object").slice(0, 200).map(h => {
       const p = tgPt(h) || { x: 0, y: 0 }, m = tgPt(h.m); let sh = h.sh != null && ids.has(String(h.sh)) ? String(h.sh) : null;
       if (sh && used.has(sh)) sh = null; if (sh) used.add(sh);   // one reading ↔ one hole
-      const o = { id: sstr(h.id, 20) || uid(), x: p.x, y: p.y, sh }; if (m) o.m = m; if (!sh && h.nr) o.nr = true; return o; }) }));
+      const o = { id: sstr(h.id, 20) || uid(), x: p.x, y: p.y, sh }; if (m) o.m = m; if (!sh && h.nr) o.nr = true; if (h.ad && !m) o.ad = true; return o; }) }))
+    .map((st, i) => { const d = cleanDial(t.strings.filter(q => q && typeof q === "object")[i].dial); if (d) st.dial = d; return st; });
   if (!strings.length) return null;
   return { targets, strings, cur: strings.some(s => s.id === t.cur) ? t.cur : strings[strings.length - 1].id, mark: !!t.mark };
 }
+function cleanDial(d) {   // elevation dialed for a string: e in unit u (turret reading, display unit at the time), c clicks, k tracking factor, wx conditions + angle then
+  if (!d || typeof d !== "object") return null; const e = tgFin(d.e); if (e == null) return null;
+  const o = { e, u: d.u === "MOA" ? "MOA" : "MIL", src: d.src === "app" ? "app" : "user" }, c = tgFin(d.c), k = tgFin(d.k);
+  if (c != null) o.c = Math.round(c); if (typeof d.cl === "string" && d.cl) o.cl = sstr(d.cl, 24); if (k != null && k >= 0.8 && k <= 1.2) o.k = k;
+  if (d.wx && typeof d.wx === "object") { const w = {}; ["temp", "hum", "alt", "press", "tp", "look", "yd"].forEach(q => { const v = tgFin(d.wx[q]); if (v != null) w[q] = v; }); o.wx = w; }
+  if (typeof d.at === "number" && isFinite(d.at) && d.at > 0) o.at = Math.round(d.at);
+  return o;
+}
+function angConv(v, from, to) { return from === to ? v : from === "MIL" ? v * 3.437747 : v / 3.437747; }
+function fpsT(v) { return String(Math.round(v)); }   // speeds shown to the whole fps (stored precision kept)
 function tgDefDist() { const d = num("target"); return d > 0 ? d : 100; }
 function tgView(s) { return s.tg || { targets: [{ id: "_t", tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: "_s", tid: "_t", aim: null, holes: [] }], cur: "_s", mark: false, virt: true }; }
 function tgEnsure(s) {
@@ -3072,9 +3106,10 @@ function tsFor(rid) {   // the turret of the session's gun (its optic, else the 
   const r = P.rifles.find(x => x.id === rid);
   if (r && curRifle() === r) return turretSpec();
   const o = r && r.opticId && (P.optics || []).find(x => x.id === r.opticId), key = o ? o.opTurret : r && r.turret;
-  if (key && TURRETS[key]) { const [u, v, lbl] = TURRETS[key]; return { u, v, lbl }; }
-  if (key === "custom") { const v = parseFloat(o ? o.opTurretV : r.turretV), u = (o ? o.opTurretU : r.turretU) === "moa" ? "MOA" : "MIL"; if (v > 0) return { u, v, lbl: `${v} ${angU(u)}` }; }
-  return S.ang === "MOA" ? { u: "MOA", v: 0.25, lbl: "\u00bc MOA" } : { u: "MIL", v: 0.1, lbl: "0.1 mil" };
+  const tk = o ? parseFloat(o.opTrack) : NaN, k = tk >= 0.8 && tk <= 1.2 ? tk : 1;
+  if (key && TURRETS[key]) { const [u, v, lbl] = TURRETS[key]; return { u, v, lbl, k }; }
+  if (key === "custom") { const v = parseFloat(o ? o.opTurretV : r.turretV), u = (o ? o.opTurretU : r.turretU) === "moa" ? "MOA" : "MIL"; if (v > 0) return { u, v, lbl: `${v} ${angU(u)}`, k }; }
+  return S.ang === "MOA" ? { u: "MOA", v: 0.25, lbl: "\u00bc MOA", k } : { u: "MIL", v: 0.1, lbl: "0.1 mil", k };
 }
 function tgNice(x) { const p = Math.pow(10, Math.floor(Math.log10(x))), f = x / p; return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p; }
 
@@ -3123,19 +3158,38 @@ function tplGrid(tpl, yd, span, u, ext) {   // returns { step, svg } in drawing 
   const st = span > 48 ? tgNice(span / 24) : 1; return { step: st, unit: "in", svg: grid(st, st === 1 ? 6 : 0) };
 }
 // layers: [{ i (string index for color/shape), aim {x,y}|null, holes: [{ p {x,y}, n, meas, sel, id }], dim }]
+function tgLabels(layers, r, fs) {   // place hole numbers so they don't sit on each other or on holes (current string first); far ones get a leader line
+  const all = [], out = new Map(), boxes = [];
+  layers.forEach((Ly, li) => Ly.holes.forEach((H, hi) => all.push({ k: li + ":" + hi, x: H.p.x, y: -H.p.y, w: fs * (0.62 * String(H.n).length + 0.45), dim: !!Ly.dim })));
+  const hit = (b) => boxes.some(q => Math.abs(q.x - b.x) * 2 < q.w + b.w && Math.abs(q.y - b.y) * 2 < q.h + b.h) || all.some(p => Math.abs(p.x - b.x) < b.w / 2 + r * 0.95 && Math.abs(p.y - b.y) < b.h / 2 + r * 0.95);
+  const dirs = [[1, -1], [-1, -1], [1, 1], [-1, 1], [1, 0], [-1, 0], [0, -1], [0, 1]];
+  [...all].sort((a, b) => a.dim - b.dim).forEach(p => {
+    let best = null;
+    for (const m of [1, 1.8, 2.7, 3.7, 4.8, 6]) { for (const [dx, dy] of dirs) { const n = Math.hypot(dx, dy), d = r + fs * 0.55 * m;
+      const b = { x: p.x + dx / n * (d + p.w * 0.3 * Math.abs(dx / n)), y: p.y + dy / n * d, w: p.w, h: fs * 1.4 }; if (!hit(b)) { best = { ...b, m, dx: dx / n, dy: dy / n }; break; } } if (best) break; }
+    if (!best) { const n = Math.SQRT2; best = { x: p.x + (r + fs) / n, y: p.y - (r + fs) / n, w: p.w, h: fs * 1.4, m: 1, dx: 1 / n, dy: -1 / n }; }
+    boxes.push(best);
+    const lead = best.m > 1, o = { x: best.x, y: best.y, lead };
+    if (lead) { o.lx = p.x + best.dx * r * 1.1; o.ly = p.y + best.dy * r * 1.1; o.ex = best.x - best.dx * fs * 0.45; o.ey = best.y - best.dy * fs * 0.45; }
+    out.set(p.k, o);
+  });
+  return out;
+}
 function tgSvg(o) {
-  const S2 = o.span, h = S2 / 2, cx = o.cx || 0, cy = o.cy || 0, r = S2 / 58 * (o.mk || 1), fs = r * 1.9, g = tplGrid(o.tpl, o.yd, o.gspan || S2, o.u, h + Math.max(Math.abs(cx), Math.abs(cy)));
+  const S2 = o.span, h = S2 / 2, cx = o.cx || 0, cy = o.cy || 0, r = S2 / 58 * (o.mk || 1), fs = Math.max(r * 1.9, (o.px || 0) * 13), g = tplGrid(o.tpl, o.yd, o.gspan || S2, o.u, h + Math.max(Math.abs(cx), Math.abs(cy)));
   let s = `<rect class="sheet" x="${(cx - h).toFixed(3)}" y="${(-cy - h).toFixed(3)}" width="${S2.toFixed(3)}" height="${S2.toFixed(3)}"/>`;
   s += `<g class="grid" data-step="${g.step.toFixed(4)}" data-unit="${g.unit}" transform="translate(${(0).toFixed(3)},0)">${g.svg}</g>`;
-  o.layers.forEach(Ly => {
+  const LB = tgLabels(o.layers, r, fs);
+  o.layers.forEach((Ly, li) => {
     const sh = TG_SHAPES[Ly.i % 8], cl = `ms s${Ly.i % 6 + 1}${Ly.dim ? " dim" : ""}`;
     if (Ly.aim) { const ax = Ly.aim.x, ay = -Ly.aim.y, a = r * 2.6;
       s += `<g class="aim${Ly.dim ? " dim" : ""}" data-s="${Ly.sid || ""}"><line x1="${(ax - a).toFixed(3)}" y1="${ay.toFixed(3)}" x2="${(ax + a).toFixed(3)}" y2="${ay.toFixed(3)}" vector-effect="non-scaling-stroke"/><line x1="${ax.toFixed(3)}" y1="${(ay - a).toFixed(3)}" x2="${ax.toFixed(3)}" y2="${(ay + a).toFixed(3)}" vector-effect="non-scaling-stroke"/><circle cx="${ax.toFixed(3)}" cy="${ay.toFixed(3)}" r="${(r * 1.3).toFixed(3)}" vector-effect="non-scaling-stroke"/></g>`; }
-    Ly.holes.forEach(H => { const x = H.p.x, y = -H.p.y;
+    Ly.holes.forEach((H, hi) => { const x = H.p.x, y = -H.p.y, L = LB.get(li + ":" + hi);
       s += `<g class="hole${H.sel ? " sel" : ""}${H.meas ? " meas" : ""}" data-h="${H.id || ""}" data-n="${H.n}">` +
         (H.sel ? `<circle class="selr" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(r * 2.3).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
         (H.meas ? `<circle class="mr s${Ly.i % 6 + 1}" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(r * 1.75).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
-        `<g class="${cl}">${shpPath(sh, x, y, r)}</g><text class="hn" x="${(x + r * 1.5).toFixed(3)}" y="${(y - r * 1.2).toFixed(3)}" font-size="${fs.toFixed(3)}">${H.n}</text></g>`; });
+        `<g class="${cl}">${shpPath(sh, x, y, r)}</g>` + (L.lead ? `<line class="hl${Ly.dim ? " dim" : ""}" x1="${L.lx.toFixed(3)}" y1="${L.ly.toFixed(3)}" x2="${L.ex.toFixed(3)}" y2="${L.ey.toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
+        `<text class="hn${Ly.dim ? " dim" : ""}" x="${L.x.toFixed(3)}" y="${L.y.toFixed(3)}" font-size="${fs.toFixed(3)}" text-anchor="middle" dominant-baseline="central">${H.n}</text></g>`; });
   });
   return { vb: `${(cx - h).toFixed(3)} ${(-cy - h).toFixed(3)} ${S2.toFixed(3)} ${S2.toFixed(3)}`, html: s, grid: g };
 }
@@ -3149,9 +3203,9 @@ function banPaint() {
   const el = $("shotBan"); if (!BAN.sid) return;
   const s = banSess(), x = s && s.shots.find(q => q.id === BAN.shid); if (!x) { banHide(); return; }
   const t = tgView(s), sid = strOf(s, x), rd = readings(s, sid), st = shotStats(rd), k = rd.indexOf(x) + 1;
-  $("sbV").textContent = x.v.toFixed(1);
+  $("sbV").textContent = fpsT(x.v);
   $("sbN").textContent = `Shot ${k} · String ${strNo(t, sid)} · Target ${tgtLetter(t, t.strings.find(q => q.id === sid).tid)}`;
-  $("sbSt").textContent = st.n ? `avg ${st.avg.toFixed(1)} · ES ${st.n > 1 ? st.es.toFixed(1) : "—"} · SD ${st.n > 1 ? st.sd.toFixed(1) : "—"}${st.n < rd.length ? ` · ${rd.length - st.n} discarded` : ""}` : "no kept shots";
+  $("sbSt").textContent = st.n ? `avg ${fpsT(st.avg)} · ES ${st.n > 1 ? fpsT(st.es) : "—"} · SD ${st.n > 1 ? st.sd.toFixed(1) : "—"}${st.n < rd.length ? ` · ${rd.length - st.n} discarded` : ""}` : "no kept shots";
   el.querySelectorAll("#sbActs button[data-a]").forEach(b => { const a = b.dataset.a; if (a === "mark") { b.hidden = !t.mark; return; }
     const on = !!x[a]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (a === "x") b.textContent = on ? "↺ Restore" : "Discard"; });
   el.classList.toggle("dis", !!x.x);
@@ -3212,7 +3266,7 @@ function paintTgView() {
   const yds = [...new Set(shown.map(o => Math.round(tgYd(o.g))))], ts = tsFor(ED.rifleId), ang = yds.length > 1 ? ts.u : null, lu = shown[0]?.g.u || "in";
   const conv = (p, g) => ang ? { x: p.x / inPerU(ang, tgYd(g)), y: p.y / inPerU(ang, tgYd(g)) } : p;
   let mx = 0; const layers = shown.map(o => ({ i: o.i, sid: o.st.id, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = conv(hoff(o.st, h), o.g); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: k + 1, meas: !!h.m, id: h.id }; }) }));
-  const span = Math.max(ang ? 2 : 3, mx * 2.5), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers });
+  const span = Math.max(ang ? 2 : 3, mx * 2.5), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers, px: span / Math.max(200, box.clientWidth || 380) });
   const chips = vis.map(o => { const on = !TV.hide.has(o.st.id), gs = grpStats(o.st.holes.map(h => hoff(o.st, h)));
     return `<button type="button" class="sc${on ? " on" : ""}" data-s="${escapeHtml(o.st.id)}" aria-pressed="${on}">${mkGlyph(o.i)}S${o.i + 1} · ${tgtLetter(t, o.st.tid)} · ${fmt(o.g.dist, 0)} ${o.g.du}${gs && gs.n > 1 ? ` · ${lenTxt(gs.es, o.g.u)}` : ""}</button>`; }).join("");
   box.innerHTML = `<div class="scRow" role="group" aria-label="Show or hide strings">${chips}</div>` +
@@ -3235,11 +3289,68 @@ function tgNewString(newTarget) {
   tgAfterEdit();
   const nc = t.strings.find(s => s.id === t.cur), msg = `String ${strNo(t, nc.id)} · Target ${tgtLetter(t, nc.tid)}${newTarget ? " (fresh sheet)" : " (same sheet, new aim point)"}`;
   if (needMark) toast(`${msg} — String ${curNo} has no holes marked`, { label: "Mark holes", fn: () => openTgEd(cur.id) }); else toast(msg);
+  tgAutoDial(ED, nc);
 }
 $("tgNewStr").onclick = () => tgNewString(false);
 $("tgNewTgt").onclick = () => tgNewString(true);
 $("tgMarkBtn").onclick = () => { if (!ED) return; const t = tgEnsure(ED); openTgEd(t.cur); };
 $("tgMarkEach").onchange = e => { if (!ED) return; tgEnsure(ED).mark = e.target.checked; tgAfterEdit(); if (BAN.sid === ED.id) banPaint(); };
+
+/* ---- elevation dialed per string (defaults to the app's dope at that moment) ---- */
+function tgSame() { return !!(ED && curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId); }
+async function tgDope(yd) {   // the dope the app shows now (conditions + shot angle on the Dope tab) at yd, as the turret reading (÷ tracking) + clicks
+  if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return null;
+  try {
+    const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    if (look) sv.shot.lookAngle = B.UNew.Degree(look);
+    const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
+    const p = r.samples[r.samples.length - 1]; if (!p || Math.abs(p.distance.In(B.Distance.Yard) - yd * cosA) > 1) return null;
+    const a = angs(p), ts = turretSpec(), c = curCond();
+    return cleanDial({ e: a.e, u: S.ang, c: a.ec, cl: ts.lbl, k: ts.k || 1, src: "app", wx: { temp: c.temp, hum: c.hum, alt: c.alt, press: c.press, tp: powderT(), look, yd }, at: Date.now() });
+  } catch { return null; }
+}
+function tgWxSnap(yd) { const c = curCond(); return { temp: c.temp, hum: c.hum, alt: c.alt, press: c.press, tp: powderT(), look: num("shotAngle") || 0, yd }; }
+function tgRecent(s) { const t = new Date(s && s.date).getTime(); return !isFinite(t) || Date.now() - t < 864e5; }
+async function tgAutoDial(sess, st) {   // when a string is started or first marked
+  if (!sess || !st || st.dial || !tgSame() || ED !== sess) return;
+  const g = sess.tg.targets.find(q => q.id === st.tid), d = await tgDope(tgYd(g) || tgDefDist());
+  if (!d || st.dial || ED !== sess) return;
+  st.dial = d; edDirty = true; if (!sess._new && sess.source === "bluetooth") commitEditor();
+  if (TE && teStr() === st) teRender();
+}
+async function tgRedope(g) {   // distance changed: an unedited app-dope dial follows it (an edited one is the shooter's and stays)
+  if (!ED || !g || !tgSame()) return; const sess = ED, d = await tgDope(tgYd(g)); if (!d || ED !== sess) return;
+  let n = 0; sess.tg.strings.forEach(st => { if (st.tid === g.id && st.dial && st.dial.src === "app") { st.dial = { ...d }; n++; } });
+  if (n) { tgAfterEditQuiet(); if (TE) teRender(); }
+}
+function dialTxt(d, U) {   // "U 1.20 mil"
+  const v = angConv(d.e, d.u, U); return `${v >= 0 ? "U" : "D"} ${Math.abs(v).toFixed(2)} ${angU(U)}`;
+}
+function teDialPaint() {
+  const st = teStr(), d = st.dial, U = S.ang, ts = tsFor(ED.rifleId);
+  $("tgDialU").textContent = angU(U);
+  if (document.activeElement !== $("tgDialV")) setVal("tgDialV", d ? +Math.abs(angConv(d.e, d.u, U)).toFixed(3) : "");
+  $("tgDialD").value = d && angConv(d.e, d.u, U) < 0 ? "D" : "U";
+  const w = d && d.wx, wx = w ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", `${fmt(w.look || 0, 0)}° angle`].filter(Boolean).join(" · ") : "";
+  $("tgDialH").innerHTML = d ? `= ${d.c != null ? `${d.c >= 0 ? "U" : "D"} ${Math.abs(d.c)} clicks (${escapeHtml(d.cl || ts.lbl)})` : ""}${d.k && d.k !== 1 ? ` · tracking ×${fmt(d.k, 3)}` : ""} · ${d.src === "app" ? "app dope" : "edited"}${wx ? ` · saved with ${wx}` : ""}`
+    : `Not saved — enter what you dialed${tgSame() ? " or tap App dope" : ""}. Truing then falls back to today's prediction.`;
+}
+async function teDialSet(raw, dir) {
+  const st = teStr(); if (!st) return; const v = parseFloat(raw);
+  if (raw === "" || raw == null) { if (st.dial) { teSnap(); delete st.dial; tgAfterEditQuiet(); } teRender(); return; }
+  if (!(v >= 0 && v <= 300)) { toast("Elevation 0–300"); teDialPaint(); return; }
+  const U = S.ang, ts = tsFor(ED.rifleId), e = dir === "D" ? -v : v, eT = angConv(e, U, ts.u), old = st.dial;
+  teSnap(); st.dial = cleanDial({ e, u: U, c: Math.round(eT / ts.v), cl: ts.lbl, k: old && old.k || ts.k || 1, src: old && old.src === "app" && Math.abs(angConv(old.e, old.u, U) - e) < 1e-6 ? "app" : "user",
+    wx: old && old.wx || tgWxSnap(tgYd(teTgt())), at: old && old.at || Date.now() });
+  tgAfterEditQuiet(); teRender();
+}
+$("tgDialV").addEventListener("change", e => teDialSet(e.target.value.trim(), $("tgDialD").value));
+$("tgDialD").onchange = () => teDialSet($("tgDialV").value.trim(), $("tgDialD").value);
+$("tgDialApp").onclick = async () => {
+  if (!TE) return; const st = teStr(), d = await tgDope(tgYd(teTgt()));
+  if (!d) { toast(tgSame() ? "No dope at that distance — check the inputs on the Dope tab" : "Pick this session's gun + load on Gear to use its dope"); return; }
+  teSnap(); st.dial = d; tgAfterEditQuiet(); teRender(); toast(`Dial set to the app's dope: ${dialTxt(d, S.ang)}`);
+};
 
 /* ---- target editor ---- */
 function teStr() { return ED && ED.tg && ED.tg.strings.find(s => s.id === TE.str); }
@@ -3259,6 +3370,7 @@ function openTgEd(strId, opts = {}) {
   $("tgEd").classList.add("show"); $("tgEd").scrollTop = 0; $("tgUndo").disabled = true;
   if (BAN.sid === ED.id) banPaint();
   teRender();
+  if (!st.holes.length && !st.dial && tgRecent(ED)) tgAutoDial(ED, st);   // first marked: default to the dope at this moment
 }
 async function closeTgEd() {
   if (!TE) return; if (TE.mode === "meas") teMeasCommit();
@@ -3277,12 +3389,17 @@ function teDraw() {
   const layers = t.strings.map((s, i) => ({ s, i })).filter(o => o.s.tid === g.id).map(o => ({ i: o.i, sid: o.s.id, dim: o.s.id !== st.id, aim: o.s.aim,
     holes: o.s.holes.map((h, k) => ({ p: hpos(o.s, h), n: k + 1, meas: !!h.m, sel: o.s.id === st.id && h.id === TE.sel, id: o.s.id === st.id ? h.id : "" })) }));
   layers.sort((a, b) => (a.dim ? 0 : 1) - (b.dim ? 0 : 1));
-  const z = TE.zoom || 1, c = z > 1 && st.aim ? st.aim : { x: 0, y: 0 };
-  const sv = tgSvg({ span: TE.span / z, gspan: TE.span, cx: c.x, cy: c.y, tpl: g.tpl, yd, layers, mk: Math.max(0.5, 1 / Math.sqrt(z)) });
-  $("tgZoomT").textContent = z > 1 ? `×${z}` : ""; $("tgZin").disabled = z >= 8; $("tgZout").disabled = z <= 1;
+  const z = TE.zoom || 1, c = teCenter(z), W = TE.span / z;
+  const sv = tgSvg({ span: W, gspan: TE.span, cx: c.x, cy: c.y, tpl: g.tpl, yd, layers, mk: Math.max(0.5, 1 / Math.sqrt(z)), px: W / Math.max(120, $("tgSvg").clientWidth || 380) });
+  $("tgZoomT").textContent = `×${+z.toFixed(1)}`; $("tgZin").disabled = z >= 8; $("tgZout").disabled = z <= 1; $("tgZfit").disabled = z <= 1;
   const svg = $("tgSvg"); svg.setAttribute("viewBox", sv.vb); svg.innerHTML = sv.html; TE.vb = sv; TE.grid = sv.grid;
   return sv;
 }
+function teCenter(z) {   // view center (sheet in), kept inside the sheet
+  if (z <= 1) return { x: 0, y: 0 }; const st = teStr(), c = TE.zc || (st && st.aim) || { x: 0, y: 0 }, lim = TE.span / 2 - TE.span / z / 2;
+  return { x: Math.max(-lim, Math.min(lim, c.x)), y: Math.max(-lim, Math.min(lim, c.y)) };
+}
+function teZoomTo(z) { z = Math.max(1, Math.min(8, z)); TE.zoom = z; TE.zc = z <= 1 ? null : teCenter(z); teDraw(); }   // ＋/－ keep the current center (the aim point when starting from ×1)
 function teRender() {
   if (!TE || !ED) return; const t = ED.tg, st = teStr(), g = teTgt(), n = strNo(t, st.id);
   $("tgEdT").textContent = `String ${n} · Target ${tgtLetter(t, g.id)}`;
@@ -3293,8 +3410,8 @@ function teRender() {
   const rd = readings(ED, st.id), pn = TE.pairNext && rd.findIndex(x => x.id === TE.pairNext) + 1;
   $("tgTip").textContent = TE.mode === "aim" ? `Tap the aim point for String ${n} (drag to adjust).`
     : TE.mode === "meas" ? (st.holes.length ? "Measure from the aim point to the center of each hole." : "Tap holes first (or ＋ Add shot), then measure them.")
-    : !st.aim ? "Set the aim point first (⊕ Aim point)." : pn ? `Tap where shot ${pn} hit.` : "Tap each hole in the order fired · drag a hole to adjust · tap its center (or its chip below) to select it.";
-  teDraw(); teMeasPaint(); tePair(); teResults();
+    : !st.aim ? "Set the aim point first (⊕ Aim point)." : pn ? `Tap where shot ${pn} hit.` : "Tap each hole in the order fired · drag a hole to adjust · tap its center (or its row below) to select it.";
+  teDraw(); teMeasPaint(); tePair(); teDialPaint(); teResults();
 }
 function teMeasPaint() {
   const box = $("tgMeas"), st = teStr(); box.hidden = TE.mode !== "meas"; if (box.hidden) return;
@@ -3302,31 +3419,34 @@ function teMeasPaint() {
   $("tgMeasBody").hidden = false;
   if (!TE.m || TE.m.i >= st.holes.length) teMeasEnter(Math.min(TE.m ? TE.m.i : 0, st.holes.length - 1), true);
   const m = TE.m, u = teTgt().u;
-  $("tgMeasT").textContent = `Hole ${m.i + 1} of ${st.holes.length}${st.holes[m.i].m ? " · 📏 measured" : " · 👆 tapped"}`;
+  $("tgMeasT").textContent = `Hole ${m.i + 1} of ${st.holes.length}${st.holes[m.i].m ? " · 📏 measured" : st.holes[m.i].ad ? " · not placed yet" : " · 👆 tapped"}`;
+  $("tgMPf").textContent = m.fr && (m.fr.xs || m.fr.ys) ? (st.holes[m.i].m ? "Showing the saved measurement — type to replace it." : "Pre-filled from where you tapped — type to replace, or Next to keep it.") : "";
   [["tgMH", m.hd], ["tgMV", m.vd], ["tgMU", u]].forEach(([id, v]) => $(id).querySelectorAll("button").forEach(b => { const on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }));
   $("tgMX").textContent = `${m.xs || "0"} ${u}`; $("tgMY").textContent = `${m.ys || "0"} ${u}`;
-  $("tgMX").classList.toggle("on", m.f === "x"); $("tgMY").classList.toggle("on", m.f === "y");
+  $("tgMX").classList.toggle("on", m.f === "x"); $("tgMY").classList.toggle("on", m.f === "y"); $("tgMX").classList.toggle("pf", !!(m.fr && m.fr.xs)); $("tgMY").classList.toggle("pf", !!(m.fr && m.fr.ys));
   $("tgMNext").textContent = m.i < st.holes.length - 1 ? `Next · hole ${m.i + 2} ›` : "Next ›";
 }
 function teMeasEnter(i, quiet) {
-  const st = teStr(), h = st.holes[i], u = teTgt().u, k = u === "cm" ? 2.54 : 1, o = h.m || null, tp = hoff(st, h);
+  // pre-fill with the measured offset, else the tapped one (so you only correct it); only never-tapped holes (＋ Add shot) start at 0
+  const st = teStr(), h = st.holes[i], u = teTgt().u, k = u === "cm" ? 2.54 : 1, o = h.m || (h.ad ? null : hoff(st, h));
   const f = v => v == null ? "" : String(+(Math.abs(v) * k).toFixed(2));
-  TE.m = { i, f: "x", xs: o ? f(o.x) : "", ys: o ? f(o.y) : "", hd: (o ? o.x : tp.x) < 0 ? "L" : "R", vd: (o ? o.y : tp.y) < 0 ? "D" : "U" };
+  TE.m = { i, f: "x", xs: o ? f(o.x) : "", ys: o ? f(o.y) : "", hd: o && o.x < 0 ? "L" : "R", vd: o && o.y < 0 ? "D" : "U", dirty: false, fr: { xs: !!o, ys: !!o } };   // fr: pre-filled, the first digit replaces it
   TE.sel = h.id; if (!quiet) teRender();
 }
 function teMeasCommit() {
-  const m = TE && TE.m, st = TE && teStr(); if (!m || !st || !st.holes[m.i] || (m.xs === "" && m.ys === "")) return false;
+  const m = TE && TE.m, st = TE && teStr(); if (!m || !st || !st.holes[m.i] || !m.dirty || (m.xs === "" && m.ys === "")) return false;   // untouched pre-fill stays 👆 tapped
   const k = teTgt().u === "cm" ? 1 / 2.54 : 1, x = (parseFloat(m.xs) || 0) * k * (m.hd === "L" ? -1 : 1), y = (parseFloat(m.ys) || 0) * k * (m.vd === "D" ? -1 : 1), h = st.holes[m.i];
   if (h.m && Math.abs(h.m.x - x) < 1e-6 && Math.abs(h.m.y - y) < 1e-6) return false;
-  teSnap(); h.m = { x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 }; TE.span = null; return true;
+  teSnap(); h.m = { x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 }; delete h.ad; m.dirty = false; TE.span = null; return true;
 }
 $("tgMeas").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || !TE || !TE.m) return; const m = TE.m, st = teStr();
-  if (b.closest("#tgMH")) m.hd = b.dataset.v; else if (b.closest("#tgMV")) m.vd = b.dataset.v;
+  if (b.closest("#tgMH")) { if (m.hd !== b.dataset.v) m.dirty = true; m.hd = b.dataset.v; } else if (b.closest("#tgMV")) { if (m.vd !== b.dataset.v) m.dirty = true; m.vd = b.dataset.v; }
   else if (b.closest("#tgMU")) { const g = teTgt(); if (g.u !== b.dataset.v) { const k = b.dataset.v === "cm" ? 2.54 : 1 / 2.54, cv2 = s => s === "" ? "" : String(+(parseFloat(s) * k).toFixed(2)); m.xs = cv2(m.xs); m.ys = cv2(m.ys); g.u = b.dataset.v; } }
   else if (b.id === "tgMX") m.f = "x"; else if (b.id === "tgMY") m.f = "y";
   else if (b.dataset.k != null) { const k = b.dataset.k, f = m.f === "x" ? "xs" : "ys"; let v = m[f];
-    if (k === "back") v = v.slice(0, -1); else if (k === ".") { if (!v.includes(".")) v = (v || "0") + "."; } else if (v.length < 6) v = v === "0" ? k : v + k; m[f] = v; }
+    if (k === "back") v = v.slice(0, -1); else if (k === ".") { if (!v.includes(".")) v = (v || "0") + "."; } else if (m.fr && m.fr[f]) v = k; else if (v.length < 6) v = v === "0" ? k : v + k;
+    if (k === ".") { if (m.fr && m.fr[f]) v = "0."; } if (m.fr) m.fr[f] = false; m[f] = v; m.dirty = true; }
   else if (b.id === "tgMNext") { teMeasCommit(); if (m.i < st.holes.length - 1) { teMeasEnter(m.i + 1); return; } toast(`All ${st.holes.length} holes done — tap ✓ Done`); }
   else if (b.id === "tgMPrev") { teMeasCommit(); if (m.i > 0) { teMeasEnter(m.i - 1); return; } }
   else if (b.id === "tgMDone") { teMeasCommit(); TE.mode = "hole"; TE.m = null; teRender(); tgAfterEditQuiet(); return; }
@@ -3334,47 +3454,67 @@ $("tgMeas").addEventListener("click", e => {
   teRender();
 });
 function tgAfterEditQuiet() { edDirty = true; }
-function tePair() {
-  const st = teStr(), rd = readings(ED, st.id), hn = new Map(st.holes.map((h, i) => [h.id, i + 1])), byShot = new Map(st.holes.filter(h => h.sh).map(h => [h.sh, h]));
-  const sel = st.holes.find(h => h.id === TE.sel);
-  $("tgHoles").innerHTML = st.holes.map((h, i) => { const x = h.sh && ED.shots.find(q => q.id === h.sh);
-    return `<button type="button" class="hc${h.id === TE.sel ? " on" : ""}" data-h="${escapeHtml(h.id)}" aria-pressed="${h.id === TE.sel}"><b>${i + 1}</b><span>${x ? x.v.toFixed(1) : h.nr ? "no reading" : "unpaired"}</span><i title="${h.m ? "measured" : "tapped"}">${h.m ? "📏" : "👆"}</i></button>`; }).join("") || `<span class="hint">No holes yet.</span>`;
-  $("tgHoleAct").hidden = !sel; if (sel) $("tgHoleActT").textContent = `Hole ${hn.get(sel.id)} selected — tap its reading below`;
-  $("tgReads").innerHTML = rd.map((x, k) => { const h = byShot.get(x.id), tags = [x.cold && "cold bore", x.clean && "clean bore", x.fl && "flier"].filter(Boolean).join(" · ");
-    return `<div class="rd${x.x ? " dis" : ""}${h ? "" : " un"}" data-s="${escapeHtml(x.id)}"><button type="button" class="rdPick" aria-label="Pair reading ${k + 1} with the selected hole"><span class="hn">${h ? hn.get(h.id) : "–"}</span><span class="rv">${x.v.toFixed(1)} fps</span><span class="rk">reading ${k + 1}${x.x ? " · discarded" : h ? "" : " · no hole"}${tags ? " · " + tags : ""}</span></button><button type="button" class="rdX">${x.x ? "↺ Restore" : "Discard"}</button></div>`; }).join("") || `<div class="hint">No readings in this string yet.</div>`;
+function tePair() {   // one list: a row per hole (number, fps or "no reading", 📏/👆, ⋯), then readings with no hole (discarded double reads included)
+  const st = teStr(), rd = readings(ED, st.id), rk = new Map(rd.map((x, k) => [x.id, k + 1])), used = new Set(), M = TE.menu;
+  ED.tg.strings.forEach(q => q.holes.forEach(h => h.sh && used.add(h.sh)));
+  const tags = x => [x.cold && "cold bore", x.clean && "clean bore", x.fl && "flier"].filter(Boolean).join(" · "), E = escapeHtml, B2 = (m, t, cl, ex) => `<button type="button" class="${cl || ""}" data-m="${m}"${ex || ""}>${t}</button>`;
+  let h = st.holes.map((ho, i) => { const x = ho.sh && ED.shots.find(q => q.id === ho.sh), op = M && M.k === "h" && M.id === ho.id, tg = x && tags(x);
+    let r = `<div class="lr${ho.id === TE.sel ? " on" : ""}${x ? "" : " np"}" data-h="${E(ho.id)}"><button type="button" class="lrM" aria-pressed="${ho.id === TE.sel}" aria-label="Hole ${i + 1}"><span class="hn">${i + 1}</span><span class="rv">${x ? `${fpsT(x.v)} fps` : ho.nr ? "no reading" : "unpaired"}</span><span class="rk">${x ? `reading ${rk.get(x.id) || "?"}${tg ? " · " + tg : ""}` : ho.nr ? "" : "tap ⋯ to pair"}</span><i title="${ho.m ? "measured" : "tapped"}">${ho.m ? "📏" : "👆"}</i></button><button type="button" class="lrX" aria-label="Hole ${i + 1} options" aria-expanded="${!!op}">⋯</button></div>`;
+    if (op) r += `<div class="lmenu" role="menu" aria-label="Hole ${i + 1}">` + (M.step === "pair"
+      ? `<div class="lmT">Pair hole ${i + 1} to a reading:</div>` + (rd.filter(q => !q.x).map(q => { const oh = st.holes.findIndex(z => z.sh === q.id); return B2("pk", `Reading ${rk.get(q.id)} · ${fpsT(q.v)} fps${oh >= 0 ? ` <small>(hole ${oh + 1})</small>` : ""}`, q.id === ho.sh ? "on" : "", ` data-s="${E(q.id)}"`); }).join("") || `<div class="hint">No kept readings in this string.</div>`) + B2("back", "‹ Back", "ghost")
+      : B2("pair", "↔ Re-pair to reading") + B2("nr", "No reading") + B2("meas", "📏 Measure") + B2("del", "Remove hole", "danger")) + `</div>`;
+    return r; }).join("");
+  const un = rd.filter(x => !used.has(x.id));
+  if (un.length) h += `<div class="lsub">Readings without a hole</div>` + un.map(x => { const op = M && M.k === "r" && M.id === x.id, tg = tags(x);
+    let r = `<div class="lr rdu${x.x ? " dis" : ""}" data-s="${E(x.id)}"><button type="button" class="lrM" aria-label="Reading ${rk.get(x.id)} options"><span class="hn">–</span><span class="rv">${fpsT(x.v)} fps</span><span class="rk">reading ${rk.get(x.id)}${x.x ? " · discarded" : " · no hole"}${tg ? " · " + tg : ""}</span><i></i></button><button type="button" class="lrX" aria-label="Reading ${rk.get(x.id)} options" aria-expanded="${!!op}">⋯</button></div>`;
+    if (op) r += `<div class="lmenu" role="menu" aria-label="Reading ${rk.get(x.id)}">` + (M.step === "pair"
+      ? `<div class="lmT">Pair reading ${rk.get(x.id)} (${fpsT(x.v)} fps) to hole:</div>` + (st.holes.map((z, j) => { const zx = z.sh && ED.shots.find(q => q.id === z.sh); return B2("ph", `Hole ${j + 1} · ${zx ? `${fpsT(zx.v)} fps` : z.nr ? "no reading" : "unpaired"}`, "", ` data-h="${E(z.id)}"`); }).join("") || `<div class="hint">No holes yet — tap the target first.</div>`) + B2("back", "‹ Back", "ghost")
+      : (x.x ? "" : B2("pair", "↔ Pair to hole")) + B2("x", x.x ? "↺ Restore" : "Discard (double read)", x.x ? "" : "danger")) + `</div>`;
+    return r; }).join("");
+  $("tgList").innerHTML = h || `<div class="hint">No holes or readings yet.</div>`;
 }
-$("tgHoles").addEventListener("click", e => { const b = e.target.closest(".hc"); if (!b || !TE) return; TE.sel = TE.sel === b.dataset.h ? null : b.dataset.h;
-  if (TE.mode === "meas" && TE.sel) { teMeasCommit(); teMeasEnter(teStr().holes.findIndex(h => h.id === TE.sel)); return; } teRender(); });
-$("tgReads").addEventListener("click", e => {
-  const row = e.target.closest(".rd"); if (!row || !TE) return; const id = row.dataset.s, x = ED.shots.find(q => q.id === id); if (!x) return;
-  if (e.target.closest(".rdX")) { teSnap(); x.x = !x.x; if (!x.x) delete x.x; else unpair(ED, id); tgAfterEditQuiet(); teRender(); renderEditor(); return; }
-  if (!e.target.closest(".rdPick")) return;
-  const st = teStr(), h = st.holes.find(q => q.id === TE.sel);
-  if (!h) { toast("Tap a hole first, then its reading"); return; }
-  if (x.x) { toast("That reading is discarded — restore it first"); return; }
-  teSnap(); unpair(ED, id); h.sh = id; delete h.nr; TE.sel = null; tgAfterEditQuiet(); teRender();
+$("tgList").addEventListener("click", e => {
+  if (!TE) return; const b = e.target.closest("button"); if (!b) return; const row = b.closest(".lr"), st = teStr();
+  if (row) {
+    const hid = row.dataset.h, sid = row.dataset.s;
+    if (b.classList.contains("lrX") || (sid && b.classList.contains("lrM"))) { const k = hid ? "h" : "r", id = hid || sid; TE.menu = TE.menu && TE.menu.k === k && TE.menu.id === id ? null : { k, id }; if (hid) TE.sel = hid; teRender(); return; }
+    if (hid) { TE.menu = null; TE.sel = TE.sel === hid ? null : hid;
+      if (TE.mode === "meas" && TE.sel) { teMeasCommit(); teMeasEnter(st.holes.findIndex(h => h.id === TE.sel)); return; } teRender(); }
+    return;
+  }
+  const M = TE.menu, m = b.dataset.m; if (!M || !m) return;
+  if (m === "back") { M.step = null; tePair(); return; }
+  if (m === "pair") { M.step = "pair"; tePair(); return; }
+  if (M.k === "h") { const h = st.holes.find(q => q.id === M.id), i = st.holes.indexOf(h); if (!h) return;
+    if (m === "pk") { const id = b.dataset.s; teSnap(); unpair(ED, id); h.sh = id; delete h.nr; }   // explicit: only this hole and the reading's old hole change
+    else if (m === "nr") { teSnap(); h.sh = null; h.nr = true; }
+    else if (m === "del") { teSnap(); st.holes.splice(i, 1); TE.sel = null; TE.m = null; TE.span = null; }
+    else if (m === "meas") { TE.menu = null; if (TE.mode === "meas") teMeasCommit(); TE.mode = "meas"; teMeasEnter(i); return; }
+    TE.menu = null; tgAfterEditQuiet(); teRender(); return; }
+  const x = ED.shots.find(q => q.id === M.id); if (!x) return;
+  if (m === "x") { teSnap(); x.x = !x.x; if (!x.x) delete x.x; else unpair(ED, x.id); TE.menu = null; tgAfterEditQuiet(); teRender(); renderEditor(); return; }
+  if (m === "ph") { const h = st.holes.find(q => q.id === b.dataset.h); if (!h) return; teSnap(); unpair(ED, x.id); h.sh = x.id; delete h.nr; TE.menu = null; TE.sel = h.id; tgAfterEditQuiet(); teRender(); }
 });
-$("tgNoRd").onclick = () => { const h = TE && teStr().holes.find(q => q.id === TE.sel); if (!h) return; teSnap(); h.sh = null; h.nr = true; TE.sel = null; tgAfterEditQuiet(); teRender(); };
-$("tgDelHole").onclick = () => { const st = TE && teStr(), i = st ? st.holes.findIndex(q => q.id === TE.sel) : -1; if (i < 0) return; teSnap(); st.holes.splice(i, 1); TE.sel = null; TE.m = null; TE.span = null; tgAfterEditQuiet(); teRender(); };
 $("tgAddShot").onclick = () => {
   if (!TE) return; const st = teStr(), raw = $("tgAddV").value.trim(), v = parseFloat(raw);
   if (raw && !(v >= 50 && v <= 6000)) { toast("Velocity 50–6000 fps, or leave it blank for a hole with no reading"); return; }
-  teSnap(); const a = st.aim || { x: 0, y: 0 }, h = { id: uid(), x: a.x, y: a.y, sh: null };
+  teSnap(); const a = st.aim || { x: 0, y: 0 }, h = { id: uid(), x: a.x, y: a.y, sh: null, ad: true };   // ad: never tapped (measure starts at 0)
   if (raw) { const x = { v: +v.toFixed(1), id: uid(), str: st.id }; ED.shots.push(x); h.sh = x.id; } else h.nr = true;
   st.holes.push(h); TE.sel = h.id; $("tgAddV").value = ""; TE.span = null; tgAfterEditQuiet();
   if (TE.mode === "meas") TE.m = null;
-  teRender(); renderEditor(); toast(`Hole ${st.holes.length} added at the aim point${raw ? ` with ${v.toFixed(1)} fps` : " (no reading)"} — drag it or measure it`);
+  teRender(); renderEditor(); toast(`Hole ${st.holes.length} added at the aim point${raw ? ` with ${fpsT(v)} fps` : " (no reading)"} — drag it or measure it`);
 };
 $("tgUndo").onclick = () => { if (!TE || !TE.undo.length) return; const o = JSON.parse(TE.undo.pop()); ED.tg = o.tg; ED.shots = o.shots; TE.sel = null; TE.m = null; TE.span = null; $("tgUndo").disabled = !TE.undo.length; tgAfterEditQuiet(); teRender(); renderEditor(); };
 $("tgMode").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || !TE) return; if (TE.mode === "meas" && b.dataset.v !== "meas") teMeasCommit(); TE.mode = b.dataset.v; TE.m = null; if (TE.mode === "meas" && TE.sel) { const i = teStr().holes.findIndex(h => h.id === TE.sel); if (i >= 0) { teMeasEnter(i); return; } } teRender(); });
 $("tgTpl").onchange = e => { teSnap(); teTgt().tpl = e.target.value; TE.span = null; tgAfterEditQuiet(); teRender(); };
-$("tgDist").addEventListener("change", e => { const v = parseFloat(e.target.value); if (!(v >= 5 && v <= 3000)) { toast("Distance 5–3000"); setVal("tgDist", teTgt().dist); return; } teSnap(); teTgt().dist = v; TE.span = null; tgAfterEditQuiet(); teRender(); });
-$("tgDu").onchange = e => { teSnap(); teTgt().du = e.target.value; TE.span = null; tgAfterEditQuiet(); teRender(); };
+$("tgDist").addEventListener("change", e => { const v = parseFloat(e.target.value); if (!(v >= 5 && v <= 3000)) { toast("Distance 5–3000"); setVal("tgDist", teTgt().dist); return; } teSnap(); teTgt().dist = v; TE.span = null; tgAfterEditQuiet(); teRender(); tgRedope(teTgt()); });
+$("tgDu").onchange = e => { teSnap(); teTgt().du = e.target.value; TE.span = null; tgAfterEditQuiet(); teRender(); tgRedope(teTgt()); };
 $("tgU").onchange = e => { teTgt().u = e.target.value; tgAfterEditQuiet(); teRender(); };
-$("tgStrSel").onchange = e => { if (TE.mode === "meas") teMeasCommit(); TE.str = e.target.value; TE.sel = null; TE.m = null; TE.span = null; const st = teStr(); if (TE.mode === "aim" && st.aim) TE.mode = "hole"; teRender(); };
+$("tgStrSel").onchange = e => { if (TE.mode === "meas") teMeasCommit(); TE.str = e.target.value; TE.sel = null; TE.m = null; TE.span = null; TE.zc = null; TE.menu = null; const st = teStr(); if (TE.mode === "aim" && st.aim) TE.mode = "hole"; teRender(); };
 $("tgEdDone").onclick = () => closeTgEd();
-$("tgZin").onclick = () => { if (!TE) return; TE.zoom = Math.min(8, (TE.zoom || 1) * 2); teDraw(); };
-$("tgZout").onclick = () => { if (!TE) return; TE.zoom = Math.max(1, (TE.zoom || 1) / 2); teDraw(); };
+$("tgZin").onclick = () => { if (!TE) return; const z = TE.zoom || 1; if (z <= 1) TE.zc = null; teZoomTo(z * 2); };
+$("tgZout").onclick = () => { if (!TE) return; teZoomTo((TE.zoom || 1) / 2); };
+$("tgZfit").onclick = () => { if (!TE) return; TE.zc = null; teZoomTo(1); };
 window.addEventListener("keydown", e => { if (e.key === "Escape" && $("tgEd").classList.contains("show")) { e.stopImmediatePropagation(); e.preventDefault(); closeTgEd(); } }, true);
 
 /* pointer: tap to place, drag to adjust, loupe above the finger */
@@ -3385,9 +3525,23 @@ function teLoupe(e, p) {
   L = Math.max(0, Math.min(wrap.width - D, L)); lp.style.left = L + "px"; lp.style.top = T + "px"; lp.hidden = false;
   const w = TE.span / (TE.zoom || 1) / 4; $("tgLoupeSvg").setAttribute("viewBox", `${(p.x - w / 2).toFixed(3)} ${(-p.y - w / 2).toFixed(3)} ${w.toFixed(3)} ${w.toFixed(3)}`); $("tgLoupeSvg").innerHTML = $("tgSvg").innerHTML;
 }
+function tePinchStart() {   // second finger: cancel any placement/drag in progress and start pinch-zoom / two-finger pan
+  const d = TE.drag; TE.drag = null; teLoupe(null, null);
+  if (d && (d.kind === "aim" || d.snapped) && TE.undo.length) { const o = JSON.parse(TE.undo.pop()); ED.tg = o.tg; ED.shots = o.shots; $("tgUndo").disabled = !TE.undo.length; if (d.kind === "aim") TE.mode = teStr().aim ? "hole" : "aim"; }
+  const [a, b] = [...TE.pts.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+  TE.pinch = { d0: Math.max(10, Math.hypot(a.x - b.x, a.y - b.y)), z0: TE.zoom || 1, m0: teXY({ clientX: mx, clientY: my }) };
+  teRender();
+}
+function tePinchMove() {
+  const [a, b] = [...TE.pts.values()], P = TE.pinch, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, rc = $("tgSvg").getBoundingClientRect();
+  const z = Math.max(1, Math.min(8, P.z0 * Math.hypot(a.x - b.x, a.y - b.y) / P.d0)), W = TE.span / z;
+  TE.zoom = z; TE.zc = { x: P.m0.x - ((mx - rc.left) / rc.width - 0.5) * W, y: P.m0.y + ((my - rc.top) / rc.height - 0.5) * W }; TE.zc = teCenter(z); if (z <= 1) TE.zc = null; teDraw();
+}
 $("tgSvg").addEventListener("pointerdown", e => {
-  if (!TE || !e.isPrimary) return; e.preventDefault(); const st = teStr(), p = teXY(e), pxIn = TE.span / (TE.zoom || 1) / Math.max(1, $("tgSvg").clientWidth);
+  if (!TE) return; e.preventDefault(); TE.pts = TE.pts || new Map(); TE.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
   try { $("tgSvg").setPointerCapture(e.pointerId); } catch {}
+  if (TE.pts.size === 2) { tePinchStart(); return; } if (TE.pts.size > 2 || TE.pinch) return;
+  const st = teStr(), p = teXY(e), pxIn = TE.span / (TE.zoom || 1) / Math.max(1, $("tgSvg").clientWidth);
   if (TE.mode === "aim" || (!st.aim && TE.mode === "hole")) { teSnap(); TE.drag = { kind: "aim" }; st.aim = p; TE.mode = "aim"; teDraw(); teLoupe(e, p); return; }
   // press on a hole + drag = move it; a tap right on its center (≤5 px) selects it; any other tap adds a hole (touching holes in a tight group stay addable)
   let best = null, bd = (TE.mode === "meas" ? 24 : 16) * pxIn; st.holes.forEach(h => { const q = hpos(st, h), d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; best = h; } });
@@ -3397,13 +3551,17 @@ $("tgSvg").addEventListener("pointerdown", e => {
   teLoupe(e, best ? hpos(st, best) : p);
 });
 $("tgSvg").addEventListener("pointermove", e => {
-  if (!TE || !TE.drag || !e.isPrimary) return; const st = teStr(), p = teXY(e), d = TE.drag;
+  if (!TE) return; if (TE.pts && TE.pts.has(e.pointerId)) TE.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (TE.pinch) { if (TE.pts.size >= 2) tePinchMove(); return; }
+  if (!TE.drag) return; const st = teStr(), p = teXY(e), d = TE.drag;
   if (d.kind === "aim") { st.aim = p; teDraw(); teLoupe(e, p); return; }
   if (d.kind === "new") { d.p = p; teDraw(); const g = $("tgSvg"); g.insertAdjacentHTML("beforeend", `<circle class="ghost" cx="${p.x}" cy="${-p.y}" r="${(TE.span / (TE.zoom || 1) / 58).toFixed(3)}" vector-effect="non-scaling-stroke"/>`); teLoupe(e, p); return; }
-  if (d.kind === "move") { if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 6) return; if (!d.snapped) { teSnap(); d.snapped = true; } d.moved = true; d.h.x = p.x; d.h.y = p.y; delete d.h.m; teDraw(); teLoupe(e, p); }
+  if (d.kind === "move") { if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 6) return; if (!d.snapped) { teSnap(); d.snapped = true; } d.moved = true; d.h.x = p.x; d.h.y = p.y; delete d.h.m; delete d.h.ad; teDraw(); teLoupe(e, p); }
 });
 function teUp(e) {
-  if (!TE || !TE.drag) return; const st = teStr(), d = TE.drag; TE.drag = null; teLoupe(e, null);
+  if (!TE) return; if (TE.pts) TE.pts.delete(e.pointerId);
+  if (TE.pinch) { if (!TE.pts || TE.pts.size < 2) { TE.pinch = null; if (TE.pts) TE.pts.clear(); teRender(); } return; }   // lifting after a pinch never places a hole
+  if (!TE.drag) return; const st = teStr(), d = TE.drag; TE.drag = null; teLoupe(e, null);
   if (d.kind === "aim") { TE.mode = "hole"; tgAfterEditQuiet(); teRender(); return; }
   if (d.kind === "new") { teSnap(); const h = { id: uid(), x: d.p.x, y: d.p.y, sh: teNextReading(st) }; st.holes.push(h); TE.sel = null; tgAfterEditQuiet(); teRender(); return; }
   if (d.kind === "move") { if (d.moved) { tgAfterEditQuiet(); teRender(); return; }
@@ -3411,7 +3569,7 @@ function teUp(e) {
     teSnap(); st.holes.push({ id: uid(), x: d.p.x, y: d.p.y, sh: teNextReading(st) }); TE.sel = null; tgAfterEditQuiet(); teRender(); }
 }
 $("tgSvg").addEventListener("pointerup", teUp);
-$("tgSvg").addEventListener("pointercancel", e => { if (TE && TE.drag) { TE.drag = null; teLoupe(e, null); teRender(); } });
+$("tgSvg").addEventListener("pointercancel", e => { if (!TE) return; if (TE.pts) TE.pts.delete(e.pointerId); if (TE.pinch && (!TE.pts || TE.pts.size < 2)) { TE.pinch = null; teRender(); } if (TE.drag) { TE.drag = null; teLoupe(e, null); teRender(); } });
 
 /* results per string */
 function teResults() {
@@ -3425,30 +3583,46 @@ function teResults() {
   h += `<div><span>Mean radius</span><b id="tgResMR">${gs.n > 1 ? lenTxt(gs.mr, u) : "—"}</b><small>${gs.n > 1 ? a(gs.mr) : ""}</small></div>`;
   h += `<div class="w2"><span>Group center from aim</span><b id="tgResC">${gs.cy >= 0 ? "U" : "D"} ${lenTxt(Math.abs(gs.cy), u)} · ${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}</b><small id="tgResCA">${gs.cy >= 0 ? "U" : "D"} ${a(Math.abs(gs.cy))} · ${gs.cx >= 0 ? "R" : "L"} ${a(Math.abs(gs.cx))}</small></div></div>`;
   if (!st.aim && st.holes.some(x => !x.m)) h += `<div class="hint bad">No aim point set — tapped offsets are from the sheet center.</div>`;
-  h += `<div class="hint" id="tgVV">${vv.r == null ? `Velocity vs vertical needs 3+ paired shots (${vv.n} now).` : vv.r >= 0.7 ? `<b class="w">⚠ Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.` : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
+  // a warning needs 5+ paired shots with r ≥ 0.7; fewer shots (or a weaker r) give at most a muted "possible trend" note
+  h += `<div class="hint" id="tgVV">${vv.r == null ? `Velocity vs vertical needs 3+ paired shots (${vv.n} now).`
+    : vv.r >= 0.7 && vv.n >= 5 ? `<b class="w">⚠ Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.`
+    : vv.r >= 0.5 ? `<span class="pt">Possible velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — needs 5+ paired shots with r ≥ 0.7 to call it.</span>`
+    : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
   if (atZero && gs.n) {
-    const e1 = -gs.cy / inPerU(ts.u, yd), w1 = -gs.cx / inPerU(ts.u, yd), ce = Math.round(Math.abs(e1) / ts.v), cw = Math.round(Math.abs(w1) / ts.v);
-    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
+    const k = ts.k || 1, e1 = -gs.cy / inPerU(ts.u, yd) / k, w1 = -gs.cx / inPerU(ts.u, yd), ce = Math.round(Math.abs(e1) / ts.v), cw = Math.round(Math.abs(w1) / ts.v);   // elevation ÷ tracking factor, as the dope does
+    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
   } else if (gs.n > 1) {
-    const vU = S.ang, need = -gs.cy / inPerU(vU, yd);
-    h += `<label class="tgChk"><input type="checkbox" id="tgAtDist"${TE.atDist ? " checked" : ""}><span>Fired at ${fmt(g.dist, 0)} ${g.du} with the app's dope dialed</span></label>`;
+    const vU = S.ang, need = -gs.cy / inPerU(vU, yd), d = st.dial;
+    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d, vU)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
     h += `<button type="button" id="tgTrue"${TE.atDist && same ? "" : " disabled"}>🎯 Send vertical to Truing (${gs.cy >= 0 ? "group high" : "group low"} ${lenTxt(Math.abs(gs.cy), u)} = ${need >= 0 ? "U" : "D"} ${Math.abs(need).toFixed(2)} ${angU(vU)})</button>`;
-    h += `<div class="hint">Only the vertical offset is sent. Horizontal (${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}) is never sent — it's mostly wind.${same ? "" : " <b>Pick this session's gun + load on Gear to send it.</b>"}</div>`;
+    h += `<div class="hint">${d ? `Sends dialed − offset (the elevation that would have centered the group) with this string's saved conditions and angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}Only the vertical offset is sent. Horizontal (${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}) is never sent — it's mostly wind.${same ? "" : " <b>Pick this session's gun + load on Gear to send it.</b>"}</div>`;
   }
   box.innerHTML = h;
 }
 $("tgRes").addEventListener("change", e => { if (e.target.id === "tgAtDist" && TE) { TE.atDist = e.target.checked; teResults(); } });
 $("tgRes").addEventListener("click", e => { if (e.target.closest("#tgTrue")) tgSendTrue(); });
 async function tgSendTrue() {
-  if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(st.holes.map(h => hoff(st, h))), yd = Math.round(tgYd(g));
+  if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(st.holes.map(h => hoff(st, h))), yd = Math.round(tgYd(g)), sn = strNo(ED.tg, st.id);
   if (!gs || gs.n < 2 || curRifle()?.id !== ED.rifleId || curLoad()?.id !== ED.loadId) return;
   if (yd < 50 || yd > 3000) { toast("Truing needs 50–3000 yd"); return; }
   await closeTgEd(); if (ED) { if (edDirty && ED.shots.length) await commitEditor(); closeEditor(true); }
   setTab("dope"); openTrue(); if (!$("trSheet").classList.contains("show")) return;
-  TR.unit = S.ang; TR.look = 0; trPaint(); setVal("trRange", yd); setVal("trAngle", 0);
-  const pred = await predAt(yd, {}); if (!pred) { $("trOut").innerHTML = `<span class="bad">${yd} yd is beyond this bullet's reach.</span>`; return; }
-  const corr = gs.cy / inPerU(S.ang, yd), obs = pred[S.ang] - corr; setVal("trObs", obs.toFixed(2));
-  $("trOut").innerHTML = `From the target: group center ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → the app's ${pred[S.ang].toFixed(2)} ${angU(S.ang)} would have needed <b>${obs.toFixed(2)} ${angU(S.ang)}</b>. Vertical only (horizontal is mostly wind). Tap Solve.`;
+  const U = S.ang, corr = gs.cy / inPerU(U, yd), d = st.dial;
+  TR.unit = U; trPaint(); setVal("trRange", yd);
+  if (d) {   // dialed − offset: the elevation that would have centered the group, under the conditions + angle saved with the string
+    const w = d.wx || {}, look = Math.max(-60, Math.min(60, w.look || 0)), dialT = angConv(d.e, d.u, U) * (d.k || 1), obs = dialT - corr;
+    TR.look = look; setVal("trAngle", look);
+    TR.cond = w.temp != null || w.alt != null || w.press != null || w.hum != null ? { cond: { temp: w.temp ?? null, hum: w.hum ?? null, alt: w.alt ?? null, press: w.press ?? null }, ...(w.tp != null ? { Tp: w.tp } : {}) } : null;
+    setVal("trObs", obs.toFixed(2));
+    const cTxt = TR.cond ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", w.tp != null ? `powder ${fmt(w.tp, 0)}°F` : ""].filter(Boolean).join(" · ") : "";
+    if (TR.cond) $("trFor").textContent += ` · using the string's conditions: ${cTxt}`;
+    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d, U)}${d.k && d.k !== 1 ? ` (×${fmt(d.k, 3)} tracking = ${dialT.toFixed(2)} ${angU(U)})` : ""}, group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} (${Math.abs(corr).toFixed(2)} ${angU(U)}) at ${yd} yd → <b>${obs.toFixed(2)} ${angU(U)}</b> would have centered it. ${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only (horizontal is mostly wind). Tap Solve.`;
+  } else {   // old strings: today's prediction (current behavior)
+    TR.look = 0; setVal("trAngle", 0); TR.cond = null;
+    const pred = await predAt(yd, {}); if (!pred) { $("trOut").innerHTML = `<span class="bad">${yd} yd is beyond this bullet's reach.</span>`; return; }
+    const obs = pred[U] - corr; setVal("trObs", obs.toFixed(2));
+    $("trOut").innerHTML = `From the target: group center ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → the app's ${pred[U].toFixed(2)} ${angU(U)} would have needed <b>${obs.toFixed(2)} ${angU(U)}</b>. <span class="w">No dial was saved with this string, so this uses today's prediction with today's weather and angle.</span> Vertical only (horizontal is mostly wind). Tap Solve.`;
+  }
   toast("Vertical offset sent to Truing — check it and tap Solve");
 }
 
@@ -3464,6 +3638,29 @@ function shotDetail(s) {
   });
   return out.join(" | ");
 }
+
+/* Log rows: small group thumbnail (latest target with holes, around the aim point) + group size */
+function tgThumb(s) {
+  const t = s && s.tg; if (!t) return null;
+  const last = [...t.strings].reverse().find(q => q.holes.length); if (!last) return null;
+  const g = t.targets.find(q => q.id === last.tid), strs = t.strings.map((st, i) => ({ st, i })).filter(o => o.st.tid === g.id && o.st.holes.length);
+  let mx = 0; const layers = strs.map(o => ({ i: o.i, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = hoff(o.st, h); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: "" }; }) }));
+  const span = Math.max(2, mx * 2.4), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: "in", layers, mk: 3.2 });
+  const gs = grpStats(last.holes.map(h => hoff(last, h))), U = tsFor(s.rifleId).u, yd = tgYd(g);
+  const size = gs && gs.n > 1 ? `${lenTxt(gs.es, g.u)} · ${(gs.es / inPerU(U, yd)).toFixed(2)} ${angU(U)}` : `${last.holes.length} hole`;
+  return { svg: `<svg class="tgS th" viewBox="${sv.vb}" aria-hidden="true">${sv.html.replace(/<text[^>]*>[^<]*<\/text>/g, "")}</svg>`, size, n: gs ? gs.n : 0 };
+}
+function tgThumbA(s) { return tgThumb(s) ? `<div class="slRow">` : ""; }
+function tgThumbB(s) {
+  const th = tgThumb(s); if (!th) return "";
+  return `<button type="button" class="slTh" data-id="${escapeHtml(s.id)}" aria-label="Open the targets for this session (group ${escapeHtml(th.size)})">${th.svg}<span>${th.size}</span></button></div>`;
+}
+$("slList").addEventListener("click", e => {
+  const b = e.target.closest(".slTh"); if (!b) return; e.stopPropagation();
+  if (typeof SEL !== "undefined" && SEL) { SEL.has(b.dataset.id) ? SEL.delete(b.dataset.id) : SEL.add(b.dataset.id); paintSel(); return; }
+  const s = LOG.find(q => q.id === b.dataset.id); if (!s) return; openEditor(s);
+  requestAnimationFrame(() => { const v = $("slTgView"); if (v) v.scrollIntoView({ block: "start" }); });
+});
 
 /* ---------------- wiring ---------------- */
 let calcT;
@@ -3812,7 +4009,7 @@ $("slList").addEventListener("pointerdown", e => { const b = e.target.closest(".
 ["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slList").addEventListener(ev, () => clearTimeout(lpT)));
 $("slList").addEventListener("contextmenu", e => { if (e.target.closest(".slItem")) e.preventDefault(); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("mvSheet").classList.contains("show")) { e.stopImmediatePropagation(); closeOvl("mvSheet"); } }, true);
-window.__bc = { tgView, tgEnsure, cleanTg, grpStats, pearson, inPerU, shotDetail, banHide, openTgEd, mutSess, get BAN() { return BAN; }, get TE() { return TE; }, get LIVE() { return LIVE; }, get WL() { return WL; }, wakeSync,  millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+window.__bc = { tgView, tgEnsure, cleanTg, cleanDial, tgDope, tgThumb, velVert, tgLabels, get TR() { return TR; }, grpStats, pearson, inPerU, shotDetail, banHide, openTgEd, mutSess, get BAN() { return BAN; }, get TE() { return TE; }, get LIVE() { return LIVE; }, get WL() { return WL; }, wakeSync,  millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

@@ -80,10 +80,10 @@ let B = await bt();
 ok("radar shot lands in a live session without opening the editor", B.length === 1 && B[0].shots.length === 1 && !(await vis("#slEditor")));
 ok("banner shows on top, floating (not a modal)", await vis("#shotBan") && await p.evaluate(() => { const e = document.getElementById("shotBan"), r = e.getBoundingClientRect(); return getComputedStyle(e).position === "fixed" && r.top < 20 && !e.closest("[aria-modal]") && e.getAttribute("role") === "status"; }));
 const v1 = B[0].shots[0].v;
-ok("banner: big speed + shot number + string/target", (await T("#sbV")) === v1.toFixed(1) && (await T("#sbN")) === "Shot 1 · String 1 · Target A" && await p.evaluate(() => parseFloat(getComputedStyle(document.getElementById("sbV")).fontSize) >= 36));
+ok("banner: big speed + shot number + string/target", (await T("#sbV")) === String(Math.round(v1)) && (await T("#sbN")) === "Shot 1 · String 1 · Target A" && await p.evaluate(() => parseFloat(getComputedStyle(document.getElementById("sbV")).fontSize) >= 36));
 await p.evaluate(a => window.__fake.send(a), PB); await p.waitForTimeout(250);
 B = await bt(); const v2 = B[0].shots[1].v, avg2 = (v1 + v2) / 2;
-ok("banner: running avg / ES / SD of the string", (await T("#sbN")).startsWith("Shot 2") && (await T("#sbSt")).includes(`avg ${avg2.toFixed(1)}`) && (await T("#sbSt")).includes(`ES ${Math.abs(v1 - v2).toFixed(1)}`), await T("#sbSt"));
+ok("banner: running avg / ES / SD of the string", (await T("#sbN")).startsWith("Shot 2") && (await T("#sbSt")).includes(`avg ${Math.round(avg2)}`) && (await T("#sbSt")).includes(`ES ${Math.round(Math.abs(v1 - v2))}`), await T("#sbSt"));
 ok("banner doesn't block the page (tabs still work under it)", await (async () => { await p.click("#tabBtnDope"); const a = await p.evaluate(() => document.body.dataset.tab === "dope" && !document.getElementById("shotBan").hidden); await p.click("#tabBtnLog"); return a; })());
 await p.click('#sbActs button[data-a="x"]'); await p.waitForTimeout(150);
 B = await bt();
@@ -118,9 +118,9 @@ ok("wake lock released when the radar disconnects", await p.evaluate(() => windo
 await p.click("#slNewBtn"); await p.waitForSelector("#slEditor.show");
 const add = async v => { await p.fill("#slVel", String(v)); await p.click("#slAdd"); await p.waitForTimeout(40); };
 await add(2700);
-ok("manual add shows the banner (docked in the open editor)", await vis("#shotBan") && (await T("#sbV")) === "2700.0" && (await T("#sbN")) === "Shot 1 · String 1 · Target A");
+ok("manual add shows the banner (docked in the open editor)", await vis("#shotBan") && (await T("#sbV")) === "2700" && (await T("#sbN")) === "Shot 1 · String 1 · Target A");
 for (const v of [2690, 2680, 2710, 2685]) await add(v);
-ok("banner follows manual adds", (await T("#sbN")).startsWith("Shot 5") && (await T("#sbSt")).includes("avg 2693.0"), await T("#sbSt"));
+ok("banner follows manual adds", (await T("#sbN")).startsWith("Shot 5") && (await T("#sbSt")).includes("avg 2693"), await T("#sbSt"));
 await p.click("#tgNewStr"); await p.waitForTimeout(100);
 let E = await ED();
 ok("New string: same sheet, String 2 · Target A", (await T("#tgHdrT")) === "String 2 · Target A" && E.tg.strings.length === 2 && E.tg.strings[1].tid === E.tg.strings[0].tid && E.tg.targets.length === 1);
@@ -183,9 +183,9 @@ E = await ED(); s1 = E.tg.strings[0];
 ok("drag moves a hole", near(s1.holes[4].x - s1.aim.x, 0.6, 0.09) && near(s1.holes[4].y - s1.aim.y, -0.6, 0.09));
 await p.click("#tgUndo"); await p.waitForTimeout(50); E = await ED(); s1 = E.tg.strings[0];
 ok("Undo restores the drag", near(s1.holes[4].x - s1.aim.x, 0.4, 0.09));
-ok("tapped holes show 👆", (await p.locator("#tgHoles .hc i").allTextContents()).every(t => t === "👆"));
+ok("tapped holes show 👆", (await p.locator("#tgList .lr:not(.rdu) i").allTextContents()).every(t => t === "👆"));
 await p.evaluate(() => document.getElementById("tgEd").scrollTop = 0);
-await p.screenshot({ path: OUT + "screenshot-tg-target-edit.png" });
+// (screenshot-tg-target-edit.png is taken by test-tgfix: tight group, labels + zoom bar)
 
 /* ---------- 4) measure mode ---------- */
 const MEAS = [["R", "1.25", "D", "0.9"], ["R", "0.7", "D", "1.2"], ["R", "1.1", "D", "1.5"], ["R", "0.9", "D", "0.7"], ["R", "1.4", "D", "1.4"]];   // low-right group
@@ -203,11 +203,11 @@ for (let i = 0; i < 5; i++) {
 await p.click("#tgMDone"); await p.waitForTimeout(60); E = await ED(); s1 = E.tg.strings[0];
 const sg = { L: -1, R: 1, D: -1, U: 1 }, EXP = MEAS.map(([hd, hx, vd, vy]) => ({ x: sg[hd] * +hx, y: sg[vd] * +vy }));
 ok("measured offsets stored (aim → hole center, R/U positive)", s1.holes.every((h, i) => h.m && near(h.m.x, EXP[i].x, 1e-6) && near(h.m.y, EXP[i].y, 1e-6)), JSON.stringify(s1.holes.map(h => h.m)));
-ok("Done measuring returns to holes; measured markers show 📏 + dashed ring", (await p.getAttribute('#tgMode button[data-v="hole"]', "aria-pressed")) === "true" && (await p.locator("#tgHoles .hc i").allTextContents()).every(t => t === "📏") && (await p.locator("#tgSvg g.hole.meas").count()) >= 5);
+ok("Done measuring returns to holes; measured markers show 📏 + dashed ring", (await p.getAttribute('#tgMode button[data-v="hole"]', "aria-pressed")) === "true" && (await p.locator("#tgList .lr:not(.rdu) i").allTextContents()).every(t => t === "📏") && (await p.locator("#tgSvg g.hole.meas").count()) >= 5);
 // cm entry on hole 1
 await p.click('#tgMode button[data-v="meas"]');
 ok("measure resumes on the selected hole (5)", (await T("#tgMeasT")).startsWith("Hole 5 of 5"));
-await p.click('#tgHoles .hc >> nth=0'); ok("tapping hole chip 1 jumps to it", (await T("#tgMeasT")).startsWith("Hole 1 of 5"));
+await p.click('#tgList .lr:not(.rdu) >> nth=0 >> .lrM'); ok("tapping hole row 1 jumps to it", (await T("#tgMeasT")).startsWith("Hole 1 of 5"));
 await p.click('#tgMU button[data-v="cm"]');
 ok("switching to cm converts the shown value", /^3\.1[78] cm$/.test(await T("#tgMX")), await T("#tgMX"));
 await p.click("#tgMX"); await key("<<<<"); await key("1.27"); await p.click("#tgMDone"); E = await ED();
@@ -227,31 +227,37 @@ ok("at the zero distance: zero correction in clicks, both axes", await vis("#tgZ
 ok("no truing button at the zero distance", !(await vis("#tgTrue")));
 
 /* ---------- 5) pairing ---------- */
-const readsTxt = () => p.locator("#tgReads .rd").evaluateAll(es => es.map(e => e.querySelector(".hn").textContent + ":" + e.querySelector(".rv").textContent));
-ok("readings listed, numbered to match holes", (await readsTxt()).join(",") === "1:2700.0 fps,2:2690.0 fps,3:2680.0 fps,4:2710.0 fps,5:2685.0 fps", (await readsTxt()).join(","));
-await p.click('#tgHoles .hc >> nth=1'); await p.waitForTimeout(30);
-ok("tap a hole selects it", (await T("#tgHoleActT")).includes("Hole 2 selected"));
-await p.click("#tgReads .rd >> nth=3 >> .rdPick"); await p.waitForTimeout(40); E = await ED(); s1 = E.tg.strings[0];
+const rows = () => p.locator("#tgList .lr").evaluateAll(es => es.map(e => (e.classList.contains("rdu") ? "r" : "h") + e.querySelector(".hn").textContent + ":" + e.querySelector(".rv").textContent + (e.classList.contains("dis") ? "(x)" : "")));
+const hrow = n => `#tgList .lr:not(.rdu) >> nth=${n}`, menu = async (n, m) => { await p.click(`${hrow(n)} >> .lrX`); await p.waitForTimeout(30); if (m) { await p.click(`#tgList .lmenu button[data-m="${m}"]`); await p.waitForTimeout(40); } };
+ok("one list: a row per hole with its number + whole fps, no separate readings list", (await rows()).join(",") === "h1:2700 fps,h2:2690 fps,h3:2680 fps,h4:2710 fps,h5:2685 fps" && !(await p.$("#tgHoles")) && !(await p.$("#tgReads")), (await rows()).join(","));
+await menu(1); ok("⋯ opens the hole menu (Re-pair / No reading / Measure / Remove)", (await p.locator("#tgList .lmenu button").allTextContents()).join("|") === "↔ Re-pair to reading|No reading|📏 Measure|Remove hole" && (await p.getAttribute(`${hrow(1)} >> .lrX`, "aria-expanded")) === "true");
+await p.click('#tgList .lmenu button[data-m="pair"]'); await p.waitForTimeout(30);
+ok("Re-pair lists the string's readings (with the hole each is on)", (await p.locator('#tgList .lmenu button[data-m="pk"]').count()) === 5 && (await T('#tgList .lmenu button[data-m="pk"] >> nth=3')).includes("(hole 4)"));
+await p.click('#tgList .lmenu button[data-m="pk"] >> nth=3'); await p.waitForTimeout(40); E = await ED(); s1 = E.tg.strings[0];
 const vOf = h => E.shots.find(x => x.id === h.sh)?.v ?? null;
-ok("tap a reading re-pairs: hole 2 ↔ 2710, hole 4 freed (no cascade)", vOf(s1.holes[1]) === 2710 && s1.holes[3].sh === null && vOf(s1.holes[0]) === 2700 && vOf(s1.holes[2]) === 2680 && vOf(s1.holes[4]) === 2685);
-ok("freed reading shows no hole number", (await readsTxt()).join(",") === "1:2700.0 fps,–:2690.0 fps,3:2680.0 fps,2:2710.0 fps,5:2685.0 fps", (await readsTxt()).join(","));
-await p.click('#tgHoles .hc >> nth=3'); await p.click("#tgNoRd"); await p.waitForTimeout(30); E = await ED();
-ok("hole marked 'no reading'", E.tg.strings[0].holes[3].nr === true && (await T('#tgHoles .hc >> nth=3')).includes("no reading"));
+ok("re-pair: hole 2 ↔ 2710, hole 4 freed (no cascade)", vOf(s1.holes[1]) === 2710 && s1.holes[3].sh === null && vOf(s1.holes[0]) === 2700 && vOf(s1.holes[2]) === 2680 && vOf(s1.holes[4]) === 2685);
+ok("freed reading drops below as a row with its own ⋯", (await rows()).join(",") === "h1:2700 fps,h2:2710 fps,h3:2680 fps,h4:unpaired,h5:2685 fps,r–:2690 fps" && (await T("#tgList .lsub")).includes("Readings without a hole"), (await rows()).join(","));
+await menu(3, "nr"); E = await ED();
+ok("hole menu: No reading", E.tg.strings[0].holes[3].nr === true && (await T(`${hrow(3)} >> .rv`)) === "no reading");
 await p.fill("#tgAddV", "2706"); await p.click("#tgAddShot"); await p.waitForTimeout(40); E = await ED();
-ok("+ Add shot with a typed velocity adds a paired hole + reading", E.tg.strings[0].holes.length === 6 && vOf.call(null, E.tg.strings[0].holes[5]) === 2706 || E.shots.find(x => x.id === E.tg.strings[0].holes[5].sh)?.v === 2706);
+ok("+ Add shot with a typed velocity adds a paired hole + reading", E.shots.find(x => x.id === E.tg.strings[0].holes[5].sh)?.v === 2706);
 await p.click("#tgAddShot"); await p.waitForTimeout(40); E = await ED();
 ok("+ Add shot blank adds a hole with no reading", E.tg.strings[0].holes.length === 7 && E.tg.strings[0].holes[6].nr === true && E.tg.strings[0].holes[6].sh === null);
-ok("the added hole is selected, ready to drag/measure/remove", (await T("#tgHoleActT")).includes("Hole 7 selected"));
-await p.click("#tgDelHole"); await p.waitForTimeout(30); E = await ED();
-ok("remove hole", E.tg.strings[0].holes.length === 6);
-await p.click("#tgReads .rd >> nth=1 >> .rdX"); await p.waitForTimeout(40); E = await ED();
+ok("the added hole is selected (highlighted row)", await p.evaluate(() => document.querySelectorAll("#tgList .lr.on").length === 1 && document.querySelectorAll("#tgList .lr:not(.rdu)")[6].classList.contains("on")));
+await menu(6, "del"); E = await ED();
+ok("hole menu: Remove hole", E.tg.strings[0].holes.length === 6);
+await p.click("#tgList .lr.rdu .lrX"); await p.waitForTimeout(30);
+ok("reading menu: Pair to hole / Discard", (await p.locator("#tgList .lmenu button").allTextContents()).join("|") === "↔ Pair to hole|Discard (double read)");
+await p.click('#tgList .lmenu button[data-m="x"]'); await p.waitForTimeout(40); E = await ED();
 const dbl = E.shots.find(x => x.v === 2690);
-ok("double read discarded: stays listed, grayed, out of stats", dbl.x === true && (await p.locator("#tgReads .rd.dis").count()) === 1 && await p.evaluate(() => window.__bc.ED && true) && (await p.evaluate(() => { const e = window.__bc.ED; return e.shots.filter(x => !x.x).length; })) === E.shots.length - 1);
-await p.evaluate(() => document.getElementById("tgHoles").scrollIntoView({ block: "start" }));
-await p.click('#tgHoles .hc >> nth=0'); await p.waitForTimeout(30);
-await p.evaluate(() => document.getElementById("toast").classList.remove("show")); await p.waitForTimeout(350); await p.screenshot({ path: OUT + "screenshot-tg-pairing.png" });
-await p.click('#tgHoles .hc >> nth=0');
-ok("pairing controls ≥44px", (await small("#tgHoles .hc, #tgReads button, #tgTools button, #tgTools input")).length === 0, JSON.stringify(await small("#tgHoles .hc, #tgReads button, #tgTools button, #tgTools input")));
+ok("double read discarded: stays listed (struck), out of stats", dbl.x === true && (await rows()).includes("r–:2690 fps(x)") && (await p.evaluate(() => { const e = window.__bc.ED; return e.shots.filter(x => !x.x).length; })) === E.shots.length - 1);
+await p.click("#tgList .lr.rdu .lrX"); await p.waitForTimeout(30);
+ok("a discarded reading offers Restore only", (await p.locator("#tgList .lmenu button").allTextContents()).join("|") === "↺ Restore");
+await p.click("#tgList .lr.rdu .lrX"); await p.waitForTimeout(30);
+await p.evaluate(() => document.getElementById("tgList").scrollIntoView({ block: "start" }));
+await menu(0); await p.evaluate(() => document.getElementById("toast").classList.remove("show")); await p.waitForTimeout(350); await p.screenshot({ path: OUT + "screenshot-tg-pairing.png" });
+ok("pairing controls ≥44px", (await small("#tgList button, #tgTools button, #tgTools input")).length === 0, JSON.stringify(await small("#tgList button, #tgTools button, #tgTools input")));
+await p.click(`${hrow(0)} >> .lrX`); await p.waitForTimeout(30);
 await p.click("#tgEdDone"); await p.waitForTimeout(150);
 ok("Done saves (session not new) and returns to the session", !(await vis("#tgEd")) && await vis("#slEditor") && (await LOG()).find(s => s.id === MID).tg.strings[0].holes.length === 6);
 ok("discarded reading is out of the session stats", (await LOG()).find(s => s.id === MID).stats.n === 10 && (await LOG()).find(s => s.id === MID).shots.length === 11, String((await LOG()).find(s => s.id === MID).stats.n));
@@ -261,7 +267,7 @@ await p.evaluate(() => window.__bc.openTgEd(window.__bc.ED.tg.strings[2].id)); a
 await p.fill("#tgDist", "300"); await p.press("#tgDist", "Tab"); await svgIntoView(); await tap(0, 0);
 const vbW = () => p.evaluate(() => +document.getElementById("tgSvg").getAttribute("viewBox").split(" ")[2]);
 const w0 = await vbW(); await p.click("#tgZin"); await p.click("#tgZin"); await p.waitForTimeout(40);
-ok("zoom ＋ ×4 magnifies around the aim point for tight groups", near(await vbW(), w0 / 4, 0.01) && (await T("#tgZoomT")) === "×4" && (await small("#tgZoom button")).length === 0);
+ok("zoom ＋ ×4 magnifies around the aim point for tight groups", near(await vbW(), w0 / 4, 0.01) && (await T("#tgZoomT")) === "×4" && (await small("#tgZbar button")).length === 0);
 for (const h of [[0.5, 1.0], [-0.4, 0.8], [0.3, 1.2]]) await tap(...h);
 ok("touching holes at 300 yd still add (3 holes)", (await ED()).tg.strings[2].holes.length === 3);
 await p.click('#tgMode button[data-v="meas"]');
@@ -272,8 +278,8 @@ ok("truing sends vertical only (horizontal note)", (await T("#tgRes")).includes(
 await p.check("#tgAtDist"); await p.waitForTimeout(30);
 ok("confirm checkbox enables it", !(await p.isDisabled("#tgTrue")));
 await p.click("#tgTrue"); await p.waitForSelector("#trSheet.show"); await p.waitForTimeout(500);
-const trO = +(await p.inputValue("#trObs")), trR = +(await p.inputValue("#trRange")), pred = +((await T("#trOut")).match(/app's ([\d.]+) mil/) || [])[1];
-ok("Truing opens at 300 yd with observed = predicted − 1.0″ high", trR === 300 && near(trO, pred - 1.0 / 10.8, 0.011) && (await T("#trOut")).includes("Vertical only"), `${trO} ${pred}`);
+const trO = +(await p.inputValue("#trObs")), trR = +(await p.inputValue("#trRange")), pred = (await LOG()).find(s => s.id === MID).tg.strings[2].dial?.e;
+ok("Truing opens at 300 yd with observed = dialed − 1.0″ high", trR === 300 && pred > 0 && near(trO, pred - 1.0 / 10.8, 0.011) && (await T("#trOut")).includes("Vertical only") && (await T("#trOut")).includes("dialed U"), `${trO} ${pred}`);
 await p.keyboard.press("Escape"); await p.waitForTimeout(150);
 await p.evaluate(() => { document.querySelectorAll(".ovl.show").forEach(o => o.classList.remove("show")); document.body.style.overflow = ""; });
 
@@ -292,7 +298,7 @@ await p.click("#slTgView .sc >> nth=0"); await p.click("#slTgView .sc >> nth=1")
 ok("overlay chips ≥44px", (await small("#slTgView .sc, #slStrBar button, #slShots button")).length === 0, JSON.stringify(await small("#slTgView .sc, #slStrBar button, #slShots button")));
 
 /* ---------- UX: contrast in 5 themes, clipping at 360/412 ---------- */
-const TXT = ["#tgHdrT", "#tgHdrS", "#slTgView .sc", "#slShots .sgh", "#slShots .sgh small", "#slShots .shot .v", "#slShots .tg", "#slTgNote", "#slStrBar button", ".tgChk span"];
+const TXT = ["#tgHdrT", "#tgHdrS", "#slTgView .sc", "#slShots .sgh", "#slShots .sgh small", "#slShots .shot .v", "#slShots .tg", "#slTgNote", "#slStrBar button", ".tgl span", ".tgl small"];
 const markerCR = () => p.evaluate(() => { const cs = getComputedStyle(document.documentElement), out = []; const card = cs.getPropertyValue("--card").trim(); for (let i = 1; i <= 6; i++) out.push([i, cs.getPropertyValue("--s" + i).trim(), card]); return out; });
 const toRGB = h => { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(c => c + c).join(""); return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`; };
 for (const th of ["dark", "light", "od", "fde", "night"]) {
@@ -305,7 +311,7 @@ await p.evaluate(() => document.documentElement.dataset.theme = "dark");
 await p.evaluate(() => window.__bc.openTgEd(window.__bc.ED.tg.strings[0].id)); await p.waitForSelector("#tgEd.show");
 for (const th of ["dark", "light", "od", "fde", "night"]) {
   await p.evaluate(t => document.documentElement.dataset.theme = t, th); await p.waitForTimeout(30);
-  const bad = (await colors(["#tgEdT", "#tgTip", "#tgHoles .hc", "#tgReads .rv", "#tgReads .rk", "#tgReads .hn", "#tgReads .rdX", "#tgRes .resG span", "#tgRes .resG b", "#tgRes .resG small", "#tgRes .zc", "#tgRes .hint", "#tgMode button", "#tgEd label"])).filter(([, c, bg]) => cr(c, bg) < 4.5).map(([s, c, bg]) => `${s} ${cr(c, bg).toFixed(2)}`);
+  const bad = (await colors(["#tgEdT", "#tgTip", "#tgList .lrM", "#tgList .rv", "#tgList .rk", "#tgList .hn", "#tgList .lrX", "#tgList .lsub", "#tgDialH", "#tgZbar .zh", "#tgZoomT", "#tgRes .resG span", "#tgRes .resG b", "#tgRes .resG small", "#tgRes .zc", "#tgRes .hint", "#tgMode button", "#tgEd label"])).filter(([, c, bg]) => cr(c, bg) < 4.5).map(([s, c, bg]) => `${s} ${cr(c, bg).toFixed(2)}`);
   ok(`${th}: target editor text AA`, !bad.length, JSON.stringify(bad.slice(0, 4)));
 }
 await p.click('#tgMode button[data-v="meas"]');

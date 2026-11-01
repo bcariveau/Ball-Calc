@@ -34,7 +34,7 @@ ok("debounced: 4 quick edits → 1 recalculation", (await p.evaluate(() => windo
 ok("auto-calc updated the dial for 640 yd", (await p.textContent("#dcElev")) !== e0 && (await p.textContent("#dcElevC")).startsWith("640 yd"), await p.textContent("#dcElev"));
 await setv("target", "600"); await settle();
 await p.click("#tabBtnGear"); await p.reload(); await ready();
-ok("last tab remembered (Gear)", await p.evaluate(() => document.getElementById("tabBtnGear").getAttribute("aria-selected") === "true" || document.getElementById("tabBtnGear").classList.contains("on")));
+ok("always opens on Dope (round 2; last tab not restored)", await p.evaluate(() => document.getElementById("tabBtnDope").getAttribute("aria-selected") === "true" || document.getElementById("tabBtnDope").classList.contains("on")));
 await p.click("#tabBtnDope");
 await p.evaluate(() => window.scrollTo(0, 1600)); await p.waitForTimeout(150);
 const bb = await p.evaluate(() => { const r = document.getElementById("dopeCard").getBoundingClientRect(); return { t: r.top, b: r.bottom }; });
@@ -88,7 +88,7 @@ const at100 = await p.evaluate(() => { const s = window.__bc.lastRun.samples.fin
 ok("zero solved under zero conditions (same bore angle as zeroing there)", near(zA, zB, 1e-6) && Math.abs(zA - zToday) > 0.01, `zero ${zA.toFixed(4)} = ${zB.toFixed(4)} vs today-zero ${zToday.toFixed(4)} mil`);
 R = await p.evaluate(() => ({ mz: window.__bc.lastRun.mvZero, mn: window.__bc.lastRun.mvNow, zc: window.__bc.lastRun.zc }));
 ok("…then fired under today's: zero MV 2636.5 (10°F powder) vs 2710 today → hits high at 100 → dial down", near(R.mz, 2636.5, 0.01) && near(R.mn, 2710, 0.01) && R.zc.temp === 10 && at100 < -0.02, `100 yd ${at100.toFixed(3)} mil`);
-ok("zero conditions summary + card chip", (await p.textContent("#zeroSum")).includes("10°F") && (await p.textContent("#dcWarn")).includes("Zeroed @ 10°F"));
+ok("zero conditions summary + card chip", (await p.textContent("#zeroSum")).includes("10°F") && (await p.textContent("#dcMore")).includes("Zeroed @ 10°F"));
 for (const id of ["zTemp", "zHum", "zAlt", "zPress", "ptSens", "mvTemp"]) await setv(id, ""); await settle();
 
 /* 4) turret clicks, separate from display unit */
@@ -113,7 +113,7 @@ const t5 = await p.$$eval("#results tbody tr", a => a.map(r => ({ c: r.className
 ok("target on a step row: highlighted, not duplicated", t5.filter(r => r.t.startsWith("500 yd")).length === 1 && t5.find(r => r.t.startsWith("500 yd")).c.includes("tgt"));
 const hdr = await p.$$eval("#results thead th", a => a.map(x => x.textContent));
 const pm = await p.evaluate(() => { const R = window.__bc.lastRun, M = window.__B.Angular.MRad; return Math.abs(R.tgtF.windageAngle.In(M) - R.tgtN.windageAngle.In(M)) / 10; });
-ok("1 mph column + card line", hdr.includes("1 mph") && hdr.includes("Clicks") && (await p.textContent("#dcInfo")).includes(`1 mph full = ${pm.toFixed(2)} MIL`) && pm > 0.03 && pm < 0.1, pm.toFixed(3));
+ok("1 mph column + card line", hdr.some(h => h.includes("1 mph")) && hdr.some(h => /Clicks|clk/.test(h)) && (await p.textContent("#dcInfo")).includes(`1 mph full = ${pm.toFixed(2)} MIL`) && pm > 0.03 && pm < 0.1, pm.toFixed(3));
 
 /* 6) transonic */
 await setv("target", "1200"); await setv("maxRange", "1500"); await settle(); R = await LR();
@@ -130,7 +130,7 @@ await setv("temp", "59"); await setv("target", "600"); await setv("maxRange", "1
 /* 7) Miller stability */
 const sgT = await p.evaluate(() => window.__bc.millerSG(2710, { temp: 59, alt: 0 }));
 ok("Miller 140gr 6.5 ELD-M 1.39\" 1:8 @ 59°F sea level ≈ 1.9–2.0 (tip est.)", sgT.sg >= 1.85 && sgT.sg <= 2.05 && sgT.assumed, sgT.sg.toFixed(3));
-ok("card shows SG stable", (await p.textContent("#dcWarn")).includes("stable"));
+ok("card shows SG stable (in Details)", (await p.textContent("#dcMore")).includes("stable"));
 await p.click("#tabBtnGear"); await setv("bulletName", "140gr HPBT"); 
 const sgP = await p.evaluate(() => window.__bc.millerSG(2710, { temp: 59, alt: 0 }));
 ok("plain Miller (no tip) ≈ 1.63", near(sgP.sg, 1.63, 0.03), sgP.sg.toFixed(3));
@@ -141,7 +141,7 @@ ok("1:10 → warn (<1.4)", /marginal/.test(await p.textContent("#dcWarn")), awai
 await setv("twist", "12"); await settle();
 ok("1:12 → unstable (<1.0)", /unstable/.test(await p.textContent("#dcWarn")), await p.textContent("#dcWarn"));
 await setv("length", ""); await settle();
-ok("length unknown is stated", (await p.textContent("#dcWarn")).includes("length unknown"));
+ok("length unknown is stated", (await p.textContent("#dopeCard")).includes("length unknown"));
 await setv("length", "1.390"); await setv("twist", "8"); await settle();
 
 /* 8) truing */
@@ -178,7 +178,7 @@ ok("dope card 50 yd steps to 1000 = 20 rows", n === 20, n);
 await p.click('#dcvStep button[data-v="25"]'); await p.waitForTimeout(400);
 n = await p.$$eval("#dcPrint tbody tr", a => a.length);
 const head = await p.textContent("#dcPrint .hd"), hcols = await p.$$eval("#dcPrint thead th", a => a.map(x => x.textContent));
-ok("25 yd steps = 40 rows; header with gun/load/zero/conditions; clicks + 10 mph", n === 40 && head.includes("6.5 CM · 140 ELD-M") && head.includes("Zero 100 yd") && head.includes("59°F") && hcols.join("|") === "Yd|Elev MIL|Clk|10 mph MIL|Clk|fps", head);
+ok("25 yd steps = 40 rows; header with gun/load/zero/conditions; clicks + 10 mph", n === 40 && head.includes("6.5 CM · 140 ELD-M") && head.includes("Zero 100 yd") && head.includes("59°F") && hcols.join("|") === "Yd|Elev MIL|Clk|10 mph MIL|Clk|Spin MIL|fps", head);
 await p.emulateMedia({ media: "print" });
 const pv = await p.evaluate(() => ({ card: document.getElementById("dopeCard").getClientRects().length + document.getElementById("results").getClientRects().length, nav: getComputedStyle(document.querySelector(".tabbar, nav") || document.body).display, view: getComputedStyle(document.getElementById("dcView")).display,
   ctl: getComputedStyle(document.querySelector(".dcvCtl")).display, w: document.getElementById("dcPrint").getBoundingClientRect().width }));

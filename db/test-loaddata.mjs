@@ -48,6 +48,7 @@ await p.reload(); await ready(p);
 const after = await p.evaluate(() => { const l = window.__bc.P.rifles[0].loads[0]; return { ch: l.ldCharge, pw: l.ldPowder, coal: l.ldCOAL, pr: l.ldPrimer, gk: window.__bc.P.rifles[0].gunKind,
   form: document.getElementById("ldCharge").value, sum: document.getElementById("rifleSum").textContent }; });
 ok("recipe + gun type persist after reload", after.ch === "42.5" && after.pw === "Hodgdon H4350" && after.coal === "2.800" && after.gk === "handgun" && after.form === "42.5" && after.sum.startsWith("Handgun"), JSON.stringify(after));
+await p.click("#tabBtnGear");  // app always opens on Dope (round 2)
 await p.click("#rifleDetails > summary"); await p.click("#recipeDetails > summary");
 await p.selectOption("#gunKind", "rifle");
 

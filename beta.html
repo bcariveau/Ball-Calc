@@ -427,6 +427,11 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
 #zpDlg p { margin: 0 0 14px; color: var(--muted); font-size: 0.9rem; line-height: 1.35; }
 #zpDlg .row { display: flex; gap: 10px; }
 #zpDlg .row button { flex: 1; min-height: 48px; margin: 0; font-weight: 700; }
+
+/* round 3.1 */
+#dcWarn .zcw { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+#dcWarn .zcw button { width: auto; min-height: 44px; margin: 0; padding: 0 14px; font-size: 0.85rem; font-weight: 700; }
+#opUpNote { color: var(--warn); margin: 4px 0 0; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -559,7 +564,7 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
               <div><label for="opTurn">Elevation per turn <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTurn" step="0.5" placeholder="e.g. 10"><div class="err" id="e-opTurn"></div></div>
               <div><label for="opTravel">Total elev. travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTravel" step="0.5" placeholder="e.g. 29"><div class="err" id="e-opTravel"></div></div>
               <div><label for="opCant">Canted base (MOA)</label><input type="number" inputmode="decimal" id="opCant" step="5" placeholder="e.g. 20"><div class="err" id="e-opCant"></div></div>
-              <div><label for="opUp">Up travel from zero <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opUp" step="0.1" placeholder="estimate"><div class="err" id="e-opUp"></div></div>
+              <div><label for="opUp">Up travel from zero <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opUp" step="0.1" placeholder="estimate"><div class="err" id="e-opUp"></div><p class="hint" id="opUpNote" hidden>Moved — re-measure up travel on this rifle.</p></div>
               <div><label for="opSH">Sight height (in)</label><input type="number" inputmode="decimal" id="opSH" step="0.05" placeholder="blank = gun's"><div class="err" id="e-opSH"></div></div>
               <div><label for="opWTravel">Windage travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opWTravel" step="0.5" placeholder="optional"><div class="err" id="e-opWTravel"></div></div>
               <div><label for="opTrack">Tracking factor</label><input type="number" inputmode="decimal" id="opTrack" step="0.005" placeholder="e.g. 1.02"><div class="err" id="e-opTrack"></div></div>
@@ -2566,7 +2571,7 @@ function millerSG(mv, c) {
 function paintWarn() {   // warnings stay on the card; plain info goes behind "Details"
   const R = lastRun, warn = [], info = []; if (!R) { $("dcWarn").innerHTML = ""; $("dcChips").innerHTML = ""; return; }
   const g = R.sg, ts = turretSpec(), r = curRifle();
-  if (r?.zeroUnconf) warn.push(`<span class="bad" title="${escapeHtml("Zero not confirmed: " + (r.zeroUnconf.why || "optic changed"))}">⚠ Zero not confirmed</span>`);
+  if (r?.zeroUnconf) warn.push(`<span class="bad zcw" title="${escapeHtml("Zero not confirmed: " + (r.zeroUnconf.why || "optic changed"))}">⚠ Zero not confirmed<button type="button" class="sm" id="dcZeroOk">✓ Confirm zero</button></span>`);
   if (R.tgt && ts.up != null) { const a = angs(R.tgt), tu = ts.u === "MIL" ? "mil" : "MOA";
     if (a.eT > ts.up + 1e-9) warn.push(`<span class="bad">⚠ Needs U ${a.eT.toFixed(1)} ${tu} — only ${ts.upSet ? "" : "~"}${ts.up.toFixed(1)} ${tu} up travel; hold the last ${(a.eT - ts.up).toFixed(1)} ${tu}</span>`); }
   if (g && g.sg != null) {
@@ -2749,19 +2754,36 @@ function attachOptic(oid, fresh) {   // fresh = optic just created for this gun 
   if (other && !confirm(`“${o.name}” is on “${other.name}”. Move it to “${r.name}”?\nBoth guns' zeros will be marked “not confirmed”.`)) { renderOpticSel(); return false; }
   autosave();
   const prev = r.opticId ? P.optics.find(x => x.id === r.opticId) : null;
+  const snap = { rO: r.opticId || null, rZ: r.zeroUnconf, oZ: other?.zeroUnconf, up: o.opUp, re: o.opUpRe, sh: o.opSH, pUp: prev?.opUp, pRe: prev?.opUpRe };
   if (other) { other.opticId = null; flagZero(other, `optic “${o.name}” moved to “${r.name}”`); }
   r.opticId = oid;
   if (!String(o.opSH ?? "").trim() && r.sightHeight) o.opSH = r.sightHeight;
+  const upGone = !fresh && clearUp(o, true); if (prev) clearUp(prev);
   const ask = !prev && !other;   // first optic on a gun that had none → ask once instead of flagging
   if (!ask) flagZero(r, other ? `optic “${o.name}” moved here from “${other.name}”` : `optic changed from “${prev.name}” to “${o.name}”`);
   savePresets(); applyOptic(); updateDirty(); schedule();
   if (ask) { askZero(r, o); return "ask"; }
-  return true;
+  if (other) {
+    toast(`“${o.name}” moved from “${other.name}” — confirm both zeros${upGone ? "; up travel cleared, re-measure on this rifle" : ""}`, { label: "Undo", fn: () => {
+      if (!P.optics.includes(o) || !P.rifles.includes(r) || !P.rifles.includes(other)) return;
+      autosave(); other.opticId = o.id; if (snap.oZ) other.zeroUnconf = snap.oZ; else delete other.zeroUnconf;
+      r.opticId = snap.rO; if (snap.rZ) r.zeroUnconf = snap.rZ; else delete r.zeroUnconf;
+      o.opUp = snap.up; o.opSH = snap.sh; if (snap.re) o.opUpRe = snap.re; else delete o.opUpRe;
+      if (prev) { prev.opUp = snap.pUp; if (snap.pRe) prev.opUpRe = snap.pRe; else delete prev.opUpRe; }
+      P.lastRifleId = r.id; savePresets(); renderPickers(); applyRifle(); updateDirty(); schedule(); toast(`Move undone — “${o.name}” is back on “${other.name}”`); } });
+    return "moved";
+  }
+  if (upGone) toast(`“${o.name}” attached to “${r.name}” — confirm the zero; up travel cleared, re-measure on this rifle`);
+  return upGone ? "noted" : true;
+}
+function clearUp(o, note) {   // up travel from zero belongs to the gun it was measured on
+  if (!o || !String(o.opUp ?? "").trim()) return false;
+  o.opUp = ""; if (note) o.opUpRe = 1; else delete o.opUpRe; return true;
 }
 function detachOptic() {
   const r = curRifle(), o = curOptic(); if (!r || !o) return;
-  autosave(); r.opticId = null; flagZero(r, `optic “${o.name}” removed`); savePresets(); applyOptic(); updateDirty(); schedule();
-  toast(`“${o.name}” detached from “${r.name}” — zero marked not confirmed`);
+  autosave(); r.opticId = null; flagZero(r, `optic “${o.name}” removed`); const upGone = clearUp(o); savePresets(); applyOptic(); updateDirty(); schedule();
+  toast(`“${o.name}” detached from “${r.name}” — zero marked not confirmed${upGone ? "; its up travel was cleared" : ""}`);
 }
 $("opticSel").onchange = e => { const v = e.target.value; if (!v) detachOptic(); else if (attachOptic(v) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); };
 $("opNew").onclick = () => {
@@ -2769,11 +2791,11 @@ $("opNew").onclick = () => {
   const cur = curOptic(), gt = $("turret").value, base = cur ? pick(OPTIC_F) : {
     opTurret: gt || (S.ang === "MIL" ? "0.1mil" : "0.25moa"), opTurretV: val("turretV"), opTurretU: $("turretU").value || "mil",
     opReticle: (gt === "custom" ? $("turretU").value === "moa" : gt ? /moa/.test(gt) : S.ang === "MOA") ? "moa" : "mil", opFP: "FFP", opSH: val("sightHeight") };
-  const o = { id: uid(), name: n, ...Object.fromEntries(OPTIC_F.map(f => [f, base[f] ?? ""])) };
+  const o = { id: uid(), name: n, ...Object.fromEntries(OPTIC_F.map(f => [f, base[f] ?? ""])), opUp: "" };
   P.optics.push(o); const at = attachOptic(o.id, true); followUnits(true); if (at !== "ask") toast(`Optic “${n}” added to “${r.name}”`);
 };
 $("opRename").onclick = () => { const o = curOptic(); if (!o) return; const n = askName("Rename optic:", o.name); if (!n) return; o.name = n; savePresets(); renderOpticSel(); paintOptic(); flashSaved("optic"); };
-$("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60) }; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ › Attach)`); };
+$("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60), opUp: "" }; delete c.opUpRe; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ › Attach)`); };
 $("opDetach").onclick = () => detachOptic();
 $("opDel").onclick = () => {
   const o = curOptic(), r = curRifle(); if (!o || !confirm(`Delete optic “${o.name}”?\nThe gun falls back to its own turret settings and its zero is marked not confirmed.`)) return;
@@ -2791,6 +2813,7 @@ $("opAttach").onclick = () => {
 };
 $("opList").addEventListener("click", e => { const b = e.target.closest(".opItem"); if (!b) return; closeOvl("opSheet"); if (attachOptic(b.dataset.id) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); });
 $("opSheetClose").onclick = () => closeOvl("opSheet");
+$("dcWarn").addEventListener("click", e => { if (e.target.closest("#dcZeroOk")) $("zeroConfirm").onclick(); });
 $("zeroConfirm").onclick = () => { const r = curRifle(); if (!r) return; delete r.zeroUnconf; savePresets(); updateDirty(); if (lastRun) renderCard(); toast(`Zero confirmed for “${r.name}”`); };
 $("dcMoreBtn").onclick = () => { const open = $("dcMore").hidden; $("dcMore").hidden = !open; $("dcMoreBtn").setAttribute("aria-expanded", String(open)); $("dcMoreBtn").textContent = open ? "Details ▴" : "Details ▾"; };
 
@@ -2815,7 +2838,12 @@ function paintShHint() {   // weather fills the call with the 10 m wind; shooter
   el.hidden = !on; el.textContent = on ? `At shooter height ≈ ⅔ → ~${fmt(num("windSpeed") * 2 / 3, 0)} mph` : "";
   el.title = on ? "Weather wind is measured at 10 m. In open ground the wind at shooter height usually runs about 2/3 of that. The value is not changed for you." : "";
 }
-function paintRO() {   // with an optic attached the gun's sight height / turret rows become read-only "set by optic"
+function paintUpNote() {
+  const o = curOptic(); if (o && o.opUpRe && val("opUp")) delete o.opUpRe;
+  $("opUpNote").hidden = !(o && o.opUpRe);
+}
+function paintRO() {
+  paintUpNote();   // with an optic attached the gun's sight height / turret rows become read-only "set by optic"
   const o = curOptic(), ts = turretSpec(), shO = o && num("opSH") != null;
   const ro = (row, on, txt) => { $(row + "Ro").hidden = !on; $(row + "RoL").hidden = !on; if (on) $(row + "Ro").innerHTML = txt; };
   ro("gunSH", shO, shO ? `<span>${escapeHtml(val("opSH"))}"</span><small title="From the optic “${escapeHtml(o.name)}”; the gun's own value is kept as the fallback">gun's ${escapeHtml(val("sightHeight") || "—")}"</small>` : "");
@@ -2873,6 +2901,7 @@ document.addEventListener("input", e => {
   if (WX_F.includes(id)) manual.add(id);
   if (id === "bearing") applyAuto(); else { renderChips(); updateDirty(); }
   if (id === "opReticle") followUnits(true);
+  if (id === "opUp") paintUpNote();
   if (id === "windDir" || id === "windSpeed") drawDial();
   schedule();
 });

@@ -109,6 +109,10 @@ tr.tgt td { background: var(--hover); }
 #chart { width: 100%; height: 100%; display: block; }
 #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--hover); color: var(--text); border: 1px solid var(--accent); padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10; max-width: 90vw; }
 #toast.show { opacity: 1; }
+#toast { z-index: 60; bottom: calc(84px + env(safe-area-inset-bottom)); text-align: center; }
+#toast.act { border-radius: 14px; max-width: min(92vw, 380px); text-align: left; }
+#toast.act { pointer-events: auto; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; }
+#toast.act button { width: auto; margin: 0; padding: 6px 12px; font-size: 0.82rem; border-radius: 999px; flex: 0 0 auto; }
 .sensorbtn { display: none; }
 body.has-sensors .sensorbtn { display: inline-block; }
 #sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 2px solid var(--accent); border-radius: 16px 16px 0 0; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); z-index: 20; display: none; box-shadow: 0 -8px 30px #000a; max-width: 640px; margin: 0 auto; }
@@ -183,6 +187,44 @@ body.has-sensors .sensorbtn { display: inline-block; }
 #cpAllBtn { width: 100%; margin-top: 2px; }
 #loadRow > button { padding-left: 4px; padding-right: 4px; font-size: 0.78rem; white-space: nowrap; }
 #loadRow > button.danger { flex: 0 0 42px; }
+/* move / reassign sessions */
+#mvSheet { z-index: 40; }
+#slMoveBtn { width: 100%; margin: 6px 0 2px; padding: 9px; }
+#slMoveBtn.hot { box-shadow: 0 0 0 2px var(--warn); }
+#mvSheet label.fl { display: block; color: var(--muted); font-size: 0.8rem; margin: 10px 0 4px; }
+#mvLoads .rcItem { position: relative; padding-right: 34px; }
+#mvLoads .rcItem .r { grid-column: 1 / -1; color: var(--accent); font-size: 0.75rem; font-weight: 500; }
+#mvLoads .rcItem.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--hover); }
+#mvLoads .rcItem.on::after { content: "✓"; position: absolute; right: 12px; top: 10px; color: var(--accent); font-weight: 800; }
+#mvLoads .rcItem.cur .tag { background: none; }
+.mvChk { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0 4px; font-size: 0.84rem; color: var(--text); cursor: pointer; }
+.mvChk input { width: 22px; height: 22px; flex: 0 0 22px; margin: 0; accent-color: var(--accent); padding: 0; }
+.mvChk small { display: block; color: var(--hint); font-size: 0.72rem; }
+#mvDiff { margin-top: 8px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+#mvDiff .t { font-size: 0.74rem; color: var(--accent); font-weight: 700; padding: 7px 10px 0; text-transform: uppercase; letter-spacing: 0.04em; }
+#mvDiff table { width: 100%; border-collapse: collapse; font-size: 0.78rem; table-layout: fixed; }
+#mvDiff td { overflow-wrap: anywhere; white-space: normal; }
+#mvDiff td { padding: 6px 10px; vertical-align: top; text-align: left; border-top: 1px solid var(--border); }
+#mvDiff td:first-child { color: var(--muted); width: 64px; }
+#mvDiff td.a { color: var(--muted); }
+#mvDiff td.ar { color: var(--hint); width: 14px; padding: 6px 0; }
+#mvDiff col.ar { width: 14px; }
+#mvDiff tr.ch td.b { color: var(--warn); font-weight: 600; }
+#mvDiff tr.same td.b { color: var(--muted); }
+#mvActs { display: flex; gap: 8px; margin-top: 10px; padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+#mvActs button { flex: 1; padding: 12px; }
+#mvActs button.ghost { flex: 0 0 34%; }
+.slGrp { color: var(--warn); font-size: 0.8rem; font-weight: 600; margin: 12px 0 6px; }
+.slItem.orphan { border-style: dashed; border-color: var(--warn-b); }
+.slItem .o { grid-column: 1 / -1; color: var(--warn); font-size: 0.74rem; font-weight: 600; }
+#slList.selecting .slItem { position: relative; padding-left: 40px; }
+#slList.selecting .slItem::before { content: ""; position: absolute; left: 11px; top: 50%; width: 18px; height: 18px; margin-top: -11px; border: 2px solid var(--muted); border-radius: 50%; }
+#slList.selecting .slItem.sel { border-color: var(--accent); background: var(--hover); }
+#slList.selecting .slItem.sel::before { background: var(--accent); border-color: var(--accent); }
+#slList.selecting .slItem.sel::after { content: "✓"; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--on-accent); font-size: 0.78rem; font-weight: 800; }
+#slSelBar { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); z-index: 12; display: flex; gap: 6px; align-items: center; background: var(--card); border: 1px solid var(--accent); border-radius: 12px; padding: 8px; margin-top: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+#slSelBar .n { flex: 1 1 auto; font-size: 0.84rem; font-weight: 700; color: var(--text); padding-left: 4px; }
+#slSelBar button { flex: 0 0 auto; }
 /* shot log */
 .slItem { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; width: 100%; text-align: left; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; margin: 0 0 6px; font-size: 0.88rem; font-weight: 500; }
 .slItem:active { transform: none; background: var(--hover); }
@@ -365,7 +407,8 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
     <div id="slCmpTbl"></div>
   </details>
   <div id="slList"></div>
-  <div class="row slTools"><button class="sm ghost" type="button" id="slCsvBtn">⇩ Shot log CSV (all sessions)</button></div>
+  <div id="slSelBar" hidden><span class="n" id="slSelN">0 selected</span><button class="sm ghost" type="button" id="slSelAll">All</button><button class="sm" type="button" id="slSelMove" disabled>↔ Move…</button><button class="sm ghost" type="button" id="slSelDone">Done</button></div>
+  <div class="row slTools"><button class="sm ghost" type="button" id="slCsvBtn">⇩ Shot log CSV (all sessions)</button><button class="sm ghost" type="button" id="slSelBtn">☑ Select</button></div>
 </div>
 
 <!-- ===== Conditions ===== -->
@@ -481,6 +524,7 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
   <h3><span id="slEdTitle">Session</span><button class="sm ghost" type="button" id="slEdClose">✕ Close</button></h3>
   <div class="summary" id="slEdFor"></div>
   <div id="slEdRecipe"></div>
+  <button class="sm ghost" type="button" id="slMoveBtn">↔ Move / reassign (gun, load)</button>
   <button class="sm ghost" type="button" id="slEdRecipeBtn"></button>
   <div class="hint" id="slEdRadar"></div>
   <div class="stats" id="slStats"></div>
@@ -505,6 +549,20 @@ footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16p
     <button type="button" class="danger" id="slDel" style="flex:0 0 auto;width:auto;padding:14px">🗑 Delete</button>
     <button type="button" id="slSave" style="flex:1">💾 Save session</button>
   </div>
+</div>
+<div id="mvSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Move session">
+  <h3><span id="mvTitle">↔ Move session</span><button class="sm ghost" type="button" id="mvClose">✕ Close</button></h3>
+  <div class="summary" id="mvFrom"></div>
+  <div class="list">
+    <label class="fl" for="mvGun">Gun (saved guns)</label>
+    <select id="mvGun" aria-label="Gun"></select>
+    <label class="fl">Load on this gun (sets the bullet and load data)</label>
+    <div id="mvLoads"></div>
+    <label class="mvChk"><input type="checkbox" id="mvUpd" checked><span>Update bullet + load data to the selected load<small>Uses the load's saved data. Untick if only the gun/load name was wrong and you want to keep the exact recipe you shot.</small></span></label>
+    <div id="mvDiff"></div>
+    <div class="hint" id="mvNote"></div>
+  </div>
+  <div id="mvActs"><button type="button" class="ghost" id="mvCancel">Cancel</button><button type="button" id="mvGo" disabled>Move</button></div>
 </div>
 <div id="slImport" class="ovl" role="dialog" aria-modal="true" aria-label="Import chronograph file">
   <h3><span>Import chronograph file</span><button class="sm ghost" type="button" id="slImpClose">✕ Close</button></h3>
@@ -595,7 +653,11 @@ $("themeBar").addEventListener("click", e => {
 
 /* ---------------- helpers ---------------- */
 let toastT;
-function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2200); }
+function toast(msg, act) {
+  const t = $("toast"); t.textContent = msg; t.classList.toggle("act", !!act);
+  if (act) { const b = document.createElement("button"); b.type = "button"; b.id = "toastAct"; b.textContent = act.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); act.fn(); }; t.appendChild(b); }
+  t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), act ? 7000 : 2200);
+}
 const val = id => $(id).value.trim();
 const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
 const norm360 = d => ((d % 360) + 360) % 360;
@@ -1392,14 +1454,16 @@ function maybeRenderLog() { const k = JSON.stringify(curKeyIds()); if (k !== slK
 function renderLog() {
   const { rifleId, loadId } = curKeyIds(), l = curLoad(), list = sessFor(rifleId, loadId);
   $("slNewBtn").disabled = !l;
-  if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = ""; $("slChartBox").style.display = "none"; $("slCmp").hidden = true; return; }
+  const orph = orphanSessions();
+  if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = orphanHTML(orph); $("slChartBox").style.display = "none"; $("slCmp").hidden = true; paintSel(); return; }
   const all = list.flatMap(s => s.shots), st = shotStats(all);
   $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} · ${st.n} shots for “${l.name}” · all-shot avg ${st.avg.toFixed(0)} fps, SD ${st.sd.toFixed(1)}`
     : `No sessions yet for “${l.name}”. Tap ＋ Session to type velocities, or import an Athlon file.`;
   $("slList").innerHTML = list.slice().reverse().map(s => `<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
     <span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
     <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
-    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es ?? "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`).join("");
+    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es ?? "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`).join("") + orphanHTML(orph);
+  paintSel();
   $("slChartBox").style.display = list.length ? "block" : "none";
   if (list.length) drawLogChart(list);
   renderCompare();
@@ -1430,6 +1494,17 @@ function renderCompare() {
 $("slCmpScope").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cmpScope = b.dataset.v; renderCompare(); });
 $("slCmpTbl").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if (tr) openEditor(LOG.find(s => s.id === tr.dataset.id)); });
 /* CSV export of every session, one row per session, with the recipe snapshot */
+// sessions whose gun or load no longer exists
+function sessHome(s) { const r = P.rifles.find(x => x.id === s.rifleId), l = r?.loads.find(x => x.id === s.loadId); return { r, l, why: !r ? "deleted gun" : !l ? "deleted load" : "" }; }
+function orphanSessions() { return LOG.filter(s => sessHome(s).why).sort((a, b) => b.date.localeCompare(a.date)); }
+function orphanHTML(list) {
+  if (!list.length) return "";
+  return `<div class="slGrp">⚠ Unassigned sessions (${list.length}) — their gun or load was deleted. Tap one and use ↔ Move to give it a home.</div>` + list.map(s => {
+    const h = sessHome(s), was = [s.recipe?.gunName, s.recipe?.loadName].filter(Boolean).join(" · ");
+    return `<button type="button" class="slItem orphan" data-id="${escapeHtml(s.id)}"><span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
+    <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}</span><span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es ?? "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
+  }).join("");
+}
 function sessionsCSV() {
   const q = v => { const s = v == null ? "" : String(v); return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const cols = ["date", "gun", "gun_type", "load", "source", "shots", "avg_fps", "sd", "es", "min", "max", "velocities_fps", "bullet", "weight_gr", "bc", "drag", "muzzle_velocity_preset",
@@ -1437,7 +1512,7 @@ function sessionsCSV() {
     "session_notes", "temp_f", "humidity", "pressure_inhg", "altitude_ft", "barrel_in"];
   const rows = LOG.slice().sort((a, b) => a.date.localeCompare(b.date)).map(s => {
     const r = P.rifles.find(x => x.id === s.rifleId), l = r?.loads.find(x => x.id === s.loadId), rc = s.recipe || {};
-    return [s.date, r?.name || rc.gunName, r?.gunKind || rc.gunKind, l?.name || rc.loadName, s.source, s.stats.n, s.stats.avg, s.stats.sd, s.stats.es, s.stats.min, s.stats.max,
+    return [s.date, r?.name || rc.gunName, r?.gunKind || rc.gunKind, l?.name || (rc.loadName ? rc.loadName + (r ? " (deleted load)" : " (deleted gun)") : "(unassigned)"), s.source, s.stats.n, s.stats.avg, s.stats.sd, s.stats.es, s.stats.min, s.stats.max,
       s.shots.map(x => x.v).join(" "), rc.bulletName || (rc.weight ? rc.weight + " gr" : ""), rc.weight, rc.bc, rc.drag, rc.mv,
       rc.ldKind === "factory" ? "factory" : rc.ldKind ? "handload" : "", rc.ldPowder, rc.ldCharge, rc.ldPrimer, rc.ldCase, rc.ldFired, rc.ldTrim, rc.ldCOAL, rc.ldCBTO, rc.ldJump, rc.ldPrep,
       rc.ldMaker, rc.ldProduct, rc.ldLot, rc.ldNotes, s.notes, s.wx.temp, s.wx.humidity, s.wx.pressure, s.wx.altitude, s.barrel].map(q).join(",");
@@ -1476,7 +1551,10 @@ function drawLogChart(list) {
   if (pts.length > 1) { c.textAlign = "right"; c.fillText(dl(pts[pts.length - 1].d), w - R, h - 6); }
   c.textAlign = "center"; c.fillText("avg fps ± 1 SD", (L + w - R) / 2, h - 6); c.textAlign = "left";
 }
-$("slList").addEventListener("click", e => { const b = e.target.closest(".slItem"); if (b) openEditor(LOG.find(s => s.id === b.dataset.id)); });
+$("slList").addEventListener("click", e => { const b = e.target.closest(".slItem"); if (!b) return;
+  if (lpFired) { lpFired = false; return; }
+  if (SEL) { SEL.has(b.dataset.id) ? SEL.delete(b.dataset.id) : SEL.add(b.dataset.id); paintSel(); return; }
+  openEditor(LOG.find(s => s.id === b.dataset.id)); });
 window.addEventListener("resize", () => { slKey = null; maybeRenderLog(); });
 
 /* editor */
@@ -1491,13 +1569,20 @@ function openEditor(sess) {
   ED = sess ? JSON.parse(JSON.stringify(sess)) : newSession(); edDirty = !sess;
   const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
   $("slEdTitle").textContent = ED._new ? "New session" : "Session";
-  $("slEdFor").textContent = `${r ? r.name : "?"} · ${l ? l.name : "?"}${ED.title ? " · " + ED.title : ""}`;
+  paintEdFor();
   $("slDate").value = toLocalInput(ED.date); $("slNotes").value = ED.notes || "";
   setVal("slTemp", ED.wx.temp); setVal("slHum", ED.wx.humidity); setVal("slPress", ED.wx.pressure); setVal("slAlt", ED.wx.altitude); setVal("slBarrel", ED.barrel);
   $("slSource").value = SRC_LBL[ED.source] || ED.source; $("slDel").style.display = ED._new ? "none" : ""; paintEdRecipe();
   $("slDevStats").textContent = ED.device && ED.device.avg != null ? `Device-reported: avg ${ED.device.avg}, SD ${ED.device.sd}, ES ${ED.device.es} ${ED.device.unit} (the app recomputes stats from the shots, SD uses n−1).` : "";
   $("slEditor").classList.add("show"); document.body.style.overflow = "hidden"; renderEditor();
   if (ED._new) setTimeout(() => $("slVel").focus(), 50);
+}
+function paintEdFor() {
+  const h = sessHome(ED), was = [ED.recipe?.gunName, ED.recipe?.loadName].filter(Boolean).join(" · ");
+  $("slEdFor").textContent = h.why ? `Unassigned (${h.why})${was ? " · was " + was : ""}` : `${h.r.name} · ${h.l.name}${ED.title ? " · " + ED.title : ""}`;
+  $("slEdFor").style.color = h.why ? "var(--warn)" : "";
+  $("slMoveBtn").classList.toggle("hot", !!h.why);
+  $("slMoveBtn").textContent = h.why ? "↔ Assign to a saved gun + load" : "↔ Move / reassign (gun, load)";
 }
 function paintEdRecipe() {
   const t = recipeText(ED.recipe, true);
@@ -2099,7 +2184,117 @@ $("cpAllBtn").onclick = () => { cpAll = !cpAll; renderCopy(); };
 $("cpMv").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cpMv = b.dataset.v; renderCopy(); });
 $("cpList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (b) copyLoadTo(P.rifles.find(g => g.id === b.dataset.id)); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; ["rcSheet", "cpSheet"].forEach(id => $(id).classList.contains("show") && closeOvl(id)); });
-window.__bc = { P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+
+/* ---------------- move / reassign sessions (single, live, bulk) ---------------- */
+var SEL = null, MV = null, lpFired = false, lpT = 0;
+// snapshot of a load's SAVED preset data (never the unsaved form)
+function presetSnapshot(r, l) {
+  const s = { loadName: l.name, gunName: r.name, gunKind: r.gunKind || "rifle", at: new Date().toISOString() };
+  ["bulletName", "weight", "bc", "drag", "mv", "diameter", ...REC_F].forEach(k => { const v = String(l[k] ?? "").trim(); if (v) s[k] = v; });
+  if (!s.ldKind) s.ldKind = "hand";
+  return s;
+}
+function bulletText(o) { if (!o) return ""; return o.bulletName || [o.weight ? o.weight + " gr" : "", o.diameter ? dia3(o.diameter) : "", o.bc ? `BC ${o.bc} ${o.drag || ""}`.trim() : ""].filter(Boolean).join(" · "); }
+function movePatch(s, r, l, upd) {
+  const p = { rifleId: r.id, loadId: l.id, barrel: s.barrel };
+  if (s.rifleId !== r.id) { const old = P.rifles.find(x => x.id === s.rifleId), ob = fnum(old?.barrel); if (s.barrel == null || (ob != null && s.barrel === ob)) p.barrel = fnum(r.barrel); }
+  p.recipe = upd ? presetSnapshot(r, l) : s.recipe ? { ...s.recipe, gunName: r.name, gunKind: r.gunKind || "rifle", loadName: l.name } : null;
+  return p;
+}
+const applyPatch = (s, p) => { s.rifleId = p.rifleId; s.loadId = p.loadId; s.barrel = p.barrel; if (p.recipe) s.recipe = JSON.parse(JSON.stringify(p.recipe)); else delete s.recipe; };
+const sessGet = id => (ED && ED.id === id) ? ED : LOG.find(s => s.id === id);
+function openMove(ids) {
+  const ss = ids.map(sessGet).filter(Boolean); if (!ss.length) return;
+  if (!P.rifles.some(r => r.loads.length)) { toast("Save a gun with a load first"); return; }
+  const h = sessHome(ss[0]);
+  MV = { ids: ss.map(s => s.id), gunId: (h.r || curRifle() || P.rifles.find(r => r.loads.length)).id, loadId: h.l ? h.l.id : "" };
+  if (ss.some(s => s.rifleId !== ss[0].rifleId || s.loadId !== ss[0].loadId)) MV.loadId = "";
+  $("mvTitle").textContent = ss.length > 1 ? `↔ Move ${ss.length} sessions` : "↔ Move session";
+  const n = ss.reduce((a, s) => a + shotStats(s.shots).n, 0);
+  $("mvFrom").textContent = ss.length > 1 ? `${ss.length} sessions · ${n} shots` : `${fmtDate(ss[0].date)} · ${shotStats(ss[0].shots).n} shots · ${SRC_LBL[ss[0].source] || ss[0].source}`;
+  $("mvGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)} — ${r.gunKind === "handgun" ? "Handgun" : "Rifle"}${r.barrel ? ` · ${r.barrel}"` : ""} (${r.loads.length} load${r.loads.length === 1 ? "" : "s"})</option>`).join("");
+  $("mvGun").value = MV.gunId; $("mvUpd").checked = true;
+  renderMove(); openOvl("mvSheet");
+}
+function distinct(arr, max = 3) { const u = [...new Set(arr.map(x => x || "—"))]; return u.length > max ? u.slice(0, max).join(" / ") + ` +${u.length - max}` : u.join(" / "); }
+function renderMove() {
+  const r = P.rifles.find(x => x.id === MV.gunId), ss = MV.ids.map(sessGet).filter(Boolean);
+  const curIds = new Set(ss.map(s => s.rifleId + "|" + s.loadId));
+  $("mvLoads").innerHTML = r && r.loads.length ? r.loads.map(l => {
+    const rt = recipeText(l), cur = curIds.has(r.id + "|" + l.id), n = LOG.filter(s => s.rifleId === r.id && s.loadId === l.id).length;
+    return `<button type="button" class="rcItem${l.id === MV.loadId ? " on" : ""}${cur ? " cur" : ""}" data-id="${escapeHtml(l.id)}"><span>${escapeHtml(l.name)}${cur ? '<span class="tag">current</span>' : ""}</span><span class="s"><small>${n} session${n === 1 ? "" : "s"}</small></span>` +
+      `<span class="d">${escapeHtml(bulletText(l) || "no bullet data")}${l.mv ? ` · ${escapeHtml(l.mv)} fps` : ""}</span><span class="r">${rt ? (l.ldKind === "factory" ? "📦 " : "🧪 ") + escapeHtml(rt) : '<span style="color:var(--hint)">No load data saved</span>'}</span></button>`;
+  }).join("") : `<div class="hint">No saved loads on this gun — add one under Load first.</div>`;
+  const l = r?.loads.find(x => x.id === MV.loadId), upd = $("mvUpd").checked;
+  if (!l) { $("mvDiff").innerHTML = `<div class="hint" style="padding:10px">Pick a load to see what changes.</div>`; $("mvGo").disabled = true; $("mvNote").textContent = ""; return; }
+  const after = ss.map(s => ({ s, p: movePatch(s, r, l, upd) }));
+  const gunOf = s => sessHome(s).r?.name || (s.recipe?.gunName ? s.recipe.gunName + " (deleted)" : "?");
+  const loadOf = s => sessHome(s).l?.name || (s.recipe?.loadName ? s.recipe.loadName + " (deleted)" : "?");
+  const ldOf = rc => recipeText(rc) || "none";
+  const rows = [["Gun", distinct(ss.map(gunOf)), distinct(after.map(() => r.name))], ["Load", distinct(ss.map(loadOf)), l.name],
+    ["Bullet", distinct(ss.map(s => bulletText(s.recipe))), distinct(after.map(x => bulletText(x.p.recipe)))],
+    ["Load data", distinct(ss.map(s => ldOf(s.recipe)), 2), distinct(after.map(x => ldOf(x.p.recipe)), 2)],
+    ["Barrel", distinct(ss.map(s => s.barrel != null ? s.barrel + '"' : "")), distinct(after.map(x => x.p.barrel != null ? x.p.barrel + '"' : ""))]];
+  $("mvDiff").innerHTML = `<div class="t">Before → after</div><table><colgroup><col style="width:64px"><col><col style="width:16px"><col></colgroup>${rows.map(([k, a, b]) => `<tr class="${a === b ? "same" : "ch"}"><td>${k}</td><td class="a">${escapeHtml(a)}</td><td class="ar">→</td><td class="b">${escapeHtml(a === b ? "no change" : b)}</td></tr>`).join("")}</table>`;
+  const changed = after.some(({ s, p }) => s.rifleId !== p.rifleId || s.loadId !== p.loadId || JSON.stringify(cleanRecipe(s.recipe) && { ...cleanRecipe(s.recipe), at: 0 }) !== JSON.stringify(p.recipe && { ...cleanRecipe(p.recipe), at: 0 }) || s.barrel !== p.barrel);
+  $("mvGo").disabled = !changed;
+  $("mvGo").textContent = ss.length > 1 ? `Move ${ss.length} sessions` : "Move session";
+  const live = ED && ss.some(s => s.id === ED.id) && ED.source === "bluetooth";
+  $("mvNote").textContent = (live ? "Radar shots keep going into this session after the move. " : "") + "Shots, dates, notes and weather stay as they are. You can undo right after.";
+}
+$("mvGun").onchange = e => { MV.gunId = e.target.value; const r = P.rifles.find(x => x.id === MV.gunId); MV.loadId = r && r.loads.length === 1 ? r.loads[0].id : ""; renderMove(); };
+$("mvLoads").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (!b) return; MV.loadId = b.dataset.id; renderMove(); });
+$("mvUpd").onchange = () => renderMove();
+$("mvClose").onclick = $("mvCancel").onclick = () => closeOvl("mvSheet");
+async function doMove() {
+  const r = P.rifles.find(x => x.id === MV.gunId), l = r?.loads.find(x => x.id === MV.loadId); if (!l) return;
+  const upd = $("mvUpd").checked, undo = [];
+  for (const id of MV.ids) {
+    const targets = [LOG.find(s => s.id === id), ED && ED.id === id ? ED : null].filter(Boolean);
+    if (!targets.length) continue;
+    const base = targets[targets.length - 1], p = movePatch(base, r, l, upd);
+    undo.push({ id, rifleId: base.rifleId, loadId: base.loadId, barrel: base.barrel, recipe: base.recipe ? JSON.parse(JSON.stringify(base.recipe)) : null });
+    targets.forEach(t => applyPatch(t, p));
+  }
+  await afterMove();
+  if (ED && MV.ids.includes(ED.id)) { setVal("slBarrel", ED.barrel); }
+  closeOvl("mvSheet"); if (SEL) { SEL = null; paintSel(); }
+  const n = undo.length;
+  toast(`Moved ${n > 1 ? n + " sessions" : "session"} to ${r.name} · ${l.name}`, { label: "Undo", fn: () => undoMove(undo) });
+  return n;
+}
+async function afterMove() {
+  await saveLog(); slKey = null; maybeRenderLog();
+  if (ED && $("slEditor").classList.contains("show")) { paintEdFor(); paintEdRecipe(); }
+}
+async function undoMove(undo) {
+  for (const u of undo) [LOG.find(s => s.id === u.id), ED && ED.id === u.id ? ED : null].filter(Boolean).forEach(t => applyPatch(t, u));
+  if (ED && undo.some(u => u.id === ED.id)) setVal("slBarrel", ED.barrel);
+  await afterMove(); toast(`Move undone (${undo.length} session${undo.length === 1 ? "" : "s"})`);
+}
+$("mvGo").onclick = () => doMove();
+$("slMoveBtn").onclick = () => { if (ED) openMove([ED.id]); };
+// select mode (tap "☑ Select" or long-press a session)
+function paintSel() {
+  const on = !!SEL, list = $("slList");
+  list.classList.toggle("selecting", on); $("slSelBar").hidden = !on; $("slSelBtn").hidden = on;
+  if (!on) { list.querySelectorAll(".slItem.sel").forEach(b => b.classList.remove("sel")); return; }
+  const vis = [...list.querySelectorAll(".slItem")].map(b => b.dataset.id);
+  [...SEL].forEach(id => { if (!vis.includes(id)) SEL.delete(id); });
+  list.querySelectorAll(".slItem").forEach(b => b.classList.toggle("sel", SEL.has(b.dataset.id)));
+  $("slSelN").textContent = `${SEL.size} selected`; $("slSelMove").disabled = !SEL.size;
+  $("slSelAll").textContent = SEL.size === vis.length && vis.length ? "None" : "All";
+}
+$("slSelBtn").onclick = () => { SEL = new Set(); paintSel(); toast("Tap sessions to select them, then ↔ Move"); };
+$("slSelDone").onclick = () => { SEL = null; paintSel(); };
+$("slSelAll").onclick = () => { const vis = [...$("slList").querySelectorAll(".slItem")].map(b => b.dataset.id); SEL = new Set(SEL.size === vis.length ? [] : vis); paintSel(); };
+$("slSelMove").onclick = () => { if (SEL && SEL.size) openMove([...SEL]); };
+$("slList").addEventListener("pointerdown", e => { const b = e.target.closest(".slItem"); if (!b || SEL) return; clearTimeout(lpT);
+  lpT = setTimeout(() => { lpFired = true; SEL = new Set([b.dataset.id]); paintSel(); navigator.vibrate?.(20); setTimeout(() => lpFired = false, 800); }, 550); });
+["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slList").addEventListener(ev, () => clearTimeout(lpT)));
+$("slList").addEventListener("contextmenu", e => { if (e.target.closest(".slItem")) e.preventDefault(); });
+document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("mvSheet").classList.contains("show")) { e.stopImmediatePropagation(); closeOvl("mvSheet"); } }, true);
+window.__bc = { P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

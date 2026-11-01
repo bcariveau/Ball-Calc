@@ -574,7 +574,8 @@ body.shOn #tabBar, body.shOn #shotBan { display: none !important; }
 #shV { font-size: clamp(64px, 23vw, 124px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--text); }
 .shHero.dis #shV { text-decoration: line-through; color: var(--muted); }
 #shVu { font-size: 1rem; color: var(--muted); font-weight: 700; }
-#shMeta { font-size: clamp(22px, 7vw, 34px); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); white-space: nowrap; }
+#shMeta { font-size: clamp(22px, 7vw, 34px); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; }
+#shDev { color: var(--text); border-radius: 8px; padding: 0 .15em; }
 #shMeta.wait { font-size: 1rem; font-weight: 600; color: var(--muted); white-space: normal; text-align: center; }
 #shEndNote { font-size: 0.85rem; color: var(--warn); text-align: center; font-weight: 700; }
 .shStats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
@@ -598,8 +599,8 @@ body.shOn #tabBar, body.shOn #shotBan { display: none !important; }
 .shRow.dis .v { text-decoration: line-through; }
 .shRow.new { background: var(--hover); }
 .shEmpty { padding: 10px; color: var(--muted); font-size: 0.9rem; }
-#shAddBox, #shTagBar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; padding: 6px; flex: 0 0 auto; }
-#shAddBox[hidden], #shTagBar[hidden] { display: none; }
+#shAddBox, #shTagBar, #shStrMenu { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; padding: 6px; flex: 0 0 auto; }
+#shAddBox[hidden], #shTagBar[hidden], #shStrMenu[hidden] { display: none; }
 #shVel { flex: 1 1 8em; min-width: 0; font-size: 1.5rem; font-weight: 800; text-align: center; min-height: 52px; }
 #shAddBox button { width: auto; min-height: 52px; padding: 0 16px; }
 #shTagBar .lbl2 { width: 100%; font-size: 0.75rem; color: var(--muted); margin: 0; }
@@ -611,6 +612,8 @@ body.shOn #tabBar, body.shOn #shotBan { display: none !important; }
 .shBtns button.ghost { background: var(--input); color: var(--text); border: 1px solid var(--border); }
 .shBtns .bad { background: var(--danger-bg); color: var(--err); border: 1px solid var(--danger-b); }
 .shBtns .w3 { grid-column: 1 / -1; min-height: 50px; }
+.shBtns .w2 { grid-column: span 2; }
+.shBtns button small { display: block; font-size: 0.7rem; font-weight: 600; }
 .shBtns button.on { box-shadow: 0 0 0 2px var(--warn); }
 #shView .shBtns button:active { transform: scale(0.97); }
 @media (orientation: landscape) and (max-height: 600px) {
@@ -632,8 +635,37 @@ body.shOn #tabBar, body.shOn #shotBan { display: none !important; }
 #windSpeed, #windDir { cursor: text; }
 #windLock[aria-pressed=true] { background: var(--warn-b); color: var(--text); border-color: var(--warn); }
 #toast.act { width: max-content; }
-body.shOn #toast { bottom: auto; top: calc(64px + env(safe-area-inset-top)); }
-@media (max-width: 400px) { .shRadBox:has(#shConn:not([hidden])) #shRadar { display: none; } }
+body.shOn #toast { bottom: auto; top: max(6px, env(safe-area-inset-top)); }
+@media (max-width: 479px) { .shRadBox:has(#shConn:not([hidden])) #shRadar { display: none; } }
+/* shpolish: outlier colours, String ▾ menu, header, tighter list */
+.dvW { color: var(--warn) !important; }
+.dvB { color: var(--err) !important; }
+html[data-theme=night] .dvW { box-shadow: inset 0 0 0 2px var(--warn); border-radius: 6px; }
+html[data-theme=night] .dvB { background: var(--err); color: #000 !important; border-radius: 6px; }
+.shRow .dv.dvW, .shRow .dv.dvB { font-weight: 800; padding: 0 .25em; width: auto; min-width: 3.7em; }
+#shStrMenu .lbl2 { width: 100%; font-size: 0.75rem; color: var(--muted); margin: 0; }
+#shStrMenu button { flex: 1 1 30%; min-width: 0; min-height: 52px; padding: 4px; font-size: 0.86rem; white-space: nowrap; line-height: 1.15; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; }
+#shStrMenu button small { display: block; font-size: 0.68rem; color: var(--muted); font-weight: 500; }
+#shStrMenu button.on { box-shadow: 0 0 0 2px var(--warn); }
+.shRow { min-height: 42px; }
+.shRow button { height: 40px; min-height: 40px; }
+@media (max-width: 479px) {
+  #shFor { display: none; }
+  .shTop { gap: 6px; }
+  .shTt b { font-size: 1rem; white-space: normal; overflow: visible; text-overflow: clip; }
+  #shExit, #shConn { padding: 0 9px; font-size: 0.86rem; }
+}
+@media (max-height: 800px) and (orientation: portrait) {
+  #shView { gap: 6px; }
+  .shMain, .shR { gap: 6px; }
+  .shL { gap: 4px; }
+  .shStats b { font-size: 1.05rem; }
+  .shStats span { font-size: 0.62rem; }
+  #shEs { font-size: 0.88rem; line-height: 1.25; }
+  #shDope { font-size: 0.78rem; padding: 2px 0; }
+  .shBtns button { min-height: 52px; }
+  .shBtns .w2 { min-height: 52px; }
+}
 </style>
 </head>
 <body>
@@ -1018,22 +1050,26 @@ body.shOn #toast { bottom: auto; top: calc(64px + env(safe-area-inset-top)); }
     <div class="shR">
       <div id="shList" aria-label="Shots in this string, newest first"></div>
       <div id="shAddBox" hidden>
-        <input type="number" inputmode="decimal" id="shVel" placeholder="fps" aria-label="Shot velocity in fps (several: separate with spaces)">
-        <button type="button" id="shAddGo">Add</button><button type="button" class="ghost" id="shAddDone">Done</button>
+        <input type="number" inputmode="decimal" id="shVel" placeholder="fps" aria-label="Shot velocity in fps">
+        <button type="button" id="shAddGo">Add</button><button type="button" class="ghost" id="shAddDone">Cancel</button>
       </div>
       <div id="shTagBar" hidden>
         <p class="lbl2" id="shTagFor">Tag the last shot</p>
         <button type="button" data-f="cold" aria-pressed="false">❄ Cold</button><button type="button" data-f="clean" aria-pressed="false">🧽 Clean</button><button type="button" data-f="fl" aria-pressed="false">↯ Flier</button>
         <input type="text" id="shNote" maxlength="200" placeholder="Note for this shot" aria-label="Note for the last shot">
       </div>
+      <div id="shStrMenu" hidden role="menu" aria-label="String actions">
+        <p class="lbl2" id="shStrFor">String 1</p>
+        <button type="button" role="menuitem" id="shNewStr">＋ New string<small>same target</small></button>
+        <button type="button" role="menuitem" id="shNewTgt">◎ New target<small>next target</small></button>
+        <button type="button" role="menuitem" id="shEndStr">■ End string<small>next shot = new</small></button>
+      </div>
       <div class="shBtns">
         <button type="button" class="bad" id="shBad">✗ Bad read<br><small>discard last</small></button>
         <button type="button" class="ghost" id="shTag" aria-expanded="false" aria-controls="shTagBar">🏷 Tag</button>
         <button type="button" id="shAdd" aria-expanded="false" aria-controls="shAddBox">＋ Add shot</button>
-        <button type="button" class="ghost" id="shNewStr">New string</button>
-        <button type="button" class="ghost" id="shNewTgt">New target</button>
-        <button type="button" class="ghost" id="shEndStr">End string</button>
-        <button type="button" class="w3" id="shMark">🎯 Mark holes</button>
+        <button type="button" class="ghost" id="shStrBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="shStrMenu">String ▾</button>
+        <button type="button" class="w2" id="shMark">🎯 Mark holes</button>
       </div>
     </div>
   </div>
@@ -4287,7 +4323,7 @@ async function shStart() {
   openEditor(s || null); if (!ED) { SH.on = false; return; }
   SH.sid = ED.id; SH.cont = !!s;
   const t = tgEnsure(ED), st = t.strings.find(q => q.id === t.cur);
-  $("shAddBox").hidden = true; $("shTagBar").hidden = true;
+  shPanels(); 
   $("shView").hidden = false; $("shView").classList.add("show"); document.body.classList.add("shOn"); banHide();
   shPaint(); wakeSync();
   if (!readings(ED, st.id).length) tgAutoDial(ED, st).then(() => { if (SH.on) { SH.calcKey = ""; shPaint(); } });
@@ -4325,6 +4361,15 @@ function shStatsOf(rd, w) {   // string stats + last shot (shot #, ± from the s
   const dv = last && !last.x && st.n > 1 ? Math.round(last.v - st.avg) : null;
   return { ...st, total: rd.length, disc: rd.length - st.n, last, k: rd.length, dv, ftlb: last ? shEnergy(last.v, w) : null };
 }
+// ± colour: neutral unless the shot is an outlier. 5+ kept shots: amber > 2 SD, red > 3 SD from the kept average.
+// Fewer than 5 (SD means little yet): amber at 25+ fps off the average, red at 50+ (on the rounded fps shown).
+function shDevCls(dev, n, sd) {
+  if (dev == null || !isFinite(dev) || !(n > 1)) return "";
+  const a = Math.abs(dev);
+  if (n >= 5) return sd > 0 ? (a > 3 * sd ? "dvB" : a > 2 * sd ? "dvW" : "") : "";
+  const r = Math.round(a); return r >= 50 ? "dvB" : r >= 25 ? "dvW" : "";
+}
+function shDevWord(c) { return c === "dvB" ? "far off the average" : c === "dvW" ? "off the average" : ""; }
 function shSigned(n) { return n == null ? "" : (n >= 0 ? "+" : "−") + Math.abs(n); }
 function shTags(s) { return [s.cold && "Cold", s.clean && "Clean", s.fl && "Flier", s.note && "✎ " + s.note].filter(Boolean).join(" · "); }
 function shPaint() {
@@ -4336,10 +4381,11 @@ function shPaint() {
   $("shFor").textContent = [r?.name, l?.name, `${yd} yd`].filter(Boolean).join(" · ");
   const x = q.last;
   $("shV").textContent = x ? fpsT(x.v) : "—";
-  $("shMeta").textContent = x ? [`#${q.k}`, x.x ? "discarded" : q.dv != null ? shSigned(q.dv) : ""].filter(Boolean).join(" · ") : SH.ended ? "" : "Waiting for the first shot";
+  const mc = x && !x.x ? shDevCls(x.v - q.avg, q.n, q.sd) : "";
+  $("shMeta").innerHTML = x ? `#${q.k}${x.x ? " · discarded" : q.dv != null ? ` · <span id="shDev"${mc ? ` class="${mc}"` : ""}>${shSigned(q.dv)}</span>` : ""}` : SH.ended ? "" : "Waiting for the first shot";
   $("shMeta").classList.toggle("wait", !x);
   $("shHero").classList.toggle("dis", !!(x && x.x));
-  $("shHero").setAttribute("aria-label", x ? `Last shot ${fpsT(x.v)} fps, shot ${q.k}${x.x ? ", discarded" : q.dv != null ? `, ${shSigned(q.dv)} from the string average` : ""}` : "No shots yet");
+  $("shHero").setAttribute("aria-label", x ? `Last shot ${fpsT(x.v)} fps, shot ${q.k}${x.x ? ", discarded" : q.dv != null ? `, ${shSigned(q.dv)} from the string average${mc ? `, ${shDevWord(mc)}` : ""}` : ""}` : "No shots yet");
   const en = SH.ended === cur.id; $("shEndNote").hidden = !en;
   if (en) $("shEndNote").textContent = `String ${sn} ended · the next shot starts String ${t.strings.length + 1}`;
   const f1 = v => (+v).toFixed(1);
@@ -4347,10 +4393,11 @@ function shPaint() {
     ["Min", q.n ? fpsT(q.min) : "—"], ["Max", q.n ? fpsT(q.max) : "—"], ["Energy · last", q.ftlb != null ? `${Math.round(q.ftlb).toLocaleString()} ft-lb` : "—", "w2"]]
     .map(([k, v, c]) => `<div${c ? ` class="${c}"` : ""}><b>${v}</b><span>${k}</span></div>`).join("");
   $("shList").innerHTML = rd.length ? rd.map((s, i) => ({ s, i })).reverse().map(({ s, i }) => `<div class="shRow${s.x ? " dis" : ""}${s.id === SH.lastId && i === rd.length - 1 ? " new" : ""}" data-id="${escapeHtml(s.id)}">
-      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span><span class="dv">${s.x ? "discarded" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span><span class="shTg">${escapeHtml(shTags(s))}</span>
+      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v - q.avg, q.n, q.sd); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "discarded" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
       <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot ${i + 1}" title="${s.x ? "Restore" : "Discard (bad read)"}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
     : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap ＋ Add shot to type a velocity.</div>`;
-  shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en);
+  shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en); $("shStrBtn").classList.toggle("on", en);
+  $("shStrBtn").innerHTML = en ? `String ▾<small>ended</small>` : "String ▾"; $("shStrFor").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
   $("shBad").disabled = !rd.some(s => !s.x);
   shCalc(q, yd, cur);
 }
@@ -4438,15 +4485,24 @@ $("shStartBtn").onclick = () => shStart();
 $("shExit").onclick = () => shExit();
 $("shConn").onclick = () => { const rc = $("radarReconnect"); if (!rc.hidden) rc.click(); else $("radarConnect").click(); };
 $("shBad").onclick = () => shBad();
-$("shNewStr").onclick = () => shNew(false);
-$("shNewTgt").onclick = () => shNew(true);
-$("shEndStr").onclick = () => shEnd();
+// one panel at a time over the buttons: the fps entry, the tag bar or the String ▾ menu (all closed by default)
+function shPanels(open) {
+  [["shAddBox", "shAdd"], ["shTagBar", "shTag"], ["shStrMenu", "shStrBtn"]].forEach(([p, b]) => { const on = p === open; $(p).hidden = !on; $(b).setAttribute("aria-expanded", String(on)); });
+}
+function shPanelOpen() { return ["shAddBox", "shTagBar", "shStrMenu"].find(p => !$(p).hidden) || null; }
+$("shNewStr").onclick = () => { shPanels(); shNew(false); };
+$("shNewTgt").onclick = () => { shPanels(); shNew(true); };
+$("shEndStr").onclick = () => { shPanels(); shEnd(); };
+$("shStrBtn").onclick = () => { const open = $("shStrMenu").hidden; shPanels(open ? "shStrMenu" : null); if (open) { shPaint(); $("shNewStr").focus({ preventScroll: true }); } };
+document.addEventListener("pointerdown", e => { if (SH.on && !$("shStrMenu").hidden && !e.target.closest("#shStrMenu, #shStrBtn")) shPanels(); }, true);
 $("shMark").onclick = () => shMark();
-$("shAdd").onclick = () => { const b = $("shAddBox"), open = b.hidden; b.hidden = !open; $("shTagBar").hidden = true; $("shTag").setAttribute("aria-expanded", "false"); $("shAdd").setAttribute("aria-expanded", String(open)); if (open) $("shVel").focus(); };
-$("shAddDone").onclick = () => { $("shAddBox").hidden = true; $("shAdd").setAttribute("aria-expanded", "false"); };
-$("shAddGo").onclick = async () => { const v = $("shVel").value; if (!v.trim()) { $("shVel").focus(); return; } if (await shAddText(v)) $("shVel").value = ""; $("shVel").focus(); };
+$("shAdd").onclick = () => { const open = $("shAddBox").hidden; shPanels(open ? "shAddBox" : null); if (open) { $("shVel").value = ""; $("shVel").focus(); } else $("shVel").blur(); };
+function shAddClose() { $("shVel").value = ""; $("shVel").blur(); shPanels(); $("shAdd").focus({ preventScroll: true }); }
+$("shAddDone").onclick = () => shAddClose();
+// Add closes the panel (so the shot list stays in view); a bad value keeps it open to fix
+$("shAddGo").onclick = async () => { const v = $("shVel").value; if (!v.trim()) { $("shVel").focus(); return; } if (await shAddText(v)) shAddClose(); else $("shVel").focus(); };
 $("shVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("shAddGo").click(); } });
-$("shTag").onclick = () => { const b = $("shTagBar"), open = b.hidden; b.hidden = !open; $("shAddBox").hidden = true; $("shAdd").setAttribute("aria-expanded", "false"); $("shTag").setAttribute("aria-expanded", String(open)); shTagPaint(); };
+$("shTag").onclick = () => { const open = $("shTagBar").hidden; shPanels(open ? "shTagBar" : null); shTagPaint(); };
 $("shTagBar").addEventListener("click", e => { const b = e.target.closest("button[data-f]"); if (!b || !ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), x = rd[rd.length - 1]; if (x) shToggle(x.id, b.dataset.f); });
 $("shNote").addEventListener("change", async () => { if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), x = rd[rd.length - 1]; if (!x) return; const v = $("shNote").value.trim(); if (v) x.note = v; else delete x.note; edDirty = true; renderEditor(); await shSave(); shPaint(); });
 $("shList").addEventListener("click", e => { const b = e.target.closest("button[data-a]"), row = e.target.closest(".shRow"); if (b && row) shToggle(row.dataset.id, b.dataset.a); });
@@ -4454,12 +4510,12 @@ window.addEventListener("keydown", e => {
   if (e.key !== "Escape" || !SH.on) return;
   if ($("tgEd").classList.contains("show") || document.querySelector(".ovl.show:not(#slEditor)") || $("pkMenu").style.display === "flex") return;
   e.stopImmediatePropagation(); e.preventDefault();
-  if (!$("shAddBox").hidden || !$("shTagBar").hidden) { $("shAddBox").hidden = true; $("shTagBar").hidden = true; return; }
+  const op = shPanelOpen(); if (op) { if (op === "shAddBox") shAddClose(); else { shPanels(); $(op === "shTagBar" ? "shTag" : "shStrBtn").focus({ preventScroll: true }); } return; }
   shExit();
 }, true);
 shBtnPaint();
 
-window.__bc = { get SH() { return SH; }, shStart, shExit, shStatsOf, shEsAt, shEnergy, shPaint, dialDecide, dialZone, slEmptyHTML, tgView, tgEnsure, cleanTg, cleanDial, tgDope, tgThumb, velVert, tgLabels, get TR() { return TR; }, grpStats, pearson, inPerU, shotDetail, banHide, openTgEd, mutSess, get BAN() { return BAN; }, get TE() { return TE; }, get LIVE() { return LIVE; }, get WL() { return WL; }, wakeSync,  millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+window.__bc = { get SH() { return SH; }, shStart, shExit, shStatsOf, shEsAt, shEnergy, shPaint, shDevCls, dialDecide, dialZone, slEmptyHTML, tgView, tgEnsure, cleanTg, cleanDial, tgDope, tgThumb, velVert, tgLabels, get TR() { return TR; }, grpStats, pearson, inPerU, shotDetail, banHide, openTgEd, mutSess, get BAN() { return BAN; }, get TE() { return TE; }, get LIVE() { return LIVE; }, get WL() { return WL; }, wakeSync,  millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

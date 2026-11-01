@@ -180,21 +180,21 @@ for (const [w, h, name] of [[360, 740, "portrait"], [412, 915, null], [740, 360,
 }
 await p.setViewportSize({ width: 412, height: 915 }); await p.waitForTimeout(100);
 /* ---------- new string, new target, end string ---------- */
-await p.click("#shNewStr"); await p.waitForTimeout(120);
+await p.click("#shStrBtn"); await p.click("#shNewStr"); await p.waitForTimeout(120);
 e1 = await ED();
 ok("New string → String 2 on the same target, empty list", e1.tg.strings.length === 2 && (await T("#shStr")) === "String 2 · Target A" && /No shots in String 2/.test(await T("#shList")));
 await addV(2710);
 ok("new shots go to the current string", (await ED()).shots[5].str === (await ED()).tg.cur && (await T("#shMeta")) === "#1");
-await p.click("#shNewTgt"); await p.waitForTimeout(120);
+await p.click("#shStrBtn"); await p.click("#shNewTgt"); await p.waitForTimeout(120);
 e1 = await ED();
 ok("New target → String 3 on Target B", e1.tg.strings.length === 3 && e1.tg.targets.length === 2 && (await T("#shStr")) === "String 3 · Target B");
 await addV(2702);
-await p.click("#shEndStr"); await p.waitForTimeout(100);
+await p.click("#shStrBtn"); await p.click("#shEndStr"); await p.waitForTimeout(100);
 ok("End string marks it ended and says the next shot starts String 4", await vis("#shEndNote") && /String 3 ended · the next shot starts String 4/.test(await T("#shEndNote")) && /String 3 ended/.test(await toastTxt()));
 await addV(2711);
 e1 = await ED();
 ok("…the next shot starts String 4 (same target)", e1.tg.strings.length === 4 && (await T("#shStr")) === "String 4 · Target B" && e1.shots[7].str === e1.tg.cur && !(await vis("#shEndNote")));
-await p.click("#shAddDone");
+if (await vis("#shAddBox")) await p.click("#shAddDone");
 
 /* ---------- radar live: shots arrive once, no banner, radar string #1 = new string ---------- */
 await p.click("#shConn"); await p.waitForFunction(() => /Connected/.test(document.getElementById("shRadar").textContent), null, { timeout: 5000 });

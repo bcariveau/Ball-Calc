@@ -12,7 +12,7 @@
  * >>> Bump VERSION on every publish that changes this file's precache list or the page. <<<
  * (The page also asks this worker to compare the cached page against the network, so a forgotten bump still shows the banner.)
  */
-const VERSION = "2026-11-01.1";
+const VERSION = "2026-11-01.2";
 
 const SCOPE = new URL(self.registration.scope);
 const BETA = /\/beta$/.test(SCOPE.pathname);           // ".../Ball-Calc/beta" when registered with scope "./beta"
@@ -23,8 +23,60 @@ const abs = p => new URL(p, self.location.href).href;
 
 const PAGE = abs(BETA ? "beta.html" : "index.html");
 const SHELL_ALIASES = new Set([PAGE, BETA ? abs("beta") : abs("./")]);   // navigations that get the cached page
+// beta.html is a thin shell: its code, styles and markup live in these module files (no build step). Keep this list in
+// sync with beta/ (every file the shell or main.js loads must be here, or the beta won't start offline).
+const MODULES = BETA ? [
+  "beta/css/base.css",
+  "beta/css/components.css",
+  "beta/css/controls.css",
+  "beta/css/dope.css",
+  "beta/css/layout.css",
+  "beta/css/log.css",
+  "beta/css/offline.css",
+  "beta/css/optics-table.css",
+  "beta/css/sheets.css",
+  "beta/css/shooting.css",
+  "beta/css/targets.css",
+  "beta/js/app.js",
+  "beta/js/bulletdb.js",
+  "beta/js/calc.js",
+  "beta/js/components.js",
+  "beta/js/core.js",
+  "beta/js/dope-card.js",
+  "beta/js/dope.js",
+  "beta/js/gear.js",
+  "beta/js/hooks.js",
+  "beta/js/log-import.js",
+  "beta/js/log.js",
+  "beta/js/main.js",
+  "beta/js/offline.js",
+  "beta/js/optics.js",
+  "beta/js/radar.js",
+  "beta/js/reassign.js",
+  "beta/js/recipes.js",
+  "beta/js/sensors.js",
+  "beta/js/shooting.js",
+  "beta/js/shot-banner.js",
+  "beta/js/storage.js",
+  "beta/js/strings.js",
+  "beta/js/target-draw.js",
+  "beta/js/target-editor.js",
+  "beta/js/targets.js",
+  "beta/js/themes.js",
+  "beta/js/truing.js",
+  "beta/js/views/chrome.js",
+  "beta/js/views/dope.js",
+  "beta/js/views/gear.js",
+  "beta/js/views/log.js",
+  "beta/js/views/parts.js",
+  "beta/js/views/shooting.js",
+  "beta/js/views/targets.js",
+  "beta/js/weather.js",
+  "beta/js/wind-dial.js",
+].map(abs) : [];
 const CORE = [
   PAGE,
+  ...MODULES,
   ...(BETA
     ? ["manifest-beta.webmanifest", "ballcalc-beta-icon-192.png", "ballcalc-beta-icon-512.png", "ballcalc-beta-maskable-192.png", "ballcalc-beta-maskable-512.png"]
     : ["ballcalc.webmanifest", "ballcalc-icon-192.png", "ballcalc-icon-512.png", "ballcalc-maskable-512.png", "logo.svg"]),
@@ -90,12 +142,16 @@ self.addEventListener("message", e => {
   if (d.type === "SKIP_WAITING") { self.skipWaiting(); return; }
   if (d.type === "VERSION") { reply({ version: VERSION, cache: CACHE, scope: SCOPE.href }); return; }
   if (d.type === "CHECK") {          // has the published page changed since it was cached? (catches a forgotten VERSION bump)
-    e.waitUntil((async () => {
+    e.waitUntil((async () => {         // the page and every module file are compared, so a content-only module change is caught too
       try {
-        const r = await fresh(PAGE);
-        if (!cacheable(r)) return reply({ ok: false });
-        const hit = await (await caches.open(CACHE)).match(PAGE);
-        reply({ ok: true, changed: !hit || (await hit.text()) !== (await r.text()), version: VERSION });
+        const c = await caches.open(CACHE);
+        const diff = await Promise.all([PAGE, ...MODULES].map(async u => {
+          const r = await fresh(u);
+          if (!cacheable(r)) throw new Error(u + " " + r.status);
+          const hit = await c.match(u);
+          return !hit || (await hit.text()) !== (await r.text());
+        }));
+        reply({ ok: true, changed: diff.some(Boolean), version: VERSION });
       } catch (err) { reply({ ok: false, error: String(err) }); }
     })());
     return;

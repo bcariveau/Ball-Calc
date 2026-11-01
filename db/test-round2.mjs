@@ -109,7 +109,7 @@ await p.click("#dcMoreBtn"); await p.screenshot({ path: OUT + "screenshot-r2-dop
 /* 7) gust bracket */
 await p.click("#calcBtn"); await p.waitForFunction(() => window.__bc.wx && window.__bc.wx.gust === 14, null, { timeout: 15000 }); await settle();
 const gb = await txt("#dcBracket"), gn = nums(gb.split("mph")[0]);
-ok("live weather: bracket = call / call+spread/2 / call+spread (gust 14 vs 8 → 6)", wxCalls >= 1 && (await p.evaluate(() => window.__bc.gustSpread())) === 6 && near(gn[1] - gn[0], 3, 0.05) && near(gn[2] - gn[0], 6, 0.05) && gb.includes("10 m"), gb);
+ok("live weather: bracket = call / call+spread/2 / call+spread (gust 14 vs 8 → 6)", wxCalls >= 1 && (await p.evaluate(() => window.__bc.gustSpread())) === 6 && near(gn[2] - gn[1], 3, 0.05) && near(gn[3] - gn[1], 6, 0.05) && near(gn[0], Math.max(0, gn[1] - 3), 0.05) && gb.includes("10 m"), gb);
 ok("weather wind 10 m note shown", (await p.isVisible("#wxWindNote")) && (await txt("#wxWindNote")).includes("10 m"));
 await setv("windSpeed", "10"); await setv("windDir", "90"); await settle();
 
@@ -146,7 +146,7 @@ ok("open disclosure arrow rotates", await p.evaluate(() => getComputedStyle(docu
 await p.evaluate(() => document.getElementById("opMore").open = false);
 const rs = await p.evaluate(() => { const s = document.getElementById("rangeSel"); return { t: s.options[s.selectedIndex]?.text, sw: s.scrollWidth, cw: s.clientWidth, w: s.getBoundingClientRect().width }; });
 ok("empty range picker text not truncated", rs.t && rs.sw <= rs.cw + 1 && rs.w > rs.t.length * 6, JSON.stringify(rs));
-ok("optic row: attached optic shown, required fields visible", (await p.isVisible("#opticPk")) && (await p.inputValue("#opticSel")) === mig.o1.id && (await p.isVisible("#opTurret")) && (await p.isVisible("#opReticle")) && !(await p.isVisible("#gunTurretRow")));
+ok("optic row: attached optic shown, required fields visible", (await p.isVisible("#opticPk")) && (await p.inputValue("#opticSel")) === mig.o1.id && (await p.isVisible("#opTurret")) && (await p.isVisible("#opReticle")) && (await p.evaluate(() => !document.getElementById("gunTurretRo").hidden && document.getElementById("turret").hidden)));  // round 3: read-only "set by optic"
 promptAns = "Razor HD"; await menu("optic", "opRename");
 ok("⋯ Rename optic", await p.evaluate(() => window.__bc.curOptic().name === "Razor HD" && document.getElementById("opticSel").selectedOptions[0].text === "Razor HD"));
 await menu("optic", "opDup");
@@ -241,7 +241,7 @@ for (const t of ["dark", "light", "od", "fde", "night"]) {
   const lowM = (await scan()).filter(([s]) => true).map(([s, c, bg]) => [s, cr(c, bg)]).filter(([, r]) => r < 4.5);
   ok(`theme ${t}: ⋯ menu opens with readable items`, mm.n >= 3 && mm.k === "rifle" && lowM.length === 0, JSON.stringify(mm) + lowM.map(x => x.join(" ")).join(","));
   await p.click("#pkCancel"); await p.waitForTimeout(80);
-  promptAns = `Theme ${t} optic`; await menu("optic", "opNew"); const nBefore = await p.evaluate(() => window.__bc.P.optics.length);
+  promptAns = `Theme ${t} optic`; await menu("optic", "opNew"); await p.waitForSelector("#zpDlg.show"); await p.click("#zpYes"); /* round 3: first optic asks once */ const nBefore = await p.evaluate(() => window.__bc.P.optics.length);
   await menu("optic", "opDel"); await p.waitForSelector("#toast.show #toastAct");
   const tc = await p.evaluate(() => { const b2 = document.getElementById("toastAct"), t2 = document.getElementById("toast"); return [getComputedStyle(b2).color, getComputedStyle(b2).backgroundColor, getComputedStyle(t2).color, getComputedStyle(t2).backgroundColor]; });
   await p.click("#toastAct"); await p.waitForTimeout(100);

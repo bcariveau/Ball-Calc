@@ -409,6 +409,24 @@ table.dope th small { color: var(--accent); }
 .opItem.on { border-color: var(--accent); }
 #dcPrint .ang { font-size: 1.9em; font-weight: 900; text-align: center; border: 2px solid currentColor; border-radius: 6px; margin: 0 0 4px; padding: 1px 2px; }
 #dcPrint td.ovr { text-decoration: underline; font-weight: 800; }
+
+/* ---- round 3 ---- */
+.hint.sh:not(.open) .h1 { display: inline; max-width: none; white-space: normal; overflow: visible; text-overflow: clip; }
+.stepper input[type=number]::-webkit-inner-spin-button, .stepper input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper input[type=number] { -moz-appearance: textfield; appearance: textfield; min-width: 0; }
+@media (max-width: 400px) { .grid.stk { grid-template-columns: 1fr; } }
+#trueBtn, #dcBtn { white-space: nowrap; }
+.roVal { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px dashed var(--border); border-radius: 8px; color: var(--text); background: var(--panel); font-size: 1rem; }
+.roVal small { color: var(--muted); font-size: 0.8rem; text-align: right; }
+label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-left: 6px; }
+#wxShHint { margin-top: 4px; font-size: 0.8rem; color: var(--muted); }
+#zpDlg { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; padding: 16px; }
+#zpDlg.show { display: flex; }
+#zpDlg .box { background: var(--card); color: var(--text); width: 100%; max-width: 380px; border: 2px solid var(--accent); border-radius: 16px; padding: 18px 16px 14px; }
+#zpDlg h3 { margin: 0 0 8px; font-size: 1.1rem; color: var(--text); }
+#zpDlg p { margin: 0 0 14px; color: var(--muted); font-size: 0.9rem; line-height: 1.35; }
+#zpDlg .row { display: flex; gap: 10px; }
+#zpDlg .row button { flex: 1; min-height: 48px; margin: 0; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -441,14 +459,14 @@ table.dope th small { color: var(--accent); }
     <div>
       <label for="windSpeed"><span>Wind speed (mph)</span><span class="chip" id="src-windSpeed"></span></label>
       <div class="stepper" data-step="1" data-min="0" data-max="60"><input type="number" inputmode="decimal" id="windSpeed" value="10"></div>
-      <div class="err" id="e-windSpeed"></div>
+      <div class="err" id="e-windSpeed"></div><div id="wxShHint" hidden></div>
       <label for="windDir" style="margin-top:8px"><span>Wind from (°)</span><span class="chip" id="src-windDir"></span></label>
       <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="windDir" value="90"></div>
       <div class="err" id="e-windDir"></div>
     </div>
   </div>
   <div id="dirText"></div>
-  <div class="hint" id="wxWindNote" hidden>Weather wind is measured 10 m (33 ft) above ground — usually stronger than the wind at shooter height.</div>
+  <div class="hint" id="wxWindNote" hidden>Weather wind is measured 10 m (33 ft) above ground — usually stronger than the wind at shooter height (about ⅔ of it in open ground).</div>
   <div class="hint">Drag the dial or the numbers (swipe left/right). 0° = wind in your face, 90° = from your right, 180° = from behind, 270° = from your left.</div>
   <div class="grid" style="margin-top:10px">
     <div class="full"><label for="shotAngle"><span>Shot angle (°, + up / − downhill)</span><button class="sm ghost sensorbtn" type="button" id="angleBtn">📐 Measure angle</button></label>
@@ -467,14 +485,14 @@ table.dope th small { color: var(--accent); }
   <div class="chart-container">
     <canvas id="chart" aria-label="Drop versus range chart"></canvas>
   </div>
-  <div class="grid" style="margin-top:10px">
+  <div class="grid stk" style="margin-top:10px">
     <div><label for="maxRange">Table to (yd)</label>
       <div class="stepper" data-step="50" data-min="100" data-max="3000"><input type="number" inputmode="numeric" id="maxRange" value="1000"></div><div class="err" id="e-maxRange"></div></div>
     <div><label for="step">Every (yd)</label>
       <div class="stepper" data-step="25" data-min="25" data-max="500"><input type="number" inputmode="numeric" id="step" value="100"></div><div class="err" id="e-step"></div></div>
   </div>
   <label class="tgl" for="roundClk"><span>Round to the nearest turret click<small>Shows the dial value you can actually set (click value from the optic in Gear).</small></span><input type="checkbox" id="roundClk" role="switch"></label>
-  <div class="row dcBtns" id="dopeTools"><button class="ghost" type="button" id="trueBtn">🎯 True MV / BC</button><button class="ghost" type="button" id="dcBtn">🖨 Dope card</button></div>
+  <div class="row dcBtns" id="dopeTools"><button class="ghost" type="button" id="trueBtn">🎯 Truing</button><button class="ghost" type="button" id="dcBtn">🖨 Dope card</button></div>
 </div>
 
 <details class="section" id="advCond">
@@ -496,7 +514,7 @@ table.dope th small { color: var(--accent); }
       <input type="number" inputmode="decimal" id="pressure" step="0.01" placeholder="blank = standard"><div class="err" id="e-pressure"></div></div>
     <div class="full hint">Station pressure is the actual (not sea-level corrected) pressure where you are. Leave it blank to use standard pressure for your altitude.</div>
     <div><label for="powderTemp"><span>Powder temp (°F)</span></label>
-      <div class="stepper" data-step="5" data-min="-40" data-max="160"><input type="number" inputmode="numeric" id="powderTemp" placeholder="= air temp"></div><div class="err" id="e-powderTemp"></div></div>
+      <div class="stepper" data-step="5" data-min="-40" data-max="160"><input type="number" inputmode="numeric" id="powderTemp" placeholder="air"></div><div class="err" id="e-powderTemp"></div></div>
     <div class="hint" id="ptHint" style="align-self:end"></div>
     <div class="full"><label for="bearing"><span>Shooting direction (compass °)</span><button class="sm ghost sensorbtn" type="button" id="aimBtn">🧭 Aim at target</button></label>
       <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="bearing" placeholder="optional, e.g. 270 = west"></div>
@@ -541,10 +559,11 @@ table.dope th small { color: var(--accent); }
               <div><label for="opTurn">Elevation per turn <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTurn" step="0.5" placeholder="e.g. 10"><div class="err" id="e-opTurn"></div></div>
               <div><label for="opTravel">Total elev. travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTravel" step="0.5" placeholder="e.g. 29"><div class="err" id="e-opTravel"></div></div>
               <div><label for="opCant">Canted base (MOA)</label><input type="number" inputmode="decimal" id="opCant" step="5" placeholder="e.g. 20"><div class="err" id="e-opCant"></div></div>
+              <div><label for="opUp">Up travel from zero <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opUp" step="0.1" placeholder="estimate"><div class="err" id="e-opUp"></div></div>
               <div><label for="opSH">Sight height (in)</label><input type="number" inputmode="decimal" id="opSH" step="0.05" placeholder="blank = gun's"><div class="err" id="e-opSH"></div></div>
               <div><label for="opWTravel">Windage travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opWTravel" step="0.5" placeholder="optional"><div class="err" id="e-opWTravel"></div></div>
               <div><label for="opTrack">Tracking factor</label><input type="number" inputmode="decimal" id="opTrack" step="0.005" placeholder="e.g. 1.02"><div class="err" id="e-opTrack"></div></div>
-              <div class="full hint" id="opHint">Up travel ≈ half the total travel + the canted base (assumes the zero sits near the optical center on a flat base). Tracking factor = how far the scope really moves per dialed unit (1.02 = 2% more), so dial = required ÷ factor.</div>
+              <div class="full hint" id="opHint">Up travel from zero: dial fully up from your zero and enter what's left; blank = estimate of half the total travel + the canted base. Tracking factor = how far the scope really moves per dialed unit (1.02 = 2% more), so dial = required ÷ factor.</div>
             </div></details></div>
         </div>
       </div>
@@ -554,11 +573,11 @@ table.dope th small { color: var(--accent); }
       <div class="grid">
         <div class="full"><label for="gunKind">Type</label><select id="gunKind"><option value="rifle">Rifle</option><option value="handgun">Handgun</option></select></div>
         <div class="full hint" id="gunOptNote" hidden></div>
-        <div id="gunSHRow"><label for="sightHeight">Sight height (in)</label><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
+        <div id="gunSHRow"><label for="sightHeight">Sight height (in)<span class="ro" id="gunSHRoL" hidden>set by optic</span></label><div class="roVal" id="gunSHRo" hidden></div><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
         <div><label for="zero">Zero range (yd)</label><div class="stepper" data-step="25" data-min="10" data-max="1000"><input type="number" inputmode="numeric" id="zero" value="100"></div><div class="err" id="e-zero"></div></div>
         <div><label for="barrel">Barrel length (in)</label><input type="number" inputmode="decimal" id="barrel" step="0.5" placeholder="optional, e.g. 20"><div class="err" id="e-barrel"></div></div>
         <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift and the stability check (needs bullet length).</div><div class="err" id="e-twist"></div></div>
-        <div class="full" id="gunTurretRow"><label for="turret">Turret click value</label><select id="turret"><option value="">Same as display unit (0.1 mil / ¼ MOA)</option><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div>
+        <div class="full" id="gunTurretRow"><label for="turret">Turret click value<span class="ro" id="gunTurretRoL" hidden>set by optic</span></label><div class="roVal" id="gunTurretRo" hidden></div><select id="turret"><option value="">Display unit (0.1 mil / ¼ MOA)</option><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div>
         <div id="turretCustom" hidden><label for="turretV">Click value</label><input type="number" inputmode="decimal" id="turretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-turretV"></div></div>
         <div id="turretCustomU" hidden><label for="turretU">Click unit</label><select id="turretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
         <div class="full"><details id="zeroDetails"><summary>Zero conditions <span class="rsum" id="zeroSum">same as today</span></summary>
@@ -568,7 +587,7 @@ table.dope th small { color: var(--accent); }
             <div><label for="zAlt">Altitude (ft)</label><input type="number" inputmode="numeric" id="zAlt" placeholder="blank = today"><div class="err" id="e-zAlt"></div></div>
             <div><label for="zPress">Station pressure (inHg)</label><input type="number" inputmode="decimal" id="zPress" step="0.01" placeholder="blank = today"><div class="err" id="e-zPress"></div></div>
             <div class="full"><button class="sm ghost" type="button" id="zUseCur" style="width:100%;padding:10px">📋 Use current conditions</button></div>
-            <div class="full hint">The zero is solved under these conditions (and the powder temp they imply), then today's shot uses today's conditions. Leave blank to zero in today's conditions.</div>
+            <div class="full hint">Conditions on the day you zeroed. Blank = today's conditions.</div>
           </div></details></div>
       </div>
     </details>
@@ -589,15 +608,15 @@ table.dope th small { color: var(--accent); }
           <button class="sm ghost rcBtn" type="button" id="rcBulletBtn" hidden></button>
           <input type="hidden" id="bulletId"><input type="hidden" id="bulletName"><input type="hidden" id="bcBands"></div>
         <div><label for="bc">Ballistic coefficient (BC)</label><input type="number" inputmode="decimal" id="bc" step="0.001" value="0.223"><div class="err" id="e-bc"></div></div>
-        <div><label for="drag">Drag model</label><select id="drag"><option value="G7" selected>G7 (boat-tail / long-range)</option><option value="G1">G1 (flat-base / most box BCs)</option></select></div>
+        <div><label for="drag">Drag model</label><select id="drag"><option value="G7" selected>G7 (boat-tail)</option><option value="G1">G1 (flat-base)</option></select></div>
         <div><label for="weight">Bullet weight (gr)</label><input type="number" inputmode="decimal" id="weight" step="1" value="168"><div class="err" id="e-weight"></div></div>
         <div><label for="diameter">Diameter (in)</label><input type="number" inputmode="decimal" id="diameter" step="0.001" value="0.308"><div class="err" id="e-diameter"></div></div>
         <div><label for="mv">Muzzle velocity (fps)</label><input type="number" inputmode="numeric" id="mv" step="5" value="2750"><div class="err" id="e-mv"></div></div>
-        <div><label for="mvSource">MV is…</label><select id="mvSource"><option value="">(not set)</option><option value="measured">Chronographed</option><option value="factory">Box / factory</option><option value="estimate">Estimated</option><option value="trued">Trued from drops</option></select></div>
+        <div><label for="mvSource">MV is…</label><select id="mvSource"><option value="">(not set)</option><option value="measured">Chrono</option><option value="factory">Box / factory</option><option value="estimate">Estimated</option><option value="trued">Trued</option></select></div>
         <div><label for="length">Bullet length (in)</label><input type="number" inputmode="decimal" id="length" step="0.01" value="1.215" placeholder="optional"><div class="err" id="e-length"></div></div>
         <div><label for="tipLen">Plastic tip (in)</label><input type="number" inputmode="decimal" id="tipLen" step="0.01" placeholder="tipped bullets"><div class="err" id="e-tipLen"></div></div>
         <div><label for="ptSens">Temp sensitivity (fps per 10°F)</label><input type="number" inputmode="decimal" id="ptSens" step="1" placeholder="0 = off"><div class="err" id="e-ptSens"></div></div>
-        <div><label for="mvTemp">Chrono temp (°F)</label><input type="number" inputmode="numeric" id="mvTemp" placeholder="when MV was measured"><div class="err" id="e-mvTemp"></div></div>
+        <div><label for="mvTemp">Chrono temp (°F)</label><input type="number" inputmode="numeric" id="mvTemp" placeholder="at chrono"><div class="err" id="e-mvTemp"></div></div>
         <div class="full hint">Many powders shift 1–2 fps per °F (10–20 per 10°F). MV used = chrono MV + sensitivity × (powder temp − chrono temp) ÷ 10; leave sensitivity blank or 0 to turn it off. Tip length (blank = estimated for tipped bullets) refines the stability check.</div>
         <div class="full summary" id="truedNote" hidden></div><input type="hidden" id="trued">
         <div class="full" id="bandsRow" style="display:none"><label for="useBands">Sierra velocity-banded G1</label><select id="useBands"><option value="">Use single BC above</option><option value="1">Use velocity bands (G1 only)</option></select><div class="hint" id="bandsTxt"></div></div>
@@ -629,7 +648,7 @@ table.dope th small { color: var(--accent); }
         <div class="full"><label for="ldCase">Case / brass</label><input type="text" list="dlCase" id="ldCase" maxlength="60" autocomplete="off" placeholder="e.g. Lapua"></div>
         <div><label for="ldFired">Times fired</label><input type="number" inputmode="numeric" id="ldFired" step="1" min="0" placeholder="e.g. 3"></div>
         <div><label for="ldTrim">Trim length (in)</label><input type="number" inputmode="decimal" id="ldTrim" step="0.001" placeholder="optional"></div>
-        <div class="full"><label for="ldPrep">Case prep</label><input type="text" id="ldPrep" maxlength="200" placeholder="annealed, neck turned, mandrel, sized…"></div>
+        <div class="full"><label for="ldPrep">Case prep</label><input type="text" id="ldPrep" maxlength="200" placeholder="annealed, mandrel…"></div>
       </div>
       <div class="grid" id="ldFactory" hidden>
         <div class="full"><label for="ldMaker">Brand</label><input type="text" list="dlMaker" id="ldMaker" maxlength="60" autocomplete="off" placeholder="e.g. Federal"></div>
@@ -637,7 +656,7 @@ table.dope th small { color: var(--accent); }
         <div class="full"><label for="ldLot">Lot #</label><input type="text" id="ldLot" maxlength="40" placeholder="from the box"></div>
       </div>
       <div class="grid" style="margin-top:10px">
-        <div class="full"><label for="ldNotes">Load notes</label><input type="text" id="ldNotes" maxlength="300" placeholder="seating die setting, powder lot, pressure signs…"></div>
+        <div class="full"><label for="ldNotes">Load notes</label><input type="text" id="ldNotes" maxlength="300" placeholder="die setting, lot, signs…"></div>
         <div class="full hint">Changes save to this load automatically. Every chrono session keeps its own copy of the recipe, so later edits don't change old sessions. Always work up from published load data.</div>
       </div>
       <datalist id="dlPowder"><option value="Hodgdon H4350"><option value="Hodgdon Varget"><option value="Hodgdon H4895"><option value="Hodgdon H322"><option value="Hodgdon H335"><option value="Hodgdon BL-C(2)"><option value="Hodgdon Benchmark"><option value="Hodgdon CFE 223"><option value="Hodgdon CFE BLK"><option value="Hodgdon CFE Pistol"><option value="Hodgdon H380"><option value="Hodgdon H414"><option value="Hodgdon H4831"><option value="Hodgdon H4831SC"><option value="Hodgdon H1000"><option value="Hodgdon Retumbo"><option value="Hodgdon H50BMG"><option value="Hodgdon Superformance"><option value="Hodgdon LEVERevolution"><option value="Hodgdon H110"><option value="Hodgdon Lil&#x27;Gun"><option value="Hodgdon Titegroup"><option value="Hodgdon HP-38"><option value="Hodgdon Clays"><option value="Hodgdon Universal"><option value="Hodgdon Longshot"><option value="Hodgdon US 869"><option value="IMR 3031"><option value="IMR 4064"><option value="IMR 4166"><option value="IMR 4198"><option value="IMR 4227"><option value="IMR 4320"><option value="IMR 4350"><option value="IMR 4451"><option value="IMR 4831"><option value="IMR 4895"><option value="IMR 7828"><option value="IMR 7977"><option value="IMR 8133"><option value="IMR 8208 XBR"><option value="IMR Enduron 4166"><option value="IMR Red"><option value="IMR Unequal"><option value="IMR Trail Boss"><option value="Alliant Reloder 7"><option value="Alliant Reloder 10x"><option value="Alliant Reloder 15"><option value="Alliant Reloder 16"><option value="Alliant Reloder 17"><option value="Alliant Reloder 19"><option value="Alliant Reloder 22"><option value="Alliant Reloder 23"><option value="Alliant Reloder 25"><option value="Alliant Reloder 26"><option value="Alliant Reloder 33"><option value="Alliant AR-Comp"><option value="Alliant Power Pro 2000-MR"><option value="Alliant Power Pro Varmint"><option value="Alliant Bullseye"><option value="Alliant Red Dot"><option value="Alliant Green Dot"><option value="Alliant Unique"><option value="Alliant Herco"><option value="Alliant Blue Dot"><option value="Alliant 2400"><option value="Alliant Power Pistol"><option value="Alliant Sport Pistol"><option value="Alliant BE-86"><option value="Alliant 300-MP"><option value="Alliant 20/28"><option value="Vihtavuori N110"><option value="Vihtavuori N120"><option value="Vihtavuori N130"><option value="Vihtavuori N133"><option value="Vihtavuori N135"><option value="Vihtavuori N140"><option value="Vihtavuori N150"><option value="Vihtavuori N160"><option value="Vihtavuori N165"><option value="Vihtavuori N170"><option value="Vihtavuori N540"><option value="Vihtavuori N550"><option value="Vihtavuori N555"><option value="Vihtavuori N560"><option value="Vihtavuori N565"><option value="Vihtavuori N568"><option value="Vihtavuori N570"><option value="Vihtavuori 3N37"><option value="Vihtavuori 3N38"><option value="Vihtavuori N310"><option value="Vihtavuori N320"><option value="Vihtavuori N330"><option value="Vihtavuori N340"><option value="Vihtavuori N350"><option value="Vihtavuori N105"><option value="Accurate No. 2"><option value="Accurate No. 5"><option value="Accurate No. 7"><option value="Accurate No. 9"><option value="Accurate LT-30"><option value="Accurate LT-32"><option value="Accurate 1680"><option value="Accurate 2015"><option value="Accurate 2200"><option value="Accurate 2230"><option value="Accurate 2460"><option value="Accurate 2495"><option value="Accurate 2520"><option value="Accurate 4064"><option value="Accurate 4350"><option value="Accurate 2700"><option value="Accurate MagPro"><option value="Ramshot TAC"><option value="Ramshot X-Terminator"><option value="Ramshot Big Game"><option value="Ramshot Hunter"><option value="Ramshot Magnum"><option value="Ramshot Enforcer"><option value="Ramshot Silhouette"><option value="Ramshot True Blue"><option value="Ramshot Competition"><option value="Ramshot Zip"><option value="Winchester 231"><option value="Winchester 244"><option value="Winchester 296"><option value="Winchester 748"><option value="Winchester 760"><option value="Winchester StaBall 6.5"><option value="Winchester StaBall HD"><option value="Winchester StaBall Match"><option value="Winchester WST"><option value="Winchester Super Handicap"><option value="Winchester AutoComp"><option value="Norma 203B"><option value="Norma URP"><option value="Norma MRP"><option value="Shooters World Precision Rifle"><option value="Shooters World Match Rifle"></datalist><datalist id="dlPrimer"><option value="CCI 200 (large rifle)"><option value="CCI 250 (large rifle magnum)"><option value="CCI BR-2 (large rifle bench rest)"><option value="CCI 400 (small rifle)"><option value="CCI 450 (small rifle magnum)"><option value="CCI BR-4 (small rifle bench rest)"><option value="CCI 41 (small rifle, 5.56)"><option value="CCI 500 (small pistol)"><option value="CCI 550 (small pistol magnum)"><option value="CCI 300 (large pistol)"><option value="CCI 350 (large pistol magnum)"><option value="CCI 34 (large rifle, 7.62)"><option value="Federal 205 (small rifle)"><option value="Federal 205M (small rifle match)"><option value="Federal GM205M (small rifle match)"><option value="Federal 210 (large rifle)"><option value="Federal 210M (large rifle match)"><option value="Federal GM210M (large rifle match)"><option value="Federal 215 (large rifle magnum)"><option value="Federal 215M (large rifle magnum match)"><option value="Federal 100 (small pistol)"><option value="Federal 100M (small pistol match)"><option value="Federal 200 (small pistol magnum)"><option value="Federal 150 (large pistol)"><option value="Federal 155 (large pistol magnum)"><option value="Winchester WSR (small rifle)"><option value="Winchester WSRM (small rifle magnum)"><option value="Winchester WLR (large rifle)"><option value="Winchester WLRM (large rifle magnum)"><option value="Winchester WSP (small pistol)"><option value="Winchester WSPM (small pistol magnum)"><option value="Winchester WLP (large pistol)"><option value="Remington 6½ (small rifle)"><option value="Remington 7½ BR (small rifle bench rest)"><option value="Remington 9½ (large rifle)"><option value="Remington 9½M (large rifle magnum)"><option value="Remington 1½ (small pistol)"><option value="Remington 5½ (small pistol magnum)"><option value="Remington 2½ (large pistol)"><option value="Murom KVB-223 (small rifle)"><option value="Fiocchi SRP (small rifle)"><option value="Fiocchi LRP (large rifle)"><option value="Fiocchi SPP (small pistol)"><option value="Fiocchi LPP (large pistol)"><option value="PMC / Murom KVB-7 (large rifle)"></datalist><datalist id="dlCase"><option value="Lapua"><option value="Peterson"><option value="Alpha Munitions"><option value="Hornady"><option value="Norma"><option value="Nosler"><option value="Starline"><option value="Winchester"><option value="Remington"><option value="Federal"><option value="ADG"><option value="Sig Sauer"><option value="Gunwerks"><option value="Bertram"><option value="PPU"><option value="Fiocchi"><option value="Speer"><option value="Blazer Brass"><option value="Lake City"><option value="Mixed range brass"></datalist><datalist id="dlMaker"><option value="Hornady"><option value="Federal"><option value="Federal Premium"><option value="Winchester"><option value="Remington"><option value="Sierra"><option value="Nosler"><option value="Berger"><option value="Black Hills"><option value="Sig Sauer"><option value="Norma"><option value="Lapua"><option value="PPU"><option value="Fiocchi"><option value="Barnes"><option value="CCI"><option value="Speer"><option value="Aguila"><option value="Magtech"><option value="Blazer"><option value="Underwood"><option value="HSM"><option value="Prvi Partizan"><option value="Wolf"><option value="Browning"></datalist>
@@ -736,6 +755,11 @@ table.dope th small { color: var(--accent); }
   <button type="button" class="ghost" id="pkCancel">Cancel</button>
 </div></div>
 
+<div id="zpDlg" role="alertdialog" aria-modal="true" aria-labelledby="zpQ" aria-describedby="zpFor"><div class="box">
+  <h3 id="zpQ">Is this rifle already zeroed with this scope?</h3>
+  <p id="zpFor"></p>
+  <div class="row"><button type="button" class="ghost" id="zpNo">No — not yet</button><button type="button" id="zpYes">Yes, it's zeroed</button></div>
+</div></div>
 <div id="opSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Attach an optic">
   <h3><span>🔗 Attach an optic</span><button class="sm ghost" type="button" id="opSheetClose">✕ Close</button></h3>
   <div class="summary" id="opSheetFor"></div>
@@ -883,7 +907,7 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 // load data (recipe) fields: handload or factory ammo
 const REC_F = ["ldKind", "ldPowder", "ldCharge", "ldPrimer", "ldCOAL", "ldCBTO", "ldJump", "ldCase", "ldFired", "ldTrim", "ldPrep", "ldMaker", "ldProduct", "ldLot", "ldNotes"];
 const RIFLE_F = ["gunKind", "sightHeight", "zero", "twist", "barrel", "turret", "turretV", "turretU", "zTemp", "zPress", "zAlt", "zHum"];
-const OPTIC_F = ["opTurret", "opTurretV", "opTurretU", "opReticle", "opFP", "opMag", "opTurn", "opTravel", "opCant", "opSH", "opWTravel", "opTrack"];
+const OPTIC_F = ["opTurret", "opTurretV", "opTurretU", "opReticle", "opFP", "opMag", "opTurn", "opTravel", "opCant", "opUp", "opSH", "opWTravel", "opTrack"];
 const LOAD_F = ["bc", "drag", "weight", "diameter", "mv", "length", "mvSource", "refMV", "refBarrel", "fpsPerInch", "bulletId", "bulletName", "bcBands", "useBands", "ptSens", "mvTemp", "tipLen", "trued", ...REC_F];
 const LONG_F = { trued: 160, bulletName: 100, bcBands: 200, bulletId: 80, ldPowder: 60, ldPrimer: 60, ldCase: 60, ldMaker: 60, ldProduct: 80, ldLot: 40, ldPrep: 200, ldNotes: 300 };
 const F_DEF = { drag: "G7", gunKind: "rifle", ldKind: "hand", turretU: "mil", opTurret: "0.1mil", opTurretU: "mil", opReticle: "mil", opFP: "FFP" };   // defaults for presets saved before a field existed
@@ -920,7 +944,7 @@ function migrateGunOptic(r, list) {   // old gun turret + sight height → an op
   if (!r || !r.turret || r.opticId) return null;
   const tu = r.turret === "custom" ? (r.turretU === "moa" ? "moa" : "mil") : /moa/.test(r.turret) ? "moa" : "mil";
   const o = { id: uid(), name: `${r.name || "Gun"} scope`.slice(0, 60), opTurret: r.turret, opTurretV: r.turretV || "", opTurretU: r.turretU || "mil", opReticle: tu, opFP: "FFP",
-    opMag: "", opTurn: "", opTravel: "", opCant: "", opSH: r.sightHeight || "", opWTravel: "", opTrack: "" };
+    opMag: "", opTurn: "", opTravel: "", opCant: "", opUp: "", opSH: r.sightHeight || "", opWTravel: "", opTrack: "" };
   list.push(o); r.opticId = o.id; return o;
 }
 const migrated = migratePresets();
@@ -1217,6 +1241,7 @@ function renderChips() {
     else { c.classList.add("man"); c.textContent = `✎ manual · ↺ ${name}`; c.title = `Revert to ${name} value (${a.v})`;
       c.onclick = (e) => { e.preventDefault(); manual.delete(f); setVal(f, a.v); applyAuto(); schedule(); }; }
   }
+  paintShHint();
   const b = num("bearing");
   $("bearingHint").textContent = !wx ? "Set this so weather wind direction can be converted to wind relative to your shot."
     : b == null ? `Weather wind is from ${compass(wx.windFrom)} (${Math.round(wx.windFrom)}°). Enter the direction you're facing to convert it to your shot.`
@@ -1394,7 +1419,7 @@ const RULES = {
   shotAngle: [-60, 60, false], rangeLat: [-90, 90, false], rangeLon: [-180, 180, false],
   ptSens: [-100, 100, false, "fps per 10°F, e.g. 15"], mvTemp: [-40, 160, false], powderTemp: [-40, 160, false], tipLen: [0, 1, false],
   zTemp: [-40, 140, false], zHum: [0, 100, false], zAlt: [-1500, 20000, false], zPress: [15, 32, false, "inHg, e.g. 29.92"], turretV: [0.001, 5, false],
-  opTurretV: [0.001, 5, false], opMag: [1, 60, false], opTurn: [1, 60, false], opTravel: [1, 200, false], opCant: [0, 60, false], opSH: [0, 10, false], opWTravel: [1, 200, false], opTrack: [0.8, 1.2, false, "e.g. 1.02"]
+  opTurretV: [0.001, 5, false], opMag: [1, 60, false], opTurn: [1, 60, false], opTravel: [1, 200, false], opCant: [0, 60, false], opUp: [0.1, 200, false], opSH: [0, 10, false], opWTravel: [1, 200, false], opTrack: [0.8, 1.2, false, "e.g. 1.02"]
 };
 function validate() {
   const bad = [];
@@ -1521,9 +1546,9 @@ function renderCard() {
   const call = R.ws, gs = gustSpread();
   if (windHoldAt(0) == null) $("dcBracket").textContent = "";
   else if (gs) {   // live weather: bracket from the call up through the gust spread
-    const mid = call + gs / 2, hi = call + gs;
-    $("dcBracket").innerHTML = `Wind <b>${fmt(call, 1)}</b> / ${fmt(mid, 1)} / ${fmt(hi, 1)} mph gust → <b>${lr(a.w, dd)}</b> · ${lr(windHoldAt(mid), dd)} · ${lr(windHoldAt(hi), dd)}` +
-      `<span class="gn">Gust spread ${fmt(wx.wind, 0)}→${fmt(wx.gust, 0)} mph from live weather (10 m wind)</span>`;
+    const lull = Math.max(0, call - gs / 2), mid = call + gs / 2, hi = call + gs;
+    $("dcBracket").innerHTML = `Wind ${fmt(lull, 1)} / <b>${fmt(call, 1)}</b> / ${fmt(mid, 1)} / ${fmt(hi, 1)} mph → ${lr(windHoldAt(lull), dd)} · <b>${lr(a.w, dd)}</b> · ${lr(windHoldAt(mid), dd)} · ${lr(windHoldAt(hi), dd)}` +
+      `<span class="gn">Lull / call / gusts · spread ${fmt(wx.wind, 0)}→${fmt(wx.gust, 0)} mph from live weather (10 m wind)</span>`;
   } else {
     const lo = Math.max(0, call - 2), hi = call + 2;
     $("dcBracket").innerHTML = `Wind ${fmt(lo, 1)} / <b>${fmt(call, 1)}</b> / ${fmt(hi, 1)} mph → ${lr(windHoldAt(lo), dd)} · <b>${lr(a.w, dd)}</b> · ${lr(windHoldAt(hi), dd)}`;
@@ -1565,7 +1590,7 @@ function renderTable(samples) {
   }
   html += `</tbody></table>`;
   const leg = `Elev = dial U (up) / D (down); clicks in ${escapeHtml(ts.lbl)}${ts.cpt ? ` (U1+23 = 1 turn + 23 clicks, ${ts.cpt} per turn)` : ""}${ts.k !== 1 ? `; dial includes tracking ×${fmt(ts.k, 3)}` : ""}. Wind = dial L/R to correct (includes spin drift); 1 mph = full-value hold per mph (${u}). Spin = spin-drift part alone.` +
-    `${ts.sfp ? ` SFP reticle: holds true at ${fmt(ts.sfp, 1)}×.` : ""}${ts.up != null ? ` Underlined elevation = beyond ~${fmt(ts.up, 1)} ${ts.u === "MIL" ? "mil" : "MOA"} up travel.` : ""} Highlighted row = target. <b style="color:var(--warn)">T</b> = transonic (below Mach 1.2 ≈ ${Math.round(vT)} fps at ${fmt(R.aT, 0)}°F). Drop/drift in inches relative to line of sight.`;
+    `${ts.sfp ? ` SFP reticle: holds true at ${fmt(ts.sfp, 1)}×.` : ""}${ts.up != null ? ` Underlined elevation = beyond ${ts.upSet ? "" : "~"}${fmt(ts.up, 1)} ${ts.u === "MIL" ? "mil" : "MOA"} up travel.` : ""} Highlighted row = target. <b style="color:var(--warn)">T</b> = transonic (below Mach 1.2 ≈ ${Math.round(vT)} fps at ${fmt(R.aT, 0)}°F). Drop/drift in inches relative to line of sight.`;
   resultsDiv.innerHTML = `<div class="tblBox"><div class="tblWrap">${html}</div><div class="fade" aria-hidden="true"></div></div><div class="swipe">Swipe the table sideways for more columns →</div><div class="legend">${leg}</div>`;
   paintScroll();
 }
@@ -2499,7 +2524,8 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's turret
     const tk = num("opTrack"); s.k = tk >= 0.8 && tk <= 1.2 ? tk : 1; s.optic = o;
     s.perTurn = num("opTurn") > 0 ? num("opTurn") : null; s.cpt = s.perTurn ? Math.round(s.perTurn / s.v) : 0;
     const tr = num("opTravel"), cant = num("opCant") || 0, cantT = s.u === "MIL" ? cant / 3.437747 : cant;
-    s.up = tr > 0 ? Math.min(tr, tr / 2 + cantT) : null;   // ASSUMPTION: zero near the optical center on a flat base → half the travel is up; a canted base adds its MOA
+    const upF = num("opUp"); s.upSet = upF > 0;   // measured "up travel from zero" overrides the estimate
+    s.up = s.upSet ? upF : tr > 0 ? Math.min(tr, tr / 2 + cantT) : null;   // ASSUMPTION: zero near the optical center on a flat base → half the travel is up; a canted base adds its MOA
     s.sfp = $("opFP").value === "SFP" && num("opMag") > 0 ? num("opMag") : null;
     return s;
   }
@@ -2542,7 +2568,7 @@ function paintWarn() {   // warnings stay on the card; plain info goes behind "D
   const g = R.sg, ts = turretSpec(), r = curRifle();
   if (r?.zeroUnconf) warn.push(`<span class="bad" title="${escapeHtml("Zero not confirmed: " + (r.zeroUnconf.why || "optic changed"))}">⚠ Zero not confirmed</span>`);
   if (R.tgt && ts.up != null) { const a = angs(R.tgt), tu = ts.u === "MIL" ? "mil" : "MOA";
-    if (a.eT > ts.up + 1e-9) warn.push(`<span class="bad">⚠ Needs U ${a.eT.toFixed(1)} ${tu} — only ~${ts.up.toFixed(1)} ${tu} up travel; hold the last ${(a.eT - ts.up).toFixed(1)} ${tu}</span>`); }
+    if (a.eT > ts.up + 1e-9) warn.push(`<span class="bad">⚠ Needs U ${a.eT.toFixed(1)} ${tu} — only ${ts.upSet ? "" : "~"}${ts.up.toFixed(1)} ${tu} up travel; hold the last ${(a.eT - ts.up).toFixed(1)} ${tu}</span>`); }
   if (g && g.sg != null) {
     const t = `SG ${g.sg.toFixed(2)}`, why = `Miller stability ${g.sg.toFixed(2)} at ${Math.round(R.mvNow)} fps, ${fmt(R.aT, 0)}°F${g.tip ? `, ${g.assumed ? "assumed " : ""}${g.tip}" plastic tip` : ""}`;
     (g.sg < 1.4 ? warn : info).push(g.sg < 1 ? `<span class="bad" title="${escapeHtml(why)}">✖ ${t} unstable — bullet may tumble</span>` : g.sg < 1.4 ? `<span class="w" title="${escapeHtml(why)}">⚠ ${t} marginal (&lt;1.4) — BC may suffer</span>` : `<span title="${escapeHtml(why)}">${t} stable${g.assumed ? " (tip est.)" : ""}</span>`);
@@ -2564,7 +2590,7 @@ function paintPt() {
 }
 function paintGearExtra() {
   const oN = !!curOptic(), t = $("turret").value === "custom" && !oN; $("turretCustom").hidden = !t; $("turretCustomU").hidden = !t;
-  $("gunSHRow").hidden = oN; $("gunTurretRow").hidden = oN; paintOptic();
+  paintOptic();
   const zc = zeroCond();
   $("zeroSum").textContent = zc ? [num("zTemp") != null ? `${val("zTemp")}°F` : "", num("zHum") != null ? `${val("zHum")}%` : "", num("zAlt") != null ? `${val("zAlt")} ft` : "", num("zPress") != null ? `${val("zPress")} inHg` : ""].filter(Boolean).join(" · ") : "same as today";
   const tn = val("trued"); $("truedNote").hidden = !tn; $("truedNote").textContent = tn ? "🎯 " + tn : "";
@@ -2663,7 +2689,7 @@ async function renderDopeCard() {
   el.innerHTML = `${look ? `<div class="ang">${look > 0 ? "▲ UPHILL" : "▼ DOWNHILL"} ${fmt(Math.abs(look), 0)}°</div>` : ""}<div class="hd"><b>${escapeHtml(r?.name || "Gun")} · ${escapeHtml(l?.name || "Load")}</b><br>${escapeHtml(val("bulletName") || `${val("weight")} gr`)} · BC ${escapeHtml(val("bc"))} ${$("drag").value} · MV ${Math.round(sv.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(sv.Tp, 0)}°F` : ""}<br>
     Zero ${val("zero")} yd${zc ? ` @ ${fmt(zc.temp, 0)}°F` : ""} · SH ${fmt(effSH(), 2)}" · turret ${escapeHtml(ts.lbl)}${o ? ` · ${escapeHtml(o.name)}` : ""}${ts.sfp ? ` · SFP holds true at ${fmt(ts.sfp, 1)}×` : ""}${k !== 1 ? ` · tracking ×${fmt(k, 3)}` : ""}<br>${escapeHtml(cond)} · ${escapeHtml(new Date().toLocaleDateString())}</div>
     <table><thead><tr><th>Yd</th><th>Elev ${u}</th><th>Clk</th><th>10 mph ${u}</th><th>Clk</th><th>Spin ${u}</th><th>fps</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="ft">Elev = dial up${ts.cpt ? ` (Clk 1+23 = 1 turn + 23)` : ""}. 10 mph = full-value crosswind hold (no spin drift). Spin = spin-drift correction to add. Clk = ${escapeHtml(ts.lbl)} clicks. Shaded = transonic (&lt;${Math.round(vT)} fps).${anyOver ? ` Underlined = beyond ~${fmt(ts.up, 1)} up travel.` : ""}</div>`;
+    <div class="ft">Elev = dial up${ts.cpt ? ` (Clk 1+23 = 1 turn + 23)` : ""}. 10 mph = full-value crosswind hold (no spin drift). Spin = spin-drift correction to add. Clk = ${escapeHtml(ts.lbl)} clicks. Shaded = transonic (&lt;${Math.round(vT)} fps).${anyOver ? ` Underlined = beyond ${ts.upSet ? "" : "~"}${fmt(ts.up, 1)} up travel.` : ""}</div>`;
 }
 $("dcBtn").onclick = () => openDopeCard();
 $("dcvClose").onclick = () => closeOvl("dcView");
@@ -2696,7 +2722,7 @@ function applyOptic() {
 }
 function renderOpticSel() {
   const r = curRifle(), sel = $("opticSel"), o = curOptic(); sel.innerHTML = "";
-  sel.add(new Option(r ? "No optic — uses the gun's turret" : "Add a gun first", ""));
+  sel.add(new Option(r ? "No optic" : "Add a gun first", ""));
   (P.optics || []).forEach(x => { const on = P.rifles.find(g => g.opticId === x.id); sel.add(new Option(x.name + (on && on !== r ? ` (on ${on.name})` : ""), x.id)); });
   sel.value = o ? o.id : ""; sel.disabled = !r;
 }
@@ -2707,13 +2733,14 @@ function paintOptic() {
   $("opMagRow").hidden = $("opFP").value !== "SFP";
   document.querySelectorAll("#opticBody .u2").forEach(e => e.textContent = `(${tu})`);
   $("opticSum").textContent = o ? [`${ts.lbl} turret`, `${$("opReticle").value === "moa" ? "MOA" : "MIL"} reticle`, ts.sfp ? `SFP (true at ${fmt(ts.sfp, 1)}×)` : $("opFP").value,
-      ts.perTurn ? `${fmt(ts.perTurn, 2)} ${tu}/turn` : "", ts.up != null ? `~${fmt(ts.up, 1)} ${tu} up travel` : "", num("opSH") != null ? `SH ${val("opSH")}"` : "", ts.k !== 1 ? `tracking ×${fmt(ts.k, 3)}` : ""].filter(Boolean).join(" · ")
+      ts.perTurn ? `${fmt(ts.perTurn, 2)} ${tu}/turn` : "", ts.up != null ? `${ts.upSet ? "" : "~"}${fmt(ts.up, 1)} ${tu} up travel` : "", num("opSH") != null ? `SH ${val("opSH")}"` : "", ts.k !== 1 ? `tracking ×${fmt(ts.k, 3)}` : ""].filter(Boolean).join(" · ")
     : r ? "No optic attached — the dope uses the gun's turret and sight height (Gun details)." : "";
-  $("opMoreSum").textContent = o ? [$("opFP").value, ts.perTurn ? `${fmt(ts.perTurn, 2)}/turn` : "", num("opTravel") ? `${val("opTravel")} travel` : "", num("opCant") ? `${val("opCant")} MOA base` : ""].filter(Boolean).join(" · ") : "";
+  $("opMoreSum").textContent = o ? [$("opFP").value, ts.perTurn ? `${fmt(ts.perTurn, 2)}/turn` : "", num("opTravel") ? `${val("opTravel")} travel` : "", num("opCant") ? `${val("opCant")} MOA base` : "", num("opUp") > 0 ? `${val("opUp")} up` : ""].filter(Boolean).join(" · ") : "";
   $("gunOptNote").hidden = !o; $("gunOptNote").textContent = o ? `Sight height and turret come from the optic “${o.name}”${num("opSH") == null ? ` (no sight height there, so the gun's ${val("sightHeight") || "?"}" is used)` : ""}.` : "";
   const z = r?.zeroUnconf; $("zeroFlag").hidden = !z; $("zeroFlagTxt").textContent = z ? `⚠ Zero not confirmed — ${z.why || "optic changed"}` : "";
   $("opNew").disabled = !r; $("opAttach").disabled = !r || !(P.optics || []).length;
   ["opDup", "opRename", "opDetach", "opDel"].forEach(id => $(id).disabled = !o);
+  paintRO();
 }
 function flagZero(r, why) { if (r) r.zeroUnconf = { why, at: new Date().toISOString() }; }
 function attachOptic(oid, fresh) {   // fresh = optic just created for this gun (no zero flag unless it replaces another optic)
@@ -2725,22 +2752,25 @@ function attachOptic(oid, fresh) {   // fresh = optic just created for this gun 
   if (other) { other.opticId = null; flagZero(other, `optic “${o.name}” moved to “${r.name}”`); }
   r.opticId = oid;
   if (!String(o.opSH ?? "").trim() && r.sightHeight) o.opSH = r.sightHeight;
-  if (!(fresh && !prev)) flagZero(r, other ? `optic “${o.name}” moved here from “${other.name}”` : prev ? `optic changed from “${prev.name}” to “${o.name}”` : `optic “${o.name}” attached`);
-  savePresets(); applyOptic(); updateDirty(); schedule(); return true;
+  const ask = !prev && !other;   // first optic on a gun that had none → ask once instead of flagging
+  if (!ask) flagZero(r, other ? `optic “${o.name}” moved here from “${other.name}”` : `optic changed from “${prev.name}” to “${o.name}”`);
+  savePresets(); applyOptic(); updateDirty(); schedule();
+  if (ask) { askZero(r, o); return "ask"; }
+  return true;
 }
 function detachOptic() {
   const r = curRifle(), o = curOptic(); if (!r || !o) return;
   autosave(); r.opticId = null; flagZero(r, `optic “${o.name}” removed`); savePresets(); applyOptic(); updateDirty(); schedule();
   toast(`“${o.name}” detached from “${r.name}” — zero marked not confirmed`);
 }
-$("opticSel").onchange = e => { const v = e.target.value; if (!v) detachOptic(); else if (attachOptic(v)) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); };
+$("opticSel").onchange = e => { const v = e.target.value; if (!v) detachOptic(); else if (attachOptic(v) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); };
 $("opNew").onclick = () => {
   const r = curRifle(); if (!r) return; const n = askName("Name for the new optic (e.g. Razor 4.5-27):", `${r.name} scope`); if (!n) return;
   const cur = curOptic(), gt = $("turret").value, base = cur ? pick(OPTIC_F) : {
     opTurret: gt || (S.ang === "MIL" ? "0.1mil" : "0.25moa"), opTurretV: val("turretV"), opTurretU: $("turretU").value || "mil",
     opReticle: (gt === "custom" ? $("turretU").value === "moa" : gt ? /moa/.test(gt) : S.ang === "MOA") ? "moa" : "mil", opFP: "FFP", opSH: val("sightHeight") };
   const o = { id: uid(), name: n, ...Object.fromEntries(OPTIC_F.map(f => [f, base[f] ?? ""])) };
-  P.optics.push(o); attachOptic(o.id, true); followUnits(true); toast(`Optic “${n}” added to “${r.name}”`);
+  P.optics.push(o); const at = attachOptic(o.id, true); followUnits(true); if (at !== "ask") toast(`Optic “${n}” added to “${r.name}”`);
 };
 $("opRename").onclick = () => { const o = curOptic(); if (!o) return; const n = askName("Rename optic:", o.name); if (!n) return; o.name = n; savePresets(); renderOpticSel(); paintOptic(); flashSaved("optic"); };
 $("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60) }; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ › Attach)`); };
@@ -2759,10 +2789,40 @@ $("opAttach").onclick = () => {
     return `<button type="button" class="opItem${on === r ? " on" : ""}" data-id="${escapeHtml(o.id)}">${escapeHtml(o.name)}<small>${ts ? ts[2] : escapeHtml(o.opTurretV ? `${o.opTurretV} ${o.opTurretU}` : "custom")} turret · ${o.opReticle === "moa" ? "MOA" : "MIL"} reticle · ${on ? (on === r ? "on this gun" : `on “${escapeHtml(on.name)}”`) : "not attached"}</small></button>`; }).join("") || `<div class="summary">No optics saved yet — use ⋯ › New optic.</div>`;
   openOvl("opSheet");
 };
-$("opList").addEventListener("click", e => { const b = e.target.closest(".opItem"); if (!b) return; closeOvl("opSheet"); if (attachOptic(b.dataset.id)) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); });
+$("opList").addEventListener("click", e => { const b = e.target.closest(".opItem"); if (!b) return; closeOvl("opSheet"); if (attachOptic(b.dataset.id) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); });
 $("opSheetClose").onclick = () => closeOvl("opSheet");
 $("zeroConfirm").onclick = () => { const r = curRifle(); if (!r) return; delete r.zeroUnconf; savePresets(); updateDirty(); if (lastRun) renderCard(); toast(`Zero confirmed for “${r.name}”`); };
 $("dcMoreBtn").onclick = () => { const open = $("dcMore").hidden; $("dcMore").hidden = !open; $("dcMoreBtn").setAttribute("aria-expanded", String(open)); $("dcMoreBtn").textContent = open ? "Details ▴" : "Details ▾"; };
+
+/* ---------------- round 3 ---------------- */
+var ZP = null;   // pending "already zeroed?" question { r, o }
+function askZero(r, o) {
+  ZP = { r, o }; $("zpFor").textContent = `“${o.name}” is now on “${r.name}”. Yes keeps the zero confirmed; No marks it “Zero not confirmed” until you confirm it on Gear.`;
+  $("zpDlg").classList.add("show"); setTimeout(() => $("zpYes").focus({ preventScroll: true }), 30);
+}
+function answerZero(yes) {
+  const z = ZP; ZP = null; $("zpDlg").classList.remove("show"); if (!z) return;
+  if (yes) delete z.r.zeroUnconf; else flagZero(z.r, `optic “${z.o.name}” attached — not zeroed with it yet`);
+  savePresets(); paintOptic(); updateDirty(); if (lastRun) renderCard();
+  toast(yes ? `“${z.o.name}” attached — zero kept as confirmed` : `“${z.o.name}” attached — zero marked not confirmed`);
+}
+$("zpYes").onclick = () => answerZero(true);
+$("zpNo").onclick = () => answerZero(false);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("zpDlg").classList.contains("show")) { e.stopImmediatePropagation(); answerZero(false); } }, true);
+function paintShHint() {   // weather fills the call with the 10 m wind; shooter height in open ground ≈ ⅔ of it (hint only)
+  const a = auto.windSpeed, el = $("wxShHint"); if (!el) return;
+  const on = !!(wx && a && a.src !== "range" && (!manual.has("windSpeed") || same(a.v, $("windSpeed").value)) && num("windSpeed") > 0);
+  el.hidden = !on; el.textContent = on ? `At shooter height ≈ ⅔ → ~${fmt(num("windSpeed") * 2 / 3, 0)} mph` : "";
+  el.title = on ? "Weather wind is measured at 10 m. In open ground the wind at shooter height usually runs about 2/3 of that. The value is not changed for you." : "";
+}
+function paintRO() {   // with an optic attached the gun's sight height / turret rows become read-only "set by optic"
+  const o = curOptic(), ts = turretSpec(), shO = o && num("opSH") != null;
+  const ro = (row, on, txt) => { $(row + "Ro").hidden = !on; $(row + "RoL").hidden = !on; if (on) $(row + "Ro").innerHTML = txt; };
+  ro("gunSH", shO, shO ? `<span>${escapeHtml(val("opSH"))}"</span><small title="From the optic “${escapeHtml(o.name)}”; the gun's own value is kept as the fallback">gun's ${escapeHtml(val("sightHeight") || "—")}"</small>` : "");
+  ro("gunTurret", !!o, o ? `<span>${escapeHtml(ts.lbl)}</span><small>from “${escapeHtml(o.name)}”</small>` : "");
+  $("sightHeight").hidden = shO; $("turret").hidden = !!o;
+  if (o) { $("turretCustom").hidden = true; $("turretCustomU").hidden = true; }
+}
 
 /* ---------------- wiring ---------------- */
 let calcT;

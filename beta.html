@@ -1630,13 +1630,21 @@ function adoptDevice(d) {
 }
 $("radarConnect").onclick = async () => {
   if (!hasBT) return;
+  if (navigator.bluetooth.getAvailability) { try { if (!(await navigator.bluetooth.getAvailability())) { const m = "Bluetooth isn't available to Chrome. Turn on Bluetooth and Location, and allow Chrome the Nearby devices permission."; toast(m); $("radarStatus").textContent = m; $("radarStatus").className = "summary bad"; } } catch {} }
   let d;
   try {
     d = await navigator.bluetooth.requestDevice({
       filters: [...VPR.NAMES.map(namePrefix => ({ namePrefix })), { services: [VPR.SVC] }],
       optionalServices: [VPR.SVC, "battery_service", "device_information"]
     });
-  } catch (e) { if (e.name !== "NotFoundError") toast("Radar: " + (e.message || e)); return; }   // NotFoundError = picker cancelled
+  } catch (e) {
+    const msg = e.message || String(e);
+    if (e.name === "NotFoundError" && /cancel/i.test(msg)) return;   // picker cancelled
+    const help = /adapter|not available|permission|globally disabled/i.test(msg)
+      ? "Chrome can't use Bluetooth. Turn on Bluetooth and Location, and allow Chrome the Nearby devices permission in Android settings."
+      : "Radar: " + msg;
+    toast(help); const st = $("radarStatus"); st.textContent = help + " (" + e.name + ")"; st.className = "summary bad"; return;
+  }
   adoptDevice(d); RD.retries = 0;
   try { await radarGatt(); } catch {}
 };

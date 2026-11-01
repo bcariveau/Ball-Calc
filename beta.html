@@ -332,6 +332,7 @@ button.sm { min-height: 44px; padding: 8px 12px; }
 #dcWarn span { color: var(--muted); } #dcWarn .w { color: var(--warn); font-weight: 700; } #dcWarn .bad { color: var(--err); font-weight: 700; }
 #dopeCard.stale #dcWarn { opacity: .35; }
 #results tr.trans td { color: var(--warn); }
+#results td.ovr { text-decoration: underline; text-decoration-color: var(--err); text-decoration-thickness: 2px; }
 #results td .T { font-size: .68em; font-weight: 800; color: var(--warn); margin-left: 2px; vertical-align: super; }
 #results td.ck { color: var(--muted); font-size: .86em; }
 #dopeTools { margin-top: 8px; } #dopeTools button { flex: 1 1 45%; }
@@ -361,6 +362,53 @@ button.sm { min-height: 44px; padding: 8px 12px; }
   #dcPrint { margin: 0; padding: 0; border-radius: 0; }
   #dcPrint.wrist { width: 3.4in; } #dcPrint.full { width: 100%; }
 }
+
+/* ---- round 2 ---- */
+#status:not(.bad) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; margin: 0; padding: 0; min-height: 0; }
+#status.bad { margin: 0 0 8px; }
+button.ic.wxIc { width: auto; min-width: 44px; flex: 0 0 auto; padding: 0 12px; font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
+#dcMsg { font-size: 0.8rem; text-align: center; margin-top: 4px; color: var(--muted); } #dcMsg:empty { display: none; }
+#dcMsg .bad { color: var(--err); font-weight: 700; } #dcMsg button { margin-top: 4px; }
+.dcMoreRow { display: flex; justify-content: center; margin-top: 4px; }
+#dcMoreBtn { width: auto; min-height: 44px; padding: 4px 16px; margin: 0; font-size: 0.8rem; font-weight: 600; background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; }
+#dcMoreBtn[aria-expanded=true] { color: var(--text); border-color: var(--accent); }
+#dcChips { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px; font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+#dcChips:empty { display: none; }
+#dcBracket .gn { display: block; font-size: 0.72rem; color: var(--muted); }
+.tgl { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 52px; box-sizing: border-box; padding: 8px 12px; margin: 10px 0 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); color: var(--text); font-size: 0.9rem; cursor: pointer; }
+.tgl small { display: block; color: var(--hint); font-size: 0.72rem; }
+.tgl input { appearance: none; -webkit-appearance: none; flex: 0 0 50px; width: 50px; height: 30px; border-radius: 15px; background: var(--input); border: 2px solid var(--border); position: relative; margin: 0; padding: 0; cursor: pointer; transition: background .15s; }
+.tgl input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: left .15s; }
+.tgl input:checked { background: var(--accent); border-color: var(--accent); }
+.tgl input:checked::after { left: 23px; background: var(--on-accent); }
+.tgl input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: ""; flex: 0 0 auto; width: 0; height: 0; border-left: 7px solid currentColor; border-top: 5px solid transparent; border-bottom: 5px solid transparent; transition: transform .15s; margin: 0 4px 0 2px; }
+details[open] > summary::before { transform: rotate(90deg); }
+#tabGear details > summary { border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; background: var(--panel); color: var(--text); font-weight: 600; }
+#tabGear details[open] > summary { border-color: var(--accent); }
+#tabGear details > summary .rsum { margin-left: auto; font-weight: 400; color: var(--muted); }
+#results { overflow: visible; }
+.tblBox { position: relative; }
+.tblWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tblBox .fade { display: none; position: absolute; top: 0; right: 0; bottom: 0; width: 34px; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0), var(--card)); }
+#results.scrollX:not(.atEnd) .fade { display: block; }
+#results .swipe { display: none; font-size: 0.74rem; color: var(--muted); text-align: right; margin: 4px 2px 0; }
+#results.scrollX .swipe { display: block; }
+table.full { min-width: 640px; }
+table.dope th small, table.dope td small { display: block; font-size: 0.74em; font-weight: 400; color: var(--muted); }
+table.dope th small { color: var(--accent); }
+@media (max-width: 430px) { table.dope { font-size: 0.92rem; } table.dope th, table.dope td { padding: 7px 3px; } }
+.zflag { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0 4px; padding: 6px 6px 6px 10px; border: 1px solid var(--warn-b); border-radius: 10px; color: var(--warn); background: var(--panel); font-size: 0.82rem; font-weight: 700; }
+.zflag button { flex: 0 0 auto; width: auto; margin: 0; }
+.opPk { margin: 10px 0 6px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+.opPk .lbl { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+.opItem { display: block; width: 100%; text-align: left; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin: 0 0 8px; min-height: 48px; font-size: 1rem; font-weight: 600; }
+.opItem small { display: block; color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+.opItem.on { border-color: var(--accent); }
+#dcPrint .ang { font-size: 1.9em; font-weight: 900; text-align: center; border: 2px solid currentColor; border-radius: 6px; margin: 0 0 4px; padding: 1px 2px; }
+#dcPrint td.ovr { text-decoration: underline; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -371,7 +419,7 @@ button.sm { min-height: 44px; padding: 8px 12px; }
 <main>
 <section class="tab" id="tabDope" data-tab="dope" role="tabpanel" aria-labelledby="tabBtnDope">
 <div id="dopeCard" aria-live="polite">
-  <div class="dcTop"><span class="dcFor" id="dcFor"></span><button class="ghost ic" type="button" id="calcBtn" aria-label="Recalculate" title="Recalculate">↻</button></div>
+  <div class="dcTop"><span class="dcFor" id="dcFor"></span><button class="ghost ic wxIc" type="button" id="calcBtn" aria-label="Refresh weather and recalculate" title="Refresh weather and recalculate">↻ Weather</button></div>
   <div class="dcBig">
     <div><span class="k" id="dcElevK">Dial</span><b id="dcElev">—</b><span class="c" id="dcElevC"></span><span class="clk" id="dcElevClk"></span></div>
     <div><span class="k" id="dcWindK">Wind hold</span><b id="dcWind">—</b><span class="c" id="dcWindC"></span><span class="clk" id="dcWindClk"></span></div>
@@ -379,8 +427,10 @@ button.sm { min-height: 44px; padding: 8px 12px; }
   <div class="dcDist"><div class="stepper" data-step="25" data-min="25" data-max="3000"><input type="number" inputmode="numeric" id="target" value="500" aria-label="Target distance in yards"></div><span class="u">yd</span></div>
   <div class="err" id="e-target"></div>
   <div id="dcBracket"></div>
-  <div id="dcInfo"></div>
+  <div id="dcMsg"></div>
   <div id="dcWarn"></div>
+  <div class="dcMoreRow"><button type="button" id="dcMoreBtn" aria-expanded="false" aria-controls="dcMore">Details ▾</button></div>
+  <div id="dcMore" hidden><div id="dcInfo"></div><div id="dcChips"></div></div>
 </div>
 <div id="status">Loading ballistics engine…</div>
 
@@ -398,6 +448,7 @@ button.sm { min-height: 44px; padding: 8px 12px; }
     </div>
   </div>
   <div id="dirText"></div>
+  <div class="hint" id="wxWindNote" hidden>Weather wind is measured 10 m (33 ft) above ground — usually stronger than the wind at shooter height.</div>
   <div class="hint">Drag the dial or the numbers (swipe left/right). 0° = wind in your face, 90° = from your right, 180° = from behind, 270° = from your left.</div>
   <div class="grid" style="margin-top:10px">
     <div class="full"><label for="shotAngle"><span>Shot angle (°, + up / − downhill)</span><button class="sm ghost sensorbtn" type="button" id="angleBtn">📐 Measure angle</button></label>
@@ -409,7 +460,7 @@ button.sm { min-height: 44px; padding: 8px 12px; }
 <div class="section" id="outSec">
   <h2>Trajectory
     <span class="row">
-      <span class="seg" id="angSeg"><button type="button" data-v="MOA">MOA</button><button type="button" data-v="MIL">MIL</button><span class="seg" id="viewSeg"><button type="button" data-v="dope">Dope</button><button type="button" data-v="full">Full</button></span>
+      <span class="seg" id="angSeg"><button type="button" data-v="MOA">MOA</button><button type="button" data-v="MIL">MIL</button></span><span class="seg" id="viewSeg"><button type="button" data-v="dope">Dope</button><button type="button" data-v="full">Full</button></span>
     </span>
   </h2>
   <div id="results"></div>
@@ -422,7 +473,7 @@ button.sm { min-height: 44px; padding: 8px 12px; }
     <div><label for="step">Every (yd)</label>
       <div class="stepper" data-step="25" data-min="25" data-max="500"><input type="number" inputmode="numeric" id="step" value="100"></div><div class="err" id="e-step"></div></div>
   </div>
-  <label class="mvChk" for="roundClk"><input type="checkbox" id="roundClk"><span>Round to the nearest turret click<small>Shows the dial value you can actually set on your turret (set the click value under Gear → Gun details).</small></span></label>
+  <label class="tgl" for="roundClk"><span>Round to the nearest turret click<small>Shows the dial value you can actually set (click value from the optic in Gear).</small></span><input type="checkbox" id="roundClk" role="switch"></label>
   <div class="row dcBtns" id="dopeTools"><button class="ghost" type="button" id="trueBtn">🎯 True MV / BC</button><button class="ghost" type="button" id="dcBtn">🖨 Dope card</button></div>
 </div>
 
@@ -469,15 +520,45 @@ button.sm { min-height: 44px; padding: 8px 12px; }
       <button class="ghost pkMenuBtn" type="button" id="rifleMenu" aria-label="Gun actions" aria-haspopup="dialog" title="Gun: new, duplicate, rename, delete">⋯</button>
     </div>
     <div class="summary" id="rifleSum"></div>
+    <div id="zeroFlag" class="zflag" hidden><span id="zeroFlagTxt">⚠ Zero not confirmed</span><button class="sm" type="button" id="zeroConfirm">✓ Confirm zero</button></div>
+    <div class="opPk" id="opticPk">
+      <div class="lbl"><span>🔭 Optic</span><span class="saved" id="opticSaved" aria-live="polite"></span></div>
+      <div class="row pkRow">
+        <select id="opticSel" aria-label="Optic on this gun"></select>
+        <button class="ghost pkMenuBtn" type="button" id="opticMenu" aria-label="Optic actions" aria-haspopup="dialog" title="Optic: new, rename, duplicate, delete, attach">⋯</button>
+      </div>
+      <div class="summary" id="opticSum"></div>
+      <div id="opticBody" hidden>
+        <div class="grid" style="margin-top:8px">
+          <div class="full"><label for="opTurret">Turret click value</label><select id="opTurret"><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div>
+          <div id="opTurretCustom" hidden><label for="opTurretV">Click value</label><input type="number" inputmode="decimal" id="opTurretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-opTurretV"></div></div>
+          <div id="opTurretCustomU" hidden><label for="opTurretU">Click unit</label><select id="opTurretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
+          <div class="full"><label for="opReticle">Reticle unit</label><select id="opReticle"><option value="mil">MIL reticle</option><option value="moa">MOA reticle</option></select></div>
+          <div class="full"><details id="opMore"><summary>More specs <span class="rsum" id="opMoreSum"></span></summary>
+            <div class="grid">
+              <div><label for="opFP">Focal plane</label><select id="opFP"><option value="FFP">FFP (first)</option><option value="SFP">SFP (second)</option></select></div>
+              <div id="opMagRow" hidden><label for="opMag">Holds true at (×)</label><input type="number" inputmode="decimal" id="opMag" step="1" placeholder="e.g. 10"><div class="err" id="e-opMag"></div></div>
+              <div><label for="opTurn">Elevation per turn <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTurn" step="0.5" placeholder="e.g. 10"><div class="err" id="e-opTurn"></div></div>
+              <div><label for="opTravel">Total elev. travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTravel" step="0.5" placeholder="e.g. 29"><div class="err" id="e-opTravel"></div></div>
+              <div><label for="opCant">Canted base (MOA)</label><input type="number" inputmode="decimal" id="opCant" step="5" placeholder="e.g. 20"><div class="err" id="e-opCant"></div></div>
+              <div><label for="opSH">Sight height (in)</label><input type="number" inputmode="decimal" id="opSH" step="0.05" placeholder="blank = gun's"><div class="err" id="e-opSH"></div></div>
+              <div><label for="opWTravel">Windage travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opWTravel" step="0.5" placeholder="optional"><div class="err" id="e-opWTravel"></div></div>
+              <div><label for="opTrack">Tracking factor</label><input type="number" inputmode="decimal" id="opTrack" step="0.005" placeholder="e.g. 1.02"><div class="err" id="e-opTrack"></div></div>
+              <div class="full hint" id="opHint">Up travel ≈ half the total travel + the canted base (assumes the zero sits near the optical center on a flat base). Tracking factor = how far the scope really moves per dialed unit (1.02 = 2% more), so dial = required ÷ factor.</div>
+            </div></details></div>
+        </div>
+      </div>
+    </div>
     <details id="rifleDetails">
       <summary>Gun details</summary>
       <div class="grid">
         <div class="full"><label for="gunKind">Type</label><select id="gunKind"><option value="rifle">Rifle</option><option value="handgun">Handgun</option></select></div>
-        <div><label for="sightHeight">Sight height (in)</label><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
+        <div class="full hint" id="gunOptNote" hidden></div>
+        <div id="gunSHRow"><label for="sightHeight">Sight height (in)</label><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
         <div><label for="zero">Zero range (yd)</label><div class="stepper" data-step="25" data-min="10" data-max="1000"><input type="number" inputmode="numeric" id="zero" value="100"></div><div class="err" id="e-zero"></div></div>
         <div><label for="barrel">Barrel length (in)</label><input type="number" inputmode="decimal" id="barrel" step="0.5" placeholder="optional, e.g. 20"><div class="err" id="e-barrel"></div></div>
         <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift and the stability check (needs bullet length).</div><div class="err" id="e-twist"></div></div>
-        <div class="full"><label for="turret">Turret click value</label><select id="turret"><option value="">Same as display unit (0.1 mil / ¼ MOA)</option><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div>
+        <div class="full" id="gunTurretRow"><label for="turret">Turret click value</label><select id="turret"><option value="">Same as display unit (0.1 mil / ¼ MOA)</option><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div>
         <div id="turretCustom" hidden><label for="turretV">Click value</label><input type="number" inputmode="decimal" id="turretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-turretV"></div></div>
         <div id="turretCustomU" hidden><label for="turretU">Click unit</label><select id="turretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
         <div class="full"><details id="zeroDetails"><summary>Zero conditions <span class="rsum" id="zeroSum">same as today</span></summary>
@@ -636,6 +717,15 @@ button.sm { min-height: 44px; padding: 8px 12px; }
     <div class="sep"></div>
     <button type="button" class="del" id="loadDel">🗑 Delete load…</button>
   </div>
+  <div class="grp" data-k="optic">
+    <button type="button" id="opNew">＋ New optic on this gun</button>
+    <button type="button" id="opAttach">🔗 Attach existing optic…</button>
+    <button type="button" id="opDup">⧉ Duplicate optic</button>
+    <button type="button" id="opRename">✎ Rename optic</button>
+    <button type="button" id="opDetach">⛓ Detach from this gun</button>
+    <div class="sep"></div>
+    <button type="button" class="del" id="opDel">🗑 Delete optic…</button>
+  </div>
   <div class="grp" data-k="range">
     <button type="button" id="rangeNew">＋ New range</button>
     <button type="button" id="rangeDup">⧉ Duplicate range</button>
@@ -646,6 +736,11 @@ button.sm { min-height: 44px; padding: 8px 12px; }
   <button type="button" class="ghost" id="pkCancel">Cancel</button>
 </div></div>
 
+<div id="opSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Attach an optic">
+  <h3><span>🔗 Attach an optic</span><button class="sm ghost" type="button" id="opSheetClose">✕ Close</button></h3>
+  <div class="summary" id="opSheetFor"></div>
+  <div class="list" id="opList"></div>
+</div>
 <div id="trSheet" class="ovl" role="dialog" aria-modal="true" aria-label="True muzzle velocity or BC">
   <h3><span>🎯 True to an observed drop</span><button class="sm ghost" type="button" id="trClose">✕ Close</button></h3>
   <div class="summary" id="trFor"></div>
@@ -653,6 +748,7 @@ button.sm { min-height: 44px; padding: 8px 12px; }
     <div class="grid">
       <div><label for="trRange">Range (yd)</label><input type="number" inputmode="numeric" id="trRange"><div class="err" id="e-trRange"></div></div>
       <div><label for="trObs">Observed</label><input type="number" inputmode="decimal" id="trObs" step="0.05" placeholder="e.g. 7.4"><div class="err" id="e-trObs"></div></div>
+      <div class="full"><label for="trAngle">Shot angle used (°, + up / − down)</label><input type="number" inputmode="decimal" id="trAngle" step="1" value="0"><div class="hint" id="trAngHint">Angle of the truing shot — 0 = flat. It is not taken from the Dope tab.</div></div>
       <div class="full"><span class="seg" id="trUnit" role="group" aria-label="Observed unit"><button type="button" data-v="MIL">mil dialed</button><button type="button" data-v="MOA">MOA dialed</button><button type="button" data-v="IN">inches low</button></span></div>
       <div class="full"><span class="seg" id="trWhat" role="group" aria-label="What to solve"><button type="button" data-v="mv">Solve MV</button><button type="button" data-v="bc">Solve BC scale</button></span></div>
       <div class="full"><button type="button" id="trGo">Solve</button></div>
@@ -667,6 +763,7 @@ button.sm { min-height: 44px; padding: 8px 12px; }
   <div class="dcvCtl dcvRow">
     <span class="seg" id="dcvStep" role="group" aria-label="Range step"><button type="button" data-v="25">25 yd</button><button type="button" data-v="50">50 yd</button><button type="button" data-v="100">100 yd</button></span>
     <span class="seg" id="dcvSize" role="group" aria-label="Card size"><button type="button" data-v="wrist">Wrist coach</button><button type="button" data-v="full">Full page</button></span>
+    <span class="seg" id="dcvAng" role="group" aria-label="Shot angle on the card"><button type="button" data-v="flat">0° flat</button><button type="button" data-v="keep" id="dcvKeep">Keep 0°</button></span>
     <label class="dcvMaxL" for="dcvMax">to <input type="number" inputmode="numeric" id="dcvMax" step="50"> yd</label>
     <button type="button" id="dcvPrint">🖨 Print</button>
   </div>
@@ -786,9 +883,10 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 // load data (recipe) fields: handload or factory ammo
 const REC_F = ["ldKind", "ldPowder", "ldCharge", "ldPrimer", "ldCOAL", "ldCBTO", "ldJump", "ldCase", "ldFired", "ldTrim", "ldPrep", "ldMaker", "ldProduct", "ldLot", "ldNotes"];
 const RIFLE_F = ["gunKind", "sightHeight", "zero", "twist", "barrel", "turret", "turretV", "turretU", "zTemp", "zPress", "zAlt", "zHum"];
+const OPTIC_F = ["opTurret", "opTurretV", "opTurretU", "opReticle", "opFP", "opMag", "opTurn", "opTravel", "opCant", "opSH", "opWTravel", "opTrack"];
 const LOAD_F = ["bc", "drag", "weight", "diameter", "mv", "length", "mvSource", "refMV", "refBarrel", "fpsPerInch", "bulletId", "bulletName", "bcBands", "useBands", "ptSens", "mvTemp", "tipLen", "trued", ...REC_F];
 const LONG_F = { trued: 160, bulletName: 100, bcBands: 200, bulletId: 80, ldPowder: 60, ldPrimer: 60, ldCase: 60, ldMaker: 60, ldProduct: 80, ldLot: 40, ldPrep: 200, ldNotes: 300 };
-const F_DEF = { drag: "G7", gunKind: "rifle", ldKind: "hand", turretU: "mil" };   // defaults for presets saved before a field existed
+const F_DEF = { drag: "G7", gunKind: "rifle", ldKind: "hand", turretU: "mil", opTurret: "0.1mil", opTurretU: "mil", opReticle: "mil", opFP: "FFP" };   // defaults for presets saved before a field existed
 const RANGE_F = ["bearing", "altitude", "target", "rangeLat", "rangeLon"];
 const WX_F = ["windSpeed", "windDir", "temp", "humidity", "altitude", "pressure"];
 const ALL_F = [...RIFLE_F, ...LOAD_F, ...RANGE_F, "windSpeed", "windDir", "temp", "humidity", "pressure", "powderTemp", "maxRange", "step"];
@@ -811,10 +909,24 @@ function migratePresets() {   // v1 → v2: guns get a type, loads get a recipe 
   P.rifles.forEach(r => { if (!Array.isArray(r.loads)) { r.loads = []; ch = true; } if (r.gunKind !== "rifle" && r.gunKind !== "handgun") { r.gunKind = "rifle"; ch = true; }
     r.loads.forEach(l => { if (l.ldKind !== "hand" && l.ldKind !== "factory") { l.ldKind = "hand"; ch = true; } }); });
   if (P.version !== 2) { P.version = 2; ch = true; }
+  // optics (round 2): own list, attached to a gun by rifle.opticId; guns with turret settings get one once
+  if (!Array.isArray(P.optics)) { P.optics = []; ch = true; }
+  P.optics = P.optics.filter(o => o && typeof o === "object" && o.id);
+  P.rifles.forEach(r => { if (r.opticId && !P.optics.some(o => o.id === r.opticId)) { r.opticId = null; ch = true; } });
+  if (!P.opticsMig) { P.rifles.forEach(r => migrateGunOptic(r, P.optics)); P.opticsMig = 1; ch = true; }
   return ch;
+}
+function migrateGunOptic(r, list) {   // old gun turret + sight height → an optic attached to that gun (gun fields kept as the fallback)
+  if (!r || !r.turret || r.opticId) return null;
+  const tu = r.turret === "custom" ? (r.turretU === "moa" ? "moa" : "mil") : /moa/.test(r.turret) ? "moa" : "mil";
+  const o = { id: uid(), name: `${r.name || "Gun"} scope`.slice(0, 60), opTurret: r.turret, opTurretV: r.turretV || "", opTurretU: r.turretU || "mil", opReticle: tu, opFP: "FFP",
+    opMag: "", opTurn: "", opTravel: "", opCant: "", opSH: r.sightHeight || "", opWTravel: "", opTrack: "" };
+  list.push(o); r.opticId = o.id; return o;
 }
 const migrated = migratePresets();
 const S = Object.assign({ ang: "MOA", view: "dope", values: {} }, load(K_SETTINGS, {}));
+if (S.ang !== "MIL" && S.ang !== "MOA") S.ang = "MOA";   // repair settings saved by the nested-toggle bug
+if (S.view !== "dope" && S.view !== "full") S.view = "dope";
 const savePresets = () => store(K_PRESETS, P);
 if (migrated) savePresets();
 const saveSettings = () => { S.values = {}; ALL_F.forEach(f => S.values[f] = $(f).value); store(K_SETTINGS, S); };
@@ -874,12 +986,12 @@ function renderPickers() {
   if (!curRifle() && P.rifles.length) P.lastRifleId = P.rifles[0].id;
   const r = curRifle();
   if (r && !r.loads.find(l => l.id === r.lastLoadId) && r.loads.length) r.lastLoadId = r.loads[0].id;
-  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns saved — tap ＋ New");
-  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads for this gun — tap ＋ New" : "Add a gun first"));
-  fillOptions($("rangeSel"), P.ranges, curRange(), "Current location (no saved range)");
+  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns yet (⋯ › New)");
+  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads yet (⋯ › New)" : "Add a gun first"));
+  fillOptions($("rangeSel"), P.ranges, curRange(), "Current location");
   updateDirty();
 }
-function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; applyGunKind(); }
+function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; applyGunKind(); applyOptic(); }
 function applyGunKind() { const hg = $("gunKind").value === "handgun"; $("barrel").placeholder = hg ? "optional, e.g. 4.25" : "optional, e.g. 20"; }
 function applyLoad() { const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); }
 function applyRange() {
@@ -895,11 +1007,12 @@ const same = (a, b) => String(a ?? "").trim() === String(b ?? "").trim() || (par
 function isDirty(obj, fields) { return !!obj && fields.some(f => !same((obj[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : obj[f], $(f).value)); }
 // autosave: the form always belongs to the preset ids in formFor (set when a preset is put on screen),
 // so switching or deleting a preset never writes the old form into another one.
-var formFor = { r: null, l: null, g: null }, savedT = {};
+var formFor = { r: null, l: null, g: null, o: null }, savedT = {};
 function autosave() {
   const r = curRifle(), l = curLoad(), g = curRange(), done = [];
   if (r && formFor.r === r.id && isDirty(r, RIFLE_F)) { Object.assign(r, pick(RIFLE_F)); done.push("rifle"); }
   if (l && formFor.l === l.id && isDirty(l, LOAD_F)) { Object.assign(l, pick(LOAD_F)); done.push("load"); }
+  { const o = curOptic(); if (o && formFor.o === o.id && isDirty(o, OPTIC_F)) { Object.assign(o, pick(OPTIC_F)); done.push("optic"); } }
   if (g && formFor.g === g.id) {
     let ch = false;
     ["bearing", "target", "rangeLat", "rangeLon"].forEach(f => { if (!same(g[f], $(f).value)) { g[f] = $(f).value; ch = true; } });
@@ -921,7 +1034,7 @@ function updateDirty() {
   $("loadNew").disabled = !r;
   ["rangeDup", "rangeRename", "rangeDel"].forEach(id => $(id).disabled = !g);
   const tw = num("twist");
-  $("rifleSum").textContent = `${val("sightHeight") || "?"}" sight height · ${val("zero") || "?"} yd zero` + (tw ? ` · 1:${Math.abs(tw)}" ${tw < 0 ? "LH" : "RH"} twist` : "");
+  $("rifleSum").textContent = `${fmt(effSH(), 2) || "?"}" sight height${curOptic() && num("opSH") != null ? " (optic)" : ""} · ${val("zero") || "?"} yd zero` + (tw ? ` · 1:${Math.abs(tw)}" ${tw < 0 ? "LH" : "RH"} twist` : "");
   const mvs = { measured: " (chrono)", factory: " (box)", estimate: " (est.)", trued: " (trued)" }[$("mvSource").value] || "";
   $("loadSum").textContent = (val("bulletName") ? val("bulletName") + " · " : `${val("weight") || "?"} gr · `) + `${val("bc") || "?"} ${$("drag").value}${bandsOn() ? " banded" : ""} · ${val("mv") || "?"} fps${mvs}`;
   if (val("barrel")) $("rifleSum").textContent += ` · ${val("barrel")}" barrel`;
@@ -989,6 +1102,7 @@ $("rifleNew").onclick = () => { const n = askName("Name for the new gun (starts 
 $("rifleDup").onclick = () => { const r = curRifle(); if (!r) return;
   const c = JSON.parse(JSON.stringify(r)); c.id = uid(); let n = `${r.name} (copy)`.slice(0, 60), k = 2; while (P.rifles.some(x => x.name === n)) n = `${r.name} (copy ${k++})`.slice(0, 60); c.name = n;
   c.loads.forEach(l => { const nid = uid(); if (l.id === r.lastLoadId) c.lastLoadId = nid; l.id = nid; });
+  c.opticId = null; delete c.zeroUnconf;
   P.rifles.push(c); P.lastRifleId = c.id; pkRefresh(); toast(`Duplicated as “${n}” (${c.loads.length} load${c.loads.length === 1 ? "" : "s"}; chrono sessions stay with the original)`); };
 $("rifleRename").onclick = () => { const r = curRifle(); if (!r) return; const n = askName("Rename gun:", r.name); if (!n) return; r.name = n; savePresets(); renderPickers(); flashSaved("rifle"); };
 $("rifleDel").onclick = () => { const r = curRifle(); if (!r || !confirm(`Delete gun “${r.name}” and its ${r.loads.length} load(s)?\nChrono sessions are kept as unassigned.`)) return;
@@ -1013,13 +1127,13 @@ $("rangeDel").onclick = () => { const g = curRange(); if (!g || !confirm(`Delete
   toast(`Range “${g.name}” deleted`, { label: "Undo", fn: () => { P.ranges.splice(Math.min(i, P.ranges.length), 0, g); P.lastRangeId = g.id; savePresets(); renderPickers(); applyRange(); refreshWeather(); schedule(); toast(`Range “${g.name}” restored`); } }); };
 // ⋯ menus
 function openPk(k) {
-  const o = k === "rifle" ? curRifle() : k === "load" ? curLoad() : curRange(), t = { rifle: "Gun", load: "Load", range: "Range" }[k];
+  const o = k === "rifle" ? curRifle() : k === "load" ? curLoad() : k === "optic" ? curOptic() : curRange(), t = { rifle: "Gun", load: "Load", range: "Range", optic: "Optic" }[k];
   $("pkTitle").textContent = o ? `${t}: ${o.name}` : t;
   document.querySelectorAll("#pkMenu .grp").forEach(g => g.hidden = g.dataset.k !== k);
   $("pkMenu").classList.add("show"); setTimeout(() => $("pkMenu").querySelector(`.grp[data-k="${k}"] button:not(:disabled)`)?.focus({ preventScroll: true }), 30);
 }
 function closePk() { $("pkMenu").classList.remove("show"); }
-["rifle", "load", "range"].forEach(k => $(k + "Menu").onclick = () => openPk(k));
+["rifle", "load", "range", "optic"].forEach(k => $(k + "Menu").onclick = () => openPk(k));
 // capture: close the menu first, then the item's own handler runs (prompts/confirms appear over the page)
 $("pkMenu").addEventListener("click", e => { if (e.target === $("pkMenu") || e.target.closest(".grp button, #pkCancel")) closePk(); }, true);
 document.addEventListener("keydown", e => { if (e.key === "Escape" && $("pkMenu").classList.contains("show")) closePk(); });
@@ -1040,7 +1154,7 @@ $("exportBtn").onclick = () => {
   a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
   a.download = `ballistic-presets-${new Date().toISOString().slice(0, 10)}.json`;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  toast(`Exported ${P.rifles.length} gun(s), ${P.ranges.length} range(s), ${LOG.length} chrono session(s)`);
+  toast(`Exported ${P.rifles.length} gun(s), ${(P.optics || []).length} optic(s), ${P.ranges.length} range(s), ${LOG.length} chrono session(s)`);
 };
 $("importBtn").onclick = () => $("importFile").click();
 $("importFile").onchange = async e => {
@@ -1050,16 +1164,19 @@ $("importFile").onchange = async e => {
     if (!d || !Array.isArray(d.rifles)) throw new Error("not a presets file");
     const str = (v, n = 40) => v == null ? "" : String(v).slice(0, n);
     const rifles = d.rifles.filter(r => r && r.name).map(r => ({ id: str(r.id) || uid(), name: String(r.name).slice(0, 60),
-      ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null,
+      ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null, opticId: str(r.opticId) || null,
+      ...(r.zeroUnconf && typeof r.zeroUnconf === "object" ? { zeroUnconf: { why: str(r.zeroUnconf.why, 120), at: str(r.zeroUnconf.at) } } : {}),
       loads: (Array.isArray(r.loads) ? r.loads : []).filter(l => l && l.name).map(l => ({ id: str(l.id) || uid(), name: String(l.name).slice(0, 60),
         ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k], LONG_F[k])])) })) }));
     const ranges = (Array.isArray(d.ranges) ? d.ranges : []).filter(g => g && g.name).map(g => ({ id: str(g.id) || uid(), name: String(g.name).slice(0, 60),
       ...Object.fromEntries(RANGE_F.map(k => [k, str(g[k])])) }));
     const sess = (Array.isArray(d.shotSessions) ? d.shotSessions : []).map(cleanSession).filter(Boolean);
+    const optics = (Array.isArray(d.optics) ? d.optics : []).filter(o => o && o.name).map(o => ({ id: str(o.id) || uid(), name: String(o.name).slice(0, 60), ...Object.fromEntries(OPTIC_F.map(k => [k, str(o[k])])) }));
+    if (!Array.isArray(d.optics)) rifles.forEach(r => migrateGunOptic(r, optics));   // file from before optics existed
     const replace = confirm(`Import ${rifles.length} gun(s), ${ranges.length} range(s) and ${sess.length} chrono session(s).\n\nOK = replace all current presets\nCancel = merge with current presets`);
     const merge = (dst, src) => src.forEach(x => { const i = dst.findIndex(y => y.id === x.id); i >= 0 ? dst[i] = x : dst.push(x); });
-    if (replace) { P.rifles = rifles; P.ranges = ranges; P.lastRifleId = d.lastRifleId; P.lastRangeId = d.lastRangeId; LOG = sess; }
-    else { merge(P.rifles, rifles); merge(P.ranges, ranges); merge(LOG, sess); }
+    if (replace) { P.rifles = rifles; P.ranges = ranges; P.optics = optics; P.lastRifleId = d.lastRifleId; P.lastRangeId = d.lastRangeId; LOG = sess; }
+    else { merge(P.rifles, rifles); merge(P.ranges, ranges); merge(P.optics = P.optics || [], optics); merge(LOG, sess); }
     migratePresets();
     await saveLog(); slKey = null;
     savePresets(); renderPickers(); applyRifle(); applyLoad(); applyRange(); updateDirty(); schedule();
@@ -1143,7 +1260,7 @@ async function refreshWeather() {
     const c = d.current; if (!c) throw new Error("No current weather returned");
     wx = { wind: c.wind_speed_10m, windFrom: c.wind_direction_10m, gust: c.wind_gusts_10m, tempF: c.temperature_2m, rh: c.relative_humidity_2m,
       inHg: c.surface_pressure ? c.surface_pressure * 0.0295300 : null, elevFt: (d.elevation ?? 0) * 3.28084, at: new Date() };
-    $("placeBox").style.display = "none";
+    $("placeBox").style.display = "none"; $("wxWindNote").hidden = false;
     applyAuto();
     wxStatus(`🌤 ${loc.label}: wind ${Math.round(wx.wind)} mph from ${compass(wx.windFrom)}` + (wx.gust ? ` (gusts ${Math.round(wx.gust)})` : "") +
       ` · ${Math.round(wx.tempF)}°F · ${Math.round(wx.rh)}% RH · updated ${wx.at.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}${note}`);
@@ -1276,7 +1393,8 @@ const RULES = {
   altitude: [-1500, 20000, true], pressure: [15, 32, false, "inHg, e.g. 29.92"], target: [10, 3000, false], maxRange: [50, 3000, true], step: [5, 1000, true],
   shotAngle: [-60, 60, false], rangeLat: [-90, 90, false], rangeLon: [-180, 180, false],
   ptSens: [-100, 100, false, "fps per 10°F, e.g. 15"], mvTemp: [-40, 160, false], powderTemp: [-40, 160, false], tipLen: [0, 1, false],
-  zTemp: [-40, 140, false], zHum: [0, 100, false], zAlt: [-1500, 20000, false], zPress: [15, 32, false, "inHg, e.g. 29.92"], turretV: [0.001, 5, false]
+  zTemp: [-40, 140, false], zHum: [0, 100, false], zAlt: [-1500, 20000, false], zPress: [15, 32, false, "inHg, e.g. 29.92"], turretV: [0.001, 5, false],
+  opTurretV: [0.001, 5, false], opMag: [1, 60, false], opTurn: [1, 60, false], opTravel: [1, 200, false], opCant: [0, 60, false], opSH: [0, 10, false], opWTravel: [1, 200, false], opTrack: [0.8, 1.2, false, "e.g. 1.02"]
 };
 function validate() {
   const bad = [];
@@ -1290,6 +1408,7 @@ function validate() {
     $(id).classList.toggle("bad", !!msg); const e = $("e-" + id); if (e) e.textContent = msg;
     if (msg) bad.push(id);
   }
+  if (curOptic() && $("opTurret").value === "custom" && !(num("opTurretV") > 0) && !bad.includes("opTurretV")) { $("opTurretV").classList.add("bad"); $("e-opTurretV").textContent = "Required for a custom turret"; bad.push("opTurretV"); }
   return bad;
 }
 
@@ -1303,6 +1422,7 @@ async function calculate() {
     statusEl.textContent = `Fix ${bad.length} highlighted field${bad.length > 1 ? "s" : ""} to calculate.`; statusEl.classList.add("bad");
     noResult(bad);
     if (bad.some(f => RIFLE_F.includes(f))) $("rifleDetails").open = true;
+    if (bad.some(f => OPTIC_F.includes(f) && f !== "opTurretV")) $("opMore").open = true;
     if (bad.some(f => /^z[A-Z]/.test(f))) $("zeroDetails").open = true;
     if (bad.some(f => LOAD_F.includes(f))) $("loadDetails").open = true;
     if (bad.some(f => f.startsWith("range"))) $("rangeDetails").open = true;
@@ -1361,7 +1481,7 @@ function setStale(on) { $("dopeCard").classList.toggle("stale", on); resultsDiv.
 function noResult(bad) {
   lastRun = null; setStale(false);
   $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; $("dcElevC").textContent = ""; $("dcWindC").textContent = ""; $("dcBracket").textContent = ""; ["dcElevClk", "dcWindClk", "dcWarn"].forEach(id => $(id).textContent = "");
-  $("dcInfo").innerHTML = bad && bad.length ? `<span class="bad">Fix ${bad.length} field${bad.length > 1 ? "s" : ""}: ${bad.map(f => escapeHtml(fieldName(f))).join(", ")}</span><br><button class="sm ghost" type="button" id="dcFix">Go to field</button>` : `<span class="bad">No result</span>`;
+  $("dcInfo").innerHTML = ""; $("dcChips").innerHTML = ""; $("dcMsg").innerHTML = bad && bad.length ? `<span class="bad">Fix ${bad.length} field${bad.length > 1 ? "s" : ""}: ${bad.map(f => escapeHtml(fieldName(f))).join(", ")}</span><br><button class="sm ghost" type="button" id="dcFix">Go to field</button>` : `<span class="bad">No result</span>`;
   if ($("dcFix")) $("dcFix").onclick = () => goToField(bad[0]);
   resultsDiv.innerHTML = ""; renderChart(null);
 }
@@ -1386,27 +1506,36 @@ function renderCard() {
   const R = lastRun, u = S.ang, ts = turretSpec();
   $("dcFor").textContent = [curRifle()?.name, curLoad()?.name, curRange()?.name].filter(Boolean).join(" · ") || "Gun and load not saved yet";
   $("dcElevK").textContent = `Dial · ${u}`; $("dcWindK").textContent = `Wind hold · ${u}`;
-  paintWarn(); paintPt();
+  $("dcMsg").innerHTML = "";
   if (!R.tgt) {
-    $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; ["dcElevC", "dcWindC", "dcElevClk", "dcWindClk", "dcBracket"].forEach(id => $(id).textContent = "");
-    $("dcInfo").innerHTML = R.td ? `<span class="bad">${R.td} yd is beyond where this bullet can reach.</span>` : "Set a target distance.";
-    return;
+    $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; ["dcElevC", "dcWindC", "dcElevClk", "dcWindClk", "dcBracket", "dcInfo"].forEach(id => $(id).textContent = "");
+    $("dcMsg").innerHTML = R.td ? `<span class="bad">${R.td} yd is beyond where this bullet can reach.</span>` : "Set a target distance.";
+    paintWarn(); paintPt(); return;
   }
-  const v = pointVals(R.tgt), a = angs(R.tgt), dd = angDec(ts);
+  const v = pointVals(R.tgt), a = angs(R.tgt), dd = angDec(ts), tt = turnsTxt(a.ec, ts);
   $("dcElev").textContent = ud(a.e, dd); $("dcWind").textContent = lr(a.w, dd);
-  $("dcElevClk").textContent = `${clkTxt(a.ec, "U", "D")} · ${ts.lbl}`; $("dcWindClk").textContent = clkTxt(a.wc, "R", "L");
+  $("dcElevClk").textContent = tt ? `${a.ec > 0 ? "U" : "D"} ${tt} (${Math.abs(a.ec)}) · ${ts.lbl}` : `${clkTxt(a.ec, "U", "D")} · ${ts.lbl}`;
+  $("dcWindClk").textContent = clkTxt(a.wc, "R", "L") + (ts.sfp ? ` · holds true at ${fmt(ts.sfp, 1)}×` : "");
   $("dcElevC").textContent = `${v.range} yd${R.look ? ` · ${Math.abs(R.look)}° ${R.look > 0 ? "up" : "down"}` : ""}`;
   $("dcWindC").textContent = R.ws ? `${fmt(R.ws, 1)} mph @ ${CLOCK(R.wd)} o'clock` : "no wind (spin drift only)";
-  const call = R.ws, lo = Math.max(0, call - 2), hi = call + 2;
-  if (windHoldAt(0) != null) $("dcBracket").innerHTML = `Wind ${fmt(lo, 1)} / <b>${fmt(call, 1)}</b> / ${fmt(hi, 1)} mph → ${lr(windHoldAt(lo), 1)} · <b>${lr(a.w, dd)}</b> · ${lr(windHoldAt(hi), 1)}`;
-  else $("dcBracket").textContent = "";
-  const pm = perMph(R.tgtN, R.tgtF);
+  const call = R.ws, gs = gustSpread();
+  if (windHoldAt(0) == null) $("dcBracket").textContent = "";
+  else if (gs) {   // live weather: bracket from the call up through the gust spread
+    const mid = call + gs / 2, hi = call + gs;
+    $("dcBracket").innerHTML = `Wind <b>${fmt(call, 1)}</b> / ${fmt(mid, 1)} / ${fmt(hi, 1)} mph gust → <b>${lr(a.w, dd)}</b> · ${lr(windHoldAt(mid), dd)} · ${lr(windHoldAt(hi), dd)}` +
+      `<span class="gn">Gust spread ${fmt(wx.wind, 0)}→${fmt(wx.gust, 0)} mph from live weather (10 m wind)</span>`;
+  } else {
+    const lo = Math.max(0, call - 2), hi = call + 2;
+    $("dcBracket").innerHTML = `Wind ${fmt(lo, 1)} / <b>${fmt(call, 1)}</b> / ${fmt(hi, 1)} mph → ${lr(windHoldAt(lo), dd)} · <b>${lr(a.w, dd)}</b> · ${lr(windHoldAt(hi), dd)}`;
+  }
+  const pm = perMph(R.tgtN, R.tgtF), sp = R.tgtN ? pointVals(R.tgtN).wind : null;
   $("dcInfo").innerHTML = `MV ${Math.round(R.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(R.Tp, 0)}°F powder` : ""} · ${v.vel.toFixed(0)} fps · ${v.energy.toFixed(0)} ft·lb · ${v.tof.toFixed(2)} s · drop ${v.drop.toFixed(1)}"` +
-    (pm != null ? ` · 1 mph full = ${pm.toFixed(u === "MIL" ? 2 : 2)} ${u}` : "");
+    (pm != null ? ` · 1 mph full = ${pm.toFixed(2)} ${u}` : "") + (sp != null && Math.abs(sp) >= 0.005 ? ` · spin drift ${sp > 0 ? "R" : "L"} ${Math.abs(sp).toFixed(2)} ${u} (in wind hold)` : "");
+  paintWarn(); paintPt();
 }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function renderTable(samples) {
-  const R = lastRun, u = S.ang, full = S.view === "full", ts = turretSpec(), dd = angDec(ts);
+  const R = lastRun, u = S.ang, full = S.view === "full", ts = turretSpec(), dd = angDec(ts), A = B.Angular, TU = ts.u === "MIL" ? A.MRad : A.MOA, sd = u === "MIL" ? 2 : 1;
   const rows = samples.map((p, i) => ({ p, n: R.sN?.[i], f: R.sF?.[i] }));
   if (R.tgt) {   // the exact target distance is always a row (highlighted)
     const tr = pointVals(R.tgt).range, k = rows.findIndex(r => pointVals(r.p).range >= tr);
@@ -1414,21 +1543,38 @@ function renderTable(samples) {
     else { const row = { p: R.tgt, n: R.tgtN, f: R.tgtF, tgt: true }; k < 0 ? rows.push(row) : rows.splice(k, 0, row); }
   }
   const vT = R.vT || 0;
-  let html = `<table class="${full ? "full" : "dope"}"><thead><tr><th>Range</th><th>Elev ${u}</th><th title="Turret clicks (${escapeHtml(ts.lbl)})">Clicks</th><th>Wind ${u}</th><th title="Full-value wind per 1 mph">1 mph</th>` +
-    (full ? `<th>Drop in</th><th>Drift in</th><th>Vel fps</th><th>Energy</th><th>TOF s</th>` : `<th>Drop in</th>`) + `</tr></thead><tbody>`;
-  rows.forEach(r => {
-    const v = pointVals(r.p), a = angs(r.p), pm = perMph(r.n, r.f), tr = vT && v.vel < vT;
-    html += `<tr class="${[r.tgt ? "tgt" : "", tr ? "trans" : ""].join(" ").trim()}"><td>${v.range.toFixed(0)} yd${tr ? '<span class="T" title="Transonic (below Mach 1.2)">T</span>' : ""}</td><td>${ud(a.e, dd)}</td><td class="ck">${clkShort(a.ec, "U", "D")}</td><td>${lr(a.w, dd)}</td><td class="ck">${pm != null ? pm.toFixed(2) : "—"}</td>` +
-      `<td>${(Math.abs(v.drop) < 0.05 ? 0 : v.drop).toFixed(1)}</td>` +
-      (full ? `<td>${lr(v.drift, 1)}</td><td>${v.vel.toFixed(0)}</td><td>${v.energy.toFixed(0)}</td><td>${v.tof.toFixed(2)}</td>` : "") + `</tr>`;
-  });
-  html += `</tbody></table><div class="legend">Elev = dial U (up) / D (down); Clicks in your turret's unit (${escapeHtml(ts.lbl)}). Wind = dial L/R to correct (includes spin drift); 1 mph = full-value hold per mph (${u}). Highlighted row = target. <b style="color:var(--warn)">T</b> = transonic (below Mach 1.2 ≈ ${Math.round(vT)} fps at ${fmt(R.aT, 0)}°F). Drop/drift in inches relative to line of sight.</div>`;
-  resultsDiv.innerHTML = html;
+  const clkT = n => { if (!ts.cpt || !n) return clkShort(n, "U", "D"); const m = Math.abs(n); return `${n > 0 ? "U" : "D"}${Math.floor(m / ts.cpt)}+${m % ts.cpt}`; };
+  const spin = r => { if (!r.n) return ["—", ""]; const v = pointVals(r.n).wind, c = Math.round(-r.n.windageAngle.In(TU) / ts.v); return [Math.abs(v) < 0.005 ? "0" : `${v > 0 ? "R" : "L"} ${Math.abs(v).toFixed(sd)}`, clkShort(c, "R", "L")]; };
+  const rc = (r, tr) => [r.tgt ? "tgt" : "", tr ? "trans" : ""].join(" ").trim(), Tm = '<span class="T" title="Transonic (below Mach 1.2)">T</span>';
+  const over = a => ts.up != null && a.eT > ts.up + 1e-9;
+  let html;
+  if (!full) {
+    html = `<table class="dope"><thead><tr><th>Range</th><th>Elev<small>${u} · clk</small></th><th>Wind<small>${u} · 1 mph</small></th><th title="Spin drift correction — already included in Wind">Spin<small>${u} · clk</small></th><th>Drop<small>in</small></th></tr></thead><tbody>`;
+    rows.forEach(r => {
+      const v = pointVals(r.p), a = angs(r.p), pm = perMph(r.n, r.f), tr = vT && v.vel < vT, [sv, sc] = spin(r);
+      html += `<tr class="${rc(r, tr)}"><td>${v.range.toFixed(0)} yd${tr ? Tm : ""}</td><td${over(a) ? ' class="ovr" title="Beyond the optic\'s up travel"' : ""}>${ud(a.e, dd)}<small>${clkT(a.ec)}</small></td>` +
+        `<td>${lr(a.w, dd)}<small>${pm != null ? pm.toFixed(2) : "—"}/mph</small></td><td>${sv}<small>${sc}</small></td><td>${(Math.abs(v.drop) < 0.05 ? 0 : v.drop).toFixed(1)}</td></tr>`;
+    });
+  } else {
+    html = `<table class="full"><thead><tr><th>Range</th><th>Elev ${u}</th><th title="Turret clicks (${escapeHtml(ts.lbl)})">Clicks</th><th>Wind ${u}</th><th title="Full-value wind per 1 mph">1 mph</th><th title="Spin drift correction — already included in Wind">Spin ${u}</th><th>Drop in</th><th>Drift in</th><th>Vel fps</th><th>Energy</th><th>TOF s</th></tr></thead><tbody>`;
+    rows.forEach(r => {
+      const v = pointVals(r.p), a = angs(r.p), pm = perMph(r.n, r.f), tr = vT && v.vel < vT, [sv] = spin(r);
+      html += `<tr class="${rc(r, tr)}"><td>${v.range.toFixed(0)} yd${tr ? Tm : ""}</td><td${over(a) ? ' class="ovr"' : ""}>${ud(a.e, dd)}</td><td class="ck">${clkT(a.ec)}</td><td>${lr(a.w, dd)}</td><td class="ck">${pm != null ? pm.toFixed(2) : "—"}</td><td>${sv}</td>` +
+        `<td>${(Math.abs(v.drop) < 0.05 ? 0 : v.drop).toFixed(1)}</td><td>${lr(v.drift, 1)}</td><td>${v.vel.toFixed(0)}</td><td>${v.energy.toFixed(0)}</td><td>${v.tof.toFixed(2)}</td></tr>`;
+    });
+  }
+  html += `</tbody></table>`;
+  const leg = `Elev = dial U (up) / D (down); clicks in ${escapeHtml(ts.lbl)}${ts.cpt ? ` (U1+23 = 1 turn + 23 clicks, ${ts.cpt} per turn)` : ""}${ts.k !== 1 ? `; dial includes tracking ×${fmt(ts.k, 3)}` : ""}. Wind = dial L/R to correct (includes spin drift); 1 mph = full-value hold per mph (${u}). Spin = spin-drift part alone.` +
+    `${ts.sfp ? ` SFP reticle: holds true at ${fmt(ts.sfp, 1)}×.` : ""}${ts.up != null ? ` Underlined elevation = beyond ~${fmt(ts.up, 1)} ${ts.u === "MIL" ? "mil" : "MOA"} up travel.` : ""} Highlighted row = target. <b style="color:var(--warn)">T</b> = transonic (below Mach 1.2 ≈ ${Math.round(vT)} fps at ${fmt(R.aT, 0)}°F). Drop/drift in inches relative to line of sight.`;
+  resultsDiv.innerHTML = `<div class="tblBox"><div class="tblWrap">${html}</div><div class="fade" aria-hidden="true"></div></div><div class="swipe">Swipe the table sideways for more columns →</div><div class="legend">${leg}</div>`;
+  paintScroll();
 }
 function niceStep(span, n) { const raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))); for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) return m * p; return 10 * p; }
+var chartLabels = [];
 function renderChart(samples) {
   const canvas = $("chart"); const ctx = canvas.getContext("2d");
   const dpr = window.devicePixelRatio || 1, width = canvas.offsetWidth, height = canvas.offsetHeight;
+  chartLabels = [];
   if (!width || !height) return;
   canvas.width = width * dpr; canvas.height = height * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = cv("panel"); ctx.fillRect(0, 0, width, height);
@@ -1438,25 +1584,42 @@ function renderChart(samples) {
   const maxX = Math.max(...xs, 1);
   let minD = Math.min(0, ...drops), maxD = Math.max(0, ...drops);
   const ys = niceStep(Math.max(maxD - minD, 1), 4); minD = Math.floor(minD / ys) * ys; maxD = Math.ceil(maxD / ys) * ys; if (maxD === minD) maxD = minD + ys;
-  const L = 44, Rm = 10, T = 22, Bm = 22;
+  const L = 48, Rm = 16, T = 30, Bm = 28, F = "11px system-ui, sans-serif";
   const X = r => L + (r / maxX) * (width - L - Rm), YY = dv => T + (maxD - dv) / (maxD - minD) * (height - T - Bm);
-  ctx.font = "11px system-ui, sans-serif"; ctx.lineWidth = 1;
-  // y grid + inch labels
-  ctx.textAlign = "right"; ctx.textBaseline = "middle";
-  for (let v = minD; v <= maxD + 1e-9; v += ys) { const y = YY(v); ctx.strokeStyle = cv("border"); ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(width - Rm, y); ctx.stroke(); ctx.globalAlpha = 1; ctx.fillStyle = cv("hint"); ctx.fillText(`${Math.round(v)}"`, L - 5, y); }
-  // x ticks + yard labels
-  const xstep = niceStep(maxX, Math.max(3, Math.min(8, Math.floor((width - L) / 55)))); ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-  for (let r = 0; r <= maxX + 1e-9; r += xstep) { const x = X(r); ctx.strokeStyle = cv("border"); ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, height - Bm); ctx.stroke(); ctx.globalAlpha = 1; ctx.fillStyle = cv("hint"); ctx.fillText(String(Math.round(r)), x, height - 7); }
-  // line of sight
+  // labels are placed on free spots only (bounding boxes), so nothing overlaps or leaves the canvas
+  const boxes = [], hit = b => boxes.some(o => b.x < o.x + o.w && o.x < b.x + b.w && b.y < o.y + o.h && o.y < b.y + b.h);
+  const inside = b => b.x >= 0 && b.y >= 0 && b.x + b.w <= width && b.y + b.h <= height;
+  function label(text, cands, color, font, kind, force) {
+    ctx.font = font || F; const w = Math.ceil(ctx.measureText(text).width), h = 13;
+    for (const c of cands) {
+      let x = c.a === "right" ? c.x - w : c.a === "center" ? c.x - w / 2 : c.x, y = c.y;
+      if (force) { x = Math.max(1, Math.min(width - w - 1, x)); y = Math.max(1, Math.min(height - h - 1, y)); }
+      const b = { x: x - 1, y: y - 1, w: w + 2, h: h + 1 };
+      if (force || (inside(b) && !hit(b))) { boxes.push(b); chartLabels.push({ text, kind, ...b }); ctx.font = font || F; ctx.fillStyle = color; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(text, x, y); return b; }
+    }
+    return null;
+  }
+  ctx.lineWidth = 1;
+  label("Drop (in) vs range (yd)", [{ x: 8, y: 4 }], cv("muted"), "12px system-ui, sans-serif", "title", true);
+  for (let v = minD; v <= maxD + 1e-9; v += ys) { const y = YY(v); ctx.strokeStyle = cv("border"); ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(width - Rm, y); ctx.stroke(); ctx.globalAlpha = 1;
+    label(`${Math.round(v)}"`, [{ x: L - 5, y: y - 6.5, a: "right" }], cv("hint"), F, "y", true); }
+  const xstep = niceStep(maxX, Math.max(3, Math.min(8, Math.floor((width - L) / 55))));
+  for (let r = 0; r <= maxX + 1e-9; r += xstep) { const x = X(r); ctx.strokeStyle = cv("border"); ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, height - Bm); ctx.stroke(); ctx.globalAlpha = 1;
+    label(String(Math.round(r)), [{ x, y: height - 17, a: "center" }], cv("hint"), F, "x", true); }
   ctx.strokeStyle = cv("grid2"); ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(L, YY(0)); ctx.lineTo(width - Rm, YY(0)); ctx.stroke(); ctx.setLineDash([]);
-  if (typeof chartExtras === "function") chartExtras(ctx, X, T, height - Bm);
+  const R = lastRun, mx = R?.trans && R.trans.range <= maxX ? X(R.trans.range) : null;
+  if (mx != null) { ctx.save(); ctx.strokeStyle = cv("err"); ctx.setLineDash([3, 4]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(mx, T); ctx.lineTo(mx, height - Bm); ctx.stroke(); ctx.restore(); }
   ctx.strokeStyle = cv("accent"); ctx.lineWidth = 2.5; ctx.beginPath();
   samples.forEach((p, i) => { const x = X(xs[i]), y = YY(drops[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.lineWidth = 1;
   const td = num("target");
-  if (td && td <= maxX) { ctx.strokeStyle = cv("warn"); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X(td), T); ctx.lineTo(X(td), height - Bm); ctx.stroke(); ctx.lineWidth = 1;
-    if (lastRun?.tgt) { const dv = lastRun.tgt.slantHeight.In(In); ctx.fillStyle = cv("warn"); ctx.beginPath(); ctx.arc(X(td), YY(dv), 4, 0, 7); ctx.fill(); ctx.textAlign = X(td) > width - 70 ? "right" : "left"; ctx.fillText(`${dv.toFixed(0)}" @ ${td}`, X(td) + (X(td) > width - 70 ? -7 : 7), YY(dv) - 7); } }
-  ctx.fillStyle = cv("muted"); ctx.font = "12px system-ui, sans-serif"; ctx.textAlign = "left"; ctx.fillText("Drop (in) vs range (yd)", 8, 15);
-  ctx.textAlign = "right"; ctx.fillStyle = cv("hint"); ctx.font = "11px system-ui, sans-serif"; ctx.fillText("line of sight", width - Rm - 2, YY(0) - 5);
+  if (td && td <= maxX) { const tx = X(td); ctx.strokeStyle = cv("warn"); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(tx, T); ctx.lineTo(tx, height - Bm); ctx.stroke(); ctx.lineWidth = 1;
+    if (R?.tgt) { const dv = R.tgt.slantHeight.In(In), ty = YY(dv); ctx.fillStyle = cv("warn"); ctx.beginPath(); ctx.arc(tx, ty, 4, 0, 7); ctx.fill();
+      const t = `${dv.toFixed(0)}" @ ${td}`;
+      label(t, [{ x: tx + 7, y: ty - 18 }, { x: tx - 7, y: ty - 18, a: "right" }, { x: tx + 7, y: ty + 5 }, { x: tx - 7, y: ty + 5, a: "right" }, { x: tx + 7, y: ty - 32 }, { x: tx - 7, y: ty - 32, a: "right" }, { x: tx + 7, y: ty + 19 }, { x: tx - 7, y: ty + 19, a: "right" }], cv("warn"), F, "target"); } }
+  if (mx != null) { const c = []; for (let y = T + 2; y <= height - Bm - 14; y += 14) c.push({ x: mx + 4, y }, { x: mx - 4, y, a: "right" });
+    label("Mach 1.2", c, cv("err"), "bold 11px system-ui, sans-serif", "mach"); }
+  const y0 = YY(0);
+  label("line of sight", [{ x: width - Rm - 2, y: y0 - 15, a: "right" }, { x: width - Rm - 2, y: y0 + 3, a: "right" }, { x: L + 4, y: y0 - 15 }, { x: L + 4, y: y0 + 3 }], cv("hint"), F, "los");
 }
 
 /* ---------------- phone sensors: compass aim & shot angle ---------------- */
@@ -2315,7 +2478,7 @@ async function solveShot(o = {}) {
       weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
   const Tp = powderT(), zc = zeroCond(), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
   const mvNow = mvAt(Tp, base), mvZero = zc ? mvAt(num("zTemp") ?? Tp, base) : mvNow;
-  const weapon = new Weapon({ sightHeight: UNew.Inch(num("sightHeight")), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
+  const weapon = new Weapon({ sightHeight: UNew.Inch(effSH()), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
   const atmo = mkAtmo(curCond()), calc = new Calculator();
   const zShot = new Shot({ weapon, ammo: new Ammo({ dm, mv: UNew.FPS(mvZero) }), atmo: zc ? mkAtmo(zc) : atmo });
   await calc.setWeaponZero(zShot, UNew.Yard(num("zero")));
@@ -2326,19 +2489,33 @@ async function solveShot(o = {}) {
 }
 // turret: click value + unit, independent of the display unit
 const TURRETS = { "0.1mil": ["MIL", 0.1, "0.1 mil"], "0.05mil": ["MIL", 0.05, "0.05 mil"], "0.25moa": ["MOA", 0.25, "¼ MOA"], "0.125moa": ["MOA", 0.125, "⅛ MOA"], "0.5moa": ["MOA", 0.5, "½ MOA"] };
-function turretSpec() {
+function turretSpec() {   // the attached optic wins; otherwise the gun's turret field (old data) or the display unit
+  const o = curOptic(); let s = null;
+  if (o) {
+    const t = $("opTurret").value, ret = $("opReticle").value === "moa" ? "MOA" : "MIL";
+    if (t === "custom") { const v = num("opTurretV"), u = $("opTurretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) s = { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
+    else if (TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; s = { u, v, lbl }; }
+    if (!s) s = ret === "MIL" ? { u: "MIL", v: 0.1, lbl: "0.1 mil" } : { u: "MOA", v: 0.25, lbl: "¼ MOA" };
+    const tk = num("opTrack"); s.k = tk >= 0.8 && tk <= 1.2 ? tk : 1; s.optic = o;
+    s.perTurn = num("opTurn") > 0 ? num("opTurn") : null; s.cpt = s.perTurn ? Math.round(s.perTurn / s.v) : 0;
+    const tr = num("opTravel"), cant = num("opCant") || 0, cantT = s.u === "MIL" ? cant / 3.437747 : cant;
+    s.up = tr > 0 ? Math.min(tr, tr / 2 + cantT) : null;   // ASSUMPTION: zero near the optical center on a flat base → half the travel is up; a canted base adds its MOA
+    s.sfp = $("opFP").value === "SFP" && num("opMag") > 0 ? num("opMag") : null;
+    return s;
+  }
   const t = $("turret").value;
-  if (t === "custom") { const v = num("turretV"), u = $("turretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) return { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
-  if (TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; return { u, v, lbl }; }
-  return S.ang === "MIL" ? { u: "MIL", v: 0.1, lbl: "0.1 mil", auto: true } : { u: "MOA", v: 0.25, lbl: "¼ MOA", auto: true };
+  if (t === "custom") { const v = num("turretV"), u = $("turretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) s = { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
+  if (!s && TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; s = { u, v, lbl }; }
+  if (!s) s = S.ang === "MIL" ? { u: "MIL", v: 0.1, lbl: "0.1 mil", auto: true } : { u: "MOA", v: 0.25, lbl: "¼ MOA", auto: true };
+  return Object.assign(s, { k: 1, up: null, sfp: null, cpt: 0, perTurn: null, optic: null });
 }
 const MOA_PER_MIL = 3.437747;
-function angs(p) {   // dial angles in the display unit (optionally rounded to whole clicks) + clicks in the turret unit
-  const A = B.Angular, ts = turretSpec(), TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA;
-  const ec = Math.round(-p.dropAngle.In(TU) / ts.v), wc = Math.round(-p.windageAngle.In(TU) / ts.v);
-  let e = -p.dropAngle.In(DU), w = -p.windageAngle.In(DU);
-  if (S.round) { const k = ts.u === S.ang ? 1 : S.ang === "MOA" ? MOA_PER_MIL : 1 / MOA_PER_MIL; e = ec * ts.v * k; w = wc * ts.v * k; }
-  return { e, w, ec, wc };
+function angs(p) {   // dial angles in the display unit (optionally rounded to whole clicks) + clicks in the turret unit; elevation dial ÷ tracking factor
+  const A = B.Angular, ts = turretSpec(), TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA, k = ts.k || 1;
+  const eT = -p.dropAngle.In(TU) / k, ec = Math.round(eT / ts.v), wc = Math.round(-p.windageAngle.In(TU) / ts.v);
+  let e = -p.dropAngle.In(DU) / k, w = -p.windageAngle.In(DU);
+  if (S.round) { const c = ts.u === S.ang ? 1 : S.ang === "MOA" ? MOA_PER_MIL : 1 / MOA_PER_MIL; e = ec * ts.v * c; w = wc * ts.v * c; }
+  return { e, w, ec, wc, eT };
 }
 function angDec(ts) { if (!S.round) return 1; const k = ts.u === S.ang ? 1 : 0; return k && Math.abs(ts.v * 10 - Math.round(ts.v * 10)) < 1e-9 ? 1 : 2; }
 function clkTxt(n, pos, neg) { return n === 0 ? "0 clicks" : `${n > 0 ? pos : neg} ${Math.abs(n)} click${Math.abs(n) === 1 ? "" : "s"}`; }
@@ -2360,19 +2537,24 @@ function millerSG(mv, c) {
   const sg = 30 * m / (t * t * d * d * d * l * (1 + lm * lm)) * Math.cbrt(mv / 2800) * ((T + 460) / 519) * (29.92 / P);
   return { sg, tip, assumed };
 }
-function paintWarn() {
-  const R = lastRun, out = []; if (!R) { $("dcWarn").innerHTML = ""; return; }
-  const g = R.sg;
+function paintWarn() {   // warnings stay on the card; plain info goes behind "Details"
+  const R = lastRun, warn = [], info = []; if (!R) { $("dcWarn").innerHTML = ""; $("dcChips").innerHTML = ""; return; }
+  const g = R.sg, ts = turretSpec(), r = curRifle();
+  if (r?.zeroUnconf) warn.push(`<span class="bad" title="${escapeHtml("Zero not confirmed: " + (r.zeroUnconf.why || "optic changed"))}">⚠ Zero not confirmed</span>`);
+  if (R.tgt && ts.up != null) { const a = angs(R.tgt), tu = ts.u === "MIL" ? "mil" : "MOA";
+    if (a.eT > ts.up + 1e-9) warn.push(`<span class="bad">⚠ Needs U ${a.eT.toFixed(1)} ${tu} — only ~${ts.up.toFixed(1)} ${tu} up travel; hold the last ${(a.eT - ts.up).toFixed(1)} ${tu}</span>`); }
   if (g && g.sg != null) {
     const t = `SG ${g.sg.toFixed(2)}`, why = `Miller stability ${g.sg.toFixed(2)} at ${Math.round(R.mvNow)} fps, ${fmt(R.aT, 0)}°F${g.tip ? `, ${g.assumed ? "assumed " : ""}${g.tip}" plastic tip` : ""}`;
-    out.push(g.sg < 1 ? `<span class="bad" title="${escapeHtml(why)}">✖ ${t} unstable — bullet may tumble</span>` : g.sg < 1.4 ? `<span class="w" title="${escapeHtml(why)}">⚠ ${t} marginal (&lt;1.4) — BC may suffer</span>` : `<span title="${escapeHtml(why)}">${t} stable${g.assumed ? " (tip est.)" : ""}</span>`);
-  } else if (g && g.none && num("twist")) out.push(`<span>Stability: ${g.none === "length" ? "bullet length unknown — add it under Gear" : "needs bullet data"}</span>`);
+    (g.sg < 1.4 ? warn : info).push(g.sg < 1 ? `<span class="bad" title="${escapeHtml(why)}">✖ ${t} unstable — bullet may tumble</span>` : g.sg < 1.4 ? `<span class="w" title="${escapeHtml(why)}">⚠ ${t} marginal (&lt;1.4) — BC may suffer</span>` : `<span title="${escapeHtml(why)}">${t} stable${g.assumed ? " (tip est.)" : ""}</span>`);
+  } else if (g && g.none && num("twist")) info.push(`<span>Stability: ${g.none === "length" ? "bullet length unknown — add it under Gear" : "needs bullet data"}</span>`);
   if (R.trans) {
     const past = R.td && R.trans.range <= R.td;
-    out.push(`<span class="${past ? "w" : ""}">${past ? "⚠ " : ""}${R.trans.range ? `Transonic at ${R.trans.range} yd` : "Transonic from the muzzle"} (&lt;${Math.round(R.vT)} fps = Mach 1.2 @ ${fmt(R.aT, 0)}°F)${past ? " — before target" : ""}</span>`);
+    (past ? warn : info).push(`<span class="${past ? "w" : ""}">${past ? "⚠ " : ""}${R.trans.range ? `Transonic at ${R.trans.range} yd` : "Transonic from the muzzle"} (&lt;${Math.round(R.vT)} fps = Mach 1.2 @ ${fmt(R.aT, 0)}°F)${past ? " — before target" : ""}</span>`);
   }
-  if (R.zc) out.push(`<span>Zeroed @ ${fmt(R.zc.temp, 0)}°F${num("zAlt") != null ? ` · ${fmt(R.zc.alt, 0)} ft` : ""}${R.zc.press != null ? ` · ${R.zc.press.toFixed(2)} inHg` : ""}</span>`);
-  $("dcWarn").innerHTML = out.join("");
+  if (R.zc) info.push(`<span>Zeroed @ ${fmt(R.zc.temp, 0)}°F${num("zAlt") != null ? ` · ${fmt(R.zc.alt, 0)} ft` : ""}${R.zc.press != null ? ` · ${R.zc.press.toFixed(2)} inHg` : ""}</span>`);
+  if (ts.k !== 1) info.push(`<span>Tracking ×${fmt(ts.k, 3)}: dial = required ÷ ${fmt(ts.k, 3)}</span>`);
+  if (ts.optic) info.push(`<span>Optic: ${escapeHtml(ts.optic.name)}</span>`);
+  $("dcWarn").innerHTML = warn.join(""); $("dcChips").innerHTML = info.join("");
 }
 function paintPt() {
   const R = lastRun, el = $("ptHint"); if (!el) return;
@@ -2381,7 +2563,8 @@ function paintPt() {
     : R ? `MV used: ${Math.round(R.mvNow)} fps (chrono ${val("mv")} fps @ ${val("mvTemp")}°F, ${val("ptSens")} fps/10°F).` : "";
 }
 function paintGearExtra() {
-  const t = $("turret").value === "custom"; $("turretCustom").hidden = !t; $("turretCustomU").hidden = !t;
+  const oN = !!curOptic(), t = $("turret").value === "custom" && !oN; $("turretCustom").hidden = !t; $("turretCustomU").hidden = !t;
+  $("gunSHRow").hidden = oN; $("gunTurretRow").hidden = oN; paintOptic();
   const zc = zeroCond();
   $("zeroSum").textContent = zc ? [num("zTemp") != null ? `${val("zTemp")}°F` : "", num("zHum") != null ? `${val("zHum")}%` : "", num("zAlt") != null ? `${val("zAlt")} ft` : "", num("zPress") != null ? `${val("zPress")} inHg` : ""].filter(Boolean).join(" · ") : "same as today";
   const tn = val("trued"); $("truedNote").hidden = !tn; $("truedNote").textContent = tn ? "🎯 " + tn : "";
@@ -2391,14 +2574,6 @@ $("zUseCur").onclick = () => {
   updateDirty(); schedule(); toast(`Zero conditions set to today's: ${val("temp")}°F · ${val("altitude") || 0} ft${val("pressure") ? " · " + val("pressure") + " inHg" : ""}`);
 };
 $("roundClk").checked = !!S.round;
-function chartExtras(ctx, X, top, bottom) {
-  const R = lastRun; if (!R?.trans || R.trans.range > num("maxRange")) return;
-  const x = X(R.trans.range); ctx.save(); ctx.strokeStyle = cv("err"); ctx.setLineDash([3, 4]); ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle = cv("err"); ctx.font = "bold 11px system-ui, sans-serif"; ctx.textAlign = x > ctx.canvas.width / (window.devicePixelRatio || 1) - 80 ? "right" : "left"; ctx.textBaseline = "top";
-  ctx.fillText("Mach 1.2", x + (ctx.textAlign === "right" ? -4 : 4), top + 2); ctx.restore();
-}
-/* truing: solve MV or a BC scale so the predicted elevation matches what was observed */
 var TR = { unit: "MIL", what: "mv", res: null };
 function trPaint() { [["trUnit", "unit"], ["trWhat", "what"]].forEach(([id, k]) => $(id).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === TR[k]))); }
 $("trUnit").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; TR.unit = b.dataset.v; TR.res = null; $("trSave").disabled = true; trPaint(); });
@@ -2406,19 +2581,19 @@ $("trWhat").addEventListener("click", e => { const b = e.target.closest("button"
 function openTrue() {
   if (!B || !lastRun) { toast("Fix the inputs so a solution shows first"); return; }
   if (!curLoad()) { toast("Pick or save a load first (Gear tab)"); return; }
-  TR.unit = S.ang; if (!val("trRange")) setVal("trRange", num("target") || 600);
+  TR.unit = S.ang; if (!val("trRange")) setVal("trRange", num("target") || 600); setVal("trAngle", 0);
   $("trFor").textContent = `${curLoad().name} · MV ${Math.round(lastRun.mvNow)} fps today · BC ${val("bc")} ${$("drag").value} · ${val("temp")}°F`;
   $("trOut").textContent = ""; $("trSave").disabled = true; TR.res = null; trPaint(); openOvl("trSheet");
 }
 async function predAt(d, o) {
-  const sv = await solveShot({ ...o, winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+  const sv = await solveShot({ ...o, winds: [] }), look = TR.look || 0, cosA = Math.cos(look * Math.PI / 180);
   if (look) sv.shot.lookAngle = B.UNew.Degree(look);
   const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(d * cosA), trajectoryStep: B.UNew.Yard(d * cosA), raiseRangeError: false });
   const p = r.samples[r.samples.length - 1]; if (!p || Math.abs(p.distance.In(B.Distance.Yard) - d * cosA) > 1) return null;
   return { MIL: -p.dropAngle.In(B.Angular.MRad), MOA: -p.dropAngle.In(B.Angular.MOA), IN: -p.slantHeight.In(B.Distance.Inch), mv: sv.mvNow };
 }
 async function solveTrue() {
-  const d = num("trRange"), obs = num("trObs"), out = $("trOut");
+  const d = num("trRange"), obs = num("trObs"), out = $("trOut"); TR.look = Math.max(-60, Math.min(60, num("trAngle") || 0));
   $("e-trRange").textContent = d >= 50 && d <= 3000 ? "" : "50–3000 yd"; $("e-trObs").textContent = obs > 0 ? "" : "Enter what you observed";
   if (!(d >= 50 && d <= 3000) || !(obs > 0)) return null;
   if (validate().length) { out.innerHTML = `<span class="bad">Fix the highlighted fields first.</span>`; return null; }
@@ -2432,7 +2607,7 @@ async function solveTrue() {
     while (it++ < 40 && hi - lo > (isMV ? 0.2 : 0.0002)) { const mid = (lo + hi) / 2; (await f(mid)) > 0 ? lo = mid : hi = mid; }
     const x = (lo + hi) / 2, after = await predAt(d, isMV ? { mv: x } : { bcScale: x }), U = TR.unit === "IN" ? '"' : " " + TR.unit;
     TR.res = { what: TR.what, x, d, obs, unit: TR.unit, before: before[TR.unit], after: after[TR.unit], it, mv0, bc0: num("bc") };
-    out.innerHTML = `Predicted ${before[TR.unit].toFixed(2)}${U} at ${d} yd, observed ${obs}${U}.<br>` + (isMV
+    out.innerHTML = `Predicted ${before[TR.unit].toFixed(2)}${U} at ${d} yd (${fmt(TR.look, 0)}° shot angle), observed ${obs}${U}.<br>` + (isMV
       ? `<b>MV ${Math.round(mv0)} → ${Math.round(x)} fps</b> today (${x >= mv0 ? "+" : ""}${Math.round(x - mv0)} fps)`
       : `<b>BC × ${x.toFixed(3)}</b> → ${(num("bc") * x).toFixed(3)} ${$("drag").value}`) + ` · now predicts ${after[TR.unit].toFixed(2)}${U} (${it} iterations).`;
     $("trSave").disabled = false; return TR.res;
@@ -2444,7 +2619,7 @@ function saveTrue() {
   const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }), U = r.unit === "IN" ? '" low' : " " + r.unit;
   if (r.what === "mv") { setVal("mv", Math.round(chronoFrom(r.x, powderT()))); $("mvSource").value = "trued"; }
   else { setVal("bc", (r.bc0 * r.x).toFixed(3)); if (val("bcBands")) $("bcBands").value = scaleBands(val("bcBands"), r.x); }
-  $("trued").value = `Trued at ${r.d} yd on ${date}: ${r.what === "mv" ? `MV ${Math.round(r.x)} fps @ ${fmt(powderT(), 0)}°F` : `BC ×${r.x.toFixed(3)}`} (observed ${r.obs}${U})`;
+  $("trued").value = `Trued at ${r.d} yd on ${date}: ${r.what === "mv" ? `MV ${Math.round(r.x)} fps @ ${fmt(powderT(), 0)}°F` : `BC ×${r.x.toFixed(3)}`} (observed ${r.obs}${U}${TR.look ? `, ${fmt(TR.look, 0)}° angle` : ""})`;
   updateDirty(); renderBulletInfo(); closeOvl("trSheet"); schedule(); toast(`Saved to “${l.name}” · ${$("trued").value}`);
 }
 $("trueBtn").onclick = openTrue;
@@ -2452,42 +2627,142 @@ $("trClose").onclick = () => closeOvl("trSheet");
 $("trGo").onclick = () => solveTrue();
 $("trSave").onclick = saveTrue;
 /* printable dope card */
-var DCV = { step: "50", size: "wrist" };
-function dcvPaint() { [["dcvStep", "step"], ["dcvSize", "size"]].forEach(([id, k]) => $(id).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === DCV[k]))); $("dcPrint").className = DCV.size; }
+var DCV = { step: "50", size: "wrist", angle: "flat" };
+function dcvPaint() { [["dcvStep", "step"], ["dcvSize", "size"], ["dcvAng", "angle"]].forEach(([id, k]) => $(id).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === DCV[k]))); $("dcPrint").className = DCV.size; }
 $("dcvStep").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; DCV.step = b.dataset.v; dcvPaint(); renderDopeCard(); });
 $("dcvSize").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; DCV.size = b.dataset.v; dcvPaint(); });
+$("dcvAng").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || b.disabled) return; DCV.angle = b.dataset.v; dcvPaint(); renderDopeCard(); });
 $("dcvMax").addEventListener("change", () => renderDopeCard());
 function openDopeCard() {
   if (!B || !lastRun) { toast("Fix the inputs so a solution shows first"); return; }
   if (!val("dcvMax")) setVal("dcvMax", Math.max(num("maxRange") || 1000, num("target") || 0));
+  const lk = num("shotAngle") || 0; DCV.angle = "flat"; $("dcvKeep").textContent = `Keep ${fmt(lk, 0)}°`; $("dcvKeep").disabled = !lk;
   dcvPaint(); openOvl("dcView"); return renderDopeCard();
 }
 async function renderDopeCard() {
   const el = $("dcPrint"), st = +DCV.step, max = Math.min(3000, Math.max(st, num("dcvMax") || 1000));
   if (!B || validate().length) { el.textContent = "Fix the highlighted fields first."; return; }
-  const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180), { UNew } = B;
+  const lkNow = num("shotAngle") || 0, look = DCV.angle === "keep" ? lkNow : 0;   // prints flat (0°) unless "Keep" is chosen
+  const sv = await solveShot({ winds: [] }), cosA = Math.cos(look * Math.PI / 180), { UNew } = B;
   if (look) sv.shot.lookAngle = UNew.Degree(look);
   const run = sh => sv.calc.fire({ shot: sh, trajectoryRange: UNew.Yard(max * cosA), trajectoryStep: UNew.Yard(st * cosA), raiseRangeError: false }).then(r => r.samples);
   const sN = await run(sv.shot), sF = await run(sv.withWind(windAt(10, 90), look));
-  const ts = turretSpec(), u = S.ang, A = B.Angular, DU = u === "MIL" ? A.MRad : A.MOA, TU = ts.u === "MIL" ? A.MRad : A.MOA, vT = 1.2 * sv.shot.atmo.mach.In(B.Velocity.FPS);
+  const ts = turretSpec(), u = S.ang, A = B.Angular, DU = u === "MIL" ? A.MRad : A.MOA, TU = ts.u === "MIL" ? A.MRad : A.MOA, vT = 1.2 * sv.shot.atmo.mach.In(B.Velocity.FPS), k = ts.k || 1, sd = u === "MIL" ? 2 : 1;
   const r = curRifle(), l = curLoad(), zc = sv.zc, p = num("pressure");
-  const cond = `${val("temp")}°F · ${p != null ? p.toFixed(2) + " inHg" : (val("altitude") || 0) + " ft std"} · ${val("humidity")}% RH${look ? ` · ${look}° angle` : ""}`;
-  let rows = "";
+  const cond = `${val("temp")}°F · ${p != null ? p.toFixed(2) + " inHg" : (val("altitude") || 0) + " ft std"} · ${val("humidity")}% RH · ${look ? `${fmt(look, 0)}° angle` : "flat (0°)"}`;
+  const ck = n => !ts.cpt || !n ? String(n) : `${Math.floor(Math.abs(n) / ts.cpt)}+${Math.abs(n) % ts.cpt}`;
+  let rows = "", anyOver = false;
   sN.forEach((q, i) => {
     const range = Math.round(q.distance.In(B.Distance.Yard) / cosA); if (range < st / 2) return;
-    const e = -q.dropAngle.In(DU), ec = Math.round(-q.dropAngle.In(TU) / ts.v), f = sF[i];
+    const e = -q.dropAngle.In(DU) / k, eT = -q.dropAngle.In(TU) / k, ec = Math.round(eT / ts.v), f = sF[i], ov = ts.up != null && eT > ts.up + 1e-9; anyOver = anyOver || ov;
     const w = f ? Math.abs(f.windageAngle.In(DU) - q.windageAngle.In(DU)) : null, wc = f ? Math.round(Math.abs(f.windageAngle.In(TU) - q.windageAngle.In(TU)) / ts.v) : null;
-    const vel = q.velocity.In(B.Velocity.FPS);
-    rows += `<tr class="${vel < vT ? "trans" : ""}"><td class="r">${range}</td><td>${(Math.abs(e) < 0.05 ? 0 : e).toFixed(1)}</td><td>${ec}</td><td>${w != null ? w.toFixed(1) : "—"}</td><td>${wc ?? "—"}</td><td>${Math.round(vel)}</td></tr>`;
+    const s = -q.windageAngle.In(DU), vel = q.velocity.In(B.Velocity.FPS);
+    rows += `<tr class="${vel < vT ? "trans" : ""}"><td class="r">${range}</td><td${ov ? ' class="ovr"' : ""}>${(Math.abs(e) < 0.05 ? 0 : e).toFixed(1)}</td><td>${ck(ec)}</td><td>${w != null ? w.toFixed(1) : "—"}</td><td>${wc ?? "—"}</td><td>${Math.abs(s) < 0.005 ? "0" : (s > 0 ? "R " : "L ") + Math.abs(s).toFixed(sd)}</td><td>${Math.round(vel)}</td></tr>`;
   });
-  el.innerHTML = `<div class="hd"><b>${escapeHtml(r?.name || "Gun")} · ${escapeHtml(l?.name || "Load")}</b><br>${escapeHtml(val("bulletName") || `${val("weight")} gr`)} · BC ${escapeHtml(val("bc"))} ${$("drag").value} · MV ${Math.round(sv.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(sv.Tp, 0)}°F` : ""}<br>
-    Zero ${val("zero")} yd${zc ? ` @ ${fmt(zc.temp, 0)}°F` : ""} · SH ${val("sightHeight")}" · turret ${escapeHtml(ts.lbl)}<br>${escapeHtml(cond)} · ${escapeHtml(new Date().toLocaleDateString())}</div>
-    <table><thead><tr><th>Yd</th><th>Elev ${u}</th><th>Clk</th><th>10 mph ${u}</th><th>Clk</th><th>fps</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="ft">Elev = dial up. 10 mph = full-value crosswind hold (no spin drift). Clk = ${escapeHtml(ts.lbl)} clicks. Shaded = transonic (&lt;${Math.round(vT)} fps).</div>`;
+  const o = ts.optic;
+  el.innerHTML = `${look ? `<div class="ang">${look > 0 ? "▲ UPHILL" : "▼ DOWNHILL"} ${fmt(Math.abs(look), 0)}°</div>` : ""}<div class="hd"><b>${escapeHtml(r?.name || "Gun")} · ${escapeHtml(l?.name || "Load")}</b><br>${escapeHtml(val("bulletName") || `${val("weight")} gr`)} · BC ${escapeHtml(val("bc"))} ${$("drag").value} · MV ${Math.round(sv.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(sv.Tp, 0)}°F` : ""}<br>
+    Zero ${val("zero")} yd${zc ? ` @ ${fmt(zc.temp, 0)}°F` : ""} · SH ${fmt(effSH(), 2)}" · turret ${escapeHtml(ts.lbl)}${o ? ` · ${escapeHtml(o.name)}` : ""}${ts.sfp ? ` · SFP holds true at ${fmt(ts.sfp, 1)}×` : ""}${k !== 1 ? ` · tracking ×${fmt(k, 3)}` : ""}<br>${escapeHtml(cond)} · ${escapeHtml(new Date().toLocaleDateString())}</div>
+    <table><thead><tr><th>Yd</th><th>Elev ${u}</th><th>Clk</th><th>10 mph ${u}</th><th>Clk</th><th>Spin ${u}</th><th>fps</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="ft">Elev = dial up${ts.cpt ? ` (Clk 1+23 = 1 turn + 23)` : ""}. 10 mph = full-value crosswind hold (no spin drift). Spin = spin-drift correction to add. Clk = ${escapeHtml(ts.lbl)} clicks. Shaded = transonic (&lt;${Math.round(vT)} fps).${anyOver ? ` Underlined = beyond ~${fmt(ts.up, 1)} up travel.` : ""}</div>`;
 }
 $("dcBtn").onclick = () => openDopeCard();
 $("dcvClose").onclick = () => closeOvl("dcView");
 $("dcvPrint").onclick = () => window.print();
+
+
+/* ---------------- round 2: optics, spin drift, gusts, table fit ---------------- */
+function curOptic() { const r = curRifle(); return r && r.opticId ? (P.optics || []).find(o => o.id === r.opticId) || null : null; }
+function effSH() { return curOptic() && num("opSH") != null ? num("opSH") : num("sightHeight"); }   // optic/mount first, gun field = fallback
+function gustSpread() { return wx && wx.gust != null && wx.wind != null && wx.gust > wx.wind ? wx.gust - wx.wind : null; }
+function turnsTxt(ec, ts) { if (!ts.cpt || !ec) return ""; const n = Math.abs(ec), t = Math.floor(n / ts.cpt), m = n % ts.cpt; return t ? `${t} turn${t > 1 ? "s" : ""} + ${m} click${m === 1 ? "" : "s"}` : ""; }
+function paintScroll() {
+  const w = resultsDiv.querySelector(".tblWrap"); if (!w) { resultsDiv.classList.remove("scrollX", "atEnd"); return; }
+  const end = () => resultsDiv.classList.toggle("atEnd", w.scrollLeft + w.clientWidth >= w.scrollWidth - 2);
+  resultsDiv.classList.toggle("scrollX", w.clientWidth > 0 && w.scrollWidth > w.clientWidth + 1); end(); w.onscroll = end;
+}
+var unitFollowed = null;
+function paintSeg(id, key) { $(id).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === S[key])); }
+function followUnits(force) {   // display unit follows the optic's reticle when the optic on screen changes (the MOA/MIL toggle still works for the session)
+  const o = curOptic(); if (!o) { unitFollowed = null; return; }
+  if (!force && unitFollowed === o.id) return; unitFollowed = o.id;
+  const u = $("opReticle").value === "moa" ? "MOA" : "MIL";
+  if (S.ang !== u) { S.ang = u; paintSeg("angSeg", "ang"); saveSettings(); if (lastRun) renderAll(); }
+}
+function applyOptic() {
+  const o = curOptic();
+  OPTIC_F.forEach(f => setVal(f, o ? ((o[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : o[f]) : (F_DEF[f] || "")));
+  formFor.o = o?.id || null;
+  renderOpticSel(); paintOptic(); followUnits();
+}
+function renderOpticSel() {
+  const r = curRifle(), sel = $("opticSel"), o = curOptic(); sel.innerHTML = "";
+  sel.add(new Option(r ? "No optic — uses the gun's turret" : "Add a gun first", ""));
+  (P.optics || []).forEach(x => { const on = P.rifles.find(g => g.opticId === x.id); sel.add(new Option(x.name + (on && on !== r ? ` (on ${on.name})` : ""), x.id)); });
+  sel.value = o ? o.id : ""; sel.disabled = !r;
+}
+function paintOptic() {
+  const r = curRifle(), o = curOptic(), ts = turretSpec(), tu = ts.u === "MIL" ? "mil" : "MOA";
+  $("opticPk").hidden = !r; $("opticBody").hidden = !o;
+  const c = $("opTurret").value === "custom"; $("opTurretCustom").hidden = !o || !c; $("opTurretCustomU").hidden = !o || !c;
+  $("opMagRow").hidden = $("opFP").value !== "SFP";
+  document.querySelectorAll("#opticBody .u2").forEach(e => e.textContent = `(${tu})`);
+  $("opticSum").textContent = o ? [`${ts.lbl} turret`, `${$("opReticle").value === "moa" ? "MOA" : "MIL"} reticle`, ts.sfp ? `SFP (true at ${fmt(ts.sfp, 1)}×)` : $("opFP").value,
+      ts.perTurn ? `${fmt(ts.perTurn, 2)} ${tu}/turn` : "", ts.up != null ? `~${fmt(ts.up, 1)} ${tu} up travel` : "", num("opSH") != null ? `SH ${val("opSH")}"` : "", ts.k !== 1 ? `tracking ×${fmt(ts.k, 3)}` : ""].filter(Boolean).join(" · ")
+    : r ? "No optic attached — the dope uses the gun's turret and sight height (Gun details)." : "";
+  $("opMoreSum").textContent = o ? [$("opFP").value, ts.perTurn ? `${fmt(ts.perTurn, 2)}/turn` : "", num("opTravel") ? `${val("opTravel")} travel` : "", num("opCant") ? `${val("opCant")} MOA base` : ""].filter(Boolean).join(" · ") : "";
+  $("gunOptNote").hidden = !o; $("gunOptNote").textContent = o ? `Sight height and turret come from the optic “${o.name}”${num("opSH") == null ? ` (no sight height there, so the gun's ${val("sightHeight") || "?"}" is used)` : ""}.` : "";
+  const z = r?.zeroUnconf; $("zeroFlag").hidden = !z; $("zeroFlagTxt").textContent = z ? `⚠ Zero not confirmed — ${z.why || "optic changed"}` : "";
+  $("opNew").disabled = !r; $("opAttach").disabled = !r || !(P.optics || []).length;
+  ["opDup", "opRename", "opDetach", "opDel"].forEach(id => $(id).disabled = !o);
+}
+function flagZero(r, why) { if (r) r.zeroUnconf = { why, at: new Date().toISOString() }; }
+function attachOptic(oid, fresh) {   // fresh = optic just created for this gun (no zero flag unless it replaces another optic)
+  const r = curRifle(), o = (P.optics || []).find(x => x.id === oid); if (!r || !o || r.opticId === oid) { renderOpticSel(); return false; }
+  const other = P.rifles.find(x => x !== r && x.opticId === oid);
+  if (other && !confirm(`“${o.name}” is on “${other.name}”. Move it to “${r.name}”?\nBoth guns' zeros will be marked “not confirmed”.`)) { renderOpticSel(); return false; }
+  autosave();
+  const prev = r.opticId ? P.optics.find(x => x.id === r.opticId) : null;
+  if (other) { other.opticId = null; flagZero(other, `optic “${o.name}” moved to “${r.name}”`); }
+  r.opticId = oid;
+  if (!String(o.opSH ?? "").trim() && r.sightHeight) o.opSH = r.sightHeight;
+  if (!(fresh && !prev)) flagZero(r, other ? `optic “${o.name}” moved here from “${other.name}”` : prev ? `optic changed from “${prev.name}” to “${o.name}”` : `optic “${o.name}” attached`);
+  savePresets(); applyOptic(); updateDirty(); schedule(); return true;
+}
+function detachOptic() {
+  const r = curRifle(), o = curOptic(); if (!r || !o) return;
+  autosave(); r.opticId = null; flagZero(r, `optic “${o.name}” removed`); savePresets(); applyOptic(); updateDirty(); schedule();
+  toast(`“${o.name}” detached from “${r.name}” — zero marked not confirmed`);
+}
+$("opticSel").onchange = e => { const v = e.target.value; if (!v) detachOptic(); else if (attachOptic(v)) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); };
+$("opNew").onclick = () => {
+  const r = curRifle(); if (!r) return; const n = askName("Name for the new optic (e.g. Razor 4.5-27):", `${r.name} scope`); if (!n) return;
+  const cur = curOptic(), gt = $("turret").value, base = cur ? pick(OPTIC_F) : {
+    opTurret: gt || (S.ang === "MIL" ? "0.1mil" : "0.25moa"), opTurretV: val("turretV"), opTurretU: $("turretU").value || "mil",
+    opReticle: (gt === "custom" ? $("turretU").value === "moa" : gt ? /moa/.test(gt) : S.ang === "MOA") ? "moa" : "mil", opFP: "FFP", opSH: val("sightHeight") };
+  const o = { id: uid(), name: n, ...Object.fromEntries(OPTIC_F.map(f => [f, base[f] ?? ""])) };
+  P.optics.push(o); attachOptic(o.id, true); followUnits(true); toast(`Optic “${n}” added to “${r.name}”`);
+};
+$("opRename").onclick = () => { const o = curOptic(); if (!o) return; const n = askName("Rename optic:", o.name); if (!n) return; o.name = n; savePresets(); renderOpticSel(); paintOptic(); flashSaved("optic"); };
+$("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60) }; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ › Attach)`); };
+$("opDetach").onclick = () => detachOptic();
+$("opDel").onclick = () => {
+  const o = curOptic(), r = curRifle(); if (!o || !confirm(`Delete optic “${o.name}”?\nThe gun falls back to its own turret settings and its zero is marked not confirmed.`)) return;
+  const i = P.optics.indexOf(o), z = r.zeroUnconf; P.optics.splice(i, 1); r.opticId = null; flagZero(r, `optic “${o.name}” deleted`);
+  savePresets(); applyOptic(); updateDirty(); schedule();
+  toast(`Optic “${o.name}” deleted`, { label: "Undo", fn: () => { P.optics.splice(Math.min(i, P.optics.length), 0, o); if (P.rifles.includes(r)) { r.opticId = o.id; if (z) r.zeroUnconf = z; else delete r.zeroUnconf; P.lastRifleId = r.id; }
+    savePresets(); renderPickers(); applyRifle(); updateDirty(); schedule(); toast(`Optic “${o.name}” restored`); } });
+};
+$("opAttach").onclick = () => {
+  const r = curRifle(); if (!r) return;
+  $("opSheetFor").textContent = `Pick the optic now mounted on “${r.name}”. Moving an optic marks the zero of both guns “not confirmed”.`;
+  $("opList").innerHTML = (P.optics || []).map(o => { const on = P.rifles.find(g => g.opticId === o.id), ts = TURRETS[o.opTurret];
+    return `<button type="button" class="opItem${on === r ? " on" : ""}" data-id="${escapeHtml(o.id)}">${escapeHtml(o.name)}<small>${ts ? ts[2] : escapeHtml(o.opTurretV ? `${o.opTurretV} ${o.opTurretU}` : "custom")} turret · ${o.opReticle === "moa" ? "MOA" : "MIL"} reticle · ${on ? (on === r ? "on this gun" : `on “${escapeHtml(on.name)}”`) : "not attached"}</small></button>`; }).join("") || `<div class="summary">No optics saved yet — use ⋯ › New optic.</div>`;
+  openOvl("opSheet");
+};
+$("opList").addEventListener("click", e => { const b = e.target.closest(".opItem"); if (!b) return; closeOvl("opSheet"); if (attachOptic(b.dataset.id)) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); });
+$("opSheetClose").onclick = () => closeOvl("opSheet");
+$("zeroConfirm").onclick = () => { const r = curRifle(); if (!r) return; delete r.zeroUnconf; savePresets(); updateDirty(); if (lastRun) renderCard(); toast(`Zero confirmed for “${r.name}”`); };
+$("dcMoreBtn").onclick = () => { const open = $("dcMore").hidden; $("dcMore").hidden = !open; $("dcMoreBtn").setAttribute("aria-expanded", String(open)); $("dcMoreBtn").textContent = open ? "Details ▴" : "Details ▾"; };
 
 /* ---------------- wiring ---------------- */
 let calcT;
@@ -2496,7 +2771,7 @@ function paintAdv() {
   const p = num("pressure");
   $("advSum").textContent = `${val("temp") || "?"}°F · ${val("humidity") || "?"}% · ${val("altitude") || "0"} ft · ${p != null ? p.toFixed(2) + " inHg" : "std pressure"}` + (val("powderTemp") ? ` · powder ${val("powderTemp")}°F` : "");
 }
-// tabs (remembered)
+// tabs (the app always opens on Dope)
 const TABS = ["dope", "gear", "log"];
 function setTab(t, persist = true) {
   if (!TABS.includes(t)) t = "dope";
@@ -2504,7 +2779,7 @@ function setTab(t, persist = true) {
   document.querySelectorAll("#tabBar button").forEach(b => { const on = b.dataset.tab === t; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; });
   document.body.dataset.tab = t;
   if (persist && S.tab !== t) { S.tab = t; store(K_SETTINGS, S); }
-  if (t === "dope" && lastRun) renderChart(lastRun.samples);
+  if (t === "dope" && lastRun) { renderChart(lastRun.samples); paintScroll(); }
   if (t === "dope") drawDial();
   if (t === "log") { slKey = null; maybeRenderLog(); }
 }
@@ -2537,6 +2812,7 @@ document.addEventListener("input", e => {
   if (["bc", "weight", "diameter"].includes(id) && val("bulletId")) markEdited();
   if (WX_F.includes(id)) manual.add(id);
   if (id === "bearing") applyAuto(); else { renderChips(); updateDirty(); }
+  if (id === "opReticle") followUnits(true);
   if (id === "windDir" || id === "windSpeed") drawDial();
   schedule();
 });
@@ -2545,7 +2821,7 @@ document.addEventListener("change", e => {
   if (id === "drag") { swapModel(); updateDirty(); schedule(); }
   if (id === "mvSource" || id === "useBands") { renderBulletInfo(); updateDirty(); schedule(); }
 });
-$("calcBtn").addEventListener("click", () => { clearTimeout(calcT); calculate(); });
+$("calcBtn").addEventListener("click", () => { clearTimeout(calcT); calculate(); refreshWeather(); });
 function seg(id, key) {
   const el = $(id);
   const paint = () => el.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === S[key]));
@@ -2553,8 +2829,8 @@ function seg(id, key) {
   paint();
 }
 seg("angSeg", "ang"); seg("viewSeg", "view");
-window.addEventListener("resize", () => lastRun && renderChart(lastRun.samples));
-setTab(S.tab || "dope", false); shortenHints(); paintAdv();
+window.addEventListener("resize", () => { if (lastRun) renderChart(lastRun.samples); paintScroll(); });
+S.tab = "dope"; setTab("dope", false); shortenHints(); paintAdv();
 
 /* ---------------- start ---------------- */
 for (const [f, v] of Object.entries(S.values || {})) if ($(f) && v != null) $(f).value = v;
@@ -2816,7 +3092,8 @@ $("slMoveBtn").onclick = () => { if (ED) openMove([ED.id]); };
 // select mode (tap "☑ Select" or long-press a session)
 function paintSel() {
   const on = !!SEL, list = $("slList");
-  list.classList.toggle("selecting", on); $("slSelBar").hidden = !on; $("slSelBtn").hidden = on;
+  list.classList.toggle("selecting", on); $("slSelBar").hidden = !on; $("slSelBtn").hidden = on || !list.querySelector(".slItem");
+  $("slCsvBtn").hidden = !LOG.length; document.querySelector(".slTools").hidden = $("slSelBtn").hidden && $("slCsvBtn").hidden;
   if (!on) { list.querySelectorAll(".slItem.sel").forEach(b => b.classList.remove("sel")); return; }
   const vis = [...list.querySelectorAll(".slItem")].map(b => b.dataset.id);
   [...SEL].forEach(id => { if (!vis.includes(id)) SEL.delete(id); });
@@ -2833,7 +3110,7 @@ $("slList").addEventListener("pointerdown", e => { const b = e.target.closest(".
 ["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slList").addEventListener(ev, () => clearTimeout(lpT)));
 $("slList").addEventListener("contextmenu", e => { if (e.target.closest(".slItem")) e.preventDefault(); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("mvSheet").classList.contains("show")) { e.stopImmediatePropagation(); closeOvl("mvSheet"); } }, true);
-window.__bc = { millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+window.__bc = { millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

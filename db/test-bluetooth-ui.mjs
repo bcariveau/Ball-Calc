@@ -38,6 +38,7 @@ await p.evaluate(a => window.__fake.send(a), IDLE);
 await p.evaluate(a => window.__fake.send(a), A); await p.waitForTimeout(200);
 console.log("no-load pending:", await p.evaluate(() => window.__bc.radar.RD.pending.length), "|", await p.textContent("#radarStatus"));
 const st = async () => (await p.innerText("#slStats")).replace(/\n/g, " ");
+console.log("banner:", await p.isVisible("#shotBan"), (await p.textContent("#shotBan")).replace(/\s+/g, " ").trim());
 console.log("editor open:", await p.isVisible("#slEditor"), "| src:", await p.inputValue("#slSource"), "| stats:", await st(), "| edRadar:", await p.textContent("#slEdRadar"), "| focus:", await p.evaluate(() => document.activeElement.id));
 await p.evaluate(a => window.__fake.send(a), B); await p.waitForTimeout(150);
 await p.evaluate(a => window.__fake.send(a), B); await p.evaluate(a => window.__fake.send(a), A); await p.waitForTimeout(150);   // resends → ignored
@@ -50,7 +51,7 @@ console.log("new string:", JSON.stringify(await p.evaluate(() => window.__bc.log
 await p.evaluate(() => { const d = window.__fake.dev; d.gatt.connected = false; d.dispatchEvent(new Event("gattserverdisconnected")); });
 console.log("dropped:", await p.textContent("#radarStatus"));
 await p.waitForTimeout(1900); console.log("after retry:", await p.textContent("#radarStatus"));
-await p.click("#slEdClose"); await p.waitForTimeout(100);
+if (await p.isVisible("#slEdClose")) await p.click("#slEdClose"); await p.waitForTimeout(100);   // targets round: radar shots no longer open the editor (live banner instead)
 // manual disconnect → Reconnect button
 await p.click("#radarDisconnect"); await p.waitForTimeout(100);
 console.log("manual off:", await p.textContent("#radarStatus"), "| reconnect:", await p.isVisible("#radarReconnect"), await p.textContent("#radarReconnect"));

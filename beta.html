@@ -364,7 +364,7 @@ svg.mk { width: 14px; height: 14px; flex: 0 0 14px; vertical-align: -2px; margin
 .sc { width: auto; margin: 0; min-height: 44px; padding: 6px 10px; font-size: 0.8rem; font-weight: 600; background: var(--input); color: var(--muted); border: 1px solid var(--border); border-radius: 999px; display: inline-flex; align-items: center; }
 .sc.on { color: var(--text); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 svg.tgS, #tgSvg { width: 100%; aspect-ratio: 1; display: block; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
-#tgEd { z-index: 31; } #tgEd > *, #slEditor > #slStrBar, #slEditor > #slTgView, #slEditor > #sbDock { flex-shrink: 0; }
+#tgEd { z-index: 32; } #tgEd > *, #slEditor > #slStrBar, #slEditor > #slTgView, #slEditor > #sbDock { flex-shrink: 0; }
 #tgEd .tgSet { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } #tgEd .tgSet .full { grid-column: 1 / -1; }
 #tgSum { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin: 0 0 8px; padding: 8px 12px; text-align: left; font-size: 0.9rem; font-weight: 700; line-height: 1.3; background: var(--input); color: var(--text); border: 1px solid var(--border); border-radius: 10px; }
 #tgSum .t { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; } #tgSum .i { flex: 0 0 auto; color: var(--accent); font-size: 1rem; }
@@ -547,6 +547,93 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
 #dcWarn .zcw { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
 #dcWarn .zcw button { width: auto; min-height: 44px; margin: 0; padding: 0 14px; font-size: 0.85rem; font-weight: 700; }
 #opUpNote { color: var(--warn); margin: 4px 0 0; font-weight: 600; }
+/* ---- Start shooting + Shooting view ---- */
+#shStartBtn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 58px; margin: 0 0 12px; font-size: 1.2rem; font-weight: 800; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+#shStartBtn small { font-size: 0.78rem; font-weight: 600; }
+.pkFlash { outline: 3px solid var(--warn); outline-offset: 3px; border-radius: 10px; transition: outline-color .3s; }
+.slEmpty { padding: 12px; border: 1px dashed var(--border); border-radius: 10px; color: var(--text); font-size: 0.9rem; background: var(--panel); margin: 4px 0 8px; }
+#shView { position: fixed; inset: 0; z-index: 31; background: var(--bg); color: var(--text); display: none; flex-direction: column; gap: 8px; padding: max(8px, env(safe-area-inset-top)) 12px max(8px, env(safe-area-inset-bottom)); max-width: 640px; margin: 0 auto; overflow: hidden; }
+#shView.show { display: flex; }
+body.shOn { overflow: hidden; }
+body.shOn #tabBar, body.shOn #shotBan { display: none !important; }
+#shView button { margin: 0; }
+.shTop { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.shTop #shExit { flex: 0 0 auto; }
+.shTt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.shTt b { font-size: 1rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shTt small { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shRadBox { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; max-width: 62%; }
+#shRadar { font-size: 0.75rem; color: var(--muted); text-align: right; line-height: 1.2; max-width: 9.5em; }
+#shRadar.ok { color: var(--pos); } #shRadar.bad { color: var(--warn); }
+#shConn { flex: 0 0 auto; }
+.shMain { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.shL { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
+.shR { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; min-height: 0; }
+.shHero { display: flex; align-items: baseline; justify-content: center; gap: 10px; flex-wrap: wrap; background: var(--panel); border: 2px solid var(--accent); border-radius: 16px; padding: 4px 10px 6px; }
+.shHero.dis { border-color: var(--border); }
+#shV { font-size: clamp(64px, 23vw, 124px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--text); }
+.shHero.dis #shV { text-decoration: line-through; color: var(--muted); }
+#shVu { font-size: 1rem; color: var(--muted); font-weight: 700; }
+#shMeta { font-size: clamp(22px, 7vw, 34px); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); white-space: nowrap; }
+#shMeta.wait { font-size: 1rem; font-weight: 600; color: var(--muted); white-space: normal; text-align: center; }
+#shEndNote { font-size: 0.85rem; color: var(--warn); text-align: center; font-weight: 700; }
+.shStats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.shStats div { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 3px 4px; text-align: center; min-width: 0; }
+.shStats b { display: block; font-size: 1.15rem; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shStats span { display: block; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+.shStats .w2 { grid-column: span 2; }
+#shEs { font-size: 0.95rem; font-weight: 700; text-align: center; color: var(--text); }
+#shEs small { font-weight: 500; color: var(--muted); }
+#shDope { display: flex; gap: 6px; font-size: 0.82rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 4px 0; justify-content: space-between; flex-wrap: wrap; color: var(--muted); }
+#shDope b { color: var(--text); font-variant-numeric: tabular-nums; }
+#shList { flex: 1 1 auto; min-height: 60px; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
+.shRow { display: flex; align-items: center; gap: 8px; padding: 0 4px 0 10px; min-height: 44px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.shRow:last-child { border-bottom: 0; }
+.shRow .n { color: var(--muted); font-size: 0.8rem; width: 2.4em; }
+.shRow .v { font-weight: 800; font-size: 1.1rem; width: 3.2em; }
+.shRow .dv { color: var(--muted); font-size: 0.85rem; width: 4.2em; }
+.shRow .shTg { flex: 1 1 auto; min-width: 0; font-size: 0.75rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shRow button { width: 44px; min-width: 44px; height: 40px; min-height: 40px; padding: 0; font-size: 1.05rem; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; }
+.shRow.dis { opacity: 0.55; }
+.shRow.dis .v { text-decoration: line-through; }
+.shRow.new { background: var(--hover); }
+.shEmpty { padding: 10px; color: var(--muted); font-size: 0.9rem; }
+#shAddBox, #shTagBar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; padding: 6px; flex: 0 0 auto; }
+#shAddBox[hidden], #shTagBar[hidden] { display: none; }
+#shVel { flex: 1 1 8em; min-width: 0; font-size: 1.5rem; font-weight: 800; text-align: center; min-height: 52px; }
+#shAddBox button { width: auto; min-height: 52px; padding: 0 16px; }
+#shTagBar .lbl2 { width: 100%; font-size: 0.75rem; color: var(--muted); margin: 0; }
+#shTagBar button { width: auto; flex: 1 1 auto; padding: 0 10px; min-height: 44px; font-size: 0.9rem; background: var(--input); color: var(--text); border: 1px solid var(--border); }
+#shTagBar button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+#shNote { flex: 1 1 100%; min-height: 44px; }
+.shBtns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 0 0 auto; }
+.shBtns button { min-height: 58px; padding: 4px; font-size: 0.95rem; line-height: 1.15; border-radius: 12px; }
+.shBtns button.ghost { background: var(--input); color: var(--text); border: 1px solid var(--border); }
+.shBtns .bad { background: var(--danger-bg); color: var(--err); border: 1px solid var(--danger-b); }
+.shBtns .w3 { grid-column: 1 / -1; min-height: 50px; }
+.shBtns button.on { box-shadow: 0 0 0 2px var(--warn); }
+#shView .shBtns button:active { transform: scale(0.97); }
+@media (orientation: landscape) and (max-height: 600px) {
+  #shView { max-width: none; padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); gap: 6px; }
+  .shMain { flex-direction: row; gap: 10px; }
+  .shL { flex: 1 1 50%; min-width: 0; overflow-y: auto; }
+  .shR { flex: 1 1 50%; min-width: 0; }
+  #shV { font-size: clamp(48px, 19vh, 96px); }
+  #shMeta { font-size: clamp(18px, 7vh, 30px); }
+  .shStats b { font-size: 1rem; }
+  .shBtns button { min-height: 44px; font-size: 0.85rem; }
+  .shBtns .w3 { min-height: 44px; }
+  #shList { min-height: 44px; }
+}
+/* wind dial gestures */
+#dial { touch-action: pan-y; }
+#dial.on { box-shadow: 0 0 0 3px var(--accent); border-radius: 50%; cursor: grabbing; }
+#dial.locked { opacity: 0.5; cursor: not-allowed; }
+#windSpeed, #windDir { cursor: text; }
+#windLock[aria-pressed=true] { background: var(--warn-b); color: var(--text); border-color: var(--warn); }
+#toast.act { width: max-content; }
+body.shOn #toast { bottom: auto; top: calc(64px + env(safe-area-inset-top)); }
+@media (max-width: 400px) { .shRadBox:has(#shConn:not([hidden])) #shRadar { display: none; } }
 </style>
 </head>
 <body>
@@ -572,10 +659,11 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
 </div>
 <div id="status">Loading ballistics engine…</div>
 
+<button type="button" id="shStartBtn">▶ Start shooting</button>
 <div class="section" id="windSec">
-  <h2>Wind &amp; angle</h2>
+  <h2>Wind &amp; angle <button type="button" class="sm ghost" id="windLock" aria-pressed="false">🔓 Lock dial</button></h2>
   <div class="windbox">
-    <canvas id="dial" aria-label="Wind direction dial: drag to set where the wind comes from"></canvas>
+    <canvas id="dial" role="img" aria-label="Wind direction dial: drag around the ring (or press and hold) to set where the wind comes from; tap an hour to snap to it"></canvas>
     <div>
       <label for="windSpeed"><span>Wind speed (mph)</span><span class="chip" id="src-windSpeed"></span></label>
       <div class="stepper" data-step="1" data-min="0" data-max="60"><input type="number" inputmode="decimal" id="windSpeed" value="10"></div>
@@ -587,7 +675,7 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
   </div>
   <div id="dirText"></div>
   <div class="hint" id="wxWindNote" hidden>Weather wind is measured 10 m (33 ft) above ground — usually stronger than the wind at shooter height (about ⅔ of it in open ground).</div>
-  <div class="hint">Drag the dial or the numbers (swipe left/right). 0° = wind in your face, 90° = from your right, 180° = from behind, 270° = from your left.</div>
+  <div class="hint">Drag around the dial's ring (or press and hold) to set where the wind comes from; tap an hour to snap to it. Use − / + for speed and direction, or tap a number to type it. 0° = wind in your face, 90° = from your right, 180° = from behind, 270° = from your left.</div>
   <div class="grid" style="margin-top:10px">
     <div class="full"><label for="shotAngle"><span>Shot angle (°, + up / − downhill)</span><button class="sm ghost sensorbtn" type="button" id="angleBtn">📐 Measure angle</button></label>
       <div class="stepper" data-step="1" data-min="-60" data-max="60"><input type="number" inputmode="decimal" id="shotAngle" value="0"></div>
@@ -913,6 +1001,43 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
   </div>
   <div id="dcPrint" class="wrist"></div>
 </div>
+<div id="shView" hidden role="dialog" aria-modal="true" aria-labelledby="shStr">
+  <div class="shTop">
+    <button type="button" class="sm ghost" id="shExit" aria-label="Exit the shooting view">← Exit</button>
+    <div class="shTt"><b id="shStr">String 1 · Target A</b><small id="shFor"></small></div>
+    <div class="shRadBox"><span id="shRadar" role="status" aria-live="polite"></span><button type="button" class="sm" id="shConn" hidden>📡 Connect</button></div>
+  </div>
+  <div class="shMain">
+    <div class="shL">
+      <div class="shHero" id="shHero" aria-live="polite"><span id="shV">—</span><span id="shVu">fps</span><span id="shMeta" class="wait">Waiting for the first shot</span></div>
+      <div id="shEndNote" hidden></div>
+      <div class="shStats" id="shStats"></div>
+      <div id="shEs"></div>
+      <div id="shDope"></div>
+    </div>
+    <div class="shR">
+      <div id="shList" aria-label="Shots in this string, newest first"></div>
+      <div id="shAddBox" hidden>
+        <input type="number" inputmode="decimal" id="shVel" placeholder="fps" aria-label="Shot velocity in fps (several: separate with spaces)">
+        <button type="button" id="shAddGo">Add</button><button type="button" class="ghost" id="shAddDone">Done</button>
+      </div>
+      <div id="shTagBar" hidden>
+        <p class="lbl2" id="shTagFor">Tag the last shot</p>
+        <button type="button" data-f="cold" aria-pressed="false">❄ Cold</button><button type="button" data-f="clean" aria-pressed="false">🧽 Clean</button><button type="button" data-f="fl" aria-pressed="false">↯ Flier</button>
+        <input type="text" id="shNote" maxlength="200" placeholder="Note for this shot" aria-label="Note for the last shot">
+      </div>
+      <div class="shBtns">
+        <button type="button" class="bad" id="shBad">✗ Bad read<br><small>discard last</small></button>
+        <button type="button" class="ghost" id="shTag" aria-expanded="false" aria-controls="shTagBar">🏷 Tag</button>
+        <button type="button" id="shAdd" aria-expanded="false" aria-controls="shAddBox">＋ Add shot</button>
+        <button type="button" class="ghost" id="shNewStr">New string</button>
+        <button type="button" class="ghost" id="shNewTgt">New target</button>
+        <button type="button" class="ghost" id="shEndStr">End string</button>
+        <button type="button" class="w3" id="shMark">🎯 Mark holes</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 <div id="sheet" role="dialog" aria-modal="true">
   <h3 id="sheetTitle"></h3>
@@ -1108,6 +1233,7 @@ function migrateGunOptic(r, list) {   // old gun turret + sight height → an op
 }
 const migrated = migratePresets();
 const S = Object.assign({ ang: "MOA", view: "dope", values: {} }, load(K_SETTINGS, {}));
+var SH = { on: false, sid: null, back: null, ended: null, pend: null, closing: false, calcKey: "", tok: 0, es: null, dope: null, lastId: null }, WG = null, WU = { from: null, t: 0, busy: false };
 if (S.ang !== "MIL" && S.ang !== "MOA") S.ang = "MOA";   // repair settings saved by the nested-toggle bug
 if (S.view !== "dope" && S.view !== "full") S.view = "dope";
 const savePresets = () => store(K_PRESETS, P);
@@ -1144,7 +1270,7 @@ let toastT;
 function toast(msg, act) {
   const t = $("toast"); t.textContent = msg; t.classList.toggle("act", !!act);
   if (act) { const b = document.createElement("button"); b.type = "button"; b.id = "toastAct"; b.textContent = act.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); act.fn(); }; t.appendChild(b); }
-  t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), act ? 7000 : 2200);
+  t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), act ? (act.ms || 7000) : 2200);
 }
 const val = id => $(id).value.trim();
 const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
@@ -1176,7 +1302,7 @@ function renderPickers() {
 }
 function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; applyGunKind(); applyOptic(); }
 function applyGunKind() { const hg = $("gunKind").value === "handgun"; $("barrel").placeholder = hg ? "optional, e.g. 4.25" : "optional, e.g. 20"; }
-function applyLoad() { const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); }
+function applyLoad() { if (SH.pend) setTimeout(shPendCheck, 0); const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); }
 function applyRange() {
   const g = curRange();
   if (g) {
@@ -1482,7 +1608,7 @@ function bump(el, n) {
   if (String(v) !== el.value) { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }
 }
 document.querySelectorAll(".stepper").forEach(box => {
-  const el = box.querySelector("input");
+  const el = box.querySelector("input"), noSwipe = el.id === "windSpeed" || el.id === "windDir";   // the wind boxes sit in the scroll path: − / + only
   const mk = (txt, n, label) => { const b = document.createElement("button"); b.type = "button"; b.textContent = txt; b.setAttribute("aria-label", label);
     let t1, t2; const stop = () => { clearTimeout(t1); clearInterval(t2); };
     b.addEventListener("pointerdown", e => { e.preventDefault(); bump(el, n); t1 = setTimeout(() => t2 = setInterval(() => bump(el, n), 70), 400); });
@@ -1505,8 +1631,8 @@ document.querySelectorAll(".stepper").forEach(box => {
     if (sx === null || e.pointerId !== pid) return;
     const dx = e.clientX - sx, dy = e.clientY - sy;
     if (!dragging) {
-      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { dragging = true; try { el.setPointerCapture(pid); } catch {} el.classList.add("dragging"); sx = e.clientX; }
-      else if (Math.abs(dy) > 10) sx = null;   // vertical: let the page scroll
+      if (!noSwipe && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { dragging = true; try { el.setPointerCapture(pid); } catch {} el.classList.add("dragging"); sx = e.clientX; }
+      else if (Math.abs(dy) > 10 || (noSwipe && Math.abs(dx) > 10)) sx = null;   // vertical: let the page scroll
       return;
     }
     const PX = 14; acc += e.clientX - sx; sx = e.clientX;
@@ -1558,16 +1684,87 @@ function drawDial() {
   c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx - 9 * Math.cos(ah - 0.5), ty - 9 * Math.sin(ah - 0.5)); c.lineTo(tx - 9 * Math.cos(ah + 0.5), ty - 9 * Math.sin(ah + 0.5)); c.fill();
   c.beginPath(); c.arc(ox, oy, 7, 0, 7); c.fill();
 }
-let dialDrag = false;
-function dialSet(e) {
-  const r = dial.getBoundingClientRect(), x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2;
-  if (Math.hypot(x, y) < 6) return;
-  const d = Math.round(norm360(Math.atan2(x, -y) * 180 / Math.PI) / 5) * 5 % 360;
-  if (String(d) !== $("windDir").value) { $("windDir").value = d; $("windDir").dispatchEvent(new Event("input", { bubbles: true })); }
+/* Wind dial gestures: a vertical swipe over the dial scrolls the page (touch-action: pan-y; nothing is prevented until the dial engages).
+   The dial engages when a drag starts on the handle or ring and follows the circle, or after a ~250 ms press-and-hold; a tap snaps to that hour. */
+function dialPt(cx, cy) { const r = dial.getBoundingClientRect(), k = 150 / (r.width || 150); return { x: (cx - r.left - r.width / 2) * k, y: (cy - r.top - r.height / 2) * k }; }
+function dialAng(p) { return norm360(Math.atan2(p.x, -p.y) * 180 / Math.PI); }
+function dialZone(p) {
+  const d = num("windDir"), rr = Math.hypot(p.x, p.y);
+  if (d != null) { const a = d * Math.PI / 180; if (Math.hypot(p.x - Math.sin(a) * 44, p.y + Math.cos(a) * 44) <= 18) return "handle"; }
+  return rr >= 40 && rr <= 80 ? "ring" : "face";
 }
-dial.addEventListener("pointerdown", e => { e.preventDefault(); dialDrag = true; dial.setPointerCapture(e.pointerId); dialSet(e); });
-dial.addEventListener("pointermove", e => { if (dialDrag) dialSet(e); });
-["pointerup", "pointercancel"].forEach(ev => dial.addEventListener(ev, () => dialDrag = false));
+function dialDecide(zone, p, mx, my) {   // first real motion: "engage" (follows the circle from the handle/ring) | "scroll" | "wait"
+  if (Math.hypot(mx, my) < 8) return "wait";
+  if (zone === "face") return "scroll";
+  const rr = Math.hypot(p.x, p.y) || 1, ux = p.x / rr, uy = p.y / rr, along = Math.abs(mx * ux + my * uy), tang = Math.abs(mx * uy - my * ux);
+  if (tang < 1.5 * along) return "scroll";
+  if (zone === "ring" && Math.abs(my) > 2 * Math.abs(mx)) return "scroll";   // straight down the side of the ring = a page scroll (grab the handle, or hold, to drag there)
+  return "engage";
+}
+function windDirSet(d) { const el = $("windDir"); if (String(d) !== el.value) { el.value = d; el.dispatchEvent(new Event("input", { bubbles: true })); } }
+function dialSetAt(p, snap) { if (Math.hypot(p.x, p.y) < 6) return; const a = dialAng(p); windDirSet(snap ? Math.round(a / 30) * 30 % 360 : Math.round(a / 5) * 5 % 360); }
+function dialEngage() { if (!WG || WG.state === "on") return; WG.state = "on"; clearTimeout(WG.hold); dial.classList.add("on"); if (navigator.vibrate) try { navigator.vibrate(10); } catch {} }
+function dialStart(cx, cy) {
+  dialCancel(); if (S.windLock) return false;
+  const p = dialPt(cx, cy); windUndoArm();
+  WG = { x0: cx, y0: cy, p0: p, zone: dialZone(p), state: "wait", moved: false };
+  WG.hold = setTimeout(() => { if (WG && WG.state === "wait") dialEngage(); }, 250);
+  return true;
+}
+function dialMove(cx, cy) {   // → true when the move belongs to the dial (caller prevents the scroll)
+  if (!WG || WG.state === "scroll") return false;
+  const mx = cx - WG.x0, my = cy - WG.y0;
+  if (WG.state === "wait") {
+    const r = dialDecide(WG.zone, WG.p0, mx, my);
+    if (r === "wait") return WG.zone === "handle" || (WG.zone === "ring" && (mx || my) && Math.abs(mx) >= Math.abs(my));   // hold off the scroll while it could still become a dial drag
+    if (r === "scroll") { WG.state = "scroll"; clearTimeout(WG.hold); return false; }
+    dialEngage();
+  }
+  if (Math.hypot(mx, my) >= 6) WG.moved = true;
+  if (WG.moved) dialSetAt(dialPt(cx, cy));
+  return true;
+}
+function dialEnd(cx, cy) {
+  if (!WG) return false; const g = WG; WG = null; clearTimeout(g.hold); dial.classList.remove("on");
+  if (g.state === "scroll") return false;
+  if ((g.state === "wait" && Math.hypot(cx - g.x0, cy - g.y0) < 8) || (g.state === "on" && !g.moved)) dialSetAt(g.p0, true);   // a tap (or a hold without moving) snaps to that hour
+  windUndoSoon(); return true;
+}
+function dialCancel() { if (WG) { clearTimeout(WG.hold); WG = null; dial.classList.remove("on"); } }
+dial.addEventListener("touchstart", e => { if (e.touches.length !== 1) { dialCancel(); return; } const t = e.touches[0]; dialStart(t.clientX, t.clientY); }, { passive: true });
+dial.addEventListener("touchmove", e => { if (!WG) return; if (e.touches.length !== 1) { dialCancel(); return; } const t = e.touches[0]; if (dialMove(t.clientX, t.clientY) && e.cancelable) e.preventDefault(); }, { passive: false });
+dial.addEventListener("touchend", e => { if (!WG) return; const on = WG.state !== "scroll", t = e.changedTouches[0]; dialEnd(t.clientX, t.clientY); if (on && e.cancelable) e.preventDefault(); });
+dial.addEventListener("touchcancel", () => dialCancel());
+dial.addEventListener("pointerdown", e => { if (e.pointerType === "touch") return; e.preventDefault(); if (dialStart(e.clientX, e.clientY)) try { dial.setPointerCapture(e.pointerId); } catch {} });
+dial.addEventListener("pointermove", e => { if (e.pointerType !== "touch" && WG) dialMove(e.clientX, e.clientY); });
+dial.addEventListener("pointerup", e => { if (e.pointerType !== "touch") dialEnd(e.clientX, e.clientY); });
+dial.addEventListener("pointercancel", e => { if (e.pointerType !== "touch") dialCancel(); });
+/* 🔒 wind lock: the dial ignores input (− / + still work) */
+function windLockPaint() {
+  const on = !!S.windLock, b = $("windLock"); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "🔒 Dial locked" : "🔓 Lock dial";
+  b.title = on ? "The wind dial ignores touches — tap to unlock" : "Lock the wind dial so a stray touch can't move it";
+  dial.classList.toggle("locked", on); dial.setAttribute("aria-disabled", String(on));
+}
+$("windLock").onclick = () => { S.windLock = !S.windLock; if (!S.windLock) delete S.windLock; store(K_SETTINGS, S); windLockPaint(); toast(S.windLock ? "🔒 Wind dial locked (− / + still work)" : "🔓 Wind dial unlocked"); };
+windLockPaint();
+/* every wind-direction change by hand: a brief "Wind now N o'clock · Undo" */
+function windUndoArm() { if (WU.from == null) WU.from = $("windDir").value; }
+function windUndoSoon() { clearTimeout(WU.t); WU.t = setTimeout(windUndoToast, 450); }
+function windUndoToast() {
+  if (WG) { windUndoSoon(); return; }
+  const from = WU.from, now = $("windDir").value; WU.from = null;
+  if (from == null || from === now || now === "") return;
+  const d = num("windDir");
+  toast(`Wind now ${CLOCK(d)} o'clock`, { label: "Undo", ms: 4000, fn: () => {
+    WU.busy = true; try { $("windDir").value = from; $("windDir").dispatchEvent(new Event("input", { bubbles: true })); } finally { WU.busy = false; }
+    WU.from = null; toast(`Wind back to ${from === "" ? "—" : CLOCK(+from) + " o'clock"}`);
+  } });
+}
+$("windDir").addEventListener("input", () => { if (!WU.busy && WU.from != null) windUndoSoon(); });
+$("windDir").addEventListener("focus", () => windUndoArm());
+$("windDir").addEventListener("keydown", () => windUndoArm(), true);
+$("windDir").closest(".stepper").addEventListener("pointerdown", () => windUndoArm(), true);
+
 
 /* ---------------- validation ---------------- */
 const RULES = {
@@ -2084,20 +2281,24 @@ const SRC_LBL = { manual: "manual", athlon: "Athlon import", bluetooth: "Bluetoo
 function maybeRenderLog() { const k = JSON.stringify(curKeyIds()); if (k !== slKey) { slKey = k; renderLog(); if (window.__radarFlush) window.__radarFlush(); } }
 function renderLog() {
   const { rifleId, loadId } = curKeyIds(), l = curLoad(), list = sessFor(rifleId, loadId);
-  $("slNewBtn").disabled = !l;
-  const orph = orphanSessions();
-  if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = orphanHTML(orph); $("slChartBox").style.display = "none"; $("slCmp").hidden = true; paintSel(); return; }
+  $("slNewBtn").disabled = false; $("slNewBtn").title = l ? "Start a session: type velocities" : "Pick a gun and load first"; shBtnPaint();
+  const orph = orphanSessions(), emp = !l ? !LOG.length : !list.length;
+  $("slSum").hidden = emp;
+  if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = (emp ? slEmptyHTML(false) : "") + orphanHTML(orph); $("slChartBox").style.display = "none"; $("slCmp").hidden = true; paintSel(); return; }
   const all = list.flatMap(s => s.shots), st = shotStats(all);
   $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} · ${st.n} shots for “${l.name}” · all-shot avg ${st.avg.toFixed(0)} fps, SD ${st.sd.toFixed(1)}`
     : `No sessions yet for “${l.name}”. Tap ＋ Session to type velocities, or import an Athlon file.`;
   $("slList").innerHTML = list.slice().reverse().map(s => `${tgThumbA(s)}<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
     <span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
     <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
-    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>${tgThumbB(s)}`).join("") + orphanHTML(orph);
+    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>${tgThumbB(s)}`).join("") + (emp ? slEmptyHTML(true) : "") + orphanHTML(orph);
   paintSel();
   $("slChartBox").style.display = list.length ? "block" : "none";
   if (list.length) drawLogChart(list);
   renderCompare();
+}
+function slEmptyHTML(hasLoad) {
+  return `<div class="slEmpty" id="slEmpty">No sessions yet. A session is one range trip's chronograph shots for ${hasLoad ? "this load" : "a gun + load"} — ${hasLoad ? "" : "pick them on Gear, then "}tap ▶ Start shooting on Dope, or ＋ Session to type velocities.</div>`;
 }
 /* compare sessions (ladder / charge tests) */
 let cmpScope = "load";
@@ -2208,7 +2409,7 @@ function openEditor(sess) {
   $("slDevStats").textContent = ED.device && ED.device.avg != null ? `Device-reported: avg ${ED.device.avg}, SD ${ED.device.sd}, ES ${ED.device.es} ${ED.device.unit} (the app recomputes stats from the shots, SD uses n−1).` : "";
   if (BAN.sid && BAN.sid !== ED.id) banHide();
   $("slEditor").classList.add("show"); document.body.style.overflow = "hidden"; renderEditor();
-  if (ED._new) setTimeout(() => $("slVel").focus(), 50);
+  if (ED._new && !SH.on) setTimeout(() => $("slVel").focus(), 50);
 }
 function paintEdFor() {
   const h = sessHome(ED), was = [ED.recipe?.gunName, ED.recipe?.loadName].filter(Boolean).join(" · ");
@@ -2282,6 +2483,7 @@ function closeEditor(force) {
   $("slEditor").classList.remove("show"); document.body.style.overflow = ""; ED = null; edDirty = false;
   if ($("tgEd").classList.contains("show")) { $("tgEd").classList.remove("show"); TE = null; }
   if ($("shotBan").classList.contains("dock")) banHide();
+  if (SH.on && !SH.closing) shHide();
 }
 $("slEdClose").onclick = () => closeEditor();
 $("slSave").onclick = async () => { if (!ED.shots.length) { toast("Add at least one shot"); return; } const c = await commitEditor(); closeEditor(true); toast(`Session saved · ${c.stats.n} shots, avg ${c.stats.avg.toFixed(0)} fps`); };
@@ -2296,7 +2498,7 @@ $("slUseMV").onclick = async () => {
   closeEditor(true); updateDirty(); schedule();
   toast(`MV set to ${mv} fps (Chronographed, ${c.stats.n} shots, SD ${c.stats.sd}${pt != null ? `, at ${pt}°F` : ""})`);
 };
-$("slNewBtn").onclick = () => openEditor(null);
+$("slNewBtn").onclick = () => curLoad() ? openEditor(null) : shNeedGear("session");
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("slEditor").classList.contains("show")) closeEditor(); else if ($("slImport").classList.contains("show")) closeImport(); });
 
 /* Live-session hook used by the Bluetooth radar (and usable by other sources): call with velocities as they arrive.
@@ -2305,6 +2507,13 @@ async function addShotsToLiveSession(shots, opts = {}) {
   const source = opts.source || "bluetooth", open = opts.open !== false;
   const mk = () => (Array.isArray(shots) ? shots : [shots]).map(x => typeof x === "number" ? { v: x } : x)
     .map(x => ({ v: +((+x.v) * (x.mps ? MPS : 1)).toFixed(1), id: uid(), ...(x.t ? { t: String(x.t) } : {}) })).filter(x => x.v >= 50 && x.v <= 6000);
+  if (SH.on && ED && ED.id === SH.sid) {   // the shooting view is open: its session takes the shot
+    const arr = mk(); if (!arr.length) return ED.id;
+    if (!ED.shots.length && ED._new) { ED.source = source; $("slSource").value = SRC_LBL[source] || source; }
+    shRollIfEnded(); arr.forEach(x => { x.str = tgEnsure(ED).cur; }); ED.shots.push(...arr); SH.lastId = arr[arr.length - 1].id;
+    renderEditor(); await commitEditor(); $("slDel").style.display = ""; LIVE = { id: ED.id, source }; shPaint();
+    return ED.id;
+  }
   if (!open && !(ED && ED.source === source)) {   // background live session: no editor, the banner shows the shot
     const k = curKeyIds(); if (!k.loadId) return null;
     let L = LIVE && LIVE.source === source && LOG.find(s => s.id === LIVE.id && s.rifleId === k.rifleId && s.loadId === k.loadId);
@@ -2498,7 +2707,7 @@ const K_RSEEN = "bcalc.radar.seen.v1";
 try { RD.seen = JSON.parse(localStorage.getItem(K_RSEEN) || "[]"); if (!Array.isArray(RD.seen)) RD.seen = []; } catch { RD.seen = []; }
 const hasBT = !!(navigator.bluetooth && window.isSecureContext);
 function radarPaint() {
-  wakeSync();
+  wakeSync(); shStatus();
   const st = $("radarStatus"), c = $("radarConnect"), rc = $("radarReconnect"), dc = $("radarDisconnect");
   if (!hasBT) {
     c.disabled = true; c.hidden = true; rc.hidden = true; dc.hidden = true; $("radarMore").hidden = true;
@@ -2532,7 +2741,8 @@ async function radarFlush() {
     while (RD.pending.length) {
       const s = RD.pending[0];
       // radar shot #1 = a new string on the radar → start a new app session if the live one already has radar shots
-      if (s.n === 1) { const L = LIVE && LOG.find(q => q.id === LIVE.id); if (ED && ED.source === "bluetooth" && ED.shots.length) { closeEditor(true); LIVE = null; } else if (L && L.shots.length) LIVE = null; }
+      if (s.n === 1 && SH.on && ED && ED.id === SH.sid) { const t = tgEnsure(ED); if (readings(ED, t.cur).length) SH.ended = t.cur; }   // shooting view: a new radar string = a new string in the same session
+      else if (s.n === 1) { const L = LIVE && LOG.find(q => q.id === LIVE.id); if (ED && ED.source === "bluetooth" && ED.shots.length) { closeEditor(true); LIVE = null; } else if (L && L.shots.length) LIVE = null; }
       const id = await addShotsToLiveSession([{ v: s.fps, t: s.timeStr ? s.timeStr.slice(11) : "" }], { source: "bluetooth", open: false });
       if (!id) break;
       RD.pending.shift();
@@ -2551,7 +2761,7 @@ function radarFrame(f) {
   RD.last = { n: s.n, fps: s.fps };
   RD.pending.push({ n: s.n, fps: s.fps, timeStr: p.timeStr });
   if (!curLoad()) toast(`Radar shot ${fpsT(s.fps)} fps held: pick a load to log it`);
-  else toast(`📡 Shot #${s.n}: ${fpsT(s.fps)} fps`);
+  else if (!SH.on) toast(`📡 Shot #${s.n}: ${fpsT(s.fps)} fps`);
   if (navigator.vibrate) try { navigator.vibrate(40); } catch {}
   radarFlush();
 }
@@ -3201,7 +3411,7 @@ function tgSvg(o) {
 /* ---- live shot banner ---- */
 function banSess() { return ED && ED.id === BAN.sid ? ED : LOG.find(s => s.id === BAN.sid); }
 function banDocked() { return !!(ED && ED.id === BAN.sid && $("slEditor").classList.contains("show") && !$("tgEd").classList.contains("show")); }
-function banShow(sid, shid) { BAN.sid = sid; BAN.shid = shid; if ($("tgEd").classList.contains("show")) { if (TE && ED && ED.id === sid) teRender(); return; } banPaint(); banArm(); }
+function banShow(sid, shid) { if (SH.on) { shPaint(); return; } BAN.sid = sid; BAN.shid = shid; if ($("tgEd").classList.contains("show")) { if (TE && ED && ED.id === sid) teRender(); return; } banPaint(); banArm(); }
 function banHide() { const el = $("shotBan"); clearTimeout(BAN.t); el.hidden = true; el.classList.remove("fade"); if (el.parentElement !== document.body) document.body.appendChild(el); el.classList.remove("dock"); BAN.sid = null; }
 function banPaint() {
   const el = $("shotBan"); if (!BAN.sid) return;
@@ -3241,9 +3451,9 @@ $("sbActs").addEventListener("click", async e => {
   BAN.sid = sid; BAN.shid = shid; banPaint(); banArm();
 });
 
-/* ---- wake lock while a radar session is live ---- */
+/* ---- wake lock while a radar session is live or the shooting view is open ---- */
 async function wakeSync() {
-  const want = typeof RD !== "undefined" && RD.status === "connected" && document.visibilityState === "visible";
+  const want = ((typeof RD !== "undefined" && RD.status === "connected") || SH.on) && document.visibilityState === "visible";
   if (WLbusy || !navigator.wakeLock) return; WLbusy = true;
   try {
     if (want && !WL) { WL = await navigator.wakeLock.request("screen"); WL.addEventListener("release", () => { WL = null; }); }
@@ -3403,6 +3613,7 @@ async function closeTgEd() {
   $("tgEd").classList.remove("show"); $("tgLoupe").hidden = true; TE = null;
   edDirty = true; if (ED && !ED._new) await commitEditor(); if (ED) renderEditor();
   if (ED && BAN.sid === ED.id) banPaint();
+  if (SH.on) { SH.calcKey = ""; shPaint(); }
 }
 function teSpan(t, g) {
   const yd = tgYd(g) || 100; let base = Math.max(12, 10 * inPerU("MOA", yd)), mx = 0;
@@ -4035,7 +4246,220 @@ $("slList").addEventListener("pointerdown", e => { const b = e.target.closest(".
 ["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slList").addEventListener(ev, () => clearTimeout(lpT)));
 $("slList").addEventListener("contextmenu", e => { if (e.target.closest(".slItem")) e.preventDefault(); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("mvSheet").classList.contains("show")) { e.stopImmediatePropagation(); closeOvl("mvSheet"); } }, true);
-window.__bc = { tgView, tgEnsure, cleanTg, cleanDial, tgDope, tgThumb, velVert, tgLabels, get TR() { return TR; }, grpStats, pearson, inPerU, shotDetail, banHide, openTgEd, mutSess, get BAN() { return BAN; }, get TE() { return TE; }, get LIVE() { return LIVE; }, get WL() { return WL; }, wakeSync,  millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
+/* ================= Shooting view (Start shooting on Dope) =================
+   Full-screen chronograph view on top of the session editor: ED is the session, so strings, targets, Mark holes and the radar
+   all keep working as before. Shots autosave. Radar shots land here live (no banner, no second session). */
+function shLoadOf(s) { const r = P.rifles.find(x => x.id === s.rifleId); return r?.loads.find(x => x.id === s.loadId) || null; }
+function shWeight() { const l = ED && shLoadOf(ED), w = parseFloat(l?.weight); return isFinite(w) && w > 0 ? w : num("weight"); }
+function shEnergy(v, w) { return w > 0 && v > 0 ? w * v * v / 450240 : null; }   // ft-lb from grains + fps
+function shPick() {   // the session to continue: the live radar one, else this gun + load's latest from the last 12 h
+  const k = curKeyIds(); if (!k.loadId) return null;
+  const mine = LOG.filter(s => s.rifleId === k.rifleId && s.loadId === k.loadId);
+  const L = LIVE && mine.find(s => s.id === LIVE.id); if (L) return L;
+  const last = mine.slice().sort((a, b) => a.date.localeCompare(b.date)).pop();
+  return last && Date.now() - new Date(last.date).getTime() < 12 * 36e5 ? last : null;
+}
+function shBtnPaint() {
+  const b = $("shStartBtn"); if (!b) return; let s = null;
+  try { s = curLoad() ? shPick() : null; } catch { s = null; }
+  const n = s ? s.shots.filter(x => !x.x).length : 0;
+  b.innerHTML = s ? `▶ Continue shooting<small>${n} shot${n === 1 ? "" : "s"} in today's session · radar or typed</small>` : `▶ Start shooting<small>chronograph view · radar or typed shots</small>`;
+}
+function shNeedGear(kind) {   // no gun / load yet: show the pickers, then offer to carry on once one is picked
+  SH.pend = kind; setTab("gear");
+  const r = curRifle(), el = !r ? $("rifleSel") : $("loadSel"), pk = el.closest(".picker") || el;
+  pk.scrollIntoView({ block: "center" }); pk.classList.add("pkFlash"); setTimeout(() => pk.classList.remove("pkFlash"), 2600);
+  try { el.focus({ preventScroll: true }); } catch {}
+  toast(!r ? "Pick a gun and its load first (⋯ adds a new one)" : "Pick a load for this gun first (⋯ adds a new one)");
+}
+function shPendCheck() {
+  if (!SH.pend || SH.on || !curRifle() || !curLoad()) return;
+  const k = SH.pend; SH.pend = null;
+  toast(`Ready: ${curRifle().name} · ${curLoad().name}`, { label: k === "shoot" ? "▶ Start shooting" : "＋ Session", fn: () => k === "shoot" ? shStart() : openEditor(null) });
+}
+async function shStart() {
+  if (SH.on) return;
+  if (!curRifle() || !curLoad()) { shNeedGear("shoot"); return; }
+  SH.back = { tab: S.tab || document.body.dataset.tab || "dope", y: window.scrollY };
+  if (ED) { if (edDirty && ED.shots.length) await commitEditor(); closeEditor(true); }
+  const s = shPick();
+  SH.on = true; SH.ended = null; SH.calcKey = ""; SH.es = null; SH.dope = null; SH.lastId = null;
+  openEditor(s || null); if (!ED) { SH.on = false; return; }
+  SH.sid = ED.id; SH.cont = !!s;
+  const t = tgEnsure(ED), st = t.strings.find(q => q.id === t.cur);
+  $("shAddBox").hidden = true; $("shTagBar").hidden = true;
+  $("shView").hidden = false; $("shView").classList.add("show"); document.body.classList.add("shOn"); banHide();
+  shPaint(); wakeSync();
+  if (!readings(ED, st.id).length) tgAutoDial(ED, st).then(() => { if (SH.on) { SH.calcKey = ""; shPaint(); } });
+  setTimeout(() => { if (SH.on) $("shExit").focus({ preventScroll: true }); }, 30);
+}
+function shHide() {
+  SH.on = false; SH.sid = null; SH.ended = null;
+  $("shView").classList.remove("show"); $("shView").hidden = true; document.body.classList.remove("shOn"); wakeSync(); shBtnPaint();
+}
+async function shExit() {
+  if (!SH.on) return;
+  if ($("tgEd").classList.contains("show")) await closeTgEd();
+  let n = 0;
+  if (ED && ED.id === SH.sid) { if (ED.shots.length && (edDirty || ED._new)) await commitEditor(); n = ED.shots.length; SH.closing = true; closeEditor(true); SH.closing = false; }
+  const b = SH.back; shHide();
+  if (b) { setTab(b.tab); window.scrollTo(0, b.y); requestAnimationFrame(() => window.scrollTo(0, b.y)); }
+  if (n) toast(`Session saved · ${n} shot${n === 1 ? "" : "s"} (Log tab)`);
+}
+async function shSave() { if (ED && ED.shots.length) { await commitEditor(); $("slDel").style.display = ""; } }
+function shCurStr() { const t = tgEnsure(ED); return { t, cur: t.strings.find(q => q.id === t.cur) }; }
+function shRollIfEnded() {   // the string was ended: the next shot starts a new one
+  if (!ED || !SH.ended) return; const t = tgEnsure(ED);
+  if (SH.ended === t.cur && readings(ED, t.cur).length) tgNewString(false);
+  SH.ended = null;
+}
+async function shAddText(text) {
+  if (!ED) return 0;
+  const vals = String(text).split(/[\s,;]+/).map(parseFloat).filter(v => isFinite(v) && v >= 50 && v <= 6000);
+  if (!vals.length) { toast("Enter a velocity in fps (50–6000)"); return 0; }
+  shRollIfEnded(); addVelocities(vals.join(" ")); SH.lastId = ED.shots[ED.shots.length - 1].id;
+  renderEditor(); await shSave(); shPaint(); return vals.length;
+}
+function shStatsOf(rd, w) {   // string stats + last shot (shot #, ± from the string average, energy)
+  const st = shotStats(rd), last = rd[rd.length - 1] || null;
+  const dv = last && !last.x && st.n > 1 ? Math.round(last.v - st.avg) : null;
+  return { ...st, total: rd.length, disc: rd.length - st.n, last, k: rd.length, dv, ftlb: last ? shEnergy(last.v, w) : null };
+}
+function shSigned(n) { return n == null ? "" : (n >= 0 ? "+" : "−") + Math.abs(n); }
+function shTags(s) { return [s.cold && "Cold", s.clean && "Clean", s.fl && "Flier", s.note && "✎ " + s.note].filter(Boolean).join(" · "); }
+function shPaint() {
+  if (!SH.on || !ED) return;
+  const { t, cur } = shCurStr(), sn = strNo(t, cur.id), rd = readings(ED, cur.id), w = shWeight(), q = shStatsOf(rd, w), g = t.targets.find(x => x.id === cur.tid);
+  const yd = Math.round(tgYd(g) || tgDefDist());
+  $("shStr").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
+  const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
+  $("shFor").textContent = [r?.name, l?.name, `${yd} yd`].filter(Boolean).join(" · ");
+  const x = q.last;
+  $("shV").textContent = x ? fpsT(x.v) : "—";
+  $("shMeta").textContent = x ? [`#${q.k}`, x.x ? "discarded" : q.dv != null ? shSigned(q.dv) : ""].filter(Boolean).join(" · ") : SH.ended ? "" : "Waiting for the first shot";
+  $("shMeta").classList.toggle("wait", !x);
+  $("shHero").classList.toggle("dis", !!(x && x.x));
+  $("shHero").setAttribute("aria-label", x ? `Last shot ${fpsT(x.v)} fps, shot ${q.k}${x.x ? ", discarded" : q.dv != null ? `, ${shSigned(q.dv)} from the string average` : ""}` : "No shots yet");
+  const en = SH.ended === cur.id; $("shEndNote").hidden = !en;
+  if (en) $("shEndNote").textContent = `String ${sn} ended · the next shot starts String ${t.strings.length + 1}`;
+  const f1 = v => (+v).toFixed(1);
+  $("shStats").innerHTML = [["Avg", q.n ? fpsT(q.avg) : "—"], ["SD", q.n > 1 ? f1(q.sd) : "—"], ["ES", q.n > 1 ? fpsT(q.es) : "—"], ["Shots", q.n + (q.disc ? ` <small>+${q.disc}⊘</small>` : "")],
+    ["Min", q.n ? fpsT(q.min) : "—"], ["Max", q.n ? fpsT(q.max) : "—"], ["Energy · last", q.ftlb != null ? `${Math.round(q.ftlb).toLocaleString()} ft-lb` : "—", "w2"]]
+    .map(([k, v, c]) => `<div${c ? ` class="${c}"` : ""}><b>${v}</b><span>${k}</span></div>`).join("");
+  $("shList").innerHTML = rd.length ? rd.map((s, i) => ({ s, i })).reverse().map(({ s, i }) => `<div class="shRow${s.x ? " dis" : ""}${s.id === SH.lastId && i === rd.length - 1 ? " new" : ""}" data-id="${escapeHtml(s.id)}">
+      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span><span class="dv">${s.x ? "discarded" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span><span class="shTg">${escapeHtml(shTags(s))}</span>
+      <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot ${i + 1}" title="${s.x ? "Restore" : "Discard (bad read)"}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
+    : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap ＋ Add shot to type a velocity.</div>`;
+  shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en);
+  $("shBad").disabled = !rd.some(s => !s.x);
+  shCalc(q, yd, cur);
+}
+function shTagPaint() {
+  if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), x = rd[rd.length - 1];
+  $("shTagFor").textContent = x ? `Tag shot #${rd.length} (${fpsT(x.v)} fps)` : "No shot to tag yet";
+  $("shTagBar").querySelectorAll("button[data-f]").forEach(b => { const on = !!(x && x[b.dataset.f]); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); b.disabled = !x; });
+  if (document.activeElement !== $("shNote")) $("shNote").value = x?.note || ""; $("shNote").disabled = !x;
+}
+function shStatus() {
+  if (!SH.on) return; const st = $("shRadar"), c = $("shConn");
+  if (!hasBT) { st.textContent = "📡 No radar here · type shots"; st.className = ""; c.hidden = true; return; }
+  const bt = RD.battery != null ? ` · 🔋 ${RD.battery}%` : "";
+  st.textContent = { connected: `📡 Connected${bt}`, connecting: "📡 Connecting…", lost: `📡 Lost${RD.retries ? " · retrying" : ""}${bt}` }[RD.status] || "📡 Disconnected";
+  st.className = RD.status === "connected" ? "ok" : RD.status === "lost" ? "bad" : "";
+  c.hidden = RD.status === "connected" || RD.status === "connecting";
+  c.textContent = RD.dev && (RD.status === "lost" || RD.status === "off") ? "↻ Reconnect" : "📡 Connect";
+}
+// vertical spread at the target from the slowest vs fastest kept shot, same zero + conditions + angle as the Dope tab
+async function shEsAt(min, max, yd) {
+  if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000) || !(max > min)) return null;
+  try {
+    const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    const fire = async v => {
+      const s2 = new B.Shot({ weapon: sv.shot.weapon, ammo: new B.Ammo({ dm: sv.shot.ammo.dm, mv: B.UNew.FPS(v) }), atmo: sv.shot.atmo, winds: [] });
+      if (look) s2.lookAngle = B.UNew.Degree(look);
+      const r = await sv.calc.fire({ shot: s2, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
+      const p = r.samples[r.samples.length - 1]; return p && Math.abs(p.distance.In(B.Distance.Yard) - yd * cosA) <= 1 ? p : null;
+    };
+    const a = await fire(min), b = await fire(max); if (!a || !b) return null;
+    const A = S.ang === "MIL" ? B.Angular.MRad : B.Angular.MOA, spread = Math.abs(a.dropAngle.In(A) - b.dropAngle.In(A));
+    return { spread, half: spread / 2, inch: Math.abs(a.height.In(B.Distance.Inch) - b.height.In(B.Distance.Inch)), yd, u: S.ang };
+  } catch { return null; }
+}
+async function shDopeAt(yd, st) {   // dope strip: the string's dial (else the app's dope there) + the wind hold for the Dope-tab wind
+  const ts = ED ? tsFor(ED.rifleId) : turretSpec(), o = { yd };
+  if (st && st.dial) { const dv = dialView(st.dial, ts); o.elev = `${dv.txt}`; o.clk = dv.c != null ? `${Math.abs(dv.c)} clicks` : ""; o.src = st.dial.src === "app" ? "dialed" : "dialed (edited)"; }
+  if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return o;
+  try {
+    const sv = await solveShot(), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    if (look) sv.shot.lookAngle = B.UNew.Degree(look);
+    const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
+    const p = r.samples[r.samples.length - 1]; if (!p) return o;
+    const a = angs(p), dd = angDec(turretSpec()), u = angU(S.ang);
+    if (!o.elev) { o.elev = `${ud(a.e, dd)} ${u}`; o.clk = `${Math.abs(a.ec)} clicks`; o.src = "app dope"; }
+    const ws = num("windSpeed") || 0;
+    o.wind = `${lr(a.w, dd)} ${u}`; o.wtxt = ws ? `${fmt(ws, 1)} mph @ ${CLOCK(num("windDir") || 0)} o'clock` : "no wind";
+  } catch {}
+  return o;
+}
+function shCalc(q, yd, st) {
+  const key = [q.n > 1 ? q.min : "", q.n > 1 ? q.max : "", yd, S.ang, st.dial ? JSON.stringify(st.dial) : "", num("windSpeed"), num("windDir"), num("shotAngle"), lastRun?.tgt ? 1 : 0].join("|");
+  if (key === SH.calcKey) { shCalcPaint(q); return; }
+  SH.calcKey = key; const tok = ++SH.tok; shCalcPaint(q);
+  (async () => {
+    const es = q.n > 1 ? await shEsAt(q.min, q.max, yd) : null, dp = await shDopeAt(yd, st);
+    if (tok !== SH.tok || !SH.on) return; SH.es = es; SH.dope = dp; shCalcPaint(q);
+  })();
+}
+function shCalcPaint(q) {
+  const u = angU(S.ang), es = SH.es, d = SH.dope, { t, cur } = ED ? shCurStr() : {}, g = t && t.targets.find(x => x.id === cur.tid), yd = Math.round(t ? tgYd(g) || tgDefDist() : 0);
+  $("shEs").innerHTML = q.n < 2 ? `ES at ${yd} yd: needs 2+ kept shots` : es && es.yd === yd && es.u === S.ang ? `ES ±${fmt(es.half, 2)} ${u} at ${yd} yd <small>· ${fmt(es.spread, 2)} ${u} (${fmt(es.inch, 1)}″) top to bottom</small>` : `ES at ${yd} yd: …`;
+  $("shDope").innerHTML = d && d.yd === yd ? `<span>🎯 ${yd} yd · ${escapeHtml(d.src || "dial")} <b>${escapeHtml(d.elev || "—")}</b>${d.clk ? ` (${escapeHtml(d.clk)})` : ""}</span><span>Wind hold <b>${escapeHtml(d.wind || "—")}</b>${d.wtxt ? ` · ${escapeHtml(d.wtxt)}` : ""}</span>` : `<span>🎯 ${yd} yd · dial …</span>`;
+}
+async function shBad() {
+  if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), k = rd.map(s => !s.x).lastIndexOf(true);
+  if (k < 0) { toast("No kept shot to discard"); return; }
+  const x = rd[k]; x.x = true; if (x.id) unpair(ED, x.id); edDirty = true; renderEditor(); await shSave(); shPaint();
+  toast(`Shot #${k + 1} (${fpsT(x.v)} fps) discarded · out of the stats`, { label: "Undo", ms: 5000, fn: async () => { if (!ED) return; delete x.x; edDirty = true; renderEditor(); await shSave(); shPaint(); } });
+}
+async function shToggle(id, f) {
+  if (!ED) return; const x = ED.shots.find(s => s.id === id); if (!x) return;
+  x[f] = !x[f]; if (!x[f]) delete x[f]; else if (f === "x" && x.id) unpair(ED, x.id);
+  edDirty = true; renderEditor(); await shSave(); shPaint();
+}
+async function shNew(target) { if (!ED) return; SH.ended = null; tgNewString(target); SH.lastId = null; await shSave(); SH.calcKey = ""; shPaint(); }
+async function shEnd() {
+  if (!ED) return; const { t, cur } = shCurStr(), rd = readings(ED, cur.id), n = strNo(t, cur.id), st = shotStats(rd);
+  if (!rd.length) { toast(`String ${n} has no shots yet`); return; }
+  SH.ended = cur.id; await shSave(); shPaint();
+  toast(`String ${n} ended · ${st.n} shot${st.n === 1 ? "" : "s"}${st.n > 1 ? `, SD ${st.sd.toFixed(1)}, ES ${fpsT(st.es)}` : ""}`, { label: "🎯 Mark holes", fn: () => shMark() });
+}
+function shMark() { if (!ED) return; const { t } = shCurStr(); openTgEd(SH.ended && t.strings.some(q => q.id === SH.ended) ? SH.ended : t.cur); }
+$("shStartBtn").onclick = () => shStart();
+$("shExit").onclick = () => shExit();
+$("shConn").onclick = () => { const rc = $("radarReconnect"); if (!rc.hidden) rc.click(); else $("radarConnect").click(); };
+$("shBad").onclick = () => shBad();
+$("shNewStr").onclick = () => shNew(false);
+$("shNewTgt").onclick = () => shNew(true);
+$("shEndStr").onclick = () => shEnd();
+$("shMark").onclick = () => shMark();
+$("shAdd").onclick = () => { const b = $("shAddBox"), open = b.hidden; b.hidden = !open; $("shTagBar").hidden = true; $("shTag").setAttribute("aria-expanded", "false"); $("shAdd").setAttribute("aria-expanded", String(open)); if (open) $("shVel").focus(); };
+$("shAddDone").onclick = () => { $("shAddBox").hidden = true; $("shAdd").setAttribute("aria-expanded", "false"); };
+$("shAddGo").onclick = async () => { const v = $("shVel").value; if (!v.trim()) { $("shVel").focus(); return; } if (await shAddText(v)) $("shVel").value = ""; $("shVel").focus(); };
+$("shVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("shAddGo").click(); } });
+$("shTag").onclick = () => { const b = $("shTagBar"), open = b.hidden; b.hidden = !open; $("shAddBox").hidden = true; $("shAdd").setAttribute("aria-expanded", "false"); $("shTag").setAttribute("aria-expanded", String(open)); shTagPaint(); };
+$("shTagBar").addEventListener("click", e => { const b = e.target.closest("button[data-f]"); if (!b || !ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), x = rd[rd.length - 1]; if (x) shToggle(x.id, b.dataset.f); });
+$("shNote").addEventListener("change", async () => { if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), x = rd[rd.length - 1]; if (!x) return; const v = $("shNote").value.trim(); if (v) x.note = v; else delete x.note; edDirty = true; renderEditor(); await shSave(); shPaint(); });
+$("shList").addEventListener("click", e => { const b = e.target.closest("button[data-a]"), row = e.target.closest(".shRow"); if (b && row) shToggle(row.dataset.id, b.dataset.a); });
+window.addEventListener("keydown", e => {
+  if (e.key !== "Escape" || !SH.on) return;
+  if ($("tgEd").classList.contains("show") || document.querySelector(".ovl.show:not(#slEditor)") || $("pkMenu").style.display === "flex") return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  if (!$("shAddBox").hidden || !$("shTagBar").hidden) { $("shAddBox").hidden = true; $("shTagBar").hidden = true; return; }
+  shExit();
+}, true);
+shBtnPaint();
+
+window.__bc = { get SH() { return SH; }, shStart, shExit, shStatsOf, shEsAt, shEnergy, shPaint, dialDecide, dialZone, slEmptyHTML, tgView, tgEnsure, cleanTg, cleanDial, tgDope, tgThumb, velVert, tgLabels, get TR() { return TR; }, grpStats, pearson, inPerU, shotDetail, banHide, openTgEd, mutSess, get BAN() { return BAN; }, get TE() { return TE; }, get LIVE() { return LIVE; }, get WL() { return WL; }, wakeSync,  millerSG, mvAdjust, turretSpec, solveTrue, openDopeCard, curOptic, effSH, turnsTxt, gustSpread, attachOptic, followUnits, angs, get chartLabels() { return chartLabels; }, get lastRun() { return lastRun; }, P, S, manual, auto, get wx() { return wx; }, get db() { return DB; }, loadDB, get log() { return LOG; }, addShotsToLiveSession, parseAthlonRows, get ED() { return ED; }, openMove, projMatch, recipeMatches, copyMV, radar: { RD, vprParse, vprReassemble, feed: radarBytes, paint: radarPaint } };
 </script>
 </body>
 </html>

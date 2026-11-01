@@ -4,7 +4,11 @@
 button.ic.wxIc { width: auto; min-width: 44px; flex: 0 0 auto; padding: 0 12px; font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
 #dcMsg { font-size: 0.8rem; text-align: center; margin-top: 4px; color: var(--muted); } #dcMsg:empty { display: none; }
 #dcMsg .bad { color: var(--err); font-weight: 700; } #dcMsg button { margin-top: 4px; }
-.dcMoreRow { display: flex; justify-content: center; margin-top: 4px; }
+/* Details ▾ stays centred; ↻ Weather shares its row at the right (no row of its own) */
+.dcMoreRow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; margin-top: 4px; }
+.dcMoreRow #dcMoreBtn { grid-column: 2; }
+.dcMoreRow #calcBtn { grid-column: 3; justify-self: end; }
+@media (max-width: 345px) { .dcMoreRow #calcBtn { width: 44px; padding: 0; } .dcMoreRow #calcBtn .wxL { display: none; } }   /* compact ↻, still 44 px */
 #dcMoreBtn { width: auto; min-height: 44px; padding: 4px 16px; margin: 0; font-size: 0.8rem; font-weight: 600; background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; }
 #dcMoreBtn[aria-expanded=true] { color: var(--text); border-color: var(--accent); }
 #dcChips { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px; font-size: 0.76rem; color: var(--muted); margin-top: 2px; }

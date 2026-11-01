@@ -1,0 +1,40 @@
+/* Phase B: clicks, warnings, truing, dope card */
+#themeBtn { min-width: 44px; min-height: 44px; }
+.dcBig .clk { display: block; font-size: 0.74rem; color: var(--muted); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.dcBig .clk:empty { display: none; }
+#dcWarn { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px; font-size: 0.76rem; margin-top: 2px; }
+#dcWarn:empty { display: none; }
+#dcWarn span { color: var(--muted); } #dcWarn .w { color: var(--warn); font-weight: 700; } #dcWarn .bad { color: var(--err); font-weight: 700; }
+#dopeCard.stale #dcWarn { opacity: .35; }
+#results tr.trans td { color: var(--warn); }
+#results td.ovr { text-decoration: underline; text-decoration-color: var(--err); text-decoration-thickness: 2px; }
+#results td .T { font-size: .68em; font-weight: 800; color: var(--warn); margin-left: 2px; vertical-align: super; }
+#results td.ck { color: var(--muted); font-size: .86em; }
+#dopeTools { margin-top: 8px; } #dopeTools button { flex: 1 1 45%; }
+#trOut { font-size: .9rem; } #trOut b { color: var(--accent); } #trOut .bad { color: var(--err); font-weight: 700; }
+#truedNote { color: var(--accent); }
+.dcvRow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.dcvMaxL { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--text); }
+.dcvMaxL input { width: 92px; }
+#dcvPrint { flex: 1 1 120px; width: auto; }
+#dcPrint { background: #fff; color: #000; padding: 8px; border-radius: 8px; margin: 0 auto; font-family: system-ui, sans-serif; }
+#dcPrint.wrist { width: 3.4in; max-width: 100%; font-size: 8.5pt; }
+#dcPrint.full { width: 100%; font-size: 11pt; }
+#dcPrint .hd { margin-bottom: 4px; line-height: 1.25; } #dcPrint .hd b { font-size: 1.1em; }
+#dcPrint table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 1em; margin: 0; }
+#dcPrint th, #dcPrint td { border: 1px solid #000; padding: 2px 3px; text-align: center; color: #000; background: #fff; font-weight: 600; }
+#dcPrint th { background: #e6e6e6; font-weight: 800; font-size: .9em; }
+#dcPrint tr:nth-child(even) td { background: #f2f2f2; }
+#dcPrint tr.trans td { background: #ddd; font-style: italic; }
+#dcPrint td.r { font-weight: 800; }
+#dcPrint .ft { font-size: .8em; margin-top: 3px; }
+@media print {
+  @page { margin: 0.35in; }
+  html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+  body > *:not(#dcView) { display: none !important; }
+  #dcView { display: block !important; position: static !important; inset: auto; padding: 0 !important; background: #fff !important; max-width: none; overflow: visible; }
+  #dcView .dcvCtl { display: none !important; }
+  #dcPrint { margin: 0; padding: 0; border-radius: 0; }
+  #dcPrint.wrist { width: 3.4in; } #dcPrint.full { width: 100%; }
+}
+

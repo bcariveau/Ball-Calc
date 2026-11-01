@@ -4,7 +4,6 @@ import { ctxRow, startBtn } from "./parts.js";
 export const dopeTab = `<section class="tab" id="tabDope" data-tab="dope" role="tabpanel" aria-labelledby="tabBtnDope">
 ${ctxRow("ctxDope")}
 <div id="dopeCard" aria-live="polite">
-  <div class="dcTop"><button class="ghost ic wxIc" type="button" id="calcBtn" aria-label="Refresh weather and recalculate" title="Refresh weather and recalculate">↻ Weather</button></div>
   <div class="dcBig">
     <div><span class="k" id="dcElevK">Dial</span><b id="dcElev">—</b><span class="c" id="dcElevC"></span><span class="clk" id="dcElevClk"></span></div>
     <div><span class="k" id="dcWindK">Wind hold</span><b id="dcWind">—</b><span class="c" id="dcWindC"></span><span class="clk" id="dcWindClk"></span></div>
@@ -14,7 +13,7 @@ ${ctxRow("ctxDope")}
   <div id="dcBracket"></div>
   <div id="dcMsg"></div>
   <div id="dcWarn"></div>
-  <div class="dcMoreRow"><button type="button" id="dcMoreBtn" aria-expanded="false" aria-controls="dcMore">Details ▾</button></div>
+  <div class="dcMoreRow"><button type="button" id="dcMoreBtn" aria-expanded="false" aria-controls="dcMore">Details ▾</button><button class="ghost ic wxIc" type="button" id="calcBtn" aria-label="Refresh weather and recalculate" title="Refresh weather and recalculate">↻ <span class="wxL">Weather</span></button></div>
   <div id="dcMore" hidden><div id="dcInfo"></div><div id="dcChips"></div></div>
 </div>
 <div id="status">Loading ballistics engine…</div>

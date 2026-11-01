@@ -10,7 +10,6 @@ body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 #dopeCard { position: sticky; top: 0; z-index: 15; background: var(--panel); border: 1px solid var(--accent); border-radius: 14px; padding: 6px 10px 8px; margin: 0 0 6px; box-shadow: 0 6px 14px rgba(0,0,0,.28); }
 #dopeCard.stale .dcBig, #dopeCard.stale #dcBracket, #dopeCard.stale #dcInfo { opacity: .35; transition: opacity .12s; }
 .stale#results, .stale.chart-container { opacity: .35; transition: opacity .12s; }
-.dcTop { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 0.78rem; color: var(--muted); }   /* gun·load line sits above the card (#ctxDope) */
 button.ic { width: 44px; min-width: 44px; height: 44px; flex: 0 0 44px; padding: 0; margin: 0; font-size: 1.15rem; border-radius: 10px; }
 .dcBig { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center; }
 .dcBig > div { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 3px 4px 5px; min-width: 0; }

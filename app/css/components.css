@@ -1,0 +1,20 @@
+/* uniform: gun/load context line on every tab · Log start button · About sheet · Load data row */
+.ctx { display: flex; align-items: baseline; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 0.78rem; color: var(--muted); }
+.ctx > span { flex: 0 0 auto; }
+.ctx .cG { flex: 0 1000 auto; min-width: 1.6em; overflow: hidden; text-overflow: ellipsis; }   /* shrinks first */
+.ctx .cL { flex: 0 1 auto; min-width: 1.6em; overflow: hidden; text-overflow: ellipsis; }      /* then the load */
+.ctx .sep { padding: 0 0.24em; }
+.ctx .cZ.unconf { color: var(--warn); font-weight: 700; }
+.ctxRow { display: flex; align-items: center; min-height: 20px; margin: -2px 0 10px; padding: 0 11px; }
+.ctxRow .ctx { flex: 1 1 auto; }
+#slStartBtn { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 58px; margin: 0 0 12px; font-size: 1.2rem; font-weight: 800; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+#slStartBtn small { font-size: 0.78rem; font-weight: 600; }
+#themeBar #aboutBtn { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 6px; min-height: 44px; font-size: 0.8rem; }
+#aboutSheet .abBody { color: var(--text); font-size: 0.9rem; line-height: 1.45; }
+#aboutSheet .abBody p { margin: 0 0 12px; }
+#aboutSheet .abBody a { color: var(--accent); }
+#aboutSheet .abBody .abNote { color: var(--muted); font-size: 0.8rem; }
+#tabGear #recipeDetails > summary { flex-wrap: wrap; }
+#tabGear #recipeDetails > summary .rsum { flex: 1 0 100%; display: block; margin: 1px 0 0 17px; font-weight: 400; font-size: 0.78rem; color: var(--muted); }
+#tabGear #recipeDetails > summary .rsum[hidden] { display: none; }
+#loadRecipe { display: none; }   /* the Load data row now carries the summary */

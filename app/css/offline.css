@@ -1,0 +1,34 @@
+/* offline pill + update banner */
+#offPill { margin-left: auto; flex: 0 0 auto; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--warn); color: var(--warn); background: var(--card); white-space: nowrap; }
+#offPill[hidden] { display: none; }
+#updBar { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 55; display: flex; align-items: center; gap: 6px; width: max-content; max-width: calc(100vw - 16px); padding: 4px 4px 4px 14px; border-radius: 999px; background: var(--card); color: var(--text); border: 1.5px solid var(--accent); box-shadow: 0 6px 22px rgba(0,0,0,.35); font-size: 0.88rem; font-weight: 600; }
+#updBar[hidden] { display: none; }
+#updBar span { white-space: nowrap; }
+#updBar .dot { color: var(--hint); }
+#updBar button { min-height: 40px; border-radius: 999px; margin: 0; }
+#updGo { background: var(--accent); color: var(--on-accent, var(--bg)); border: 0; padding: 0 16px; font-weight: 800; }
+#updX { background: transparent; color: var(--hint); border: 0; min-width: 40px; padding: 0; font-size: 1rem; }
+body.shOn #updBar { top: auto; bottom: max(8px, env(safe-area-inset-bottom)); }
+#appHead .tag { font-size: 0.68rem; color: var(--hint); letter-spacing: 0.08em; text-transform: uppercase; }
+#themeBtn { font-size: 1.05rem; padding: 7px 10px; }
+#themeBar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: -4px 0 12px; }
+#themeBar button { margin: 0; padding: 6px 2px 5px; font-size: 0.66rem; font-weight: 600; border-radius: 10px; background: var(--card); color: var(--muted); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 4px; line-height: 1.1; }
+#themeBar button.on { border-color: var(--accent); color: var(--text); box-shadow: 0 0 0 1px var(--accent) inset; }
+#themeBar i { display: block; width: 30px; height: 18px; border-radius: 6px; border: 1px solid #8884; }
+#recipeDetails > summary { color: var(--text); font-weight: 600; }
+#recipeDetails .rsum { display: block; font-weight: 400; color: var(--muted); font-size: 0.75rem; margin-top: 2px; }
+#ldKindSeg { display: flex; margin-bottom: 10px; }
+#ldKindSeg button { flex: 1; padding: 9px 6px; }
+#loadRecipe { font-size: 0.78rem; color: var(--accent); margin-top: 3px; }
+.slItem .r { grid-column: 1 / -1; color: var(--accent); font-size: 0.74rem; font-weight: 500; }
+#slEdRecipe { font-size: 0.8rem; color: var(--accent); margin-top: 3px; }
+#slEdRecipeBtn { margin-top: 4px; }
+#slCmp { margin: 6px 0 8px; }
+#slCmpScope { margin-bottom: 6px; }
+#slCmpTbl { overflow-x: auto; }
+#slCmpTbl table { font-size: 0.74rem; }
+#slCmpTbl th, #slCmpTbl td { padding: 6px 5px; }
+#slCmpTbl tr { cursor: pointer; }
+#slCmpTbl tr.best td { background: var(--chip); }
+#slCmpTbl td.l { text-align: left; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.slTools { margin-top: 4px; }

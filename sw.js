@@ -1,19 +1,23 @@
-/* Ball-Calc service worker for the main app (registered from index.html with scope "./").
+/* Ball-Calc service worker for the main app (registered by index.html, from app/js/offline.js, with scope "./").
  *
  * - App shell: index.html and /Ball-Calc/ open from the cache (cache-first), even in airplane mode.
- * - Precaches the page + its same-origin assets on install, in a versioned cache ("ballcalc-main-<VERSION>",
+ * - index.html is a thin shell; the app itself is the ES modules in app/ (listed in MODULES below).
+ * - Precaches the page + every app/ module + its same-origin assets on install, in a versioned cache ("ballcalc-main-<VERSION>",
  *   separate from the beta's "ballcalc-beta-*"). Only its own old caches are deleted on activate.
- * - beta.html has its own worker (sw-beta.js, scope "./beta"); the more specific scope wins there.
+ * - beta.html has its own worker (sw-beta.js, scope "./beta", which also covers beta/…); the more specific scope wins there.
+ *   This worker never answers or caches beta.html, beta/…, sw-beta.js or the beta manifest/icons (not in its list).
  * - Every other page under /Ball-Calc/ (previous.html, legacy.html, …) passes straight through: its navigation
  *   and its requests are never answered from, or written to, this cache.
  * - Cross-origin and non-GET requests are never intercepted (weather API, CDN fallbacks); Web Bluetooth isn't HTTP.
  * - Only same-origin "basic" 200 responses are cached. It never touches localStorage / IndexedDB (your data).
  * - A new worker waits until the page asks it to take over ("Update available · Reload").
  *
- * >>> Bump VERSION on every publish of index.html (or of anything in the precache list). <<<
- * (The page also asks this worker to compare the cached page with the network, so a forgotten bump still shows the banner.)
+ * >>> Bump VERSION on every publish of index.html or app/ (or of anything in the precache list). <<<
+ * >>> When you add, rename or remove a file in app/, update MODULES. <<<
+ * (The page also asks this worker to compare the cached page and every module with the network, so a forgotten bump
+ *  still shows the banner.)
  */
-const VERSION = "2026-11-01.1";
+const VERSION = "2026-11-01.2";
 
 const PREFIX = "ballcalc-main-";
 const CACHE = PREFIX + VERSION;
@@ -22,8 +26,59 @@ const keyOf = u => { const x = new URL(u); return x.origin + x.pathname; };
 
 const PAGE = abs("index.html");
 const SHELL = new Set([PAGE, abs("./")]);               // navigations that get the cached page
+const MODULES = [
+  "app/css/base.css",
+  "app/css/components.css",
+  "app/css/controls.css",
+  "app/css/dope.css",
+  "app/css/layout.css",
+  "app/css/log.css",
+  "app/css/offline.css",
+  "app/css/optics-table.css",
+  "app/css/sheets.css",
+  "app/css/shooting.css",
+  "app/css/targets.css",
+  "app/js/app.js",
+  "app/js/bulletdb.js",
+  "app/js/calc.js",
+  "app/js/components.js",
+  "app/js/core.js",
+  "app/js/dope-card.js",
+  "app/js/dope.js",
+  "app/js/gear.js",
+  "app/js/hooks.js",
+  "app/js/log-import.js",
+  "app/js/log.js",
+  "app/js/main.js",
+  "app/js/offline.js",
+  "app/js/optics.js",
+  "app/js/radar.js",
+  "app/js/reassign.js",
+  "app/js/recipes.js",
+  "app/js/sensors.js",
+  "app/js/shooting.js",
+  "app/js/shot-banner.js",
+  "app/js/storage.js",
+  "app/js/strings.js",
+  "app/js/target-draw.js",
+  "app/js/target-editor.js",
+  "app/js/targets.js",
+  "app/js/themes.js",
+  "app/js/truing.js",
+  "app/js/views/chrome.js",
+  "app/js/views/dope.js",
+  "app/js/views/gear.js",
+  "app/js/views/log.js",
+  "app/js/views/parts.js",
+  "app/js/views/shooting.js",
+  "app/js/views/targets.js",
+  "app/js/weather.js",
+  "app/js/wind-dial.js",
+].map(abs);
 const CORE = [
-  "index.html", "ballcalc.webmanifest",
+  PAGE,
+  ...MODULES,
+  "ballcalc.webmanifest",
   "ballcalc-icon-192.png", "ballcalc-icon-512.png", "ballcalc-maskable-192.png", "ballcalc-maskable-512.png", "logo.svg", "ballcalc-apple-touch-icon.png",
   "vendor/js-ballistics-3.1.0.js",   // the ballistics engine (required to solve)
   "bullets.json",                     // bullet/powder database (also kept by the page in IndexedDB)
@@ -35,6 +90,7 @@ const DB = abs("bullets.json");
 const fresh = url => fetch(new Request(url, { cache: "no-cache" }));
 const cacheable = r => r && r.ok && r.status === 200 && r.type === "basic";
 // Subresources are only served from the cache for the app shell (or the browser itself, e.g. manifest icons).
+// A module's imports carry the importing module (app/js/…) as referrer, which is in KNOWN.
 // Requests made by previous.html / legacy.html / any other page go to the network untouched.
 function forShell(req) {
   const ref = req.referrer;
@@ -94,12 +150,16 @@ self.addEventListener("message", e => {
   if (d.type === "SKIP_WAITING") { self.skipWaiting(); return; }
   if (d.type === "VERSION") { reply({ version: VERSION, cache: CACHE, scope: self.registration.scope }); return; }
   if (d.type === "CHECK") {          // has the published page changed since it was cached? (catches a forgotten VERSION bump)
-    e.waitUntil((async () => {
+    e.waitUntil((async () => {         // the page and every module file are compared, so a content-only module change is caught too
       try {
-        const r = await fresh(PAGE);
-        if (!cacheable(r)) return reply({ ok: false });
-        const hit = await (await caches.open(CACHE)).match(PAGE);
-        reply({ ok: true, changed: !hit || (await hit.text()) !== (await r.text()), version: VERSION });
+        const c = await caches.open(CACHE);
+        const diff = await Promise.all([PAGE, ...MODULES].map(async u => {
+          const r = await fresh(u);
+          if (!cacheable(r)) throw new Error(u + " " + r.status);
+          const hit = await c.match(u);
+          return !hit || (await hit.text()) !== (await r.text());
+        }));
+        reply({ ok: true, changed: diff.some(Boolean), version: VERSION });
       } catch (err) { reply({ ok: false, error: String(err) }); }
     })());
     return;

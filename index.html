@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ballistic Calculator</title>
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Ballistic%20Calculator%22%2C%22short_name%22%3A%22Ballistics%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a1f14%22%2C%22theme_color%22%3A%22%230d3b2e%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%230d3b2e%27%2F%3E%3Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2718%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%273%27%2F%3E%3Cline%20x1%3D%2750%27%20y1%3D%2720%27%20x2%3D%2750%27%20y2%3D%2780%27%20stroke%3D%27white%27%20stroke-width%3D%273%27%2F%3E%3Cline%20x1%3D%2720%27%20y1%3D%2750%27%20x2%3D%2780%27%20y2%3D%2750%27%20stroke%3D%27white%27%20stroke-width%3D%273%27%2F%3E%3Cpath%20d%3D%27M50%2050%20Q70%2030%2085%2015%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%272.5%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<meta name="theme-color" content="#0d3b2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root {
+  --bg: #0a1f14;
+  --card: #122a1e;
+  --accent: #2ecc71;
+  --text: #e8f5e9;
+  --muted: #a5d6a7;
+  --input: #1a3a2a;
+  --border: #2d5a3d;
+  --warn: #ffd54f;
+  --err: #ff8a80;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 12px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  line-height: 1.4;
+  max-width: 640px;
+  margin: 0 auto;
+}
+h1 { font-size: 1.4rem; margin: 0 0 12px 0; text-align: center; color: var(--accent); font-weight: 600; }
+.section { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+.section h2 { margin: 0 0 10px 0; font-size: 1rem; color: var(--accent); font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.full { grid-column: 1 / -1; }
+label, .lbl { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 0.75rem; color: var(--muted); margin-bottom: 3px; min-height: 1.3em; }
+input, select {
+  width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--input); color: var(--text); font-size: 1rem; outline: none; min-width: 0;
+}
+input:focus, select:focus { border-color: var(--accent); }
+input.bad { border-color: var(--err); }
+.err { color: var(--err); font-size: 0.72rem; margin-top: 2px; min-height: 0; }
+.hint { color: #7fa886; font-size: 0.72rem; margin-top: 3px; }
+button {
+  width: 100%; padding: 14px; background: var(--accent); color: #0a1f14; border: none; border-radius: 10px;
+  font-size: 1.05rem; font-weight: 700; cursor: pointer; margin-top: 6px; touch-action: manipulation;
+}
+button:active { transform: scale(0.98); }
+button:disabled { opacity: 0.6; }
+button.sm { width: auto; padding: 7px 11px; font-size: 0.82rem; margin: 0; border-radius: 8px; font-weight: 600; }
+button.ghost { background: var(--input); color: var(--text); border: 1px solid var(--border); }
+button.danger { background: #3a1a1a; color: var(--err); border: 1px solid #5a2d2d; }
+button.hot { box-shadow: 0 0 0 2px var(--warn); }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.row > select { flex: 1 1 150px; }
+.picker .row > select { flex: 1 1 100%; }
+.picker .row > button { flex: 1 1 0; }
+.picker .row > button.danger { flex: 0 0 48px; }
+.picker { margin-bottom: 12px; }
+.picker:last-child { margin-bottom: 0; }
+.summary { font-size: 0.78rem; color: var(--muted); margin-top: 5px; }
+.dirty { color: var(--warn); font-size: 0.75rem; font-weight: 600; }
+details { margin-top: 8px; }
+details > summary { cursor: pointer; color: var(--muted); font-size: 0.82rem; padding: 4px 0; }
+details[open] > summary { margin-bottom: 8px; }
+.chip { font-size: 0.68rem; padding: 1px 7px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; background: none; cursor: default; }
+.chip.wx { background: #14402b; color: var(--accent); border-color: #1f6b44; }
+.chip.man { color: var(--warn); border-color: #6b5a1f; cursor: pointer; }
+#wxStatus { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; }
+#wxStatus.bad { color: var(--warn); }
+#placeBox { display: none; margin-bottom: 10px; }
+/* steppers */
+.stepper { display: flex; align-items: stretch; gap: 4px; }
+.stepper input { text-align: center; touch-action: pan-y; cursor: ew-resize; flex: 1; padding-left: 4px; padding-right: 4px; }
+.stepper input:focus { cursor: text; }
+.stepper input.dragging { border-color: var(--accent); background: #1f4a34; }
+.stepper button { width: 40px; min-width: 40px; margin: 0; padding: 0; font-size: 1.3rem; line-height: 1; background: var(--input); color: var(--accent); border: 1px solid var(--border); border-radius: 8px; user-select: none; -webkit-user-select: none; }
+/* wind dial */
+.windbox { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+#dial { width: 150px; height: 150px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+#dirText { font-size: 0.8rem; color: var(--text); margin-top: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { width: auto; margin: 0; padding: 6px 12px; font-size: 0.8rem; border-radius: 0; background: var(--input); color: var(--muted); font-weight: 600; }
+.seg button.on { background: var(--accent); color: #0a1f14; }
+#status { text-align: center; font-size: 0.85rem; color: var(--muted); margin: 8px 0; min-height: 1.2em; }
+#status.bad { color: var(--err); }
+#shotCard { display: none; background: #0e2418; border: 1px solid var(--accent); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+#shotCard .big { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center; margin: 6px 0; }
+#shotCard .big b { display: block; font-size: 1.6rem; color: var(--accent); }
+#shotCard .big span { font-size: 0.72rem; color: var(--muted); }
+#shotCard .sub { font-size: 0.78rem; color: var(--muted); text-align: center; }
+#results { overflow-x: auto; margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+table.full { min-width: 560px; }
+table.dope { font-size: 1rem; }
+th, td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+th { color: var(--accent); font-weight: 600; position: sticky; top: 0; background: var(--card); }
+td:first-child, th:first-child { text-align: left; }
+tr.tgt td { background: #1f4a34; }
+.neg { color: #ff8a80; }
+.pos { color: #69f0ae; }
+.legend { font-size: 0.7rem; color: #7fa886; margin-top: 6px; }
+.chart-container { height: 220px; margin-top: 12px; background: #0e2418; border-radius: 8px; padding: 8px; }
+#chart { width: 100%; height: 100%; display: block; }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1f4a34; color: var(--text); border: 1px solid var(--accent); padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10; max-width: 90vw; }
+#toast.show { opacity: 1; }
+.sensorbtn { display: none; }
+body.has-sensors .sensorbtn { display: inline-block; }
+#sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 2px solid var(--accent); border-radius: 16px 16px 0 0; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); z-index: 20; display: none; box-shadow: 0 -8px 30px #000a; max-width: 640px; margin: 0 auto; }
+#sheet.show { display: block; }
+#sheet h3 { margin: 0 0 4px; color: var(--accent); font-size: 1rem; }
+#sheetVal { font-size: 3rem; font-weight: 700; text-align: center; color: var(--text); font-variant-numeric: tabular-nums; }
+#sheetSub, #sheetHelp { text-align: center; font-size: 0.8rem; color: var(--muted); }
+#sheet .row { justify-content: center; margin-top: 10px; }
+#sheet .row button { flex: 1; }
+footer { text-align: center; font-size: 0.7rem; color: #6b8f71; margin: 16px 0 8px; }
+</style>
+</head>
+<body>
+<h1>🎯 Ballistic Calculator</h1>
+
+<!-- ===== Presets ===== -->
+<div class="section">
+  <h2>Setup <span class="row"><button class="sm ghost" id="exportBtn" type="button">⇩ Export</button><button class="sm ghost" id="importBtn" type="button">⇧ Import</button></span></h2>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+
+  <div class="picker">
+    <div class="lbl"><span>Rifle</span><span class="dirty" id="rifleDirty"></span></div>
+    <div class="row">
+      <select id="rifleSel" aria-label="Rifle"></select>
+      <button class="sm ghost" type="button" id="rifleNew" title="Save current rifle fields as a new rifle">＋ New</button>
+      <button class="sm ghost" type="button" id="rifleSave">💾 Save</button>
+      <button class="sm ghost" type="button" id="rifleRename">✎ Rename</button>
+      <button class="sm danger" type="button" id="rifleDel" aria-label="Delete rifle">🗑</button>
+    </div>
+    <div class="summary" id="rifleSum"></div>
+    <details id="rifleDetails">
+      <summary>Rifle details</summary>
+      <div class="grid">
+        <div><label for="sightHeight">Sight height (in)</label><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
+        <div><label for="zero">Zero range (yd)</label><div class="stepper" data-step="25" data-min="10" data-max="1000"><input type="number" inputmode="numeric" id="zero" value="100"></div><div class="err" id="e-zero"></div></div>
+        <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift (needs bullet length).</div><div class="err" id="e-twist"></div></div>
+      </div>
+    </details>
+  </div>
+
+  <div class="picker">
+    <div class="lbl"><span>Load (ammo for this rifle)</span><span class="dirty" id="loadDirty"></span></div>
+    <div class="row">
+      <select id="loadSel" aria-label="Load"></select>
+      <button class="sm ghost" type="button" id="loadNew">＋ New</button>
+      <button class="sm ghost" type="button" id="loadSave">💾 Save</button>
+      <button class="sm ghost" type="button" id="loadRename">✎ Rename</button>
+      <button class="sm danger" type="button" id="loadDel" aria-label="Delete load">🗑</button>
+    </div>
+    <div class="summary" id="loadSum"></div>
+    <details id="loadDetails">
+      <summary>Load details</summary>
+      <div class="grid">
+        <div><label for="bc">Ballistic coefficient (BC)</label><input type="number" inputmode="decimal" id="bc" step="0.001" value="0.223"><div class="err" id="e-bc"></div></div>
+        <div><label for="drag">Drag model</label><select id="drag"><option value="G7" selected>G7 (boat-tail / long-range)</option><option value="G1">G1 (flat-base / most box BCs)</option></select></div>
+        <div><label for="weight">Bullet weight (gr)</label><input type="number" inputmode="decimal" id="weight" step="1" value="168"><div class="err" id="e-weight"></div></div>
+        <div><label for="diameter">Diameter (in)</label><input type="number" inputmode="decimal" id="diameter" step="0.001" value="0.308"><div class="err" id="e-diameter"></div></div>
+        <div><label for="mv">Muzzle velocity (fps)</label><input type="number" inputmode="numeric" id="mv" step="5" value="2750"><div class="err" id="e-mv"></div></div>
+        <div><label for="length">Bullet length (in)</label><input type="number" inputmode="decimal" id="length" step="0.01" value="1.215" placeholder="optional"><div class="err" id="e-length"></div></div>
+        <div class="full hint">BC must match the drag model printed on the box (G1 vs G7). Bullet length is optional; it enables spin drift.</div>
+      </div>
+    </details>
+  </div>
+
+  <div class="picker">
+    <div class="lbl"><span>Shooting range / location</span><span class="dirty" id="rangeDirty"></span></div>
+    <div class="row">
+      <select id="rangeSel" aria-label="Range"></select>
+      <button class="sm ghost" type="button" id="rangeNew">＋ New</button>
+      <button class="sm ghost" type="button" id="rangeSave">💾 Save</button>
+      <button class="sm ghost" type="button" id="rangeRename">✎ Rename</button>
+      <button class="sm danger" type="button" id="rangeDel" aria-label="Delete range">🗑</button>
+    </div>
+    <div class="summary" id="rangeSum"></div>
+    <details id="rangeDetails">
+      <summary>Range location</summary>
+      <div class="grid">
+        <div><label for="rangeLat">Latitude</label><input type="number" inputmode="decimal" id="rangeLat" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLat"></div></div>
+        <div><label for="rangeLon">Longitude</label><input type="number" inputmode="decimal" id="rangeLon" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLon"></div></div>
+        <div class="full"><button class="sm ghost" type="button" id="rangeHere">📍 Use my current location</button></div>
+        <div class="full hint">A range saves its location (for weather), shooting direction, altitude and default target distance (set those below, then tap Save). Leave lat/lon blank to use your phone's location.</div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ===== Conditions ===== -->
+<div class="section">
+  <h2>Conditions <button class="sm ghost" type="button" id="wxBtn">↻ Weather</button></h2>
+  <div id="wxStatus">Weather not loaded yet.</div>
+  <div id="placeBox" class="row">
+    <input type="text" id="placeQ" placeholder="City or ZIP for weather" style="flex:1 1 160px">
+    <button class="sm ghost" type="button" id="placeGo">Find</button>
+  </div>
+
+  <div class="windbox">
+    <canvas id="dial" aria-label="Wind direction dial: drag to set where the wind comes from"></canvas>
+    <div>
+      <label for="windSpeed"><span>Wind speed (mph)</span><span class="chip" id="src-windSpeed"></span></label>
+      <div class="stepper" data-step="1" data-min="0" data-max="60"><input type="number" inputmode="decimal" id="windSpeed" value="10"></div>
+      <div class="err" id="e-windSpeed"></div>
+      <label for="windDir" style="margin-top:8px"><span>Wind from (°)</span><span class="chip" id="src-windDir"></span></label>
+      <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="windDir" value="90"></div>
+      <div class="err" id="e-windDir"></div>
+    </div>
+  </div>
+  <div id="dirText"></div>
+  <div class="hint">Drag the dial or the numbers (swipe left/right). 0° = wind in your face, 90° = from your right, 180° = from behind, 270° = from your left.</div>
+
+  <div class="grid" style="margin-top:10px">
+    <div class="full"><label for="bearing"><span>Shooting direction (compass °)</span><button class="sm ghost sensorbtn" type="button" id="aimBtn">🧭 Aim at target</button></label>
+      <div class="stepper" data-step="5" data-min="0" data-max="360" data-wrap="1"><input type="number" inputmode="numeric" id="bearing" placeholder="optional, e.g. 270 = west"></div>
+      <div class="hint" id="bearingHint">Set this so the weather wind direction can be turned into wind relative to your shot.</div>
+      <div class="err" id="e-bearing"></div></div>
+    <div class="full"><label for="shotAngle"><span>Shot angle (°, + up / − downhill)</span><button class="sm ghost sensorbtn" type="button" id="angleBtn">📐 Measure angle</button></label>
+      <div class="stepper" data-step="1" data-min="-60" data-max="60"><input type="number" inputmode="decimal" id="shotAngle" value="0"></div>
+      <div class="hint" id="sensorHint">Leave 0 for a flat shot. Target distance is the rangefinder (line-of-sight) distance.</div><div class="err" id="e-shotAngle"></div></div>
+    <div><label for="temp"><span>Temp (°F)</span><span class="chip" id="src-temp"></span></label>
+      <div class="stepper" data-step="1" data-min="-40" data-max="130"><input type="number" inputmode="numeric" id="temp" value="59"></div><div class="err" id="e-temp"></div></div>
+    <div><label for="humidity"><span>Humidity (%)</span><span class="chip" id="src-humidity"></span></label>
+      <div class="stepper" data-step="5" data-min="0" data-max="100"><input type="number" inputmode="numeric" id="humidity" value="50"></div><div class="err" id="e-humidity"></div></div>
+    <div><label for="altitude"><span>Altitude (ft)</span><span class="chip" id="src-altitude"></span></label>
+      <div class="stepper" data-step="100" data-min="-1500" data-max="15000"><input type="number" inputmode="numeric" id="altitude" value="0"></div><div class="err" id="e-altitude"></div></div>
+    <div><label for="pressure"><span>Station pressure (inHg)</span><span class="chip" id="src-pressure"></span></label>
+      <input type="number" inputmode="decimal" id="pressure" step="0.01" placeholder="blank = standard"><div class="err" id="e-pressure"></div></div>
+    <div class="full hint">Station pressure is the actual (not sea-level corrected) pressure where you are. Leave it blank to use standard pressure for your altitude.</div>
+  </div>
+</div>
+
+<!-- ===== Output ===== -->
+<div class="section">
+  <h2>Output
+    <span class="row">
+      <span class="seg" id="angSeg"><button type="button" data-v="MOA">MOA</button><button type="button" data-v="MIL">MIL</button></span>
+      <span class="seg" id="viewSeg"><button type="button" data-v="dope">Dope</button><button type="button" data-v="full">Full</button></span>
+    </span>
+  </h2>
+  <div class="grid">
+    <div class="full"><label for="target">Target distance (yd)</label>
+      <div class="stepper" data-step="25" data-min="25" data-max="3000"><input type="number" inputmode="numeric" id="target" value="500"></div><div class="err" id="e-target"></div></div>
+    <div><label for="maxRange">Table to (yd)</label>
+      <div class="stepper" data-step="50" data-min="100" data-max="3000"><input type="number" inputmode="numeric" id="maxRange" value="1000"></div><div class="err" id="e-maxRange"></div></div>
+    <div><label for="step">Every (yd)</label>
+      <div class="stepper" data-step="25" data-min="25" data-max="500"><input type="number" inputmode="numeric" id="step" value="100"></div><div class="err" id="e-step"></div></div>
+  </div>
+</div>
+
+<div id="shotCard"></div>
+<button id="calcBtn" type="button">Calculate Trajectory</button>
+<div id="status">Loading ballistics engine…</div>
+
+<div id="results"></div>
+<div class="chart-container">
+  <canvas id="chart"></canvas>
+</div>
+
+<div id="toast"></div>
+<div id="sheet" role="dialog" aria-modal="true">
+  <h3 id="sheetTitle"></h3>
+  <div id="sheetVal">—</div>
+  <div id="sheetSub"></div>
+  <div id="sheetHelp"></div>
+  <div class="row"><button type="button" class="ghost" id="sheetCancel">Cancel</button><button type="button" id="sheetLock">🔒 Lock</button></div>
+</div>
+<footer>
+  Powered by js-ballistics (point-mass 3DoF + spin drift). Weather from Open-Meteo. Values are approximations — always verify with a chronograph and real-world testing.
+</footer>
+<script type="module">
+const $ = id => document.getElementById(id);
+const btn = $("calcBtn");
+const statusEl = $("status");
+const resultsDiv = $("results");
+
+/* ---------------- storage ---------------- */
+const K_PRESETS = "bcalc.presets.v1", K_SETTINGS = "bcalc.settings.v1", K_LOC = "bcalc.lastLoc.v1";
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
+const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const RIFLE_F = ["sightHeight", "zero", "twist"];
+const LOAD_F = ["bc", "drag", "weight", "diameter", "mv", "length"];
+const RANGE_F = ["bearing", "altitude", "target", "rangeLat", "rangeLon"];
+const WX_F = ["windSpeed", "windDir", "temp", "humidity", "altitude", "pressure"];
+const ALL_F = [...RIFLE_F, ...LOAD_F, ...RANGE_F, "windSpeed", "windDir", "temp", "humidity", "pressure", "maxRange", "step"];
+
+function seed() {
+  return {
+    version: 1,
+    rifles: [{ id: uid(), name: "My .308", sightHeight: "1.5", zero: "100", twist: "10",
+      loads: [{ id: uid(), name: "168gr SMK", bc: "0.223", drag: "G7", weight: "168", diameter: "0.308", mv: "2750", length: "1.215" }] }],
+    ranges: [],
+    lastRifleId: null, lastRangeId: null
+  };
+}
+let P = load(K_PRESETS, null);
+if (!P || !Array.isArray(P.rifles)) P = seed();
+if (!Array.isArray(P.ranges)) P.ranges = [];
+const S = Object.assign({ ang: "MOA", view: "dope", values: {} }, load(K_SETTINGS, {}));
+const savePresets = () => store(K_PRESETS, P);
+const saveSettings = () => { S.values = {}; ALL_F.forEach(f => S.values[f] = $(f).value); store(K_SETTINGS, S); };
+
+/* ---------------- helpers ---------------- */
+let toastT;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2200); }
+const val = id => $(id).value.trim();
+const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+const norm360 = d => ((d % 360) + 360) % 360;
+const fmt = (v, d = 1) => (v == null || isNaN(v)) ? "" : String(+(+v).toFixed(d));
+function setVal(id, v) { $(id).value = (v ?? "") === "" ? "" : v; }
+const COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const compass = d => COMPASS[Math.round(norm360(d) / 22.5) % 16];
+
+/* ---------------- presets: rifle / load / range ---------------- */
+const curRifle = () => P.rifles.find(r => r.id === P.lastRifleId) || null;
+const curLoad = () => { const r = curRifle(); return r ? (r.loads.find(l => l.id === r.lastLoadId) || null) : null; };
+const curRange = () => P.ranges.find(r => r.id === P.lastRangeId) || null;
+
+function fillOptions(sel, items, cur, emptyText) {
+  sel.innerHTML = "";
+  if (emptyText !== undefined) { const o = new Option(emptyText, ""); sel.add(o); }
+  items.forEach(it => sel.add(new Option(it.name, it.id)));
+  sel.value = cur ? cur.id : "";
+}
+function renderPickers() {
+  if (!curRifle() && P.rifles.length) P.lastRifleId = P.rifles[0].id;
+  const r = curRifle();
+  if (r && !r.loads.find(l => l.id === r.lastLoadId) && r.loads.length) r.lastLoadId = r.loads[0].id;
+  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No rifles saved — tap ＋ New");
+  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads for this rifle — tap ＋ New" : "Add a rifle first"));
+  fillOptions($("rangeSel"), P.ranges, curRange(), "Current location (no saved range)");
+  updateDirty();
+}
+function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f])); }
+function applyLoad() { const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, l[f] ?? (f === "drag" ? "G7" : ""))); }
+function applyRange() {
+  const g = curRange();
+  if (g) {
+    ["bearing", "target", "rangeLat", "rangeLon"].forEach(f => setVal(f, g[f]));
+    manual.delete("altitude"); manual.delete("windDir");
+  }
+  applyAuto();
+}
+const same = (a, b) => String(a ?? "").trim() === String(b ?? "").trim() || (parseFloat(a) === parseFloat(b));
+function isDirty(obj, fields) { return !!obj && fields.some(f => !same(obj[f], $(f).value)); }
+function updateDirty() {
+  const r = curRifle(), l = curLoad(), g = curRange();
+  const rd = isDirty(r, RIFLE_F), ld = isDirty(l, LOAD_F);
+  // range altitude: blank in preset means "use weather", so don't flag it
+  const gd = !!g && RANGE_F.some(f => !(f === "altitude" && String(g.altitude ?? "") === "") && !same(g[f], $(f).value));
+  $("rifleDirty").textContent = rd ? "● unsaved changes" : "";
+  $("loadDirty").textContent = ld ? "● unsaved changes" : "";
+  $("rangeDirty").textContent = gd ? "● unsaved changes" : "";
+  $("rifleSave").classList.toggle("hot", rd); $("loadSave").classList.toggle("hot", ld); $("rangeSave").classList.toggle("hot", gd);
+  ["rifleSave", "rifleRename", "rifleDel"].forEach(id => $(id).disabled = !r);
+  ["loadSave", "loadRename", "loadDel"].forEach(id => $(id).disabled = !l);
+  $("loadNew").disabled = !r;
+  ["rangeSave", "rangeRename", "rangeDel"].forEach(id => $(id).disabled = !g);
+  const tw = num("twist");
+  $("rifleSum").textContent = `${val("sightHeight") || "?"}" sight height · ${val("zero") || "?"} yd zero` + (tw ? ` · 1:${Math.abs(tw)}" ${tw < 0 ? "LH" : "RH"} twist` : "");
+  $("loadSum").textContent = `${val("weight") || "?"} gr · ${val("bc") || "?"} ${$("drag").value} · ${val("mv") || "?"} fps`;
+  const b = num("bearing");
+  $("rangeSum").textContent = (g ? "" : "Weather uses your phone's location. ") +
+    (b != null ? `Facing ${fmt(b, 0)}° ${compass(b)}` : "No shooting direction set") +
+    (val("altitude") ? ` · ${val("altitude")} ft` : "") + (val("target") ? ` · target ${val("target")} yd` : "") +
+    (g && val("rangeLat") && val("rangeLon") ? ` · ${(+val("rangeLat")).toFixed(3)}, ${(+val("rangeLon")).toFixed(3)}` : "");
+}
+const askName = (msg, def) => { const n = prompt(msg, def || ""); return n && n.trim() ? n.trim().slice(0, 60) : null; };
+const pick = (fields) => Object.fromEntries(fields.map(f => [f, $(f).value]));
+
+$("rifleSel").onchange = e => { P.lastRifleId = e.target.value; applyRifle(); renderPickers(); applyLoad(); savePresets(); updateDirty(); schedule(); };
+$("loadSel").onchange = e => { const r = curRifle(); if (r) r.lastLoadId = e.target.value; applyLoad(); savePresets(); updateDirty(); schedule(); };
+$("rangeSel").onchange = e => { P.lastRangeId = e.target.value || null; applyRange(); savePresets(); updateDirty(); refreshWeather(); schedule(); };
+
+$("rifleNew").onclick = () => { const n = askName("Name for the new rifle (uses the rifle details below):", ""); if (!n) return;
+  const r = { id: uid(), name: n, ...pick(RIFLE_F), loads: [] };
+  const l = curLoad(); if (l) { const c = { ...pick(LOAD_F), id: uid(), name: l.name }; r.loads.push(c); r.lastLoadId = c.id; }
+  P.rifles.push(r); P.lastRifleId = r.id; savePresets(); renderPickers(); toast(`Rifle “${n}” saved${r.loads.length ? " (current load copied)" : ""}`); };
+$("rifleSave").onclick = () => { const r = curRifle(); if (!r) return; Object.assign(r, pick(RIFLE_F)); savePresets(); updateDirty(); toast(`Saved “${r.name}”`); };
+$("rifleRename").onclick = () => { const r = curRifle(); if (!r) return; const n = askName("Rename rifle:", r.name); if (!n) return; r.name = n; savePresets(); renderPickers(); };
+$("rifleDel").onclick = () => { const r = curRifle(); if (!r || !confirm(`Delete rifle “${r.name}” and its ${r.loads.length} load(s)?`)) return;
+  P.rifles = P.rifles.filter(x => x !== r); P.lastRifleId = P.rifles[0]?.id || null; savePresets(); renderPickers(); applyRifle(); applyLoad(); updateDirty(); toast("Rifle deleted"); };
+
+$("loadNew").onclick = () => { const r = curRifle(); if (!r) return; const n = askName(`Name for the new load on “${r.name}” (uses the load details below):`, ""); if (!n) return;
+  const l = { id: uid(), name: n, ...pick(LOAD_F) }; r.loads.push(l); r.lastLoadId = l.id; savePresets(); renderPickers(); toast(`Load “${n}” saved`); };
+$("loadSave").onclick = () => { const l = curLoad(); if (!l) return; Object.assign(l, pick(LOAD_F)); savePresets(); updateDirty(); toast(`Saved “${l.name}”`); };
+$("loadRename").onclick = () => { const l = curLoad(); if (!l) return; const n = askName("Rename load:", l.name); if (!n) return; l.name = n; savePresets(); renderPickers(); };
+$("loadDel").onclick = () => { const r = curRifle(), l = curLoad(); if (!l || !confirm(`Delete load “${l.name}”?`)) return;
+  r.loads = r.loads.filter(x => x !== l); r.lastLoadId = r.loads[0]?.id || null; savePresets(); renderPickers(); applyLoad(); updateDirty(); toast("Load deleted"); };
+
+$("rangeNew").onclick = () => { const n = askName("Name for the new range (saves shooting direction, altitude, target distance and location):", ""); if (!n) return;
+  const g = { id: uid(), name: n, ...pick(RANGE_F) }; P.ranges.push(g); P.lastRangeId = g.id; savePresets(); renderPickers();
+  toast(`Range “${n}” saved`); if (!g.rangeLat) $("rangeDetails").open = true; };
+$("rangeSave").onclick = () => { const g = curRange(); if (!g) return; Object.assign(g, pick(RANGE_F)); savePresets(); updateDirty(); toast(`Saved “${g.name}”`); refreshWeather(); };
+$("rangeRename").onclick = () => { const g = curRange(); if (!g) return; const n = askName("Rename range:", g.name); if (!n) return; g.name = n; savePresets(); renderPickers(); };
+$("rangeDel").onclick = () => { const g = curRange(); if (!g || !confirm(`Delete range “${g.name}”?`)) return;
+  P.ranges = P.ranges.filter(x => x !== g); P.lastRangeId = null; savePresets(); renderPickers(); refreshWeather(); toast("Range deleted"); };
+$("rangeHere").onclick = async () => {
+  try {
+    const c = await getPosition();
+    setVal("rangeLat", c.lat.toFixed(5)); setVal("rangeLon", c.lon.toFixed(5));
+    try { const e = await fetchJSON(`https://api.open-meteo.com/v1/elevation?latitude=${c.lat}&longitude=${c.lon}`);
+      if (e.elevation?.[0] != null) { setVal("altitude", Math.round(e.elevation[0] * 3.28084)); manual.add("altitude"); } } catch {}
+    updateDirty(); toast(curRange() ? "Location filled — tap Save to keep it" : "Location filled — tap ＋ New to save as a range");
+  } catch (e) { toast("Couldn't get location: " + e.message); }
+};
+
+/* export / import */
+$("exportBtn").onclick = () => {
+  const data = JSON.stringify({ app: "ballistic-calculator", exported: new Date().toISOString(), ...P }, null, 2);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
+  a.download = `ballistic-presets-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast(`Exported ${P.rifles.length} rifle(s), ${P.ranges.length} range(s)`);
+};
+$("importBtn").onclick = () => $("importFile").click();
+$("importFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || !Array.isArray(d.rifles)) throw new Error("not a presets file");
+    const str = v => v == null ? "" : String(v).slice(0, 40);
+    const rifles = d.rifles.filter(r => r && r.name).map(r => ({ id: str(r.id) || uid(), name: String(r.name).slice(0, 60),
+      ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null,
+      loads: (Array.isArray(r.loads) ? r.loads : []).filter(l => l && l.name).map(l => ({ id: str(l.id) || uid(), name: String(l.name).slice(0, 60),
+        ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k])])) })) }));
+    const ranges = (Array.isArray(d.ranges) ? d.ranges : []).filter(g => g && g.name).map(g => ({ id: str(g.id) || uid(), name: String(g.name).slice(0, 60),
+      ...Object.fromEntries(RANGE_F.map(k => [k, str(g[k])])) }));
+    const replace = confirm(`Import ${rifles.length} rifle(s) and ${ranges.length} range(s).\n\nOK = replace all current presets\nCancel = merge with current presets`);
+    if (replace) { P.rifles = rifles; P.ranges = ranges; P.lastRifleId = d.lastRifleId; P.lastRangeId = d.lastRangeId; }
+    else {
+      const merge = (dst, src) => src.forEach(x => { const i = dst.findIndex(y => y.id === x.id); i >= 0 ? dst[i] = x : dst.push(x); });
+      merge(P.rifles, rifles); merge(P.ranges, ranges);
+    }
+    savePresets(); renderPickers(); applyRifle(); applyLoad(); applyRange(); updateDirty(); schedule();
+    toast("Presets imported");
+  } catch (err) { alert("Import failed: " + err.message); }
+};
+
+/* ---------------- weather & auto-fill ---------------- */
+let wx = null;                 // last weather reading
+const manual = new Set();      // fields the user overrode this session
+const auto = {};               // field -> {v, src}
+function computeAuto() {
+  for (const k in auto) delete auto[k];
+  const g = curRange();
+  if (g && String(g.altitude ?? "") !== "") auto.altitude = { v: g.altitude, src: "range" };
+  else if (wx) auto.altitude = { v: Math.round(wx.elevFt), src: "wx" };
+  if (!wx) return;
+  auto.windSpeed = { v: Math.round(wx.wind), src: "wx" };
+  auto.temp = { v: Math.round(wx.tempF), src: "wx" };
+  auto.humidity = { v: Math.round(wx.rh), src: "wx" };
+  if (wx.inHg) auto.pressure = { v: wx.inHg.toFixed(2), src: "wx" };
+  const b = num("bearing");
+  if (b != null) auto.windDir = { v: Math.round(norm360(wx.windFrom - b)), src: "wx" };
+}
+function applyAuto() {
+  computeAuto();
+  for (const f of WX_F) if (auto[f] && !manual.has(f)) setVal(f, auto[f].v);
+  renderChips(); drawDial(); updateDirty();
+}
+function renderChips() {
+  for (const f of WX_F) {
+    const c = $("src-" + f); if (!c) continue;
+    const a = auto[f];
+    c.className = "chip"; c.textContent = ""; c.onclick = null; c.title = "";
+    if (!a) continue;
+    const name = a.src === "range" ? "range" : "weather";
+    if (!manual.has(f) || same(a.v, $(f).value)) { c.classList.add("wx"); c.textContent = a.src === "range" ? "📍 range" : "🌤 local weather"; }
+    else { c.classList.add("man"); c.textContent = `✎ manual · ↺ ${name}`; c.title = `Revert to ${name} value (${a.v})`;
+      c.onclick = (e) => { e.preventDefault(); manual.delete(f); setVal(f, a.v); applyAuto(); schedule(); }; }
+  }
+  const b = num("bearing");
+  $("bearingHint").textContent = !wx ? "Set this so weather wind direction can be converted to wind relative to your shot."
+    : b == null ? `Weather wind is from ${compass(wx.windFrom)} (${Math.round(wx.windFrom)}°). Enter the direction you're facing to convert it to your shot.`
+    : `Weather wind from ${compass(wx.windFrom)} (${Math.round(wx.windFrom)}°) while facing ${compass(b)} → ${Math.round(norm360(wx.windFrom - b))}° relative.`;
+}
+function wxStatus(msg, bad) { const s = $("wxStatus"); s.textContent = msg; s.classList.toggle("bad", !!bad); }
+async function fetchJSON(url) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 10000);
+  try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
+  finally { clearTimeout(t); }
+}
+function getPosition() {
+  return new Promise((res, rej) => {
+    if (!navigator.geolocation) return rej(new Error("not supported here"));
+    if (!window.isSecureContext) return rej(new Error("needs https (or localhost)"));
+    navigator.geolocation.getCurrentPosition(
+      p => { const c = { lat: p.coords.latitude, lon: p.coords.longitude, label: "your location" }; store(K_LOC, c); res(c); },
+      e => rej(new Error(e.code === 1 ? "permission denied" : e.code === 3 ? "timed out" : "unavailable")),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+  });
+}
+let wxBusy = false;
+async function refreshWeather() {
+  if (wxBusy) return; wxBusy = true; $("wxBtn").disabled = true;
+  try {
+    let loc, note = "";
+    const g = curRange();
+    if (g && val("rangeLat") !== "" && val("rangeLon") !== "" && !isNaN(num("rangeLat")) && !isNaN(num("rangeLon"))) loc = { lat: num("rangeLat"), lon: num("rangeLon"), label: g.name };
+    else {
+      wxStatus("Getting your location…");
+      try { loc = await getPosition(); }
+      catch (e) {
+        const last = load(K_LOC, null);
+        if (last) { loc = last; note = ` (GPS ${e.message}; using last place)`; }
+        else { $("placeBox").style.display = "flex"; throw new Error(`Location ${e.message}. Search a place below or keep entering wind manually.`); }
+      }
+    }
+    wxStatus(`Fetching weather for ${loc.label}…`);
+    const d = await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat.toFixed(4)}&longitude=${loc.lon.toFixed(4)}` +
+      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure&wind_speed_unit=mph&temperature_unit=fahrenheit`);
+    const c = d.current; if (!c) throw new Error("No current weather returned");
+    wx = { wind: c.wind_speed_10m, windFrom: c.wind_direction_10m, gust: c.wind_gusts_10m, tempF: c.temperature_2m, rh: c.relative_humidity_2m,
+      inHg: c.surface_pressure ? c.surface_pressure * 0.0295300 : null, elevFt: (d.elevation ?? 0) * 3.28084, at: new Date() };
+    $("placeBox").style.display = "none";
+    applyAuto();
+    wxStatus(`🌤 ${loc.label}: wind ${Math.round(wx.wind)} mph from ${compass(wx.windFrom)}` + (wx.gust ? ` (gusts ${Math.round(wx.gust)})` : "") +
+      ` · ${Math.round(wx.tempF)}°F · ${Math.round(wx.rh)}% RH · updated ${wx.at.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}${note}`);
+    schedule();
+  } catch (e) {
+    const msg = e.name === "AbortError" ? "Weather request timed out" : e.message.startsWith("Location") ? e.message : "Weather unavailable (" + e.message + ")";
+    wxStatus(msg + (msg.includes("manually") ? "" : " — keeping your manual values."), true);
+  } finally { wxBusy = false; $("wxBtn").disabled = false; }
+}
+$("wxBtn").onclick = refreshWeather;
+async function placeSearch() {
+  const q = val("placeQ"); if (!q) return;
+  try {
+    const d = await fetchJSON(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(q)}`);
+    const r = d.results?.[0]; if (!r) return toast("Place not found");
+    store(K_LOC, { lat: r.latitude, lon: r.longitude, label: [r.name, r.admin1].filter(Boolean).join(", ") });
+    refreshWeather();
+  } catch (e) { toast("Search failed: " + e.message); }
+}
+$("placeGo").onclick = placeSearch;
+$("placeQ").addEventListener("keydown", e => { if (e.key === "Enter") placeSearch(); });
+
+/* ---------------- steppers (swipe / +/- / tap to type) ---------------- */
+function clampStep(el, v) {
+  const box = el.closest(".stepper"), min = +box.dataset.min, max = +box.dataset.max;
+  if (box.dataset.wrap) return norm360(v) % 360;
+  return Math.min(max, Math.max(min, v));
+}
+function bump(el, n) {
+  const box = el.closest(".stepper"), step = +box.dataset.step;
+  let cur = parseFloat(el.value); if (isNaN(cur)) cur = box.dataset.wrap ? 0 : Math.max(+box.dataset.min, 0);
+  const snapped = Math.round(cur / step) * step;
+  let v = (snapped !== cur && n !== 0) ? (n > 0 ? Math.ceil(cur / step) * step + (n - 1) * step : Math.floor(cur / step) * step + (n + 1) * step) : cur + n * step;
+  v = clampStep(el, +v.toFixed(4));
+  if (String(v) !== el.value) { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }
+}
+document.querySelectorAll(".stepper").forEach(box => {
+  const el = box.querySelector("input");
+  const mk = (txt, n, label) => { const b = document.createElement("button"); b.type = "button"; b.textContent = txt; b.setAttribute("aria-label", label);
+    let t1, t2; const stop = () => { clearTimeout(t1); clearInterval(t2); };
+    b.addEventListener("pointerdown", e => { e.preventDefault(); bump(el, n); t1 = setTimeout(() => t2 = setInterval(() => bump(el, n), 70), 400); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, stop));
+    b.addEventListener("contextmenu", e => e.preventDefault());
+    return b; };
+  box.prepend(mk("−", -1, "decrease")); box.append(mk("+", 1, "increase"));
+  // horizontal swipe on the number changes it; vertical swipe still scrolls the page (touch-action: pan-y)
+  // Read-only until tapped, so a swipe never pops the keyboard; a plain tap (or keyboard focus) allows typing.
+  let sx = null, sy = 0, acc = 0, dragging = false, pid = null, lastDrag = 0;
+  el.readOnly = true;
+  el.addEventListener("focus", () => { if (Date.now() - lastDrag < 350) el.blur(); else el.readOnly = false; });
+  el.addEventListener("blur", () => { el.readOnly = true; });
+  el.addEventListener("pointerdown", e => {
+    if (document.activeElement === el && !el.readOnly) return;   // already typing
+    sx = e.clientX; sy = e.clientY; acc = 0; dragging = false; pid = e.pointerId;
+    e.preventDefault();
+  });
+  el.addEventListener("pointermove", e => {
+    if (sx === null || e.pointerId !== pid) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (!dragging) {
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { dragging = true; try { el.setPointerCapture(pid); } catch {} el.classList.add("dragging"); sx = e.clientX; }
+      else if (Math.abs(dy) > 10) sx = null;   // vertical: let the page scroll
+      return;
+    }
+    const PX = 14; acc += e.clientX - sx; sx = e.clientX;
+    while (acc >= PX) { bump(el, 1); acc -= PX; }
+    while (acc <= -PX) { bump(el, -1); acc += PX; }
+  });
+  const end = e => {
+    if (sx === null && !dragging) return;
+    const wasDrag = dragging; sx = null; dragging = false; el.classList.remove("dragging");
+    if (wasDrag) lastDrag = Date.now();
+    else if (e.type === "pointerup") { el.readOnly = false; el.focus(); el.select?.(); }   // a tap = type a value
+  };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("keydown", e => { if (e.key === "ArrowUp") { e.preventDefault(); bump(el, 1); } if (e.key === "ArrowDown") { e.preventDefault(); bump(el, -1); } });
+  el.addEventListener("wheel", e => { if (document.activeElement === el) { e.preventDefault(); bump(el, e.deltaY < 0 ? 1 : -1); } }, { passive: false });
+});
+
+/* ---------------- wind dial ---------------- */
+const dial = $("dial");
+function dirWords(d) {
+  if (d == null) return "";
+  d = norm360(d);
+  const clock = Math.round(d / 30) % 12 || 12;
+  const cross = Math.abs(Math.sin(d * Math.PI / 180)), head = Math.cos(d * Math.PI / 180);
+  const side = (d > 15 && d < 165) ? "from the right" : (d > 195 && d < 345) ? "from the left" : (d <= 15 || d >= 345) ? "headwind" : "tailwind";
+  const value = cross > 0.9 ? "full value" : cross > 0.6 ? "¾ value" : cross > 0.35 ? "½ value" : "little crosswind";
+  const sp = num("windSpeed") || 0;
+  return `${clock} o'clock · ${side} · ${value} (${fmt(sp * cross, 1)} mph cross, ${fmt(Math.abs(sp * head), 1)} mph ${head >= 0 ? "head" : "tail"})`;
+}
+function drawDial() {
+  const dpr = window.devicePixelRatio || 1, W = 150;
+  dial.width = W * dpr; dial.height = W * dpr; const c = dial.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const cx = W / 2, cy = W / 2, R = 66;
+  c.clearRect(0, 0, W, W);
+  c.beginPath(); c.arc(cx, cy, R, 0, 7); c.fillStyle = "#0e2418"; c.fill(); c.strokeStyle = "#2d5a3d"; c.lineWidth = 2; c.stroke();
+  c.fillStyle = "#a5d6a7"; c.font = "11px system-ui"; c.textAlign = "center"; c.textBaseline = "middle";
+  for (let h = 1; h <= 12; h++) { const a = h * 30 * Math.PI / 180; c.fillText(h, cx + Math.sin(a) * (R - 11), cy - Math.cos(a) * (R - 11)); }
+  c.fillStyle = "#2ecc71"; c.fillText("🎯", cx, cy - 30);   // target is straight ahead (12 o'clock)
+  c.beginPath(); c.arc(cx, cy, 4, 0, 7); c.fill();          // shooter
+  const d = num("windDir");
+  dial.setAttribute("aria-valuenow", d ?? "");
+  $("dirText").textContent = dirWords(d);
+  if (d == null) return;
+  const a = d * Math.PI / 180, ox = cx + Math.sin(a) * (R - 22), oy = cy - Math.cos(a) * (R - 22);
+  const tx = cx + Math.sin(a) * 12, ty = cy - Math.cos(a) * 12;
+  c.strokeStyle = "#ffd54f"; c.fillStyle = "#ffd54f"; c.lineWidth = 3;
+  c.beginPath(); c.moveTo(ox, oy); c.lineTo(tx, ty); c.stroke();
+  const ah = Math.atan2(ty - oy, tx - ox);
+  c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx - 9 * Math.cos(ah - 0.5), ty - 9 * Math.sin(ah - 0.5)); c.lineTo(tx - 9 * Math.cos(ah + 0.5), ty - 9 * Math.sin(ah + 0.5)); c.fill();
+  c.beginPath(); c.arc(ox, oy, 7, 0, 7); c.fill();
+}
+let dialDrag = false;
+function dialSet(e) {
+  const r = dial.getBoundingClientRect(), x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2;
+  if (Math.hypot(x, y) < 6) return;
+  const d = Math.round(norm360(Math.atan2(x, -y) * 180 / Math.PI) / 5) * 5 % 360;
+  if (String(d) !== $("windDir").value) { $("windDir").value = d; $("windDir").dispatchEvent(new Event("input", { bubbles: true })); }
+}
+dial.addEventListener("pointerdown", e => { e.preventDefault(); dialDrag = true; dial.setPointerCapture(e.pointerId); dialSet(e); });
+dial.addEventListener("pointermove", e => { if (dialDrag) dialSet(e); });
+["pointerup", "pointercancel"].forEach(ev => dial.addEventListener(ev, () => dialDrag = false));
+
+/* ---------------- validation ---------------- */
+const RULES = {
+  bc: [0.01, 2, true, "BC is usually 0.1–1.0"], weight: [1, 1000, true], diameter: [0.1, 1, true, "e.g. 0.308"], mv: [300, 5000, true],
+  length: [0, 3, false], sightHeight: [0, 10, true], zero: [10, 3000, true], twist: [-40, 40, false],
+  windSpeed: [0, 80, true], windDir: [0, 360, true], bearing: [0, 360, false], temp: [-40, 140, true], humidity: [0, 100, true],
+  altitude: [-1500, 20000, true], pressure: [15, 32, false, "inHg, e.g. 29.92"], target: [10, 3000, false], maxRange: [50, 3000, true], step: [5, 1000, true],
+  shotAngle: [-60, 60, false], rangeLat: [-90, 90, false], rangeLon: [-180, 180, false]
+};
+function validate() {
+  const bad = [];
+  for (const [id, [lo, hi, req, tip]] of Object.entries(RULES)) {
+    const raw = val(id), v = parseFloat(raw); let msg = "";
+    if (raw === "") { if (req) msg = "Required"; }
+    else if (isNaN(v)) msg = "Enter a number";
+    else if (v < lo || v > hi) msg = `Must be ${lo}–${hi}` + (tip ? ` (${tip})` : "");
+    if (id === "twist" && !msg && raw !== "" && v !== 0 && Math.abs(v) < 3) msg = "Twist is inches per turn, e.g. 8 or 10";
+    if (id === "step" && !msg && num("maxRange") && num("maxRange") / v > 300) msg = "Too many rows — use a bigger step";
+    $(id).classList.toggle("bad", !!msg); const e = $("e-" + id); if (e) e.textContent = msg;
+    if (msg) bad.push(id);
+  }
+  return bad;
+}
+
+/* ---------------- ballistics ---------------- */
+let B = null;
+let calcSeq = 0;
+async function calculate() {
+  if (!B) return;
+  const bad = validate();
+  if (bad.length) {
+    statusEl.textContent = `Fix ${bad.length} highlighted field${bad.length > 1 ? "s" : ""} to calculate.`; statusEl.classList.add("bad");
+    if (bad.some(f => RIFLE_F.includes(f))) $("rifleDetails").open = true;
+    if (bad.some(f => LOAD_F.includes(f))) $("loadDetails").open = true;
+    if (bad.some(f => f.startsWith("range"))) $("rangeDetails").open = true;
+    return;
+  }
+  const seq = ++calcSeq;
+  btn.disabled = true; statusEl.classList.remove("bad"); statusEl.textContent = "Calculating…";
+  const { Calculator, Shot, Weapon, Ammo, DragModel, DragTables, Atmo, Wind, UNew } = B;
+  try {
+    const twist = num("twist") || 0, length = num("length") || 0;
+    const mkShot = () => {
+      const dm = new DragModel({ bc: num("bc"), dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
+        weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
+      const ammo = new Ammo({ dm, mv: UNew.FPS(num("mv")) });
+      const weapon = new Weapon({ sightHeight: UNew.Inch(num("sightHeight")), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
+      const atmoOpts = { altitude: UNew.Foot(num("altitude")), temperature: UNew.Fahrenheit(num("temp")), humidity: num("humidity") / 100 };
+      if (num("pressure") != null) atmoOpts.pressure = UNew.InHg(num("pressure"));
+      const ws = num("windSpeed");
+      // UI: 0° = wind from the target (headwind), 90° = from shooter's right.
+      // js-ballistics: 0° = wind from behind (tailwind), 90° = from shooter's left. So add 180°.
+      const winds = ws > 0 ? [new Wind({ velocity: UNew.MPH(ws), directionFrom: UNew.Degree(norm360(num("windDir") + 180)) })] : [];
+      return new Shot({ weapon, ammo, atmo: new Atmo(atmoOpts), winds });
+    };
+    const shot = mkShot();
+    const calc = new Calculator();
+    await calc.setWeaponZero(shot, UNew.Yard(num("zero")));
+    // Zero is found on the flat (look angle 0); then apply the up/down-hill angle for this shot.
+    // With a look angle the library steps in horizontal distance, so scale by cos() to land on round line-of-sight ranges.
+    const look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    if (look) shot.lookAngle = UNew.Degree(look);
+    const result = await calc.fire({ shot, trajectoryRange: UNew.Yard(num("maxRange") * cosA), trajectoryStep: UNew.Yard(num("step") * cosA), raiseRangeError: false });
+    let tgt = null; const td = num("target");
+    if (td) {
+      const r2 = await calc.fire({ shot, trajectoryRange: UNew.Yard(td * cosA), trajectoryStep: UNew.Yard(td * cosA), raiseRangeError: false });
+      const last = r2.samples[r2.samples.length - 1];
+      if (last && Math.abs(last.distance.In(B.Distance.Yard) - td * cosA) < 1) tgt = last;
+    }
+    if (seq !== calcSeq) return;
+    lastRun = { samples: result.samples, tgt, td, look };
+    renderAll();
+    statusEl.textContent = `Done — ${result.samples.length} points` + (result.error ? ` · bullet stopped early (${result.error.message || "out of range"})` : "") +
+      (twist && !length ? " · add bullet length for spin drift" : "");
+    saveSettings();
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "Error: " + (err.message || err); statusEl.classList.add("bad");
+  } finally { btn.disabled = false; }
+}
+let lastRun = null;
+function renderAll() { if (!lastRun) return; renderShotCard(lastRun.tgt, lastRun.td); renderTable(lastRun.samples); renderChart(lastRun.samples); }
+
+function pointVals(p) {
+  const { Distance, Velocity, Angular } = B; const A = S.ang === "MIL" ? Angular.MIL : Angular.MOA;
+  return {
+    range: Math.round(p.distance.In(Distance.Yard) / Math.cos((lastRun?.look || 0) * Math.PI / 180)) || 0, drop: p.slantHeight.In(Distance.Inch), drift: p.windage.In(Distance.Inch),
+    elev: -p.dropAngle.In(A), wind: -p.windageAngle.In(A), vel: p.velocity.In(Velocity.FPS), energy: p.energy.footPound, tof: p.time
+  };
+}
+const ud = (v, d) => Math.abs(v) < 0.05 ? "0.0" : `${v > 0 ? "U" : "D"} ${Math.abs(v).toFixed(d)}`;
+const lr = (v, d) => Math.abs(v) < 0.05 ? "0.0" : `${v > 0 ? "R" : "L"} ${Math.abs(v).toFixed(d)}`;
+function renderShotCard(p, td) {
+  const card = $("shotCard");
+  if (!p) { card.style.display = td ? "block" : "none"; card.innerHTML = td ? `<div class="sub">Target ${td} yd is beyond where the bullet can reach.</div>` : ""; return; }
+  const v = pointVals(p), u = S.ang, d = u === "MIL" ? 1 : 1;
+  card.style.display = "block";
+  card.innerHTML = `<div class="sub">Dial for <b style="color:var(--text)">${v.range.toFixed(0)} yd</b>${curRange() ? " at " + escapeHtml(curRange().name) : ""}${lastRun?.look ? ` · ${Math.abs(lastRun.look)}° ${lastRun.look > 0 ? "uphill" : "downhill"}` : ""}</div>
+    <div class="big"><div><b>${ud(v.elev, u === "MIL" ? 1 : 1)}</b><span>Elevation ${u}</span></div><div><b>${lr(v.wind, d)}</b><span>Windage ${u}</span></div></div>
+    <div class="sub">Drop ${v.drop.toFixed(1)}" · drift ${lr(v.drift, 1).replace(/^([LR]) (.*)$/, "$2\" $1")} · ${v.vel.toFixed(0)} fps · ${v.energy.toFixed(0)} ft·lb · ${v.tof.toFixed(2)} s</div>`;
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function renderTable(samples) {
+  const u = S.ang, d = u === "MIL" ? 1 : 1, td = num("target"), full = S.view === "full";
+  let near = -1;
+  if (td) { let best = Infinity; samples.forEach((p, i) => { const r = Math.abs(p.distance.In(B.Distance.Yard) / Math.cos((lastRun?.look || 0) * Math.PI / 180) - td); if (r < best) { best = r; near = i; } }); }
+  let html = `<table class="${full ? "full" : "dope"}"><thead><tr><th>Range</th><th>Elev ${u}</th><th>Wind ${u}</th>` +
+    (full ? `<th>Drop in</th><th>Drift in</th><th>Vel fps</th><th>Energy</th><th>TOF s</th>` : `<th>Drop in</th>`) + `</tr></thead><tbody>`;
+  samples.forEach((p, i) => {
+    const v = pointVals(p);
+    html += `<tr class="${i === near ? "tgt" : ""}"><td>${v.range.toFixed(0)} yd</td><td>${ud(v.elev, d)}</td><td>${lr(v.wind, d)}</td>` +
+      `<td class="${v.drop < 0 ? "neg" : v.drop > 0 ? "pos" : ""}">${(Math.abs(v.drop) < 0.05 ? 0 : v.drop).toFixed(1)}</td>` +
+      (full ? `<td>${lr(v.drift, 1)}</td><td>${v.vel.toFixed(0)}</td><td>${v.energy.toFixed(0)}</td><td>${v.tof.toFixed(2)}</td>` : "") + `</tr>`;
+  });
+  html += `</tbody></table><div class="legend">Elev = dial U (up) / D (down). Wind = dial L/R to correct (includes spin drift). Drop/drift in inches relative to line of sight.</div>`;
+  resultsDiv.innerHTML = html;
+}
+function renderChart(samples) {
+  const canvas = $("chart"); const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1, width = canvas.offsetWidth, height = canvas.offsetHeight;
+  canvas.width = width * dpr; canvas.height = height * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = "#0e2418"; ctx.fillRect(0, 0, width, height);
+  if (!samples || samples.length < 2) return;
+  const Y = B.Distance.Yard, In = B.Distance.Inch;
+  const cosA = Math.cos((lastRun?.look || 0) * Math.PI / 180), xs = samples.map(p => p.distance.In(Y) / cosA), drops = samples.map(p => p.slantHeight.In(In));
+  const minD = Math.min(0, ...drops), maxD = Math.max(0, ...drops), rd = Math.max(maxD - minD, 1), maxX = Math.max(...xs, 1);
+  const X = r => 20 + (r / maxX) * (width - 40), YY = dv => height - 30 - ((dv - minD) / rd) * (height - 55);
+  ctx.strokeStyle = "#4a6b52"; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
+  ctx.beginPath(); ctx.moveTo(20, YY(0)); ctx.lineTo(width - 20, YY(0)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = "#2ecc71"; ctx.lineWidth = 2.5; ctx.beginPath();
+  samples.forEach((p, i) => { const x = X(xs[i]), y = YY(drops[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
+  const td = num("target");
+  if (td && td <= maxX) { ctx.strokeStyle = "#ffd54f"; ctx.beginPath(); ctx.moveTo(X(td), 26); ctx.lineTo(X(td), height - 22); ctx.stroke(); }
+  ctx.fillStyle = "#a5d6a7"; ctx.font = "12px system-ui"; ctx.textAlign = "left"; ctx.fillText("Drop vs range (in)", 12, 16);
+  ctx.textAlign = "right"; ctx.fillText(`0–${maxX.toFixed(0)} yd · ${minD.toFixed(0)}"`, width - 12, 16);
+  ctx.textAlign = "right"; ctx.fillStyle = "#6b8f71"; ctx.fillText("line of sight", width - 22, YY(0) + 14);
+}
+
+/* ---------------- phone sensors: compass aim & shot angle ---------------- */
+// Heading/tilt of the back-camera axis (phone upright, camera at target) or of the top edge (phone flat on the scope).
+const D2R = Math.PI / 180;
+function orient(e) {
+  if (e.beta == null || e.gamma == null) return null;
+  const a = (e.alpha || 0) * D2R, b = e.beta * D2R, g = e.gamma * D2R;
+  const sA = Math.sin(a), cA = Math.cos(a), sB = Math.sin(b), cB = Math.cos(b), sG = Math.sin(g), cG = Math.cos(g);
+  const flat = Math.abs(cB * cG) > 0.7;   // screen facing up/down
+  let vx, vy, vz;
+  if (flat) { vx = -cB * sA; vy = cA * cB; vz = sB; }                       // top edge (device +y)
+  else { vx = -(cA * sG + sA * sB * cG); vy = -(sA * sG - cA * sB * cG); vz = -(cB * cG); } // back camera (device −z)
+  let heading = null;
+  if (e.webkitCompassHeading != null) heading = e.webkitCompassHeading;     // iOS: already a compass heading
+  else if (e.absolute || e.type === "deviceorientationabsolute") {
+    heading = norm360(Math.atan2(vx, vy) / D2R);
+    if (flat) heading = norm360(heading + (screen.orientation?.angle || 0));
+  }
+  return { heading, angle: Math.asin(Math.max(-1, Math.min(1, vz))) / D2R, flat };
+}
+let sens = null;   // {mode, sx, sy, n, ang, last}
+function sensorHandler(e) {
+  if (!sens) return;
+  const o = orient(e); if (!o) return;
+  if (sens.mode === "aim") {
+    if (o.heading == null) { if (e.type === "deviceorientation" && !sens.sawAbs) $("sheetSub").textContent = "Waiting for compass…"; return; }
+    if (e.type === "deviceorientationabsolute") sens.sawAbs = true;
+    const k = sens.n ? 0.15 : 1;  // exponential smoothing on the unit circle
+    sens.sx = (sens.sx || 0) * (1 - k) + Math.sin(o.heading * D2R) * k; sens.sy = (sens.sy || 0) * (1 - k) + Math.cos(o.heading * D2R) * k;
+    sens.n++; sens.last = Math.round(norm360(Math.atan2(sens.sx, sens.sy) / D2R));
+    $("sheetVal").textContent = `${sens.last}° ${compass(sens.last)}`;
+    $("sheetSub").textContent = o.flat ? "Phone flat — using the top edge" : "Phone upright — using the back camera";
+  } else {
+    const k = sens.n ? 0.15 : 1; sens.ang = (sens.ang ?? o.angle) * (1 - k) + o.angle * k; sens.n++;
+    sens.last = Math.round(sens.ang * 2) / 2;   // 0.5° steps
+    $("sheetVal").textContent = `${sens.last > 0 ? "+" : ""}${sens.last.toFixed(1)}°`;
+    $("sheetSub").textContent = Math.abs(sens.last) < 0.5 ? "Level" : sens.last > 0 ? "Uphill" : "Downhill";
+  }
+}
+async function openSensor(mode) {
+  if (!window.isSecureContext) { toast("Phone sensors need the page served over https"); return; }
+  try {
+    const DOE = window.DeviceOrientationEvent;
+    if (DOE && typeof DOE.requestPermission === "function") {   // iOS 13+ — must be called from a tap
+      const r = await DOE.requestPermission(); if (r !== "granted") throw new Error("Motion & orientation access was denied. Allow it in your browser site settings (iPhone: Settings › Apps › Safari › Motion & Orientation Access), then reload.");
+    }
+  } catch (e) { toast(e.message || "Sensor permission failed"); return; }
+  sens = { mode, n: 0, last: null };
+  $("sheetTitle").textContent = mode === "aim" ? "🧭 Aim at target" : "📐 Measure shot angle";
+  $("sheetVal").textContent = "—"; $("sheetSub").textContent = "Waiting for sensor…";
+  $("sheetHelp").textContent = mode === "aim"
+    ? "Hold the phone upright and point the back camera at the target (or lay it flat with the top edge toward the target). Keep it away from metal and magnets, then tap Lock. Reads magnetic north."
+    : "Point the back camera at the target (or lay the phone along the scope, top edge toward the target), hold steady, then tap Lock.";
+  $("sheet").classList.add("show");
+  window.addEventListener("deviceorientationabsolute", sensorHandler);
+  window.addEventListener("deviceorientation", sensorHandler);
+  clearTimeout(sens.t); sens.t = setTimeout(() => { if (sens && !sens.n) $("sheetSub").textContent = "No sensor data — this device may not have a " + (mode === "aim" ? "compass" : "motion sensor") + "."; }, 3000);
+}
+function closeSensor() {
+  window.removeEventListener("deviceorientationabsolute", sensorHandler);
+  window.removeEventListener("deviceorientation", sensorHandler);
+  if (sens) clearTimeout(sens.t); sens = null; $("sheet").classList.remove("show");
+}
+$("sheetCancel").onclick = closeSensor;
+$("sheetLock").onclick = () => {
+  if (!sens || sens.last == null) { toast("No reading yet"); return; }
+  const { mode, last } = sens; closeSensor();
+  if (mode === "aim") {
+    $("bearing").value = last; $("bearing").dispatchEvent(new Event("input", { bubbles: true }));
+    const g = curRange();
+    if (g && confirm(`Shooting direction locked at ${last}° ${compass(last)}.\n\nSave it to range “${g.name}”?`)) { g.bearing = String(last); savePresets(); updateDirty(); toast(`Saved to “${g.name}”`); }
+    else toast(`Shooting direction set to ${last}° ${compass(last)}`);
+  } else {
+    $("shotAngle").value = last; $("shotAngle").dispatchEvent(new Event("input", { bubbles: true }));
+    toast(`Shot angle set to ${last > 0 ? "+" : ""}${last}°`);
+  }
+};
+$("aimBtn").onclick = () => openSensor("aim");
+$("angleBtn").onclick = () => openSensor("angle");
+if ("DeviceOrientationEvent" in window && matchMedia("(pointer: coarse)").matches) {
+  document.body.classList.add("has-sensors");
+  if (!window.isSecureContext) $("sensorHint").textContent += " Compass/angle buttons need https.";
+}
+
+/* ---------------- wiring ---------------- */
+let calcT;
+function schedule() { clearTimeout(calcT); calcT = setTimeout(calculate, 350); }
+document.addEventListener("input", e => {
+  const id = e.target.id; if (!id || id === "placeQ") return;
+  if (WX_F.includes(id)) manual.add(id);
+  if (id === "bearing") applyAuto(); else { renderChips(); updateDirty(); }
+  if (id === "windDir" || id === "windSpeed") drawDial();
+  schedule();
+});
+document.addEventListener("change", e => { if (e.target.id === "drag") { updateDirty(); schedule(); } });
+btn.addEventListener("click", calculate);
+function seg(id, key) {
+  const el = $(id);
+  const paint = () => el.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === S[key]));
+  el.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S[key] = b.dataset.v; paint(); saveSettings(); renderAll(); });
+  paint();
+}
+seg("angSeg", "ang"); seg("viewSeg", "view");
+window.addEventListener("resize", () => lastRun && renderChart(lastRun.samples));
+
+/* ---------------- start ---------------- */
+for (const [f, v] of Object.entries(S.values || {})) if ($(f) && v != null) $(f).value = v;
+renderPickers(); applyRifle(); applyLoad();
+if (curRange()) applyRange(); else applyAuto();
+if (!P.rifles.length) $("rifleDetails").open = true;
+drawDial();
+refreshWeather();
+try {
+  B = await import("https://cdn.jsdelivr.net/npm/js-ballistics@3/dist/index.js");
+  statusEl.textContent = "Ready";
+  calculate();
+} catch (e) {
+  console.error(e);
+  statusEl.textContent = "Couldn't load the ballistics engine (offline?). Connect once and reload."; statusEl.classList.add("bad");
+}
+window.__bc = { P, S, manual, auto, get wx() { return wx; } };
+</script>
+</body>
+</html>

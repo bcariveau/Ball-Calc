@@ -1051,7 +1051,7 @@ html[data-theme=night] .dvB { background: var(--err); color: #000 !important; bo
       <div id="shList" aria-label="Shots in this string, newest first"></div>
       <div id="shAddBox" hidden>
         <input type="number" inputmode="decimal" id="shVel" placeholder="fps" aria-label="Shot velocity in fps">
-        <button type="button" id="shAddGo">Add</button><button type="button" class="ghost" id="shAddDone">Cancel</button>
+        <button type="button" id="shAddGo">Add</button><button type="button" class="ghost" id="shAddDone" aria-label="Done: close the velocity entry">Done</button>
       </div>
       <div id="shTagBar" hidden>
         <p class="lbl2" id="shTagFor">Tag the last shot</p>
@@ -4361,13 +4361,22 @@ function shStatsOf(rd, w) {   // string stats + last shot (shot #, ± from the s
   const dv = last && !last.x && st.n > 1 ? Math.round(last.v - st.avg) : null;
   return { ...st, total: rd.length, disc: rd.length - st.n, last, k: rd.length, dv, ftlb: last ? shEnergy(last.v, w) : null };
 }
-// ± colour: neutral unless the shot is an outlier. 5+ kept shots: amber > 2 SD, red > 3 SD from the kept average.
-// Fewer than 5 (SD means little yet): amber at 25+ fps off the average, red at 50+ (on the rounded fps shown).
-function shDevCls(dev, n, sd) {
-  if (dev == null || !isFinite(dev) || !(n > 1)) return "";
-  const a = Math.abs(dev);
-  if (n >= 5) return sd > 0 ? (a > 3 * sd ? "dvB" : a > 2 * sd ? "dvW" : "") : "";
-  const r = Math.round(a); return r >= 50 ? "dvB" : r >= 25 ? "dvW" : "";
+// ± colour (flier rule). d = v − the full kept average (the ± shown). Under 10 fps off: always neutral.
+// Fixed flags at any count: 25+ fps amber, 50+ fps red. With 5+ kept shots, also leave-one-out: z = |v − mean of the OTHER kept shots| / their
+// sample SD; z > 2 amber, z > 3 red (if the others' SD is 0, any shot 10+ fps off them is amber). The more severe result wins.
+// kept = velocities of the string's kept shots (including this one); discarded shots never reach here.
+function shDevCls(v, kept) {
+  const n = kept ? kept.length : 0; if (!(n > 1) || !isFinite(v)) return "";
+  const avg = kept.reduce((a, b) => a + b, 0) / n, a = Math.abs(v - avg);
+  if (a < 10) return "";
+  let lv = a >= 50 ? 2 : a >= 25 ? 1 : 0;
+  if (n >= 5 && lv < 2) {
+    const o = kept.slice(), k = o.indexOf(v); if (k >= 0) o.splice(k, 1);
+    const m = o.reduce((x, y) => x + y, 0) / o.length, sd = Math.sqrt(o.reduce((s, x) => s + (x - m) ** 2, 0) / (o.length - 1)), ao = Math.abs(v - m);
+    const lo = sd > 0 ? (ao / sd > 3 ? 2 : ao / sd > 2 ? 1 : 0) : ao >= 10 ? 1 : 0;
+    lv = Math.max(lv, lo);
+  }
+  return lv === 2 ? "dvB" : lv === 1 ? "dvW" : "";
 }
 function shDevWord(c) { return c === "dvB" ? "far off the average" : c === "dvW" ? "off the average" : ""; }
 function shSigned(n) { return n == null ? "" : (n >= 0 ? "+" : "−") + Math.abs(n); }
@@ -4381,7 +4390,7 @@ function shPaint() {
   $("shFor").textContent = [r?.name, l?.name, `${yd} yd`].filter(Boolean).join(" · ");
   const x = q.last;
   $("shV").textContent = x ? fpsT(x.v) : "—";
-  const mc = x && !x.x ? shDevCls(x.v - q.avg, q.n, q.sd) : "";
+  const keptV = rd.filter(s => !s.x).map(s => s.v), mc = x && !x.x ? shDevCls(x.v, keptV) : "";
   $("shMeta").innerHTML = x ? `#${q.k}${x.x ? " · discarded" : q.dv != null ? ` · <span id="shDev"${mc ? ` class="${mc}"` : ""}>${shSigned(q.dv)}</span>` : ""}` : SH.ended ? "" : "Waiting for the first shot";
   $("shMeta").classList.toggle("wait", !x);
   $("shHero").classList.toggle("dis", !!(x && x.x));
@@ -4393,7 +4402,7 @@ function shPaint() {
     ["Min", q.n ? fpsT(q.min) : "—"], ["Max", q.n ? fpsT(q.max) : "—"], ["Energy · last", q.ftlb != null ? `${Math.round(q.ftlb).toLocaleString()} ft-lb` : "—", "w2"]]
     .map(([k, v, c]) => `<div${c ? ` class="${c}"` : ""}><b>${v}</b><span>${k}</span></div>`).join("");
   $("shList").innerHTML = rd.length ? rd.map((s, i) => ({ s, i })).reverse().map(({ s, i }) => `<div class="shRow${s.x ? " dis" : ""}${s.id === SH.lastId && i === rd.length - 1 ? " new" : ""}" data-id="${escapeHtml(s.id)}">
-      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v - q.avg, q.n, q.sd); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "discarded" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
+      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v, keptV); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "discarded" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
       <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot ${i + 1}" title="${s.x ? "Restore" : "Discard (bad read)"}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
     : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap ＋ Add shot to type a velocity.</div>`;
   shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en); $("shStrBtn").classList.toggle("on", en);
@@ -4501,7 +4510,8 @@ function shAddClose() { $("shVel").value = ""; $("shVel").blur(); shPanels(); $(
 $("shAddDone").onclick = () => shAddClose();
 // Add closes the panel (so the shot list stays in view); a bad value keeps it open to fix
 $("shAddGo").onclick = async () => { const v = $("shVel").value; if (!v.trim()) { $("shVel").focus(); return; } if (await shAddText(v)) shAddClose(); else $("shVel").focus(); };
-$("shVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("shAddGo").click(); } });
+// Enter adds and keeps the panel open for the next velocity (keyboard / chrono-by-ear entry); Done or Escape closes it
+$("shVel").addEventListener("keydown", async e => { if (e.key !== "Enter") return; e.preventDefault(); const v = $("shVel").value; if (!v.trim()) return; if (await shAddText(v)) $("shVel").value = ""; $("shVel").focus(); });
 $("shTag").onclick = () => { const open = $("shTagBar").hidden; shPanels(open ? "shTagBar" : null); shTagPaint(); };
 $("shTagBar").addEventListener("click", e => { const b = e.target.closest("button[data-f]"); if (!b || !ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), x = rd[rd.length - 1]; if (x) shToggle(x.id, b.dataset.f); });
 $("shNote").addEventListener("change", async () => { if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), x = rd[rd.length - 1]; if (!x) return; const v = $("shNote").value.trim(); if (v) x.note = v; else delete x.note; edDirty = true; renderEditor(); await shSave(); shPaint(); });

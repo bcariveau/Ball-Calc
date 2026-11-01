@@ -32,7 +32,10 @@ const cr = (a, c) => { const [x, y] = [lum(a), lum(c)].sort((m, k) => k - m); re
 const hook = pg => { pg.on("console", m => { if (m.type() === "error" || m.type() === "warning") errs.push(m.type() + ": " + m.text()); }); pg.on("pageerror", e => errs.push("PAGEERR " + e.message)); pg.on("dialog", d => d.accept()); };
 const route = async c => c.route("https://api.open-meteo.com/**", r => r.fulfill({ contentType: "application/json", body: JSON.stringify({ elevation: [260], current: { temperature_2m: 59, relative_humidity_2m: 40, wind_speed_10m: 8, wind_direction_10m: 270, wind_gusts_10m: 14, surface_pressure: 984 } }) }));
 const sdOf = a => { const m = a.reduce((x, y) => x + y) / a.length; return { m, s: a.length > 1 ? Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - 1)) : 0 }; };
-const expCls = kept => { const x = kept[kept.length - 1], { m, s } = sdOf(kept), d = x - m, a = Math.abs(d), n = kept.length; if (n < 2) return ""; if (n >= 5) return s > 0 ? (a > 3 * s ? "dvB" : a > 2 * s ? "dvW" : "") : ""; const r = Math.round(a); return r >= 50 ? "dvB" : r >= 25 ? "dvW" : ""; };
+const expCls = kept => { const v = kept[kept.length - 1], n = kept.length; if (n < 2) return ""; const { m } = sdOf(kept), a = Math.abs(v - m); if (a < 10) return "";
+  let lv = a >= 50 ? 2 : a >= 25 ? 1 : 0; if (n >= 5) { const o = sdOf(kept.slice(0, -1)), ao = Math.abs(v - o.m); lv = Math.max(lv, o.s > 0 ? (ao / o.s > 3 ? 2 : ao / o.s > 2 ? 1 : 0) : ao >= 10 ? 1 : 0); }
+  return ["", "dvW", "dvB"][lv]; };
+const oldCls = kept => { const v = kept[kept.length - 1], { m, s } = sdOf(kept), a = Math.abs(v - m), n = kept.length; if (n >= 5) return s > 0 ? (a > 3 * s ? "dvB" : a > 2 * s ? "dvW" : "") : ""; const r = Math.round(a); return r >= 50 ? "dvB" : r >= 25 ? "dvW" : ""; };
 
 const ctx = await b.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 2 });
 await ctx.addInitScript(init); await ctx.addInitScript(fakes); await route(ctx);
@@ -41,7 +44,8 @@ await p.goto(URL_); await p.waitForFunction(() => document.getElementById("statu
 const T = s => p.textContent(s), vis = s => p.isVisible(s);
 const ED = () => p.evaluate(() => JSON.parse(JSON.stringify(window.__bc.ED)));
 const metaCls = () => p.evaluate(() => { const d = document.getElementById("shDev"); if (!d) return "none"; const c = d.classList; return c.contains("dvB") ? "dvB" : c.contains("dvW") ? "dvW" : ""; });
-const add = async v => { await p.click("#shAdd"); await p.fill("#shVel", String(v)); await p.press("#shVel", "Enter"); await p.waitForTimeout(70); };
+const add = async v => { if (!(await vis("#shAddBox"))) await p.click("#shAdd"); await p.fill("#shVel", String(v)); await p.press("#shVel", "Enter"); await p.waitForTimeout(70); };
+const closeAdd = async () => { if (await vis("#shAddBox")) await p.click("#shAddDone"); await p.waitForTimeout(30); };
 const newStr = async () => { await p.click("#shStrBtn"); await p.click("#shNewStr"); await p.waitForTimeout(80); };
 
 /* ---------- 1) the fps panel ---------- */
@@ -55,28 +59,38 @@ await p.click("#shStrBtn");
 await p.click("#shAdd"); await p.waitForTimeout(40);
 ok("＋ Add shot opens it, focused and empty", await vis("#shAddBox") && (await p.evaluate(() => document.activeElement.id)) === "shVel" && (await p.inputValue("#shVel")) === "" && (await p.getAttribute("#shAdd", "aria-expanded")) === "true");
 await p.fill("#shVel", "2700"); await p.press("#shVel", "Enter"); await p.waitForTimeout(80);
-ok("Enter adds the shot and closes the panel", !(await vis("#shAddBox")) && (await T("#shV")) === "2700" && (await p.getAttribute("#shAdd", "aria-expanded")) === "false");
-await p.click("#shAdd"); await p.fill("#shVel", "2710"); await p.click("#shAddGo"); await p.waitForTimeout(80);
-ok("the Add button adds and closes too", !(await vis("#shAddBox")) && (await T("#shV")) === "2710");
+ok("Enter adds the shot and keeps the panel open, cleared and focused for the next one", await vis("#shAddBox") && (await T("#shV")) === "2700" && (await p.inputValue("#shVel")) === "" && (await p.evaluate(() => document.activeElement.id)) === "shVel");
+await p.fill("#shVel", "2710"); await p.click("#shAddGo"); await p.waitForTimeout(80);
+ok("tapping the Add button adds and closes it (list back in view)", !(await vis("#shAddBox")) && (await T("#shV")) === "2710" && (await p.getAttribute("#shAdd", "aria-expanded")) === "false");
 await p.click("#shAdd"); await p.fill("#shVel", "12"); await p.click("#shAddGo"); await p.waitForTimeout(80);
 ok("an out-of-range value keeps the panel open to fix (nothing added)", await vis("#shAddBox") && (await ED()).shots.length === 2);
+ok("the close button is labelled Done (text + aria)", (await T("#shAddDone")).trim() === "Done" && /^Done/.test(await p.getAttribute("#shAddDone", "aria-label")) && !/Cancel/.test(await T("#shAddBox")));
 await p.click("#shAddDone"); await p.waitForTimeout(40);
-ok("Cancel closes it without adding", !(await vis("#shAddBox")) && (await ED()).shots.length === 2);
+ok("Done closes it without adding", !(await vis("#shAddBox")) && (await ED()).shots.length === 2);
 await p.click("#shAdd"); await p.fill("#shVel", "2705"); await p.keyboard.press("Escape"); await p.waitForTimeout(60);
 ok("Escape closes it (no shot added, view stays open)", !(await vis("#shAddBox")) && await vis("#shView") && (await ED()).shots.length === 2);
 await add(2701); await add(2699);
-ok("each Add closes it again (2 more shots)", (await ED()).shots.length === 4 && !(await vis("#shAddBox")));
+ok("several shots in a row with Enter (panel stays open), Done closes", (await ED()).shots.length === 4 && await vis("#shAddBox")); await closeAdd(); ok("(closed)", !(await vis("#shAddBox")));
 await p.click("#shAdd"); await p.waitForTimeout(30); await p.click("#shTag"); await p.waitForTimeout(30);
 ok("only one panel at a time (Tag closes the fps panel)", !(await vis("#shAddBox")) && await vis("#shTagBar")); await p.click("#shTag");
 
 /* ---------- 2) deviation colours ---------- */
-const U = await p.evaluate(() => { const f = window.__bc.shDevCls; return {
-  n4_24: f(24, 4, 30), n4_25: f(25, 4, 1), n4m25: f(-25, 4, 1), n4_49: f(49, 3, 1), n4_50: f(50, 3, 1), n2_244: f(24.4, 2, 1), n2_246: f(24.6, 2, 1),
-  n5_2sd: f(20, 5, 10), n5_2sdp: f(20.01, 5, 10), n5_3sd: f(30, 5, 10), n5_3sdp: f(30.01, 7, 10), n5_m: f(-31, 9, 10), n5_big: f(60, 5, 40), sd0: f(0, 6, 0), n1: f(80, 1, 0), nul: f(null, 5, 3) }; });
-ok("n<5: 24 fps neutral, 25 amber (either side), 49 amber, 50 red", U.n4_24 === "" && U.n4_25 === "dvW" && U.n4m25 === "dvW" && U.n4_49 === "dvW" && U.n4_50 === "dvB", JSON.stringify(U));
-ok("n<5 uses the rounded fps shown (24.4 → neutral, 24.6 → shows 25 → amber)", U.n2_244 === "" && U.n2_246 === "dvW");
-ok("n≥5: exactly 2 SD neutral, just over amber; exactly 3 SD amber, just over red (either side)", U.n5_2sd === "" && U.n5_2sdp === "dvW" && U.n5_3sd === "dvW" && U.n5_3sdp === "dvB" && U.n5_m === "dvB");
-ok("n≥5 ignores the fps rule (60 fps at SD 40 = neutral); SD 0, one shot, no dev → neutral", U.n5_big === "" && U.sd0 === "" && U.n1 === "" && U.nul === "");
+const U = await p.evaluate(() => { const f = window.__bc.shDevCls, at = (o, d) => { const S = o.reduce((a, b) => a + b, 0), n = o.length + 1, v = (n * d + S) / (n - 1); return [...o, v]; }, g = k => f(k[k.length - 1], k);
+  const tiny = [2700, 2700.1, 2699.9, 2700, 2700.1, 2699.9, 2700], wide = [2650, 2680, 2700, 2720, 2750, 2690, 2710], two = [2700, 2700];
+  return { floor99: g(at(tiny, 9.9)), floor99m: g(at(tiny, -9.9)), floor10: g(at(tiny, 10)),
+    n3_249: g(at(two, 24.9)), n3_25: g(at(two, 25)), n3m25: g(at(two, -25)), n3_499: g(at(two, 49.9)), n3_50: g(at(two, 50)),
+    n8_249: g(at(wide, 24.9)), n8_25: g(at(wide, 25)), n8_499: g(at(wide, 49.9)), n8_50: g(at(wide, 50)), n8m50: g(at(wide, -50)),
+    n5fl: g([2700, 2702, 2698, 2701, 2716]), n6red: g([2700, 2702, 2698, 2701, 2699, 2716]), n6amb: g([2690, 2700, 2710, 2695, 2705, 2719.76]),
+    sd0a: g([2700, 2700, 2700, 2700, 2700, 2712]), sd0n: g([2700, 2700, 2700, 2700, 2700, 2711]), sd0r: g([2700, 2700, 2700, 2700, 2700, 2760]), n4loo: g([2700, 2702, 2698, 2716]),
+    n1: f(2800, [2800]), none: f(2700, []) }; });
+const J = JSON.stringify(U);
+ok("9.9 fps off is never coloured, even with a tiny SD (either side); 10 fps with the same SD is (leave-one-out red)", U.floor99 === "" && U.floor99m === "" && U.floor10 === "dvB", J);
+ok("n=3: 24.9 neutral, 25 amber (either side), 49.9 amber, 50 red", U.n3_249 === "" && U.n3_25 === "dvW" && U.n3m25 === "dvW" && U.n3_499 === "dvW" && U.n3_50 === "dvB");
+ok("n=8 (others SD ≈ 32, leave-one-out quiet): 24.9 neutral, 25 amber, 49.9 amber, 50 red (either side)", U.n8_249 === "" && U.n8_25 === "dvW" && U.n8_499 === "dvW" && U.n8_50 === "dvB" && U.n8m50 === "dvB");
+ok("n=5: leave-one-out flags a 12.6 fps flier the old rule could never colour (red)", U.n5fl === "dvB" && oldCls([2700, 2702, 2698, 2701, 2716]) === "" && expCls([2700, 2702, 2698, 2701, 2716]) === "dvB");
+ok("n=6: red reachable (13.3 fps flier, z ≈ 10 vs the others); 2.5 z → amber below the fps flags", U.n6red === "dvB" && oldCls([2700, 2702, 2698, 2701, 2699, 2716]) !== "dvB" && U.n6amb === "dvW");
+ok("others' SD 0: 10 fps off → amber, 9.2 → neutral (floor), 50 → red", U.sd0a === "dvW" && U.sd0n === "" && U.sd0r === "dvB");
+ok("n=4: no leave-one-out (fixed flags only: 12 fps → neutral); 1 shot / none → neutral", U.n4loo === "" && U.n1 === "" && U.none === "");
 // live: string 1 = 2700, 2710, 2701, 2699 → last −3: neutral
 ok("live: the ± is its own span; small ± is neutral (no colour class)", (await metaCls()) === "" && /#4 · −3/.test(await T("#shMeta")));
 const col = s => p.evaluate(s => getComputedStyle(document.querySelector(s)).color, s), cssv = v => p.evaluate(v => { const d = document.createElement("i"); d.style.color = `var(${v})`; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; }, v);
@@ -90,12 +104,12 @@ ok("amber is the theme's warn colour; the discarded row stays neutral", (await c
 await add(2804);   // kept 2700, 2750, 2804 → n=3, avg 2751.3, +53 → red
 ok("live n=3: +53 → red (err colour)", (await metaCls()) === "dvB" && (await col("#shDev")) === (await cssv("--err")), await T("#shMeta"));
 // n ≥ 5
-await newStr(); const A6 = [2700, 2702, 2698, 2701, 2699]; for (const v of A6) await add(v);
-await add(2715); ok("live n=6: 1.99 SD → neutral", expCls([...A6, 2715]) === "" && (await metaCls()) === "", await T("#shMeta"));
-await p.click("#shBad"); await p.waitForTimeout(60); await add(2730);
-ok("live n=6: 2.03 SD → amber", expCls([...A6, 2730]) === "dvW" && (await metaCls()) === "dvW", await T("#shMeta"));
+await newStr(); const A5 = [2700, 2702, 2698, 2701]; for (const v of A5) await add(v);
+await add(2716); ok("live n=5: a +13 flier → red (leave-one-out), hero and its row", expCls([...A5, 2716]) === "dvB" && (await metaCls()) === "dvB" && await p.evaluate(() => document.querySelector("#shList .shRow .dv").classList.contains("dvB")), await T("#shMeta"));
+await p.click("#shBad"); await p.waitForTimeout(80); await add(2709);
+ok("live: the discarded flier is out of the stats; +7 (z ≈ 5 vs the others) stays neutral under the 10 fps floor", expCls([...A5, 2709]) === "" && (await metaCls()) === "" && /#6 · \+7/.test(await T("#shMeta")), await T("#shMeta"));
 await newStr(); const A11 = [2700, 2701, 2699, 2700, 2701, 2699, 2700, 2701, 2699, 2700]; for (const v of A11) await add(v);
-await add(2800); ok("live n=11: a 100 fps flier is > 3 SD → red", expCls([...A11, 2800]) === "dvB" && (await metaCls()) === "dvB", await T("#shMeta"));
+await add(2800); ok("live n=11: a 100 fps flier → red", expCls([...A11, 2800]) === "dvB" && (await metaCls()) === "dvB", await T("#shMeta")); await closeAdd();
 ok("hero aria-label says the shot is far off the average", /far off the average/.test(await p.getAttribute("#shHero", "aria-label")));
 const TH = ["dark", "light", "od", "fde", "night"], thr = [];
 for (const th of TH) {
@@ -140,7 +154,7 @@ ok("＋ Add shot closes the menu", !(await vis("#shStrMenu")) && await vis("#shA
 for (let i = 0; i < 3; i++) { await add(2700); await newStr(); }
 const hd = await p.evaluate(() => { const b = document.getElementById("shStr"), lh = parseFloat(getComputedStyle(b).lineHeight) || 20; return { txt: b.textContent, sw: b.scrollWidth, cw: b.clientWidth, h: b.getBoundingClientRect().height, lh, for: getComputedStyle(document.getElementById("shFor")).display, conn: !document.getElementById("shConn").hidden, right: document.querySelector(".shRadBox").getBoundingClientRect().right }; });
 ok("360 px: gun · load · distance line hidden; 'String N · Target M' on one line, not truncated (Connect showing)", hd.for === "none" && /^String \d{2} · Target B$/.test(hd.txt) && hd.sw <= hd.cw + 1 && hd.h < hd.lh * 1.5 && hd.conn && hd.right <= 360, JSON.stringify(hd));
-await newStr(); for (const v of [2700, 2712, 2695, 2720, 2705, 2760, 2701]) await add(v); await p.waitForTimeout(300);
+await newStr(); for (const v of [2700, 2712, 2695, 2720, 2705, 2760, 2701]) await add(v); await closeAdd(); await p.waitForTimeout(300);
 const rowsIn = () => p.evaluate(() => { const L = document.getElementById("shList").getBoundingClientRect(); return [...document.querySelectorAll(".shRow")].filter(e => { const r = e.getBoundingClientRect(); return r.top >= L.top - 1 && r.bottom <= L.bottom + 1; }).length; });
 const lay = () => p.evaluate(() => ({ sw: document.documentElement.scrollWidth, btnB: document.querySelector(".shBtns").getBoundingClientRect().bottom, H: innerHeight }));
 let rws = await rowsIn(), ly = await lay();
@@ -151,12 +165,17 @@ ok("(with the fps panel open, rows shrink but the list stays visible)", rOpen >=
 for (const [w, h, n, shot] of [[740, 360, 4, "landscape"], [915, 412, 5, ""], [412, 915, 7, ""]]) {
   await p.setViewportSize({ width: w, height: h }); await p.waitForTimeout(200);
   rws = await rowsIn(); ly = await lay();
-  const f = await p.evaluate(() => { const b = document.getElementById("shStr"), s = document.getElementById("shFor"); return { for: getComputedStyle(s).display, fsw: s.scrollWidth, fcw: s.clientWidth, sw: b.scrollWidth, cw: b.clientWidth }; });
+  const f = await p.evaluate(() => { const b = document.getElementById("shStr"), s = document.getElementById("shFor"); return { for: getComputedStyle(s).display, fsw: s.scrollWidth, fcw: s.clientWidth, bsw: b.scrollWidth, cw: b.clientWidth }; });
   const wide = w >= 480;
-  ok(`${w}×${h}: ≥ ${n} rows visible; header line ${wide ? "kept and fits" : "hidden"}; label untruncated`, rws >= n && ly.sw <= w && ly.btnB <= h && f.sw <= f.cw + 1 && (wide ? f.for !== "none" && f.fsw <= f.fcw + 1 : f.for === "none"), JSON.stringify({ rws, ...ly, ...f }));
+  ok(`${w}×${h}: ≥ ${n} rows visible; header line ${wide ? "kept and fits" : "hidden"}; label untruncated`, rws >= n && ly.sw <= w && ly.btnB <= h && f.bsw <= f.cw + 1 && (wide ? f.for !== "none" && f.fsw <= f.fcw + 1 : f.for === "none"), JSON.stringify({ rws, ...ly, ...f }));
   if (shot) await p.evaluate(() => document.getElementById("toast").classList.remove("show", "act")); await p.waitForTimeout(450); await p.screenshot({ path: SHOT + shot + ".png" });
 }
 await p.setViewportSize({ width: 360, height: 740 });
+await newStr(); const FL = [2701, 2722, 2708, 2693, 2732, 2700, 2790, 2685, 2704]; for (const v of FL) await add(v); await closeAdd(); await p.waitForTimeout(300);
+const flc = await p.evaluate(() => [...document.querySelectorAll("#shList .shRow .dv")].map(e => e.classList.contains("dvB") ? "B" : e.classList.contains("dvW") ? "W" : "-").join(""));
+const expRow = FL.map(v => ({ "": "-", dvW: "W", dvB: "B" })[expCls([...FL.filter((x, i) => i !== FL.indexOf(v)), v])]).reverse().join("");
+ok("flier string: row colours match the rule (amber + red fliers shown)", flc === expRow && flc.includes("W") && flc.includes("B"), flc);
+await p.evaluate(() => document.getElementById("toast").classList.remove("show", "act")); await p.waitForTimeout(450); await p.screenshot({ path: "/workspace/screenshot-fl-portrait.png" });
 await p.click("#shExit"); await p.waitForTimeout(150);
 ok("exit still works", !(await vis("#shView")) && (await p.evaluate(() => document.body.dataset.tab)) === "dope");
 console.log(thr.join("\n"));

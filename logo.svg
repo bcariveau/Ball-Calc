@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512"><title>Ball-Calc</title><rect width="64" height="64" rx="14" fill="#0a1f14"/><g transform="translate(6 6) scale(0.8125)"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="32" cy="32" r="23" stroke="#e8f5e9" stroke-width="3"/>
+<path d="M32 5v11M32 48v11M5 32h11M48 32h11" stroke="#e8f5e9" stroke-width="3"/>
+<path d="M32 23v2M32 39v2M23 32h2M39 32h2" stroke="#e8f5e9" stroke-width="2" opacity=".55"/>
+<path d="M3 59C9 24 25 4 32 32" pathLength="100" stroke="#0a1f14" stroke-width="7" stroke-dasharray="0 38 62 0"/>
+<path d="M3 59C9 24 25 4 32 32" pathLength="100" stroke="#2ecc71" stroke-width="2.4" stroke-dasharray="0.1 6.5" opacity=".75"/>
+<path d="M3 59C9 24 25 4 32 32" pathLength="100" stroke="#2ecc71" stroke-width="3.4" stroke-dasharray="0 40 60 0"/>
+</g>
+<circle cx="32" cy="32" r="4.4" fill="#2ecc71" stroke="#0a1f14" stroke-width="1.5"/></g></svg>

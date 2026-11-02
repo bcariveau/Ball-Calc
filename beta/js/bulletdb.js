@@ -7,6 +7,7 @@ import { toast } from "./components.js";
 import { $, escapeHtml, num, setVal, val } from "./core.js";
 import { pick, recipeText, updateDirty } from "./gear.js";
 import { openRecipes, recipeMatches } from "./recipes.js";
+import { suOnBullet, suWantsBullet } from "./setup.js";
 import { LOAD_F, store } from "./storage.js";
 
 
@@ -107,15 +108,19 @@ function bandPoints() {
 }
 function pickBullet(id) {
   const b = DB && DB.byId.get(id); if (!b) return;
+  if (suWantsBullet()) { closeDB(); suOnBullet(b); return; }   // first-run setup card: fills its own step 3 fields
   const g7 = b.g7 != null, model = g7 ? "G7" : "G1";
   setVal("bc", g7 ? b.g7 : b.g1); $("drag").value = model;
-  setVal("weight", b.weight_gr); setVal("diameter", b.diameter_in); setVal("length", b.length_in ?? "");
+  // bullet length: fill it when the database has one; never blank a length already there (many entries list none, e.g. the 168 gr SMK)
+  const hadLen = val("length"), keptLen = b.length_in == null && !!hadLen;
+  setVal("weight", b.weight_gr); setVal("diameter", b.diameter_in); if (b.length_in != null) setVal("length", b.length_in);
   setVal("bulletId", b.id); setVal("bulletName", `${b.brand} ${b.caliber || ""} ${b.weight_gr} gr ${b.line || ""}`.replace(/\s+/g, " ").trim().slice(0, 100));
   setVal("bcBands", bandStr(b.g1_bands)); $("useBands").value = "";
-  closeDB(); $("loadDetails").open = true; renderBulletInfo(); updateDirty(); schedule();
+  const lenNote = keptLen ? ` · kept your bullet length ${hadLen}" (none in the database)` : b.length_in == null && num("twist") ? " · no length in the database: add it under More for spin drift" : "";
+  closeDB(); renderBulletInfo(); updateDirty(); schedule();
   const nRc = recipeMatches().length;
-  if (nRc && !recipeText(pick(LOAD_F))) { toast(`Filled from ${b.brand} ${b.weight_gr} gr — ${nRc} saved recipe${nRc === 1 ? "" : "s"} for this bullet`); setTimeout(openRecipes, 60); return; }
-  toast(`Filled from ${b.brand} ${b.weight_gr} gr — now enter your MV`);
+  if (nRc && !recipeText(pick(LOAD_F))) { toast(`Filled from ${b.brand} ${b.weight_gr} gr — ${nRc} saved recipe${nRc === 1 ? "" : "s"} for this bullet${lenNote}`); setTimeout(openRecipes, 60); return; }
+  toast(`Filled from ${b.brand} ${b.weight_gr} gr — now enter your MV${lenNote}`);
   setTimeout(() => { $("mv").focus(); $("mv").select?.(); }, 60);
 }
 function markEdited() { $("bulletInfo").dataset.edited = "1"; renderBulletInfo(); }

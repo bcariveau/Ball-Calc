@@ -33,6 +33,7 @@ import * as app from "./app.js";
 import * as offline from "./offline.js";
 import * as recipes from "./recipes.js";
 import * as reassign from "./reassign.js";
+import * as setup from "./setup.js";
 import * as hooks from "./hooks.js";
 
 document.body.insertAdjacentHTML("afterbegin", "\n" + [chromeView.header, dopeView.dopeTab, gearView.gearTab, logView.logTab, chromeView.tabBar, gearView.gearSheets, dopeView.dopeCardView, shootingView.shootingView, chromeView.appSheets, gearView.gearSheets2, targetsView.targetEditor, shootingView.shotBanner, logView.logSheets].join("\n") + "\n");
@@ -66,4 +67,5 @@ await calc.init();
 recipes.init();
 reassign.init();
 shooting.init();
+setup.init();
 hooks.init();

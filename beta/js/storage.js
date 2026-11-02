@@ -24,14 +24,34 @@ const RANGE_F = ["bearing", "altitude", "target", "rangeLat", "rangeLon"];
 const WX_F = ["windSpeed", "windDir", "temp", "humidity", "altitude", "pressure"];
 const ALL_F = [...RIFLE_F, ...LOAD_F, ...RANGE_F, "windSpeed", "windDir", "temp", "humidity", "pressure", "powderTemp", "maxRange", "step"];
 
-function seed() {
+function seed(fresh) {   // fresh = a true first open (nothing saved yet): the gun is the labelled sample and the setup card shows
   return {
     version: 2,
-    rifles: [{ id: uid(), name: "My .308", gunKind: "rifle", sightHeight: "1.5", zero: "100", twist: "10",
+    rifles: [{ id: uid(), name: fresh ? SAMPLE_NAME : "My .308", gunKind: "rifle", sightHeight: "1.5", zero: "100", twist: "10", turret: "0.1mil", ...(fresh ? { sample: true } : {}),
       loads: [{ id: uid(), name: "168gr SMK", ldKind: "hand", bc: "0.223", drag: "G7", weight: "168", diameter: "0.308", mv: "2750", length: "1.215" }] }],
     ranges: [],
-    lastRifleId: null, lastRangeId: null
+    lastRifleId: null, lastRangeId: null, ...(fresh ? { setup: "pending" } : {})
   };
+}
+const SAMPLE_NAME = "Sample .308";
+// turret click unit (new-user round): the "Display unit" fallback is gone, every gun gets an explicit turret.
+// RULE: a gun with no valid turret keeps the click unit it was effectively using: its attached optic's turret when it has
+// one, else the display unit saved in settings (0.1 mil if MIL, ¼ MOA if MOA, MOA when never set). An optic with an
+// empty/unknown click value gets its reticle's unit. A custom value with no number is left alone (it is a field error).
+const TURRET_KEYS = ["0.1mil", "0.05mil", "0.25moa", "0.125moa", "0.5moa"];
+function migrateTurrets(list, optics) {
+  let ch = false; const ang = (load(K_SETTINGS, {}) || {}).ang === "MIL" ? "MIL" : "MOA";
+  (optics || []).forEach(o => { if (o.opTurret !== "custom" && !TURRET_KEYS.includes(o.opTurret)) { o.opTurret = o.opReticle === "moa" ? "0.25moa" : "0.1mil"; ch = true; } });
+  list.forEach(r => {
+    const okV = r.turret === "custom" && parseFloat(r.turretV) > 0;
+    if (TURRET_KEYS.includes(r.turret) || okV) return;
+    const o = r.opticId && (optics || []).find(x => x.id === r.opticId);
+    if (o && TURRET_KEYS.includes(o.opTurret)) r.turret = o.opTurret;
+    else if (o && o.opTurret === "custom" && parseFloat(o.opTurretV) > 0) { r.turret = "custom"; r.turretV = o.opTurretV; r.turretU = o.opTurretU === "moa" ? "moa" : "mil"; }
+    else r.turret = ang === "MIL" ? "0.1mil" : "0.25moa";
+    r.turretMig = 1; ch = true;
+  });
+  return ch;
 }
 let P;
 function migratePresets() {   // v1 → v2: guns get a type, loads get a recipe kind; everything else unchanged
@@ -45,6 +65,7 @@ function migratePresets() {   // v1 → v2: guns get a type, loads get a recipe 
   P.optics = P.optics.filter(o => o && typeof o === "object" && o.id);
   P.rifles.forEach(r => { if (r.opticId && !P.optics.some(o => o.id === r.opticId)) { r.opticId = null; ch = true; } });
   if (!P.opticsMig) { P.rifles.forEach(r => migrateGunOptic(r, P.optics)); P.opticsMig = 1; ch = true; }
+  if (migrateTurrets(P.rifles, P.optics)) ch = true;
   return ch;
 }
 function migrateGunOptic(r, list) {   // old gun turret + sight height → an optic attached to that gun (gun fields kept as the fallback)
@@ -55,13 +76,15 @@ function migrateGunOptic(r, list) {   // old gun turret + sight height → an op
   list.push(o); r.opticId = o.id; return o;
 }
 let migrated;   // set in init (was const)
+let FRESH = false;   // nothing was saved before this open (a brand-new user)
 let S;   // set in init (was const)
 const savePresets = () => store(K_PRESETS, P);
 const saveSettings = () => { S.values = {}; ALL_F.forEach(f => S.values[f] = $(f).value); store(K_SETTINGS, S); };
 
 export function init() {
   P = load(K_PRESETS, null);
-  if (!P || !Array.isArray(P.rifles)) P = seed();
+  FRESH = localStorage.getItem(K_PRESETS) == null && localStorage.getItem(K_SETTINGS) == null;
+  if (!P || !Array.isArray(P.rifles)) { P = seed(FRESH); if (FRESH) store(K_PRESETS, P); }
   if (!Array.isArray(P.ranges)) P.ranges = [];
   migrated = migratePresets();
   S = Object.assign({ ang: "MOA", view: "dope", values: {} }, load(K_SETTINGS, {}));
@@ -70,4 +93,4 @@ export function init() {
   if (migrated) savePresets();
 }
 
-export { K_PRESETS, K_SETTINGS, K_LOC, load, store, uid, REC_F, RIFLE_F, OPTIC_F, LOAD_F, LONG_F, F_DEF, RANGE_F, WX_F, ALL_F, seed, P, migratePresets, migrateGunOptic, migrated, S, savePresets, saveSettings };
+export { K_PRESETS, K_SETTINGS, K_LOC, load, store, uid, REC_F, RIFLE_F, OPTIC_F, LOAD_F, LONG_F, F_DEF, RANGE_F, WX_F, ALL_F, seed, SAMPLE_NAME, TURRET_KEYS, FRESH, migrateTurrets, P, migratePresets, migrateGunOptic, migrated, S, savePresets, saveSettings };

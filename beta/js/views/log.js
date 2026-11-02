@@ -43,6 +43,7 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
   <button class="sm ghost" type="button" id="slEdRecipeBtn"></button>
   <div class="hint" id="slEdRadar"></div>
   <div class="stats" id="slStats"></div>
+  <div id="slMvRow"><button type="button" id="slUseMV" class="ghost">Use avg as MV</button><div class="hint" id="slMvNote" aria-live="polite"></div></div>
   <div id="slStrBar"><div class="hd"><span id="tgHdrT">String 1 · Target A</span><span id="tgHdrS"></span></div>
     <div class="row"><button type="button" class="sm ghost" id="tgNewStr">＋ New string <small>(same sheet)</small></button><button type="button" class="sm ghost" id="tgNewTgt">＋ New target <small>(fresh sheet)</small></button></div>
     <div class="row"><button type="button" class="sm" id="tgMarkBtn">🎯 Mark holes</button></div>
@@ -67,7 +68,6 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
     </div>
   </details>
   <div class="row" style="margin-top:10px">
-    <button type="button" id="slUseMV" class="ghost" style="flex:1 1 100%">Use avg as MV (Chronographed)</button>
     <button type="button" id="slSave" style="flex:1 1 100%">💾 Save session</button>
   </div>
   <div class="row" style="margin-top:28px;justify-content:flex-end">

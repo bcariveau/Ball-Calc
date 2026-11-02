@@ -38,3 +38,7 @@
 #slEdRadar { color: var(--accent); }
 footer { text-align: center; font-size: 0.7rem; color: var(--faint); margin: 16px 0 8px; }
 #slSection .slNone { margin: 2px 0 8px; font-size: 0.85rem; color: var(--muted); }   /* empty Log: "No sessions yet." */
+/* "Use … fps at …°F for …" sits with the session averages, away from Save (new-user round) */
+#slMvRow { margin: 8px 0 4px; }
+#slMvRow #slUseMV { width: 100%; margin: 0; white-space: normal; }
+#slMvNote.warn { color: var(--warn); }

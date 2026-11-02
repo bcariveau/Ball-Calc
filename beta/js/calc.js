@@ -35,6 +35,7 @@ function validate() {
     $(id).classList.toggle("bad", !!msg); const e = $("e-" + id); if (e) e.textContent = msg;
     if (msg) bad.push(id);
   }
+  if (!curOptic() && $("turret").value === "custom" && !(num("turretV") > 0) && !bad.includes("turretV")) { $("turretV").classList.add("bad"); $("e-turretV").textContent = "Required for a custom turret"; bad.push("turretV"); }
   if (curOptic() && $("opTurret").value === "custom" && !(num("opTurretV") > 0) && !bad.includes("opTurretV")) { $("opTurretV").classList.add("bad"); $("e-opTurretV").textContent = "Required for a custom turret"; bad.push("opTurretV"); }
   return bad;
 }
@@ -51,7 +52,7 @@ async function calculate() {
     if (bad.some(f => RIFLE_F.includes(f))) $("rifleDetails").open = true;
     if (bad.some(f => OPTIC_F.includes(f) && f !== "opTurretV")) $("opMore").open = true;
     if (bad.some(f => /^z[A-Z]/.test(f))) $("zeroDetails").open = true;
-    if (bad.some(f => LOAD_F.includes(f))) $("loadDetails").open = true;
+    if (bad.some(f => LOAD_F.includes(f) && $("loadDetails").contains($(f)))) $("loadDetails").open = true;   // only a field under More ▾ opens it
     if (bad.some(f => f.startsWith("range"))) $("rangeDetails").open = true;
     return;
   }
@@ -157,7 +158,7 @@ async function solveShot(o = {}) {
 }
 // turret: click value + unit, independent of the display unit
 const TURRETS = { "0.1mil": ["MIL", 0.1, "0.1 mil"], "0.05mil": ["MIL", 0.05, "0.05 mil"], "0.25moa": ["MOA", 0.25, "¼ MOA"], "0.125moa": ["MOA", 0.125, "⅛ MOA"], "0.5moa": ["MOA", 0.5, "½ MOA"] };
-function turretSpec() {   // the attached optic wins; otherwise the gun's turret field (old data) or the display unit
+function turretSpec() {   // the attached optic wins; otherwise the gun's own turret (always set; no display-unit fallback)
   const o = curOptic(); let s = null;
   if (o) {
     const t = $("opTurret").value, ret = $("opReticle").value === "moa" ? "MOA" : "MIL";
@@ -175,7 +176,7 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's turret
   const t = $("turret").value;
   if (t === "custom") { const v = num("turretV"), u = $("turretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) s = { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
   if (!s && TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; s = { u, v, lbl }; }
-  if (!s) s = S.ang === "MIL" ? { u: "MIL", v: 0.1, lbl: "0.1 mil", auto: true } : { u: "MOA", v: 0.25, lbl: "¼ MOA", auto: true };
+  if (!s) s = /moa/.test(t) || (t === "custom" && $("turretU").value === "moa") ? { u: "MOA", v: 0.25, lbl: "¼ MOA" } : { u: "MIL", v: 0.1, lbl: "0.1 mil" };   // only a custom turret with no value lands here (a field error)
   return Object.assign(s, { k: 1, up: null, sfp: null, cpt: 0, perTurn: null, optic: null });
 }
 const MOA_PER_MIL = 3.437747;

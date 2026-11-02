@@ -4,7 +4,9 @@
 stylesheet links, and a single `<script type="module" src="beta/js/main.js">`. Everything else lives in this folder as
 plain files. **There is no build step**: GitHub Pages serves them as they are, and the browser loads them as ES modules.
 
-The main app (`index.html`, `previous.html`, `legacy.html`, `sw.js`) is **not** part of this layout. It is still a single file.
+The main app is a separate copy of this same layout: `index.html` is its thin shell and `app/` holds its own `css/` and `js/`
+modules, precached by `sw.js`. `previous.html` and `legacy.html` are kept as single-file fallbacks. Beta work changes only
+`beta/` and `sw-beta.js`; main is updated by promoting a tested beta into `app/`.
 
 ## Start-up order
 `js/main.js` inserts the markup from `js/views/*` into `<body>`, then calls each module's `init*()` in the same order the
@@ -36,6 +38,7 @@ writer `set_X(v)` (for example `set_lastRun`, `set_LOG`, `set_slKey`).
 | `js/reassign.js` | Move / reassign sessions between loads. |
 | `js/recipes.js` | Saved load recipes and copy-load sheets. |
 | `js/sensors.js` | Device sensors: compass/inclinometer sheet. |
+| `js/setup.js` | First-run setup card (rifle + zero → scope turret unit + click → load) and the “Try with sample data” path. Shows only on a true first open; existing users never see it. |
 | `js/shooting.js` | Shooting view (SH state): start/continue shooting, live string capture. |
 | `js/shot-banner.js` | Live shot banner and screen wake-lock. |
 | `js/storage.js` | localStorage keys, the persisted settings object S / profiles P, migrations, save/load. |
@@ -75,6 +78,13 @@ Start button, About sheet and Load-data row styles.
 its `MODULES` array. **When you add, rename or remove a file here, update that list and bump `VERSION`.** The worker's
 update check compares the page *and* every module, so a content-only change still shows "Update available".
 The main app's `sw.js` only handles its own fixed file list, so it never intercepts or caches `beta/` files.
+
+## Turret, display unit and location (new-user round)
+- Every gun has an explicit turret unit + click value (Gear: MOA | MIL switch + click select; with an optic the optic's turret wins).
+  Clicks always count in the turret unit. The Dope MOA/MIL switch only changes how numbers read and defaults to the turret's unit.
+- `storage.js` `migrateTurrets()` gives old guns that used the removed "Display unit" option the click unit they were effectively using.
+- Location is requested only by ↻ Weather (`refreshWeather({ gps: true })`) and Gear › Range › 📍 Use my current location.
+  Page load, back-online and range changes use the range's coordinates or the last stored place, never a permission prompt.
 
 ## Tests
 `db/test-bluetooth.mjs` unit-tests the `RADAR-PARSER` block in `js/radar.js`. Keep the BEGIN/END markers and keep the

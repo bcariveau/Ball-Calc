@@ -87,6 +87,7 @@ export function init1() {
       b.addEventListener("contextmenu", e => e.preventDefault());
       return b; };
     box.prepend(mk("−", -1, "decrease")); box.append(mk("+", 1, "increase"));
+    if (el.id === "target") { box.classList.add("plain"); return; }   // the Dope distance is a normal editable number box: tap and type, − / + still step it
     // horizontal swipe on the number changes it; vertical swipe still scrolls the page (touch-action: pan-y)
     // Read-only until tapped, so a swipe never pops the keyboard; a plain tap (or keyboard focus) allows typing.
     let sx = null, sy = 0, acc = 0, dragging = false, pid = null, lastDrag = 0;

@@ -67,7 +67,11 @@ function getPosition() {
   });
 }
 let wxBusy = false;
-async function refreshWeather() {
+// Location is asked for ONLY when the user taps ↻ Weather (wxBtn, or the Dope ↻ button): refreshWeather({ gps: true }).
+// Every other caller (page load, back online, range change, place search) uses the range's saved coordinates or the last
+// place stored on this phone, and never triggers a permission prompt.
+async function refreshWeather(opts) {
+  const gps = !!(opts && opts.gps === true);
   if (wxBusy) return;
   if (navigator.onLine === false) { wxStatus("📴 Offline — weather needs a connection. Keeping your manual values; it'll refresh when you're back online.", true); return; }
   wxBusy = true; $("wxBtn").disabled = true;
@@ -75,7 +79,11 @@ async function refreshWeather() {
     let loc, note = "";
     const g = curRange();
     if (g && val("rangeLat") !== "" && val("rangeLon") !== "" && !isNaN(num("rangeLat")) && !isNaN(num("rangeLon"))) loc = { lat: num("rangeLat"), lon: num("rangeLon"), label: g.name };
-    else {
+    else if (!gps) {
+      const last = load(K_LOC, null);
+      if (!last || typeof last.lat !== "number" || typeof last.lon !== "number") { wxStatus("Tap ↻ Weather for live wind and temperature where you are (it asks for your location then), or keep entering them by hand."); return; }
+      loc = last; note = opts && opts.place ? "" : " (last place · tap ↻ Weather to update)";
+    } else {
       wxStatus("Getting your location…");
       try { loc = await getPosition(); }
       catch (e) {
@@ -108,12 +116,12 @@ async function placeSearch() {
     const d = await fetchJSON(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(q)}`);
     const r = d.results?.[0]; if (!r) return toast("Place not found");
     store(K_LOC, { lat: r.latitude, lon: r.longitude, label: [r.name, r.admin1].filter(Boolean).join(", ") });
-    refreshWeather();
+    refreshWeather({ place: true });
   } catch (e) { toast("Search failed: " + e.message); }
 }
 
 export function init() {
-  $("wxBtn").onclick = refreshWeather;
+  $("wxBtn").onclick = () => refreshWeather({ gps: true });
   $("placeGo").onclick = placeSearch;
   $("placeQ").addEventListener("keydown", e => { if (e.key === "Enter") placeSearch(); });
 }

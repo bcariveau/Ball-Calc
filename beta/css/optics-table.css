@@ -71,3 +71,18 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
 #dcWarn .zcw { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
 #dcWarn .zcw button { width: auto; min-height: 44px; margin: 0; padding: 0 14px; font-size: 0.85rem; font-weight: 700; }
 #opUpNote { color: var(--warn); margin: 4px 0 0; font-weight: 600; }
+/* turret unit + click value (new-user round): MOA | MIL switch beside the click select */
+.tuRow { display: flex; gap: 8px; align-items: stretch; }
+.tuRow .seg { flex: 0 0 auto; }
+.tuRow .seg[hidden], .tuRow select[hidden] { display: none; }
+.tuRow .seg button { padding: 8px 12px; }
+.tuRow select { flex: 1 1 auto; min-width: 0; }
+/* basics-first load form: bullet, BC + drag, MV on screen; the rest under More ▾ */
+#loadBasic { margin-top: 8px; }
+#tabGear #loadDetails > summary::before { display: none; }
+#tabGear #loadDetails > summary { flex-wrap: wrap; }
+#tabGear #loadDetails > summary .rsum { flex: 1 0 100%; display: block; margin: 1px 0 0; font-weight: 400; font-size: 0.78rem; color: var(--muted); }
+#tabGear #loadDetails > summary .rsum:empty { display: none; }
+#tabGear #loadDetails > #recipeDetails { margin-top: 10px; }
+.sampleNote span { font-size: 0.82rem; }
+#tabGear #loadDetails[open] > summary .mArr { display: inline-block; transform: rotate(180deg); }

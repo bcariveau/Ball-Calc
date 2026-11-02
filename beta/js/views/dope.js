@@ -3,6 +3,40 @@ import { ctxRow, startBtn } from "./parts.js";
 
 export const dopeTab = `<section class="tab" id="tabDope" data-tab="dope" role="tabpanel" aria-labelledby="tabBtnDope">
 ${ctxRow("ctxDope")}
+<div id="suWrap" hidden>
+<form class="section" id="suCard" aria-labelledby="suTitle" novalidate>
+  <h2 id="suTitle">Set up your rifle <span class="suStep" id="suStepTxt">Step 1 of 3</span></h2>
+  <ol class="suDots" aria-hidden="true"><li class="on">Rifle &amp; zero</li><li>Scope</li><li>Load</li></ol>
+  <fieldset class="suPane" data-i="0"><legend class="sr">Rifle and zero</legend>
+    <div class="grid">
+      <div class="full"><label for="suName">Rifle name</label><input type="text" id="suName" maxlength="60" autocomplete="off" placeholder="e.g. Tikka T3x .308"><div class="err" id="e-suName"></div></div>
+      <div><label for="suZero">Zero (yd)</label><input type="number" inputmode="numeric" id="suZero" value="100"><div class="err" id="e-suZero"></div></div>
+      <div><label for="suSH">Sight height (in)</label><input type="number" inputmode="decimal" id="suSH" step="0.05" value="1.5"><div class="err" id="e-suSH"></div></div>
+      <div class="full"><label for="suTwist">Twist (inches per turn)</label><input type="number" inputmode="decimal" id="suTwist" step="0.5" value="10" placeholder="e.g. 10 (for spin drift)"><div class="err" id="e-suTwist"></div></div>
+    </div>
+  </fieldset>
+  <fieldset class="suPane" data-i="1" hidden><legend class="sr">Scope turret</legend>
+    <label>Scope turret unit</label>
+    <span class="seg suSeg" id="suUnit" role="group" aria-label="Turret unit"><button type="button" data-v="moa">MOA</button><button type="button" data-v="mil">MIL</button></span>
+    <label for="suClick" style="margin-top:10px">Click value</label><select id="suClick"></select>
+    <div class="hint">Look on the turret cap: “0.1 MRAD” / “1 click = 1 cm @ 100 m” is 0.1 mil; “¼ MOA” is ¼ MOA. Dial clicks always count in this unit.</div>
+  </fieldset>
+  <fieldset class="suPane" data-i="2" hidden><legend class="sr">Load</legend>
+    <button class="sm ghost" type="button" id="suDb" style="width:100%">📚 Pick bullet from database</button>
+    <div class="hint" id="suBullet"></div>
+    <div class="grid">
+      <div class="full"><label for="suLoad">Load name</label><input type="text" id="suLoad" maxlength="60" autocomplete="off" placeholder="e.g. 168gr SMK"><div class="err" id="e-suLoad"></div></div>
+      <div><label for="suBc">BC</label><input type="number" inputmode="decimal" id="suBc" step="0.001" placeholder="e.g. 0.243"><div class="err" id="e-suBc"></div></div>
+      <div><label for="suDrag">Drag model</label><select id="suDrag"><option value="G7">G7 (boat-tail)</option><option value="G1">G1 (flat-base)</option></select></div>
+      <div><label for="suWt">Weight (gr)</label><input type="number" inputmode="decimal" id="suWt" step="1" placeholder="e.g. 168"><div class="err" id="e-suWt"></div></div>
+      <div><label for="suDia">Diameter (in)</label><input type="number" inputmode="decimal" id="suDia" step="0.001" placeholder="e.g. 0.308"><div class="err" id="e-suDia"></div></div>
+      <div class="full"><label for="suMv">Muzzle velocity (fps)</label><input type="number" inputmode="numeric" id="suMv" step="5" placeholder="chrono or box velocity"><div class="err" id="e-suMv"></div></div>
+    </div>
+  </fieldset>
+  <div class="row suNav"><button type="button" class="ghost" id="suBack">‹ Back</button><button type="submit" id="suNext">Next ›</button></div>
+</form>
+<button type="button" class="linkBtn" id="suSample">Try with sample data</button>
+</div>
 <div id="dopeCard" aria-live="polite">
   <div class="dcBig">
     <div><span class="k" id="dcElevK">Dial</span><b id="dcElev">—</b><span class="c" id="dcElevC"></span><span class="clk" id="dcElevClk"></span></div>

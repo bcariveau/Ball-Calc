@@ -9,7 +9,7 @@ import { $, num, val } from "./core.js";
 import { paintScroll, renderAll, renderChart, setStale } from "./dope.js";
 import { applyGunKind, applyLoad, applyRange, applyRifle, curRange, renderPickers, updateDirty } from "./gear.js";
 import { loadLog, maybeRenderLog, set_slKey, slKey } from "./log.js";
-import { followUnits, paintUpNote } from "./optics.js";
+import { followUnits, paintTurrets, paintUpNote } from "./optics.js";
 import { K_SETTINGS, P, S, WX_F, saveSettings, store } from "./storage.js";
 import { applyAuto, manual, refreshWeather, renderChips } from "./weather.js";
 import { drawDial } from "./wind-dial.js";
@@ -43,7 +43,7 @@ export function init1() {
 
 export async function init2() {
   document.addEventListener("input", e => {
-    const id = e.target.id; if (!id || id === "placeQ" || id.startsWith("db") || id.startsWith("sl") || /^(tr[A-Z]|dcv)/.test(id)) return;
+    const id = e.target.id; if (!id || id === "placeQ" || id.startsWith("db") || id.startsWith("sl") || id.startsWith("su") || /^(tr[A-Z]|dcv)/.test(id)) return;
     if (id.startsWith("ld")) { updateDirty(); return; }   // load data: no effect on the trajectory
     if (id === "gunKind") applyGunKind();
     if (id === "roundClk") { S.round = e.target.checked; saveSettings(); renderAll(); return; }
@@ -51,7 +51,7 @@ export async function init2() {
     if (["bc", "weight", "diameter"].includes(id) && val("bulletId")) markEdited();
     if (WX_F.includes(id)) manual.add(id);
     if (id === "bearing") applyAuto(); else { renderChips(); updateDirty(); }
-    if (id === "opReticle") followUnits(true);
+    if (["turret", "turretU", "opTurret", "opTurretU"].includes(id)) { paintTurrets(); followUnits(true); }
     if (id === "opUp") paintUpNote();
     if (id === "windDir" || id === "windSpeed") drawDial();
     schedule();
@@ -61,7 +61,7 @@ export async function init2() {
     if (id === "drag") { swapModel(); updateDirty(); schedule(); }
     if (id === "mvSource" || id === "useBands") { renderBulletInfo(); updateDirty(); schedule(); }
   });
-  $("calcBtn").addEventListener("click", () => { clearTimeout(calcT); calculate(); refreshWeather(); });
+  $("calcBtn").addEventListener("click", () => { clearTimeout(calcT); calculate(); refreshWeather({ gps: true }); });
   seg("angSeg", "ang");
 
   seg("viewSeg", "view");

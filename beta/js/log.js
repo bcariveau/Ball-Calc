@@ -18,6 +18,7 @@ import { mkGlyph } from "./target-draw.js";
 import { shotDetail, tgThumbA, tgThumbB } from "./target-editor.js";
 import { BAN, LIVE, TE, cleanTg, fpsT, set_LIVE, set_TE, strOf, tgEnsure, tgRestore, tgSaveSidecar, tgView, tgtLetter, unpair } from "./targets.js";
 import { cv } from "./themes.js";
+import { wx } from "./weather.js";
 
 
 /* ---------------- chronograph shot log ---------------- */
@@ -224,7 +225,26 @@ function renderEditor() {
     : all.reverse().map(o => row(o, st, 0)).join("")) ||
     `<div class="hint" style="padding:8px 0">No shots yet.</div>`;
   paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
-  $("slUseMV").disabled = !st.n;
+  paintUseMV();
+}
+// "Use … as MV": the average of the kept shots, leaving out discarded (⊘), Cold bore and Flier shots; the label carries the numbers
+function mvPick() {
+  const all = ED ? ED.shots : [], use = all.filter(s => !s.x && !s.cold && !s.fl), st = shotStats(use);
+  const out = { x: all.filter(s => s.x).length, cold: all.filter(s => !s.x && s.cold).length, fl: all.filter(s => !s.x && !s.cold && s.fl).length };
+  const r = ED && P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
+  const t = num("slPowder") ?? num("slTemp");
+  return { st, n: use.length, out, l, t, mv: st.n ? Math.round(st.avg) : null };
+}
+function paintUseMV() {
+  if (!ED) return;
+  const m = mvPick(), b = $("slUseMV"), note = $("slMvNote");
+  b.disabled = !m.st.n || !m.l;
+  b.textContent = !m.st.n ? "Use avg as MV (no kept shots yet)" : `Use ${m.mv} fps${m.t != null ? ` at ${fmt(m.t, 0)}°F` : ""} for ${m.l ? m.l.name : "this load"}`;
+  const left = [m.out.cold && `${m.out.cold} cold bore`, m.out.fl && `${m.out.fl} flier${m.out.fl > 1 ? "s" : ""}`, m.out.x && `${m.out.x} discarded`].filter(Boolean);
+  note.classList.toggle("warn", !!m.st.n && m.n < 5);
+  note.textContent = !m.l ? "Assign this session to a saved load to use its average as the MV." : !m.st.n ? "" :
+    `Average of ${m.n} shot${m.n === 1 ? "" : "s"}${left.length ? ` (left out: ${left.join(", ")})` : ""}${m.st.n > 1 ? ` · SD ${m.st.sd.toFixed(1)}` : ""}.` +
+    (m.t == null ? " No session temperature yet: you'll be asked for it." : "") + (m.n < 5 ? ` ⚠ Only ${m.n} shot${m.n === 1 ? "" : "s"}; 5 or more give a steadier MV.` : "");
 }
 function addVelocities(text) {
   const vals = String(text).split(/[\s,;]+/).map(parseFloat).filter(v => isFinite(v) && v >= 50 && v <= 6000);
@@ -329,17 +349,24 @@ export function init() {
   $("slSave").onclick = async () => { if (!ED.shots.length) { toast("Add at least one shot"); return; } const c = await commitEditor(); closeEditor(true); toast(`Session saved · ${c.stats.n} shots, avg ${c.stats.avg.toFixed(0)} fps`); };
   $("slDel").onclick = async () => { if (!confirm("Delete this session?")) return; LOG = LOG.filter(s => s.id !== ED.id); await saveLog(); slKey = null; closeEditor(true); maybeRenderLog(); toast("Session deleted"); };
   $("slUseMV").onclick = async () => {
-    if (!ED.shots.length) return;
-    const c = await commitEditor(), mv = Math.round(c.stats.avg);
-    const r = P.rifles.find(x => x.id === c.rifleId), l = r?.loads.find(x => x.id === c.loadId);
-    const pt = c.wx.powder ?? c.wx.temp;   // chrono temp = powder temp of this session (for temp-sensitivity)
-    if (l) { l.mv = String(mv); l.mvSource = "measured"; if (pt != null) l.mvTemp = String(pt); savePresets(); }
-    if (l && curLoad() === l) { setVal("mv", mv); $("mvSource").value = "measured"; if (pt != null) setVal("mvTemp", pt); }
+    const m0 = mvPick(); if (!m0.st.n || !m0.l) return;
+    if (m0.t == null) {   // never fall back to the load's old chrono temperature: ask, prefilled with today's weather if we have it
+      const pre = wx && wx.tempF != null ? String(Math.round(wx.tempF)) : "";
+      const a = prompt(`Temperature during this session (°F)?\nIt is saved as the chrono temperature with the MV${pre ? " (prefilled from current weather)" : ""}.`, pre);
+      if (a == null) return;
+      const t = parseFloat(a); if (!isFinite(t) || t < -40 || t > 140) { toast("Enter a temperature between −40 and 140 °F"); return; }
+      setVal("slTemp", Math.round(t * 10) / 10); edDirty = true;
+    }
+    const m = mvPick(); const c = await commitEditor(); if (!c) return;
+    const l = m.l, mv = m.mv, pt = m.t;
+    l.mv = String(mv); l.mvSource = "measured"; l.mvTemp = String(pt); savePresets();
+    if (curLoad() === l) { setVal("mv", mv); $("mvSource").value = "measured"; setVal("mvTemp", pt); }
     closeEditor(true); updateDirty(); schedule();
-    toast(`MV set to ${mv} fps (Chronographed, ${c.stats.n} shots, SD ${c.stats.sd}${pt != null ? `, at ${pt}°F` : ""})`);
+    toast(`MV set to ${mv} fps at ${fmt(pt, 0)}°F for ${l.name} (${m.n} shot${m.n === 1 ? "" : "s"}${m.st.n > 1 ? `, SD ${m.st.sd.toFixed(1)}` : ""})${m.n < 5 ? " · only " + m.n + " shots" : ""}`);
   };
+  ["slTemp", "slPowder"].forEach(id => $(id).addEventListener("input", paintUseMV));
   $("slNewBtn").onclick = () => curLoad() ? openEditor(null) : shNeedGear("session");
   document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("slEditor").classList.contains("show")) closeEditor(); else if ($("slImport").classList.contains("show")) closeImport(); });
 }
 
-export { SHEETJS_URLS, ENGINE_URLS, K_LOG, MPS, LOG, slKey, ED, edDirty, IMP, loadLog, saveLog, nOrNull, sstr, cleanSession, shotStats, curKeyIds, sessFor, fmtDate, SRC_LBL, maybeRenderLog, renderLog, slEmptyHTML, cmpScope, renderCompare, sessHome, orphanSessions, orphanHTML, sessionsCSV, drawLogChart, toLocalInput, newSession, openEditor, paintEdFor, paintEdRecipe, renderEditor, addVelocities, addFromInput, readEditor, commitEditor, closeEditor, addShotsToLiveSession, set_LOG, set_slKey, set_edDirty, set_IMP };
+export { mvPick, paintUseMV, SHEETJS_URLS, ENGINE_URLS, K_LOG, MPS, LOG, slKey, ED, edDirty, IMP, loadLog, saveLog, nOrNull, sstr, cleanSession, shotStats, curKeyIds, sessFor, fmtDate, SRC_LBL, maybeRenderLog, renderLog, slEmptyHTML, cmpScope, renderCompare, sessHome, orphanSessions, orphanHTML, sessionsCSV, drawLogChart, toLocalInput, newSession, openEditor, paintEdFor, paintEdRecipe, renderEditor, addVelocities, addFromInput, readEditor, commitEditor, closeEditor, addShotsToLiveSession, set_LOG, set_slKey, set_edDirty, set_IMP };

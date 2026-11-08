@@ -10,9 +10,9 @@ export const header = `<header id="appHead"><div class="brand"><svg class="logo"
 export const tabBar = `</main>
 
 <nav id="tabBar" role="tablist" aria-label="Sections">
-  <button type="button" role="tab" id="tabBtnDope" data-tab="dope" aria-controls="tabDope" aria-label="Dope"><span class="i" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/></svg></span>Dope</button>
-  <button type="button" role="tab" id="tabBtnGear" data-tab="gear" aria-controls="tabGear" aria-label="Gear"><span class="i" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>Gear</button>
-  <button type="button" role="tab" id="tabBtnLog" data-tab="log" aria-controls="tabLog" aria-label="Log"><span class="i" aria-hidden="true"><svg viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg></span>Log</button>
+  <button type="button" role="tab" id="tabBtnDope" data-tab="dope" aria-controls="tabDope" aria-label="Dope"><span class="i" aria-hidden="true"><svg class="lucide lucide-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg></span>Dope</button>
+  <button type="button" role="tab" id="tabBtnGear" data-tab="gear" aria-controls="tabGear" aria-label="Gear"><span class="i" aria-hidden="true"><svg class="lucide lucide-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg></span>Gear</button>
+  <button type="button" role="tab" id="tabBtnLog" data-tab="log" aria-controls="tabLog" aria-label="Log"><span class="i" aria-hidden="true"><svg class="lucide lucide-clipboard-list" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>Log</button>
 </nav>
 `;
 

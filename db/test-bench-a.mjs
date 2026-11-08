@@ -92,6 +92,13 @@ try {
   assert.deepEqual(JSON.parse(icons), [3].map(() => JSON.parse(icons)[0]) && JSON.parse(icons).length === 3 ? JSON.parse(icons) : JSON.parse(icons));
   assert.equal(JSON.parse(icons).length, 3, "three inline tab icons");
   assert.ok(JSON.parse(icons).every((n) => n > 40), "icons are inline svg, not emoji");
+  const tabHtml = await ev("document.getElementById('tabBar').innerHTML");
+  assert.match(tabHtml, /class="lucide lucide-crosshair"/);
+  assert.match(tabHtml, /<line x1="22" x2="18" y1="12" y2="12"/);
+  assert.match(tabHtml, /class="lucide lucide-wrench"/);
+  assert.match(tabHtml, /l3\.106-3\.105c\.32-\.322\.863-\.22\.983\.218a6 6 0 0 1-8\.259 7\.057l-7\.91 7\.91a1 1 0 0 1-2\.999-3/);
+  assert.match(tabHtml, /class="lucide lucide-clipboard-list"/);
+  assert.match(tabHtml, /<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/);
   const labels = await ev(`JSON.stringify([...document.querySelectorAll('#tabBar [role=tab]')].map(b => b.getAttribute('aria-label')))`);
   assert.deepEqual(JSON.parse(labels), ["Dope", "Gear", "Log"]);
   const manifest = await ev(`document.querySelector('link[rel=manifest]').href`);
@@ -123,55 +130,71 @@ try {
   assert.equal(R.saved, 0.308);
   console.log("HOLES", JSON.stringify({ screenTrue1: R.screenTrue1, screenTrue4: R.screenTrue4, screenUnk: R.screenUnk1, screenOld: R.screenOld }));
 
-  // Worked example. Eight shots. 2500 is Removed. 2800 is only tagged Input error.
+  // One velocity list, three states. The only change in state 2 is ie on shot d. State 3 removes that same shot.
   const example = await ev(`JSON.stringify((() => {
-    const shots = [
-      { id: "a", v: 2700 }, { id: "b", v: 2710 }, { id: "c", v: 2720 },
-      { id: "d", v: 2800, ie: true }, { id: "e", v: 2695, cold: true },
-      { id: "f", v: 2735, fl: true }, { id: "g", v: 2688, clean: true },
-      { id: "h", v: 2500, x: true }
+    const base = [
+      { id: "a", v: 2700 }, { id: "b", v: 2710 }, { id: "c", v: 2720 }, { id: "d", v: 2800 },
+      { id: "e", v: 2695 }, { id: "f", v: 2735 }, { id: "g", v: 2688 }, { id: "h", v: 2500 }
     ];
-    const all = window.__bc.shotStats(shots);
-    const taggedOnly = window.__bc.shotStats(shots.filter(s => s.id !== "h"));
-    const inputOnly = window.__bc.shotStats(shots.map(s => s.id === "h" ? { ...s, x: false } : s));
-    const oldMv = window.__bc.shotStats(shots.filter(s => !s.x && !s.cold && !s.fl));
-    const sess = { shots, recipe: { diameter: "0.264" }, tg: { targets: [{ id: "t", dist: 100, du: "yd", u: "in" }], strings: [{ id: "s", tid: "t", aim: { x: 0, y: 0 }, holes: [
-      { id: "h1", x: 0, y: 0, sh: "a" }, { id: "h2", x: 1, y: 0, sh: "b" }, { id: "h3", x: 10, y: 0, sh: "h" }
-    ] }] } };
-    const kept = window.__bc.statHoles(sess, sess.tg.strings[0]);
-    const gs = window.__bc.grpStats(kept.map(h => ({ x: h.x, y: h.y })));
-    const gsAll = window.__bc.grpStats(sess.tg.strings[0].holes.map(h => ({ x: h.x, y: h.y })));
-    const round = window.__bc.cleanSession(JSON.parse(JSON.stringify({ id: "sess", rifleId: "r1", loadId: "l1", date: "2026-01-01T00:00:00.000Z", source: "manual", shots, notes: "", wx: {} })));
-    const flags = round.shots.map(s => ({ v: s.v, x: !!s.x, ie: !!s.ie, cold: !!s.cold, fl: !!s.fl, clean: !!s.clean }));
-    const dev = window.__bc.shDevCls(2800, shots.filter(s => !s.x).map(s => s.v));
-    return { all, taggedOnly, inputOnly, oldMv, gs, gsAll, flags, dev, dia: window.__bc.bulletDiaIn(sess), noDia: window.__bc.bulletDiaIn({ recipe: {} }) };
+    const holes = [
+      { id: "ha", x: 0, y: 0, sh: "a" }, { id: "hb", x: 1, y: 0, sh: "b" }, { id: "hd", x: 0, y: 2, sh: "d" }
+    ];
+    const pack = (shots) => {
+      const st = { holes };
+      const sess = { shots, tg: { strings: [st] } };
+      const kept = window.__bc.statHoles(sess, st);
+      const gs = window.__bc.grpStats(kept.map(h => ({ x: h.x, y: h.y })));
+      const vv = window.__bc.velVert(sess, st);
+      const keptV = shots.filter(s => !s.x).map(s => s.v);
+      return { stats: window.__bc.shotStats(shots), gs, vv, dev: window.__bc.shDevCls(2800, keptV), keptV };
+    };
+    const untagged = pack(base.map(s => ({ ...s })));
+    const tagged = pack(base.map(s => s.id === "d" ? { ...s, ie: true } : { ...s }));
+    const removed = pack(base.map(s => s.id === "d" ? { ...s, ie: true, x: true } : { ...s }));
+    return { untagged, tagged, removed };
   })())`);
   const E = JSON.parse(example);
-  const expectAvg = (xs) => {
-    const m = xs.reduce((a, b) => a + b, 0) / xs.length;
-    return +m.toFixed(1);
-  };
-  const keptVs = [2700, 2710, 2720, 2800, 2695, 2735, 2688];
-  assert.equal(E.all.n, 7);
-  assert.equal(E.all.avg, expectAvg(keptVs));
-  assert.equal(E.taggedOnly.n, 7);
-  assert.equal(E.taggedOnly.avg, E.all.avg, "Input error alone does not change the average");
-  assert.equal(E.inputOnly.n, 8, "before Remove, the 2500 is still in the stats");
-  assert.notEqual(E.inputOnly.avg, E.all.avg);
-  assert.notEqual(E.oldMv.avg, E.all.avg, "old cold/flier exclusion would have changed the MV");
-  assert.equal(E.gs.es, 1, "removed hole is out of the group");
-  assert.equal(E.gsAll.es, 10, "counting the removed hole would inflate the group");
-  assert.equal(E.gs.n, 2);
-  assert.equal(E.dia, 0.264);
-  assert.equal(E.noDia, null);
-  assert.ok(E.flags.find((s) => s.v === 2800).ie && !E.flags.find((s) => s.v === 2800).x);
-  assert.ok(E.flags.find((s) => s.v === 2500).x);
-  assert.ok(E.dev === "" || E.dev === "dvW" || E.dev === "dvB");
-  console.log("STATS before Remove avg", E.inputOnly.avg, "n", E.inputOnly.n);
-  console.log("STATS after Remove avg", E.all.avg, "n", E.all.n, "SD", E.all.sd, "ES", E.all.es);
-  console.log("STATS Input error only (same shots, 2500 still kept) avg", E.taggedOnly.avg, "equals after-remove", E.taggedOnly.avg === E.all.avg);
-  console.log("STATS old cold+flier exclusion would have been", E.oldMv.avg);
-  console.log("GROUP with removed hole excluded es", E.gs.es, "if counted", E.gsAll.es);
+  const sameStats = (a, b) => ["n", "avg", "sd", "es", "min", "max"].every((k) => a[k] === b[k]);
+  assert.ok(sameStats(E.untagged.stats, E.tagged.stats), "Input error on a kept shot must not change avg/SD/ES/count");
+  assert.equal(E.untagged.stats.n, 8);
+  assert.equal(E.untagged.stats.avg, 2693.5);
+  assert.equal(E.untagged.stats.sd, 85.8);
+  assert.equal(E.untagged.stats.es, 300);
+  assert.equal(E.untagged.stats.min, 2500);
+  assert.equal(E.untagged.stats.max, 2800);
+  assert.equal(E.tagged.stats.n, 8);
+  assert.equal(E.tagged.stats.avg, 2693.5);
+  assert.equal(E.tagged.stats.sd, 85.8);
+  assert.equal(E.tagged.stats.es, 300);
+  assert.equal(E.removed.stats.n, 7);
+  assert.equal(E.removed.stats.avg, 2678.3);
+  assert.equal(E.removed.stats.sd, 80.2);
+  assert.equal(E.removed.stats.es, 235);
+  assert.equal(E.removed.stats.min, 2500);
+  assert.equal(E.removed.stats.max, 2735);
+  assert.notEqual(E.removed.stats.avg, E.untagged.stats.avg);
+  const poi = (g) => [g.n, g.cx, g.cy, g.es, g.mr];
+  assert.deepEqual(poi(E.untagged.gs), poi(E.tagged.gs));
+  assert.equal(E.untagged.gs.n, 3);
+  assert.ok(Math.abs(E.untagged.gs.cx - 1 / 3) < 1e-12);
+  assert.ok(Math.abs(E.untagged.gs.cy - 2 / 3) < 1e-12);
+  assert.ok(Math.abs(E.untagged.gs.es - Math.hypot(1, 2)) < 1e-12);
+  assert.equal(E.removed.gs.n, 2);
+  assert.equal(E.removed.gs.cx, 0.5);
+  assert.equal(E.removed.gs.cy, 0);
+  assert.equal(E.removed.gs.es, 1);
+  assert.equal(E.removed.gs.mr, 0.5);
+  assert.equal(E.untagged.vv.n, 3);
+  assert.equal(E.tagged.vv.n, 3);
+  assert.equal(E.untagged.vv.r, E.tagged.vv.r);
+  assert.equal(E.removed.vv.n, 2);
+  assert.equal(E.removed.vv.r, null);
+  assert.equal(E.untagged.dev, E.tagged.dev);
+  assert.equal(E.untagged.dev, "dvB");
+  assert.ok(!E.removed.keptV.includes(2800));
+  console.log("STATE untagged", JSON.stringify(E.untagged.stats), "POI", JSON.stringify(E.untagged.gs), "vv", JSON.stringify(E.untagged.vv));
+  console.log("STATE input-error-only", JSON.stringify(E.tagged.stats), "POI", JSON.stringify(E.tagged.gs), "vv", JSON.stringify(E.tagged.vv));
+  console.log("STATE that shot removed", JSON.stringify(E.removed.stats), "POI", JSON.stringify(E.removed.gs), "vv", JSON.stringify(E.removed.vv));
 
   const csv = await ev(`window.__bc.sessionsCSV()`);
   assert.ok(csv.startsWith("date,"), csv.slice(0, 40));

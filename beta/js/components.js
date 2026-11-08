@@ -14,9 +14,10 @@ import { S, saveSettings } from "./storage.js";
 /* ---------------- helpers ---------------- */
 let toastT;
 function toast(msg, act) {
-  const t = $("toast"); t.textContent = msg; t.classList.toggle("act", !!act);
-  if (act) { const b = document.createElement("button"); b.type = "button"; b.id = "toastAct"; b.textContent = act.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); act.fn(); }; t.appendChild(b); }
-  t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), act ? (act.ms || 7000) : 2200);
+  const acts = Array.isArray(act) ? act : (act ? [act] : []);
+  const t = $("toast"); t.textContent = msg; t.classList.toggle("act", acts.length > 0);
+  acts.forEach((a, i) => { const b = document.createElement("button"); b.type = "button"; b.id = i ? "toastAct" + i : "toastAct"; b.textContent = a.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); a.fn(); }; t.appendChild(b); });
+  t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), acts.length ? (acts[0].ms || 7000) : 2200);
 }
 /* ---------------- uniform: gun · load · zero · unit context line (Dope, Log, Gear) ---------------- */
 function ctxParts() {

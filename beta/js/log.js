@@ -12,7 +12,7 @@ import { closeImport } from "./log-import.js";
 import { SEL, lpFired, paintSel, set_lpFired } from "./reassign.js";
 import { SH, shHide, shNeedGear, shPaint, shRollIfEnded } from "./shooting.js";
 import { banHide, banPaint, banShow } from "./shot-banner.js";
-import { calcFallback, cleanAsFired, moveShots, splitFrom, staleMv } from "./link-v3.js";
+import { asFiredFrom, cleanAsFired, assignShots, staleMv } from "./link-v3.js";
 import { P, load, savePresets, store, uid } from "./storage.js";
 import { paintStrBar, paintTgView } from "./strings.js";
 import { mkGlyph } from "./target-draw.js";
@@ -236,10 +236,32 @@ function paintShotSel() {
   const bar = $("shotSelBar"), btn = $("shotSelBtn"); if (!bar || !btn) return;
   const on = !!SHOTSEL; bar.hidden = !on; btn.hidden = on;
   if (!on || !ED) return;
-  const t = tgView(ED);
-  $("shotMoveTo").innerHTML = t.strings.map((s, i) => `<option value="${escapeHtml(s.id)}">String ${i + 1}${s.asFired && s.asFired.rifleId ? "" : ""}</option>`).join("");
+  const keepG = $("shotDestGun").value, keepL = $("shotDestLoad").value;
+  $("shotDestGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join("");
+  $("shotDestGun").value = P.rifles.some(r => r.id === keepG) ? keepG : (curRifle()?.id || P.rifles[0]?.id || "");
+  const gun = P.rifles.find(r => r.id === $("shotDestGun").value);
+  $("shotDestLoad").innerHTML = (gun?.loads || []).map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join("");
+  if (keepL && (gun?.loads || []).some(l => l.id === keepL)) $("shotDestLoad").value = keepL;
   $("shotSelN").textContent = `${SHOTSEL.size} selected`;
-  $("shotMoveGo").disabled = !SHOTSEL.size; $("shotSplit").disabled = !SHOTSEL.size;
+  const ready = SHOTSEL.size && gun && (gun.loads || []).some(l => l.id === $("shotDestLoad").value);
+  $("shotMoveGo").disabled = !ready; $("shotSplit").disabled = !ready;
+}
+function chosenAsFired() {
+  const r = P.rifles.find(x => x.id === $("shotDestGun").value);
+  const l = r?.loads.find(x => x.id === $("shotDestLoad").value);
+  if (!r || !l) return null;
+  const oid = r.lastOpticId && (P.optics || []).some(o => o.id === r.lastOpticId) ? r.lastOpticId : (r.opticId || null);
+  const o = oid ? (P.optics || []).find(x => x.id === oid) : null;
+  return asFiredFrom(r, o, l, recipeSnapshot(r.id, l.id));
+}
+function sourceLoadOf(session, movedIds) {
+  const ids = new Set(movedIds);
+  const shot = (session.shots || []).find(s => ids.has(s.id));
+  const st = shot && session.tg && session.tg.strings.find(x => x.id === shot.str);
+  const lid = st?.asFired?.loadId || session.loadId;
+  const rid = st?.asFired?.rifleId || session.rifleId;
+  const r = P.rifles.find(x => x.id === rid);
+  return r?.loads.find(l => l.id === lid) || null;
 }
 function undoShotEdit() {
   const prev = shotUndo.pop(); if (!prev || !ED) return;
@@ -249,11 +271,31 @@ function sessionLoad() {
   const r = ED && P.rifles.find(x => x.id === ED.rifleId);
   return r?.loads.find(l => l.id === ED.loadId) || null;
 }
+function redoSourceMv(load, shots) {
+  let t = num("slPowder") ?? num("slTemp");
+  if (t == null && ED) t = ED.wx?.powder ?? ED.wx?.temp ?? null;
+  if (t == null) {
+    const pre = wx && wx.tempF != null ? String(Math.round(wx.tempF)) : "";
+    const a = prompt(`Temperature for the redone MV (°F)?\nRemoved shots stay out. Tags stay in.${pre ? " Prefilled from current weather." : ""}`, pre);
+    if (a == null) return null;
+    t = parseFloat(a);
+    if (!isFinite(t) || t < -40 || t > 140) { toast("Enter a temperature between −40 and 140 °F"); return null; }
+    setVal("slTemp", Math.round(t * 10) / 10); edDirty = true;
+  }
+  const st = shotStats((shots || []).filter(s => !s.x));
+  if (!st.n) { toast("No kept shots left on that load to redo the MV"); return null; }
+  load.mv = String(Math.round(st.avg)); load.mvSource = "measured"; load.mvTemp = String(t); savePresets();
+  if (curLoad() === load) { setVal("mv", load.mv); $("mvSource").value = "measured"; setVal("mvTemp", t); }
+  updateDirty(); schedule();
+  return `MV redone to ${load.mv} fps at ${fmt(t, 0)}°F from ${st.n} kept shot${st.n === 1 ? "" : "s"}`;
+}
 function applyShotResult(result) {
-  const stale = staleMv(sessionLoad(), result.undo.shots, result.movedIds);
+  const load = sourceLoadOf(result.undo, result.movedIds);
+  const stale = staleMv(load, result.undo.shots, result.movedIds, result.undo);
   shotUndo.push(result.undo);
   ED.shots = result.session.shots; ED.tg = result.session.tg; edDirty = true; renderEditor();
-  if (stale) toast(stale.message);
+  const remain = (result.undo.shots || []).filter(s => !result.movedIds.includes(s.id) && (sourceLoadOf(result.undo, [s.id])?.id === load?.id));
+  return { stale, load, remain };
 }
 // "Use … as MV": the average of every shot that was not Removed. Tags (Clean, Cold bore, Flier, Input error) stay in the average.
 // Behavior change: Cold bore and Flier used to be left out automatically. They no longer are. Only the removed flag (x) excludes.
@@ -367,8 +409,16 @@ export function init() {
   $("slVel").addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData)?.getData("text") || ""; if (/[\s,;]/.test(t.trim())) { e.preventDefault(); if (addVelocities(t)) { renderEditor(); banShow(ED.id, ED.shots[ED.shots.length - 1].id); } } });
   $("shotSelBtn").onclick = () => { SHOTSEL = new Set(); shotUndo = []; renderEditor(); };
   $("shotSelDone").onclick = () => { SHOTSEL = null; renderEditor(); };
-  $("shotMoveGo").onclick = () => { if (!ED || !SHOTSEL?.size) return; applyShotResult(moveShots(ED, [...SHOTSEL], $("shotMoveTo").value)); toast("Moved the selected shots. Other shots were left where they were.", { label: "Undo", fn: undoShotEdit }); };
-  $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const id = [...SHOTSEL][0]; applyShotResult(splitFrom(ED, id)); toast("Split into a new string from the selected shot. Date and weather stay on the session.", { label: "Undo", fn: undoShotEdit }); };
+  $("shotDestGun").onchange = () => paintShotSel();
+  const shotToast = (done, msg) => {
+    const show = () => toast(msg, [
+      { label: "Undo", fn: undoShotEdit },
+      ...(done.stale && done.load ? [{ label: "Redo MV", fn: () => { const m = redoSourceMv(done.load, done.remain); if (m) toast(m, { label: "Undo", fn: undoShotEdit }); else show(); } }] : []),
+    ]);
+    show();
+  };
+  $("shotMoveGo").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const done = applyShotResult(assignShots(ED, [...SHOTSEL], af)); shotToast(done, done.stale ? done.stale.message : "Moved the selected shots onto that firearm and load. Other shots were left where they were."); };
+  $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const id = [...SHOTSEL][0]; const done = applyShotResult(assignShots(ED, [id], af, { splitFromId: id })); shotToast(done, done.stale ? done.stale.message : "Split from the selected shot onto that firearm and load. Date and weather stay on the session."); };
   $("slShots").addEventListener("change", e => { const box = e.target.closest(".shotCk"); if (!box || !SHOTSEL) return; box.checked ? SHOTSEL.add(box.dataset.sel) : SHOTSEL.delete(box.dataset.sel); paintShotSel(); });
   let shotLp;
   $("slShots").addEventListener("pointerdown", e => { const row = e.target.closest(".shot"); if (!row || SHOTSEL || e.target.closest("button, input")) return; clearTimeout(shotLp);

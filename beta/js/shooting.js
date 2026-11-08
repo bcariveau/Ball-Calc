@@ -3,14 +3,13 @@
 // init*() and is called by main.js in the original order.
 
 import { setTab } from "./app.js";
-import { B, angDec, angs, lastRun, solveShot, turretSpec } from "./calc.js";
+import { B, angDec, angs, entryRequired, lastRun, solveShot, turretSpec } from "./calc.js";
 import { shBtnPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, num } from "./core.js";
 import { CLOCK, lr, ud } from "./dope.js";
 import { applyLoad, applyRifle, curLoad, curRifle } from "./gear.js";
-import { calcFallback, recallFirearm } from "./link-v3.js";
+import { calcFallback, opticOn, recallFirearm } from "./link-v3.js";
 import { ED, LOG, addVelocities, closeEditor, commitEditor, curKeyIds, edDirty, openEditor, renderEditor, set_edDirty, shotStats } from "./log.js";
-import { curOptic } from "./optics.js";
 import { RD, hasBT } from "./radar.js";
 import { banHide, wakeSync } from "./shot-banner.js";
 import { P, S, savePresets } from "./storage.js";
@@ -118,7 +117,8 @@ function shPaint() {
   const yd = Math.round(tgYd(g) || tgDefDist());
   $("shStr").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
   const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
-  const fb = calcFallback(cur.asFired, P.rifles.find(x => x.id === cur.asFired?.rifleId) || r, curOptic());
+  const gunFired = P.rifles.find(x => x.id === cur.asFired?.rifleId) || r;
+  const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired));
   $("shFor").textContent = [r?.name, l?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
   const gun = $("shGun");
   if (gun && gun.dataset.lock !== "1") {
@@ -164,6 +164,11 @@ function shStatus() {
 }
 // vertical spread at the target from the slowest vs fastest kept shot, same zero + conditions + angle as the Dope tab
 async function shEsAt(min, max, yd) {
+  if (ED) {
+    const cur = shCurStr().cur, rifle = P.rifles.find(x => x.id === (cur?.asFired?.rifleId || ED.rifleId)) || curRifle();
+    if (calcFallback(cur?.asFired, rifle, opticOn(P, rifle)).source === "missing") return null;
+  }
+  if (entryRequired()) return null;
   if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000) || !(max > min)) return null;
   try {
     const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
@@ -179,7 +184,10 @@ async function shEsAt(min, max, yd) {
   } catch { return null; }
 }
 async function shDopeAt(yd, st) {   // dope strip: the string's dial (else the app's dope there) + the wind hold for the Dope-tab wind
-  const ts = ED ? tsFor(ED.rifleId) : turretSpec(), o = { yd };
+  const rifle = P.rifles.find(x => x.id === (st?.asFired?.rifleId || ED?.rifleId)) || curRifle();
+  const fb = calcFallback(st?.asFired, rifle, opticOn(P, rifle));
+  if (fb.source === "missing" || entryRequired()) return { yd, blocked: fb.warning || "Enter a turret click value before calculating. Nothing was invented." };
+  const ts = ED ? tsFor(ED.rifleId) : turretSpec(), o = { yd, warn: fb.warning || "" };
   if (st && st.dial) { const dv = dialView(st.dial, ts); o.elev = `${dv.txt}`; o.clk = dv.c != null ? `${Math.abs(dv.c)} clicks` : ""; o.src = st.dial.src === "app" ? "dialed" : "dialed (edited)"; }
   if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return o;
   try {
@@ -206,7 +214,7 @@ function shCalc(q, yd, st) {
 function shCalcPaint(q) {
   const u = angU(S.ang), es = SH.es, d = SH.dope, { t, cur } = ED ? shCurStr() : {}, g = t && t.targets.find(x => x.id === cur.tid), yd = Math.round(t ? tgYd(g) || tgDefDist() : 0);
   $("shEs").innerHTML = q.n < 2 ? `ES at ${yd} yd: needs 2+ kept shots` : es && es.yd === yd && es.u === S.ang ? `ES ±${fmt(es.half, 2)} ${u} at ${yd} yd <small>· ${fmt(es.spread, 2)} ${u} (${fmt(es.inch, 1)}″) top to bottom</small>` : `ES at ${yd} yd: …`;
-  $("shDope").innerHTML = d && d.yd === yd ? `<span>🎯 ${yd} yd · ${escapeHtml(d.src || "dial")} <b>${escapeHtml(d.elev || "—")}</b>${d.clk ? ` (${escapeHtml(d.clk)})` : ""}</span><span>Wind hold <b>${escapeHtml(d.wind || "—")}</b>${d.wtxt ? ` · ${escapeHtml(d.wtxt)}` : ""}</span>` : `<span>🎯 ${yd} yd · dial …</span>`;
+  $("shDope").innerHTML = d && d.blocked ? `<span class="bad">${escapeHtml(d.blocked)}</span>` : d && d.yd === yd ? `<span>🎯 ${yd} yd · ${escapeHtml(d.src || "dial")} <b>${escapeHtml(d.elev || "—")}</b>${d.clk ? ` (${escapeHtml(d.clk)})` : ""}</span><span>Wind hold <b>${escapeHtml(d.wind || "—")}</b>${d.wtxt ? ` · ${escapeHtml(d.wtxt)}` : ""}</span>${d.warn ? `<span class="w">${escapeHtml(d.warn)}</span>` : ""}` : `<span>🎯 ${yd} yd · dial …</span>`;
 }
 async function shBad() {
   if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), k = rd.map(s => !s.x).lastIndexOf(true);

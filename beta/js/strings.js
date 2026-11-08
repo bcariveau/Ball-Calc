@@ -2,11 +2,11 @@
 // Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
-import { B, angs, curCond, powderT, solveShot, turretSpec } from "./calc.js";
+import { B, angs, curCond, entryRequired, powderT, solveShot, turretSpec } from "./calc.js";
 import { toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal } from "./core.js";
 import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
-import { asFiredFrom, calcFallback } from "./link-v3.js";
+import { asFiredFrom, calcFallback, opticOn } from "./link-v3.js";
 import { curOptic } from "./optics.js";
 import { ED, commitEditor, edDirty, renderEditor, set_edDirty } from "./log.js";
 import { banPaint } from "./shot-banner.js";
@@ -20,8 +20,8 @@ import { BAN, TE, TV, angConv, angU, bulletDiaIn, cleanDial, grpStats, hoff, inP
 function paintStrBar() {
   if (!ED) return; const t = tgView(ED), cur = t.strings.find(q => q.id === t.cur), n = strNo(t, cur.id), rd = readings(ED, cur.id);
   $("tgHdrT").textContent = `String ${n} · Target ${tgtLetter(t, cur.tid)}`;
-  const af = cur.asFired, gun = af && P.rifles.find(x => x.id === af.rifleId);
-  const fb = af ? calcFallback(af, gun || curRifle(), curOptic()) : null;
+  const af = cur.asFired, gun = (af && P.rifles.find(x => x.id === af.rifleId)) || curRifle();
+  const fb = af ? calcFallback(af, gun, opticOn(P, gun)) : null;
   $("tgHdrS").textContent = `${gun ? gun.name + " · " : ""}${rd.length} shot${rd.length === 1 ? "" : "s"} · ${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}${t.strings.length > 1 ? ` · ${t.strings.length} strings` : ""}${fb && fb.warning ? " · " + fb.warning : ""}`;
   $("tgMarkEach").checked = !!t.mark;
   $("tgMarkBtn").textContent = `🎯 Mark holes · String ${n}`;
@@ -68,7 +68,7 @@ function tgNewString(newTarget) {
 /* ---- elevation dialed per string (defaults to the app's dope at that moment) ---- */
 function tgSame() { return !!(ED && curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId); }
 async function tgDope(yd) {   // the dope the app shows now (conditions + shot angle on the Dope tab) at yd, as the turret reading (÷ tracking) + clicks
-  if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return null;
+  if (entryRequired() || typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return null;
   try {
     const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     if (look) sv.shot.lookAngle = B.UNew.Degree(look);

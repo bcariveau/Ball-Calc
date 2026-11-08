@@ -58,6 +58,13 @@ function asFiredFrom(rifle, optic, load, recipe) {
   });
 }
 
+function opticOn(p, rifle) {
+  if (!rifle) return null;
+  const optics = (p && p.optics) || [];
+  const id = rifle.lastOpticId && optics.some((o) => o.id === rifle.lastOpticId) ? rifle.lastOpticId : (rifle.opticId || null);
+  return id ? (optics.find((o) => o.id === id) || null) : null;
+}
+
 function recallFirearm(p, rifle) {
   if (!rifle) return { opticId: null, loadId: null };
   const optics = p.optics || [];
@@ -134,14 +141,19 @@ function shotStatsOf(shots) {
   return { n, avg: +avg.toFixed(1), sd: +sd.toFixed(1), es: +(Math.max(...v) - Math.min(...v)).toFixed(1) };
 }
 
-function staleMv(load, shots, movedIds) {
+function staleMv(load, shots, movedIds, session) {
   if (!load || load.mvSource !== "measured" || !(parseFloat(load.mv) > 0)) return null;
   const moved = new Set(movedIds);
-  const before = (shots || []).filter((s) => !s.x);
+  const before = (shots || []).filter((s) => {
+    if (!s || s.x) return false;
+    if (!session) return true;
+    const st = session.tg && session.tg.strings.find((x) => x.id === s.str);
+    return (st?.asFired?.loadId || session.loadId || null) === load.id;
+  });
   if (!before.some((s) => moved.has(s.id))) return null;
   const avg = shotStatsOf(before).avg;
   if (avg == null || Math.round(avg) !== Math.round(parseFloat(load.mv))) return null;
-  return { mv: load.mv, message: "This load's MV matched the average of shots that include ones you just moved. It was not changed. Use avg as MV again if you want it redone." };
+  return { mv: load.mv, message: "This load's MV matched the average of its kept shots, including ones you just moved. It was not changed. Redo MV uses the shots that stayed and drops removed shots." };
 }
 
 function unpairMoved(tg, ids) {
@@ -151,6 +163,35 @@ function unpairMoved(tg, ids) {
   return next;
 }
 
+function sameFired(a, b) {
+  if (!a || !b) return false;
+  return (a.rifleId || null) === (b.rifleId || null) && (a.loadId || null) === (b.loadId || null) && (a.opticId || null) === (b.opticId || null);
+}
+function assignShots(session, shotIds, asFired, opts = {}) {
+  const fired = cleanAsFired(asFired);
+  if (!fired || !fired.rifleId || !fired.loadId) throw new Error("choose a firearm and a load");
+  const undo = clone(session);
+  let moving = [...shotIds];
+  if (opts.splitFromId) {
+    const shot = (session.shots || []).find((s) => s.id === opts.splitFromId);
+    if (!shot) throw new Error("shot not found");
+    const str = shot.str || null;
+    const inStr = session.shots.filter((s) => (s.str || null) === str);
+    const at = inStr.findIndex((s) => s.id === opts.splitFromId);
+    moving = inStr.slice(Math.max(0, at)).map((s) => s.id);
+  }
+  const idset = new Set(moving);
+  const tg = session.tg ? clone(session.tg) : { targets: [{ id: "t", tpl: "grid1", dist: 100, du: "yd", u: "in" }], strings: [], cur: null, mark: false };
+  if (!tg.targets.length) tg.targets.push({ id: "t", tpl: "grid1", dist: 100, du: "yd", u: "in" });
+  let dest = (tg.strings || []).find((st) => sameFired(st.asFired, fired) && !(session.shots || []).some((s) => s.str === st.id && !idset.has(s.id)));
+  if (!dest) {
+    dest = { id: "s" + Math.random().toString(36).slice(2, 8), tid: tg.targets[0].id, aim: null, holes: [], asFired: fired };
+    tg.strings = [...(tg.strings || []), dest];
+  }
+  const shots = (session.shots || []).map((s) => idset.has(s.id) ? { ...s, str: dest.id } : { ...s });
+  const sourceIds = [...new Set((undo.shots || []).filter((s) => idset.has(s.id)).map((s) => s.str).filter(Boolean))];
+  return { session: { ...clone(session), shots, tg: unpairMoved({ ...tg, cur: dest.id }, idset) }, undo, movedIds: [...idset], destId: dest.id, sourceIds };
+}
 function moveShots(session, shotIds, destStringId) {
   const ids = new Set(shotIds);
   const undo = clone(session);
@@ -183,6 +224,6 @@ function stringStats(session, stringId) {
 }
 
 export {
-  clone, opticSnap, cleanAsFired, loadsOf, currentTurretKnown, calcFallback, asFiredFrom, recallFirearm,
-  migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, stringStats,
+  clone, opticSnap, cleanAsFired, loadsOf, currentTurretKnown, calcFallback, asFiredFrom, opticOn, recallFirearm,
+  migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, assignShots, stringStats,
 };

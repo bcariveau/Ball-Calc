@@ -11,7 +11,7 @@ import { S, savePresets } from "./storage.js";
 import { cv } from "./themes.js";
 import { wx } from "./weather.js";
 
-function renderAll() { if (!lastRun) return; setStale(false); renderCard(); renderTable(lastRun.samples); renderChart(lastRun.samples); }
+function renderAll() { if (!lastRun || !(turretSpec().v > 0)) return; setStale(false); renderCard(); renderTable(lastRun.samples); renderChart(lastRun.samples); }
 function setStale(on) { $("dopeCard").classList.toggle("stale", on); resultsDiv.classList.toggle("stale", on); document.querySelector(".chart-container").classList.toggle("stale", on); }
 // never show old numbers: blank the card, table and chart when the inputs can't be solved
 function noResult(bad) {
@@ -35,6 +35,11 @@ function renderCard() {
     $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; ["dcElevC", "dcWindC", "dcElevClk", "dcWindClk", "dcBracket", "dcInfo"].forEach(id => $(id).textContent = "");
     $("dcMsg").innerHTML = R.td ? `<span class="bad">${R.td} yd is beyond where this bullet can reach.</span>` : "Set a target distance.";
     paintWarn(); paintPt(); return;
+  }
+  if (!(ts.v > 0)) {
+    $("dcElev").textContent = "—"; $("dcWind").textContent = "—";
+    $("dcMsg").innerHTML = `<span class="bad">Enter a turret click value before calculating. Nothing was invented.</span>`;
+    return;
   }
   const v = pointVals(R.tgt), a = angs(R.tgt), dd = angDec(ts), tt = turnsTxt(a.ec, ts);
   $("dcElev").textContent = ud(a.e, dd); $("dcWind").textContent = lr(a.w, dd);

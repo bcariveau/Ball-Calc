@@ -34,21 +34,22 @@ function seed(fresh) {   // fresh = a true first open (nothing saved yet): the g
   };
 }
 const SAMPLE_NAME = "Sample .308";
-// turret click unit (new-user round): the "Display unit" fallback is gone, every gun gets an explicit turret.
-// RULE: a gun with no valid turret keeps the click unit it was effectively using: its attached optic's turret when it has
-// one, else the display unit saved in settings (0.1 mil if MIL, ¼ MOA if MOA, MOA when never set). An optic with an
-// empty/unknown click value gets its reticle's unit. A custom value with no number is left alone (it is a field error).
+// A saved click value is kept. A gun can copy the click value already stored on its optic.
+// An empty gun or optic stays empty: dope asks for a click value and does not invent 0.1 mil or ¼ MOA.
 const TURRET_KEYS = ["0.1mil", "0.05mil", "0.25moa", "0.125moa", "0.5moa"];
 function migrateTurrets(list, optics) {
-  let ch = false; const ang = (load(K_SETTINGS, {}) || {}).ang === "MIL" ? "MIL" : "MOA";
-  (optics || []).forEach(o => { if (o.opTurret !== "custom" && !TURRET_KEYS.includes(o.opTurret)) { o.opTurret = o.opReticle === "moa" ? "0.25moa" : "0.1mil"; ch = true; } });
+  let ch = false;
+  (optics || []).forEach(o => {
+    if (!o.opTurret || o.opTurret === "custom" || TURRET_KEYS.includes(o.opTurret)) return;
+    o.opTurret = o.opReticle === "moa" ? "0.25moa" : "0.1mil"; ch = true;
+  });
   list.forEach(r => {
     const okV = r.turret === "custom" && parseFloat(r.turretV) > 0;
     if (TURRET_KEYS.includes(r.turret) || okV) return;
     const o = r.opticId && (optics || []).find(x => x.id === r.opticId);
     if (o && TURRET_KEYS.includes(o.opTurret)) r.turret = o.opTurret;
     else if (o && o.opTurret === "custom" && parseFloat(o.opTurretV) > 0) { r.turret = "custom"; r.turretV = o.opTurretV; r.turretU = o.opTurretU === "moa" ? "moa" : "mil"; }
-    else r.turret = ang === "MIL" ? "0.1mil" : "0.25moa";
+    else return;
     r.turretMig = 1; ch = true;
   });
   return ch;

@@ -43,8 +43,22 @@ function validate() {
 /* ---------------- ballistics ---------------- */
 let B = null;
 let calcSeq = 0;
+function entryRequired() {
+  const o = curOptic();
+  if (o) { const t = $("opTurret").value; if (t === "custom") return !(num("opTurretV") > 0); return !TURRETS[t]; }
+  const t = $("turret").value;
+  if (!t) return true;
+  if (t === "custom") return !(num("turretV") > 0);
+  return !TURRETS[t];
+}
 async function calculate() {
   if (!B) return;
+  if (entryRequired()) {
+    statusEl.textContent = "Enter a turret click value before calculating. Nothing was invented."; statusEl.classList.add("bad");
+    if ($("rifleDetails")) $("rifleDetails").open = true;
+    noResult();
+    return;
+  }
   const bad = validate();
   if (bad.length) {
     statusEl.textContent = `Fix ${bad.length} highlighted field${bad.length > 1 ? "s" : ""} to calculate.`; statusEl.classList.add("bad");
@@ -138,6 +152,7 @@ function mkAtmo(c) {
 function windAt(ws, dir) { return ws > 0 ? [new B.Wind({ velocity: B.UNew.MPH(ws), directionFrom: B.UNew.Degree(norm360(dir + 180)) })] : []; }
 // zeroed shot: o.mv = MV at today's powder temp (truing), o.bcScale, o.winds
 async function solveShot(o = {}) {
+  if (entryRequired()) throw new Error("Enter a turret click value before calculating. Nothing was invented.");
   const { Calculator, Shot, Weapon, Ammo, DragModel, DragTables, UNew } = B;
   const twist = num("twist") || 0, length = num("length") || 0, k = o.bcScale || 1;
   const pts = bandsOn() ? bandPoints() : null;
@@ -164,7 +179,7 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's own tu
     const t = $("opTurret").value, ret = $("opReticle").value === "moa" ? "MOA" : "MIL";
     if (t === "custom") { const v = num("opTurretV"), u = $("opTurretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) s = { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
     else if (TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; s = { u, v, lbl }; }
-    if (!s) s = ret === "MIL" ? { u: "MIL", v: 0.1, lbl: "0.1 mil" } : { u: "MOA", v: 0.25, lbl: "¼ MOA" };
+    if (!s) return { u: ret, v: null, lbl: "no click value", k: 1, optic: o, perTurn: null, cpt: 0, up: null, upSet: false, sfp: null, missing: true };
     const tk = num("opTrack"); s.k = tk >= 0.8 && tk <= 1.2 ? tk : 1; s.optic = o;
     s.perTurn = num("opTurn") > 0 ? num("opTurn") : null; s.cpt = s.perTurn ? Math.round(s.perTurn / s.v) : 0;
     const tr = num("opTravel"), cant = num("opCant") || 0, cantT = s.u === "MIL" ? cant / 3.437747 : cant;
@@ -176,12 +191,13 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's own tu
   const t = $("turret").value;
   if (t === "custom") { const v = num("turretV"), u = $("turretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) s = { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
   if (!s && TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; s = { u, v, lbl }; }
-  if (!s) s = /moa/.test(t) || (t === "custom" && $("turretU").value === "moa") ? { u: "MOA", v: 0.25, lbl: "¼ MOA" } : { u: "MIL", v: 0.1, lbl: "0.1 mil" };   // only a custom turret with no value lands here (a field error)
+  if (!s) return { u: "", v: null, lbl: "no click value", k: 1, up: null, sfp: null, cpt: 0, perTurn: null, optic: null, missing: true };
   return Object.assign(s, { k: 1, up: null, sfp: null, cpt: 0, perTurn: null, optic: null });
 }
 const MOA_PER_MIL = 3.437747;
 function angs(p) {   // dial angles in the display unit (optionally rounded to whole clicks) + clicks in the turret unit; elevation dial ÷ tracking factor
   const A = B.Angular, ts = turretSpec(), TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA, k = ts.k || 1;
+  if (!(ts.v > 0)) throw new Error("Enter a turret click value before calculating. Nothing was invented.");
   const eT = -p.dropAngle.In(TU) / k, ec = Math.round(eT / ts.v), wc = Math.round(-p.windageAngle.In(TU) / ts.v);
   let e = -p.dropAngle.In(DU) / k, w = -p.windageAngle.In(DU);
   if (S.round) { const c = ts.u === S.ang ? 1 : S.ang === "MOA" ? MOA_PER_MIL : 1 / MOA_PER_MIL; e = ec * ts.v * c; w = wc * ts.v * c; }
@@ -223,4 +239,4 @@ export async function init() {
   }
 }
 
-export { RULES, validate, B, calcSeq, calculate, lastRun, pointVals, windHoldAt, powderT, mvAdjust, mvAdjOn, mvAt, chronoFrom, curCond, zeroCond, mkAtmo, windAt, solveShot, TURRETS, turretSpec, MOA_PER_MIL, angs, angDec, clkTxt, clkShort, perMph, TIPPED, millerSG, set_lastRun };
+export { RULES, validate, B, calcSeq, calculate, entryRequired, lastRun, pointVals, windHoldAt, powderT, mvAdjust, mvAdjOn, mvAt, chronoFrom, curCond, zeroCond, mkAtmo, windAt, solveShot, TURRETS, turretSpec, MOA_PER_MIL, angs, angDec, clkTxt, clkShort, perMph, TIPPED, millerSG, set_lastRun };

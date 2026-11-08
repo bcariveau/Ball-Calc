@@ -51,7 +51,7 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
   <div id="slAddRow"><input type="text" inputmode="decimal" autocomplete="off" id="slVel" placeholder="fps" enterkeyhint="done" aria-label="Velocity (fps)"><button type="button" id="slAdd">＋ Add</button></div>
   <div class="hint">Type a velocity and tap Add (or Enter). You can paste several at once, e.g. "2701 2698 2710". Tags (Clean, Cold bore, Flier, Input error) can be combined and never change the stats. ⊘ Remove keeps the shot in the log, grays it, and leaves it out of every stat until you restore it.</div>
   <div class="row" id="shotSelTools"><button class="sm ghost" type="button" id="shotSelBtn">☑ Select shots</button></div>
-  <div class="row" id="shotSelBar" hidden><span class="n" id="shotSelN">0 selected</span><select id="shotMoveTo" aria-label="String to move selected shots to"></select><button class="sm" type="button" id="shotMoveGo" disabled>Move to</button><button class="sm ghost" type="button" id="shotSplit" disabled>Split from here</button><button class="sm ghost" type="button" id="shotSelDone">Done</button></div>
+  <div class="row" id="shotSelBar" hidden><span class="n" id="shotSelN">0 selected</span><select id="shotDestGun" aria-label="Firearm to assign the selected shots to"></select><select id="shotDestLoad" aria-label="Load to assign the selected shots to"></select><button class="sm" type="button" id="shotMoveGo" disabled>Move to</button><button class="sm ghost" type="button" id="shotSplit" disabled>Split from here</button><button class="sm ghost" type="button" id="shotSelDone">Done</button></div>
   <div id="slShots"></div>
   <div class="sub" style="margin-top:10px">Targets</div>
   <div id="slTgView"></div>

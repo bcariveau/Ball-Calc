@@ -2,7 +2,7 @@
 // Does not read or write a browser profile.
 import assert from "node:assert/strict";
 import {
-  asFiredFrom, calcFallback, cleanAsFired, exportBundle, importBundle, migrateToV3, moveShots,
+  asFiredFrom, assignShots, calcFallback, cleanAsFired, exportBundle, importBundle, migrateToV3, moveShots,
   recallFirearm, rollback, splitFrom, staleMv, stringStats,
 } from "../beta/js/link-v3.js";
 
@@ -81,7 +81,15 @@ ok(split.session.wx === undefined || split.session.date === m1.sessions[0].date,
 
 const load = { mv: "2737", mvSource: "measured" };
 const stale = staleMv(load, [{ id: "a", v: 2700 }, { id: "b", v: 2774 }], ["b"]);
-ok(stale && /not changed/.test(stale.message), "stale measured MV is flagged and not rewritten");
+ok(stale && /not changed/.test(stale.message) && /Redo MV/.test(stale.message), "stale measured MV is flagged and not rewritten");
+const scoped = staleMv({ id: "l1", mv: "2700", mvSource: "measured" }, [
+  { id: "a", v: 2700, str: "s1" }, { id: "b", v: 2700, str: "s1" }, { id: "c", v: 2900, str: "s2" },
+], ["b"], { loadId: "l1", tg: { strings: [{ id: "s1", asFired: { loadId: "l1" } }, { id: "s2", asFired: { loadId: "l9" } }] } });
+ok(scoped && scoped.mv === "2700", "stale MV is the source load, not the other firearm's shots");
+const other = staleMv({ id: "l9", mv: "2900", mvSource: "measured" }, [
+  { id: "a", v: 2700, str: "s1" }, { id: "b", v: 2700, str: "s1" },
+], ["b"], { loadId: "l1", tg: { strings: [{ id: "s1", asFired: { loadId: "l1" } }] } });
+ok(other === null, "a load that did not own the moved shots is not flagged");
 ok(staleMv({ mv: "2700", mvSource: "factory" }, [{ id: "a", v: 2700 }], ["a"]) === null, "a factory MV is not flagged");
 
 const mixed = split.session;
@@ -93,5 +101,21 @@ ok(left.asFired.rifleId === "r1" && right.asFired.rifleId === "r1", "both string
 
 const fresh = asFiredFrom({ id: "r2" }, null, { id: "l3" }, { mv: "2700" });
 ok(fresh.opticId === null && fresh.optic === null, "a new string does not invent an optic");
+
+const dest = asFiredFrom({ id: "r2", name: "Rifle B", opticId: null }, null, { id: "l9", name: "Load B", mv: "2800" }, { mv: "2800", diameter: "0.308" });
+const crossed = assignShots(m1.sessions[0], ["c"], dest);
+ok(crossed.session.shots.find((s) => s.id === "c").str === crossed.destId, "chosen shot moves to the new firearm");
+ok(crossed.session.shots.find((s) => s.id === "a").str === "st1", "unrelated shot stays on the source string");
+const destStr = crossed.session.tg.strings.find((s) => s.id === crossed.destId);
+const srcStr = crossed.session.tg.strings.find((s) => s.id === "st1");
+ok(destStr.asFired.rifleId === "r2" && destStr.asFired.loadId === "l9" && destStr.asFired.optic === null, "destination is the chosen firearm and load, optic stays null");
+ok(srcStr.asFired.rifleId === "r1" && srcStr.asFired.loadId === "l1", "source as-fired is not rewritten");
+ok(srcStr.holes.every((h) => h.sh !== "c") && destStr.holes.length === 0, "invalid target pairing is dropped");
+ok(stringStats(crossed.session, "st1").stats.n === 2 && stringStats(crossed.session, crossed.destId).stats.n === 1, "both strings recompute");
+ok(crossed.undo.shots.find((s) => s.id === "c").str === "st1" && crossed.undo.tg.strings.length === 1, "undo is the session from before the move");
+const splitB = assignShots(m1.sessions[0], ["b"], dest, { splitFromId: "b" });
+ok(splitB.movedIds.join() === "b,c", "split takes the chosen shot and the ones after it");
+ok(splitB.session.tg.strings.find((s) => s.id === splitB.destId).asFired.loadId === "l9", "split stamps the chosen load");
+ok(splitB.undo.shots.map((s) => s.str).join() === "st1,st1,st1", "split undo is exact");
 
 console.log("PASS link-v3 assertions", n);

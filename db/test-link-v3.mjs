@@ -2,7 +2,7 @@
 // Does not read or write a browser profile.
 import assert from "node:assert/strict";
 import {
-  asFiredFrom, assignShots, calcFallback, cleanAsFired, exportBundle, importBundle, migrateToV3, moveShots,
+  asFiredFrom, assignShots, calcFallback, clicksFor, cleanAsFired, exportBundle, histSource, importBundle, migrateToV3, moveShots, recordedDial, specFromSaved,
   recallFirearm, rollback, splitFrom, staleMv, stringStats,
 } from "../beta/js/link-v3.js";
 
@@ -117,5 +117,24 @@ const splitB = assignShots(m1.sessions[0], ["b"], dest, { splitFromId: "b" });
 ok(splitB.movedIds.join() === "b,c", "split takes the chosen shot and the ones after it");
 ok(splitB.session.tg.strings.find((s) => s.id === splitB.destId).asFired.loadId === "l9", "split stamps the chosen load");
 ok(splitB.undo.shots.map((s) => s.str).join() === "st1,st1,st1", "split undo is exact");
+
+const recorded = specFromSaved({ id: "o1", opTurret: "0.1mil", opTrack: "1", opSH: "1.75" });
+const quarter = specFromSaved({ id: "o1", opTurret: "0.25moa", opTrack: "1", opSH: "2.00" });
+const milClicks = clicksFor(2.8, recorded);
+const moaClicks = clicksFor(2.8 * 3.437747, quarter);
+ok(milClicks.c === 28 && milClicks.u === "MIL" && Math.abs(milClicks.e - 2.8) < 1e-9, "2.8 mil on a 0.1 mil turret is 28 clicks");
+ok(moaClicks.c === 39 && moaClicks.u === "MOA", "the same angle on a ¼ MOA turret is 39 clicks");
+ok(clicksFor(2.8, specFromSaved({ opTurret: "0.1mil", opTrack: "1.02" })).c === 27, "tracking 1.02 changes 2.8 mil to 27 clicks");
+const snapOptic = { optic: { id: "o1", opTurret: "0.1mil", opTrack: "1" } };
+const kept = histSource(snapOptic, { turret: "0.25moa" }, { id: "o1", opTurret: "0.25moa", opTrack: "1.02" }, quarter);
+ok(kept.source === "as-fired" && clicksFor(2.8, kept.spec).c === 28 && snapOptic.optic.opTurret === "0.1mil" && snapOptic.optic.opTrack === "1", "a saved turret still converts 28 clicks after the current turret changes");
+const unknown = histSource({ optic: null }, { id: "r1", turret: "0.25moa" }, null, quarter);
+ok(unknown.source === "current" && /not written/.test(unknown.warning) && clicksFor(2.8 * 3.437747, unknown.spec).c === 39, "unknown history uses the current turret and says so");
+const bare = { optic: null };
+const missed = histSource(bare, { turret: "custom", turretV: "" }, { id: "o1", opTurret: "custom", opTurretV: "" }, null);
+ok(missed.source === "missing" && missed.spec === null && bare.optic === null && /Nothing was invented/.test(missed.warning), "a missing current click value blocks and does not invent one");
+const oldDial = recordedDial({ e: 2.8, u: "MIL", c: 28, cl: "0.1 mil" });
+ok(oldDial.c === 28 && oldDial.u === "MIL" && oldDial.dir === "U", "a saved dial keeps its recorded clicks when the optic snapshot is missing");
+console.log("CLICKS recorded", milClicks.c, "current-quarter-moa", moaClicks.c);
 
 console.log("PASS link-v3 assertions", n);

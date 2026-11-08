@@ -4,6 +4,9 @@
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
 const OPTIC_KEYS = ["opTurret", "opTurretV", "opTurretU", "opReticle", "opFP", "opTrack", "opSH"];
+const TURRET_TABLE = { "0.1mil": ["MIL", 0.1, "0.1 mil"], "0.05mil": ["MIL", 0.05, "0.05 mil"], "0.25moa": ["MOA", 0.25, "¼ MOA"], "0.125moa": ["MOA", 0.125, "⅛ MOA"], "0.5moa": ["MOA", 0.5, "½ MOA"] };
+const CURRENT_WARN = "No as-fired optic was saved for this string. Using this firearm's current turret settings. This is not written onto the string.";
+const MISSING_WARN = "No as-fired optic and no current turret. Enter a turret click value. Nothing was invented.";
 
 function opticSnap(o) {
   if (!o || !o.id) return null;
@@ -32,20 +35,59 @@ function loadsOf(p, rifle) {
   return Array.isArray(rifle.loads) ? rifle.loads : [];
 }
 
-function currentTurretKnown(rifle, optic) {
-  if (optic && (optic.opTurret || optic.opTurretV)) return true;
-  if (!rifle) return false;
-  if (rifle.turret && rifle.turret !== "custom") return true;
-  return rifle.turret === "custom" && parseFloat(rifle.turretV) > 0;
+function specFromSaved(src) {
+  if (!src) return null;
+  const key = src.opTurret || src.turret;
+  const track = parseFloat(src.opTrack);
+  const k = track >= 0.8 && track <= 1.2 ? track : 1;
+  const sh = parseFloat(src.opSH);
+  const sight = sh > 0 ? sh : null;
+  if (key && TURRET_TABLE[key]) {
+    const [u, v, lbl] = TURRET_TABLE[key];
+    return { u, v, lbl, k, sh: sight };
+  }
+  if (key === "custom") {
+    const raw = src.opTurretV != null && src.opTurretV !== "" ? src.opTurretV : src.turretV;
+    const v = parseFloat(raw);
+    const u = (src.opTurretU || src.turretU) === "moa" ? "MOA" : "MIL";
+    if (v > 0) return { u, v, lbl: `${v} ${u === "MIL" ? "mil" : "MOA"}`, k, sh: sight };
+  }
+  return null;
 }
 
-// Missing historical optic stays null. Current settings may be used only as a labeled fallback.
-// If those are missing too, the caller must ask for a turret. This never writes onto the snapshot.
-function calcFallback(asFired, rifle, optic) {
-  if (asFired && asFired.optic) return { source: "as-fired", warning: null, optic: asFired.optic };
-  if (currentTurretKnown(rifle, optic))
-    return { source: "current", warning: "No as-fired optic was saved for this string. Using this firearm's current turret settings. This is not written onto the string.", optic: opticSnap(optic) };
-  return { source: "missing", warning: "No as-fired optic and no current turret. Enter a turret click value. Nothing was invented.", optic: null };
+function recordedDial(d) {
+  if (!d || d.c == null || d.e == null || (d.u !== "MIL" && d.u !== "MOA")) return null;
+  const dir = d.e < 0 ? "D" : "U";
+  return { c: Math.round(d.c), e: d.e, u: d.u, dir, lbl: d.cl || "" };
+}
+
+function clicksFor(angle, spec) {
+  if (!spec || !(spec.v > 0) || angle == null || !isFinite(angle)) return null;
+  const eT = angle / (spec.k || 1);
+  const c = Math.round(eT / spec.v);
+  return { c, e: c * spec.v, u: spec.u, lbl: spec.lbl, k: spec.k || 1 };
+}
+
+function currentTurretKnown(rifle, optic) {
+  if (specFromSaved(optic)) return true;
+  if (optic) return false;
+  return !!specFromSaved(rifle);
+}
+
+// A recorded optic click value wins. Current settings are used only when that history has no click value.
+// This never writes the current turret back onto the snapshot.
+function histSource(asFired, rifle, optic, liveSpec) {
+  const saved = asFired && asFired.optic ? specFromSaved(asFired.optic) : null;
+  if (saved) return { source: "as-fired", spec: saved, warning: null };
+  const live = liveSpec && liveSpec.v > 0 ? { u: liveSpec.u, v: liveSpec.v, lbl: liveSpec.lbl, k: liveSpec.k || 1, sh: liveSpec.sh || null } : null;
+  const cur = live || specFromSaved(optic) || (optic ? null : specFromSaved(rifle));
+  if (cur) return { source: "current", spec: cur, warning: CURRENT_WARN };
+  return { source: "missing", spec: null, warning: MISSING_WARN };
+}
+
+function calcFallback(asFired, rifle, optic, liveSpec) {
+  const h = histSource(asFired, rifle, optic, liveSpec);
+  return { source: h.source, warning: h.warning, spec: h.spec, optic: h.source === "as-fired" ? asFired.optic : null };
 }
 
 function asFiredFrom(rifle, optic, load, recipe) {
@@ -224,6 +266,6 @@ function stringStats(session, stringId) {
 }
 
 export {
-  clone, opticSnap, cleanAsFired, loadsOf, currentTurretKnown, calcFallback, asFiredFrom, opticOn, recallFirearm,
+  clone, opticSnap, cleanAsFired, loadsOf, specFromSaved, recordedDial, clicksFor, currentTurretKnown, histSource, calcFallback, asFiredFrom, opticOn, recallFirearm,
   migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, assignShots, stringStats,
 };

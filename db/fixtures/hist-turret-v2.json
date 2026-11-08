@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "setup": "done",
+  "lastRifleId": "r1",
+  "rifles": [
+    {
+      "id": "r1",
+      "name": "Rifle A",
+      "gunKind": "rifle",
+      "sightHeight": "1.75",
+      "zero": "100",
+      "twist": "8",
+      "barrel": "24",
+      "turret": "0.1mil",
+      "opticId": "o1",
+      "lastOpticId": "o1",
+      "lastLoadId": "l1",
+      "loads": [
+        {
+          "id": "l1",
+          "name": "Load A",
+          "bulletName": "140 ELD-M",
+          "bc": "0.326",
+          "drag": "G7",
+          "weight": "140",
+          "diameter": "0.264",
+          "length": "1.390",
+          "mv": "2710",
+          "mvSource": "measured",
+          "ldKind": "hand"
+        }
+      ]
+    }
+  ],
+  "optics": [
+    { "id": "o1", "name": "Razor", "opTurret": "0.1mil", "opReticle": "mil", "opFP": "FFP", "opTrack": "1", "opSH": "1.75" }
+  ],
+  "ranges": []
+}

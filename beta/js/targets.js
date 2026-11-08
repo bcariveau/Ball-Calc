@@ -3,11 +3,11 @@
 // init*() and is called by main.js in the original order.
 
 import { idbGet, idbPut } from "./bulletdb.js";
-import { TURRETS, turretSpec } from "./calc.js";
+import { turretSpec } from "./calc.js";
 import { num } from "./core.js";
 import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
 import { curOptic } from "./optics.js";
-import { asFiredFrom, cleanAsFired } from "./link-v3.js";
+import { asFiredFrom, cleanAsFired, histSource, opticOn } from "./link-v3.js";
 import { LOG, cleanSession, nOrNull, sstr } from "./log.js";
 import { P, S, load, store, uid } from "./storage.js";
 
@@ -107,14 +107,13 @@ function velVert(s, st) {   // fast high / slow low? needs ≥3 paired, kept sho
 }
 function lenTxt(inch, u) { return u === "cm" ? `${(inch * 2.54).toFixed(1)} cm` : `${inch.toFixed(2)}\u2033`; }
 function angU(u) { return u === "MIL" ? "mil" : "MOA"; }
-function tsFor(rid) {   // the turret of the session's gun (its optic, else the gun's own setting, else the display unit)
-  const r = P.rifles.find(x => x.id === rid);
-  if (r && curRifle() === r) return turretSpec();
-  const o = r && r.opticId && (P.optics || []).find(x => x.id === r.opticId), key = o ? o.opTurret : r && r.turret;
-  const tk = o ? parseFloat(o.opTrack) : NaN, k = tk >= 0.8 && tk <= 1.2 ? tk : 1;
-  if (key && TURRETS[key]) { const [u, v, lbl] = TURRETS[key]; return { u, v, lbl, k }; }
-  if (key === "custom") { const v = parseFloat(o ? o.opTurretV : r.turretV), u = (o ? o.opTurretU : r.turretU) === "moa" ? "MOA" : "MIL"; if (v > 0) return { u, v, lbl: `${v} ${angU(u)}`, k }; }
-  return S.ang === "MOA" ? { u: "MOA", v: 0.25, lbl: "\u00bc MOA", k } : { u: "MIL", v: 0.1, lbl: "0.1 mil", k };
+function tsFor(rid, st) {   // recorded optic click value when the string has one; otherwise the current turret, never an invented click
+  const r = P.rifles.find(x => x.id === (st?.asFired?.rifleId || rid)) || null;
+  let live = null;
+  if (r && curRifle() === r) { const t = turretSpec(); if (t && t.v > 0) live = t; }
+  const h = histSource(st?.asFired, r, opticOn(P, r), live);
+  if (h.spec) return { ...h.spec, source: h.source, warning: h.warning };
+  return { u: S.ang === "MOA" ? "MOA" : "MIL", v: null, lbl: "no click value", k: 1, missing: true, source: "missing", warning: h.warning };
 }
 function tgNice(x) { const p = Math.pow(10, Math.floor(Math.log10(x))), f = x / p; return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p; }
 

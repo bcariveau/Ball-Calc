@@ -166,10 +166,11 @@ function teUp(e) {
 
 /* results per string */
 function teResults() {
-  const st = teStr(), g = teTgt(), yd = tgYd(g), ts = tsFor(ED.rifleId), U = ts.u, box = $("tgRes");
+  const st = teStr(), g = teTgt(), yd = tgYd(g), ts = tsFor(st?.asFired?.rifleId || ED.rifleId, st), U = ts.u, box = $("tgRes");
   const pts = statHoles(ED, st).map(h => hoff(st, h)), gs = grpStats(pts), u = g.u;
   if (!gs) { box.innerHTML = st.holes.length ? `<div class="hint">Marked holes are all paired to removed shots, so the group stats are empty. Restore a shot to count it again.</div>` : `<div class="hint">Results show once holes are marked.</div>`; return; }
-  const a = v => `${(v / inPerU(U, yd)).toFixed(2)} ${angU(U)}`, vv = velVert(ED, st), r = P.rifles.find(x => x.id === ED.rifleId), zr = r && parseFloat(r.zero);
+  const blocked = !(ts.v > 0);
+  const a = v => blocked ? "" : `${(v / inPerU(U, yd)).toFixed(2)} ${angU(U)}`, vv = velVert(ED, st), r = P.rifles.find(x => x.id === (st?.asFired?.rifleId || ED.rifleId)), zr = r && parseFloat(r.zero);
   const atZero = zr > 0 && Math.abs(yd - zr) <= Math.max(1, zr * 0.02), same = curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId;
   let h = `<div class="sub">Results · String ${strNo(ED.tg, st.id)} · ${fmt(g.dist, 0)} ${g.du}</div><div class="resG">`;
   h += `<div><span>Group (c-c)</span><b id="tgResES">${gs.n > 1 ? lenTxt(gs.es, u) : "—"}</b><small>${gs.n > 1 ? a(gs.es) : "needs 2+ holes"}</small></div>`;
@@ -181,12 +182,13 @@ function teResults() {
     : vv.r >= 0.7 && vv.n >= 5 ? `<b class="w">⚠ Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.`
     : vv.r >= 0.5 ? `<span class="pt">Possible velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — needs 5+ paired shots with r ≥ 0.7 to call it.</span>`
     : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
-  if (atZero && gs.n) {
+  if (blocked) h += `<div class="zc bad" id="tgZero">${escapeHtml(ts.warning || "Enter a turret click value before calculating. Nothing was invented.")}</div>`;
+  else if (atZero && gs.n) {
     const k = ts.k || 1, e1 = -gs.cy / inPerU(ts.u, yd) / k, w1 = -gs.cx / inPerU(ts.u, yd), ce = Math.round(Math.abs(e1) / ts.v), cw = Math.round(Math.abs(w1) / ts.v);   // elevation ÷ tracking factor, as the dope does
-    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
+    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}${ts.source === "current" ? ", current turret" : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>${ts.source === "current" ? escapeHtml(ts.warning) + " " : ""}Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
   } else if (gs.n > 1) {
     const vU = S.ang, need = -gs.cy / inPerU(vU, yd), d = st.dial;
-    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
+    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d, ts)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
     h += `<button type="button" id="tgTrue"${TE.atDist && same ? "" : " disabled"}>🎯 Send vertical to Truing (${gs.cy >= 0 ? "group high" : "group low"} ${lenTxt(Math.abs(gs.cy), u)} = ${need >= 0 ? "U" : "D"} ${Math.abs(need).toFixed(2)} ${angU(vU)})</button>`;
     h += `<div class="hint">${d ? `Sends dialed − offset (the elevation that would have centered the group) with this string's saved conditions and angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}Only the vertical offset is sent. Horizontal (${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}) is never sent — it's mostly wind.${same ? "" : " <b>Pick this session's gun + load on Gear to send it.</b>"}</div>`;
   }
@@ -237,7 +239,7 @@ function tgThumb(s) {
   const g = t.targets.find(q => q.id === last.tid), strs = t.strings.map((st, i) => ({ st, i })).filter(o => o.st.tid === g.id && o.st.holes.length);
   let mx = 0; const layers = strs.map(o => ({ i: o.i, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = hoff(o.st, h); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: "" }; }) }));
   const span = Math.max(2, mx * 2.4), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: "in", layers, mk: 3.2 });
-  const kept = statHoles(s, last), gs = grpStats(kept.map(h => hoff(last, h))), U = tsFor(s.rifleId).u, yd = tgYd(g);
+  const kept = statHoles(s, last), gs = grpStats(kept.map(h => hoff(last, h))), U = tsFor(s.rifleId, last).u, yd = tgYd(g);
   const size = gs && gs.n > 1 ? `${lenTxt(gs.es, g.u)} · ${(gs.es / inPerU(U, yd)).toFixed(2)} ${angU(U)}` : `${last.holes.length} hole`;
   return { svg: `<svg class="tgS th" viewBox="${sv.vb}" aria-hidden="true">${sv.html.replace(/<text[^>]*>[^<]*<\/text>/g, "")}</svg>`, size, n: gs ? gs.n : 0 };
 }

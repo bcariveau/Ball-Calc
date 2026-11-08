@@ -152,7 +152,7 @@ function mkAtmo(c) {
 function windAt(ws, dir) { return ws > 0 ? [new B.Wind({ velocity: B.UNew.MPH(ws), directionFrom: B.UNew.Degree(norm360(dir + 180)) })] : []; }
 // zeroed shot: o.mv = MV at today's powder temp (truing), o.bcScale, o.winds
 async function solveShot(o = {}) {
-  if (entryRequired()) throw new Error("Enter a turret click value before calculating. Nothing was invented.");
+  if (!o.allowBlank && entryRequired()) throw new Error("Enter a turret click value before calculating. Nothing was invented.");
   const { Calculator, Shot, Weapon, Ammo, DragModel, DragTables, UNew } = B;
   const twist = num("twist") || 0, length = num("length") || 0, k = o.bcScale || 1;
   const pts = bandsOn() ? bandPoints() : null;
@@ -162,7 +162,8 @@ async function solveShot(o = {}) {
       weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
   const Tp = o.Tp != null ? o.Tp : powderT(), zc = zeroCond(o.cond), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
   const mvNow = mvAt(Tp, base), mvZero = zc ? mvAt(num("zTemp") ?? Tp, base) : mvNow;
-  const weapon = new Weapon({ sightHeight: UNew.Inch(effSH()), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
+  const sh = o.sh != null && o.sh > 0 ? o.sh : effSH();
+  const weapon = new Weapon({ sightHeight: UNew.Inch(sh), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
   const atmo = mkAtmo(o.cond || curCond()), calc = new Calculator();
   const zShot = new Shot({ weapon, ammo: new Ammo({ dm, mv: UNew.FPS(mvZero) }), atmo: zc ? mkAtmo(zc) : atmo });
   await calc.setWeaponZero(zShot, UNew.Yard(num("zero")));
@@ -195,9 +196,11 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's own tu
   return Object.assign(s, { k: 1, up: null, sfp: null, cpt: 0, perTurn: null, optic: null });
 }
 const MOA_PER_MIL = 3.437747;
-function angs(p) {   // dial angles in the display unit (optionally rounded to whole clicks) + clicks in the turret unit; elevation dial ÷ tracking factor
-  const A = B.Angular, ts = turretSpec(), TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA, k = ts.k || 1;
+function angs(p, ts) {   // dial angles in the display unit. A passed turret is the recorded or chosen one; live dope omits it and reads the form.
+  const A = B.Angular;
+  ts = ts || turretSpec();
   if (!(ts.v > 0)) throw new Error("Enter a turret click value before calculating. Nothing was invented.");
+  const TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA, k = ts.k || 1;
   const eT = -p.dropAngle.In(TU) / k, ec = Math.round(eT / ts.v), wc = Math.round(-p.windageAngle.In(TU) / ts.v);
   let e = -p.dropAngle.In(DU) / k, w = -p.windageAngle.In(DU);
   if (S.round) { const c = ts.u === S.ang ? 1 : S.ang === "MOA" ? MOA_PER_MIL : 1 / MOA_PER_MIL; e = ec * ts.v * c; w = wc * ts.v * c; }

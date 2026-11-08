@@ -118,7 +118,7 @@ function shPaint() {
   $("shStr").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
   const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
   const gunFired = P.rifles.find(x => x.id === cur.asFired?.rifleId) || r;
-  const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired));
+  const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired), gunFired && curRifle() === gunFired ? turretSpec() : null);
   $("shFor").textContent = [r?.name, l?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
   const gun = $("shGun");
   if (gun && gun.dataset.lock !== "1") {
@@ -164,14 +164,15 @@ function shStatus() {
 }
 // vertical spread at the target from the slowest vs fastest kept shot, same zero + conditions + angle as the Dope tab
 async function shEsAt(min, max, yd) {
+  let hist = null;
   if (ED) {
-    const cur = shCurStr().cur, rifle = P.rifles.find(x => x.id === (cur?.asFired?.rifleId || ED.rifleId)) || curRifle();
-    if (calcFallback(cur?.asFired, rifle, opticOn(P, rifle)).source === "missing") return null;
-  }
-  if (entryRequired()) return null;
+    const cur = shCurStr().cur;
+    hist = tsFor(cur?.asFired?.rifleId || ED.rifleId, cur);
+    if (!(hist.v > 0)) return null;
+  } else if (entryRequired()) return null;
   if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000) || !(max > min)) return null;
   try {
-    const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    const sv = await solveShot(hist && hist.source === "as-fired" ? { allowBlank: true, winds: [], sh: hist.sh } : { winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     const fire = async v => {
       const s2 = new B.Shot({ weapon: sv.shot.weapon, ammo: new B.Ammo({ dm: sv.shot.ammo.dm, mv: B.UNew.FPS(v) }), atmo: sv.shot.atmo, winds: [] });
       if (look) s2.lookAngle = B.UNew.Degree(look);
@@ -183,19 +184,18 @@ async function shEsAt(min, max, yd) {
     return { spread, half: spread / 2, inch: Math.abs(a.height.In(B.Distance.Inch) - b.height.In(B.Distance.Inch)), yd, u: S.ang };
   } catch { return null; }
 }
-async function shDopeAt(yd, st) {   // dope strip: the string's dial (else the app's dope there) + the wind hold for the Dope-tab wind
-  const rifle = P.rifles.find(x => x.id === (st?.asFired?.rifleId || ED?.rifleId)) || curRifle();
-  const fb = calcFallback(st?.asFired, rifle, opticOn(P, rifle));
-  if (fb.source === "missing" || entryRequired()) return { yd, blocked: fb.warning || "Enter a turret click value before calculating. Nothing was invented." };
-  const ts = ED ? tsFor(ED.rifleId) : turretSpec(), o = { yd, warn: fb.warning || "" };
+async function shDopeAt(yd, st) {   // dope strip: recorded turret when the string has one; otherwise the labeled current turret
+  const ts = st ? tsFor(st.asFired?.rifleId || ED?.rifleId, st) : turretSpec();
+  if (!(ts.v > 0)) return { yd, blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
+  const o = { yd, warn: ts.warning || "" };
   if (st && st.dial) { const dv = dialView(st.dial, ts); o.elev = `${dv.txt}`; o.clk = dv.c != null ? `${Math.abs(dv.c)} clicks` : ""; o.src = st.dial.src === "app" ? "dialed" : "dialed (edited)"; }
   if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return o;
   try {
-    const sv = await solveShot(), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    const sv = await solveShot(ts.source === "as-fired" ? { allowBlank: true, sh: ts.sh } : {}), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     if (look) sv.shot.lookAngle = B.UNew.Degree(look);
     const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
     const p = r.samples[r.samples.length - 1]; if (!p) return o;
-    const a = angs(p), dd = angDec(turretSpec()), u = angU(S.ang);
+    const a = angs(p, ts), dd = angDec(ts), u = angU(S.ang);
     if (!o.elev) { o.elev = `${ud(a.e, dd)} ${u}`; o.clk = `${Math.abs(a.ec)} clicks`; o.src = "app dope"; }
     const ws = num("windSpeed") || 0;
     o.wind = `${lr(a.w, dd)} ${u}`; o.wtxt = ws ? `${fmt(ws, 1)} mph @ ${CLOCK(num("windDir") || 0)} o'clock` : "no wind";

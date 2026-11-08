@@ -1,5 +1,5 @@
 // app/js/core.js — DOM helpers ($, val/num/fmt/setVal), number + HTML formatting, compass math, dynamic-import helper. No app state.
-// Generated from the single-file app by a mechanical split; statements are verbatim. Code that runs at start-up lives in
+// Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
 const $ = id => document.getElementById(id);

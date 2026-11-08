@@ -1,5 +1,5 @@
 // app/js/recipes.js — Saved load recipes and copy-load sheets.
-// Generated from the single-file app by a mechanical split; statements are verbatim. Code that runs at start-up lives in
+// Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
 import { schedule } from "./app.js";

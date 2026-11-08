@@ -1,15 +1,16 @@
 // app/js/gear.js — Gear tab: rifle/optic/load profiles, dirty tracking, load-data summary, zero-use helpers.
-// Generated from the single-file app by a mechanical split; statements are verbatim. Code that runs at start-up lives in
+// Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
 import { schedule } from "./app.js";
 import { bandsOn, renderBulletInfo } from "./bulletdb.js";
-import { mvAdjust, powderT, zeroCond } from "./calc.js";
+import { mvAdjOn, mvAdjust, powderT, zeroCond } from "./calc.js";
 import { ctxPaint, toast } from "./components.js";
 import { $, compass, fmt, n1, n3, num, setVal, val } from "./core.js";
 import { LOG, cleanSession, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
 import { applyOptic, curOptic, effSH, paintOptic } from "./optics.js";
 import { openCopy, paintRecipeBtns } from "./recipes.js";
+import { suActive, suCheck } from "./setup.js";
 import { SH, shPendCheck } from "./shooting.js";
 import { F_DEF, LOAD_F, LONG_F, OPTIC_F, P, RANGE_F, REC_F, RIFLE_F, S, migrateGunOptic, migratePresets, savePresets, uid } from "./storage.js";
 import { applyAuto, fetchJSON, getPosition, manual, refreshWeather } from "./weather.js";
@@ -20,24 +21,26 @@ const curRifle = () => P.rifles.find(r => r.id === P.lastRifleId) || null;
 const curLoad = () => { const r = curRifle(); return r ? (r.loads.find(l => l.id === r.lastLoadId) || null) : null; };
 const curRange = () => P.ranges.find(r => r.id === P.lastRangeId) || null;
 
-function fillOptions(sel, items, cur, emptyText) {
+const ADD_V = "__add";   // the "＋ Add …" row at the bottom of the gun / load pickers
+function fillOptions(sel, items, cur, emptyText, addText) {
   sel.innerHTML = "";
   if (emptyText !== undefined) { const o = new Option(emptyText, ""); sel.add(o); }
   items.forEach(it => sel.add(new Option(it.name, it.id)));
+  if (addText) sel.add(new Option(addText, ADD_V));
   sel.value = cur ? cur.id : "";
 }
 function renderPickers() {
   if (!curRifle() && P.rifles.length) P.lastRifleId = P.rifles[0].id;
   const r = curRifle();
   if (r && !r.loads.find(l => l.id === r.lastLoadId) && r.loads.length) r.lastLoadId = r.loads[0].id;
-  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns yet (⋯ › New)");
-  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads yet (⋯ › New)" : "Add a gun first"));
+  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns yet", "＋ Add rifle…");
+  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads yet" : "Add a gun first"), r ? "＋ Add load…" : "");
   fillOptions($("rangeSel"), P.ranges, curRange(), "Current location");
   updateDirty();
 }
 function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; applyGunKind(); applyOptic(); }
 function applyGunKind() { const hg = $("gunKind").value === "handgun"; $("barrel").placeholder = hg ? "optional, e.g. 4.25" : "optional, e.g. 20"; }
-function applyLoad() { if (SH.pend) setTimeout(shPendCheck, 0); const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); }
+function applyLoad() { if (SH.pend) setTimeout(shPendCheck, 0); const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); if (moreNeeded()) $("loadDetails").open = true; }
 function applyRange() {
   const g = curRange();
   if (g) {
@@ -88,12 +91,27 @@ function updateDirty() {
   const rt = recipeText(pick(LOAD_F));
   $("loadRecipe").textContent = rt ? (val("ldKind") === "factory" ? "📦 " : "🧪 ") + rt : "";
   const ls = ldShort(pick(LOAD_F)); $("recipeSum").textContent = ls; $("recipeSum").hidden = !ls;
+  paintLoadMore(ls); paintSample();
   const b = num("bearing");
   $("rangeSum").textContent = (g ? "" : "Weather uses your phone's location. ") +
     (b != null ? `Facing ${fmt(b, 0)}° ${compass(b)}` : "No shooting direction set") +
     (val("altitude") ? ` · ${val("altitude")} ft` : "") + (val("target") ? ` · target ${val("target")} yd` : "") +
     (g && val("rangeLat") && val("rangeLon") ? ` · ${(+val("rangeLat")).toFixed(3)}, ${(+val("rangeLon")).toFixed(3)}` : "");
   paintGearExtra();
+}
+// basics-first load form: bullet, BC + drag model and MV stay on screen; the rest lives under More ▾, whose summary lists what is set
+function paintLoadMore(ls) {
+  const tw = num("twist"), parts = [val("weight") ? `${val("weight")} gr` : "", val("diameter") ? `${val("diameter")}"` : "",
+    val("length") ? `L ${val("length")}"` : (tw ? "no length (spin drift off)" : ""), val("tipLen") ? `tip ${val("tipLen")}"` : "",
+    { measured: "chrono MV", factory: "box MV", estimate: "est. MV", trued: "trued MV" }[$("mvSource").value] || "",
+    bandsOn() ? "banded G1" : "", mvAdjOn() ? `${val("ptSens")} fps/10°F` : "", ls || ""];
+  $("loadMoreSum").textContent = parts.filter(Boolean).join(" · ");
+}
+function moreNeeded() {   // More opens by itself when something in it is part of the current solution
+  return bandsOn() || mvAdjOn() || [...$("loadDetails").querySelectorAll("input.bad, select.bad")].length > 0;
+}
+function paintSample() {
+  suCheck(); const r = curRifle(); $("sampleNote").hidden = !(r && r.sample) || suActive();
 }
 function ldShort(o) {   // Gear row subline: "Varget · 44.5 gr" / "Federal Gold Medal Match"
   if (!o) return "";
@@ -148,7 +166,7 @@ function openPk(k) {
 }
 function closePk() { $("pkMenu").classList.remove("show"); }
 function paintGearExtra() {
-  const oN = !!curOptic(), t = $("turret").value === "custom" && !oN; $("turretCustom").hidden = !t; $("turretCustomU").hidden = !t;
+  const oN = !!curOptic(), t = $("turret").value === "custom" && !oN; $("turretCustom").hidden = !t; $("turretCustomU").hidden = true;   // unit = the MOA | MIL switch
   paintOptic();
   const zc = zeroCond();
   $("zeroSum").textContent = zc ? [num("zTemp") != null ? `${val("zTemp")}°F` : "", num("zHum") != null ? `${val("zHum")}%` : "", num("zAlt") != null ? `${val("zAlt")} ft` : "", num("zPress") != null ? `${val("zPress")} inHg` : ""].filter(Boolean).join(" · ") : "same as today";
@@ -157,10 +175,16 @@ function paintGearExtra() {
 
 export function init1() {
   SNAP_F = ["loadName", "gunName", "gunKind", "bulletName", "weight", "bc", "drag", "mv", "diameter", "ptSens", "mvTemp", "mvAdj", ...REC_F];
+  // a nested panel under More (Load data, MV estimate) opening from code or a link opens More too
+  ["recipeDetails", "mvEstBox"].forEach(id => $(id).addEventListener("toggle", () => { if ($(id).open) $("loadDetails").open = true; }));
   $("ldKindSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; $("ldKind").value = b.dataset.v; paintLdKind(); updateDirty(); });
 
-  $("rifleSel").onchange = e => { P.lastRifleId = e.target.value; applyRifle(); renderPickers(); applyLoad(); savePresets(); updateDirty(); schedule(); };
-  $("loadSel").onchange = e => { const r = curRifle(); if (r) r.lastLoadId = e.target.value; applyLoad(); savePresets(); updateDirty(); schedule(); };
+  $("rifleSel").onchange = e => { if (e.target.value === ADD_V) { e.target.value = curRifle()?.id || ""; const n0 = P.rifles.length; $("rifleNew").click(); if (P.rifles.length > n0) $("rifleDetails").open = true; return; }
+    P.lastRifleId = e.target.value; const r = curRifle();
+    if (r?.lastOpticId && (P.optics || []).some(o => o.id === r.lastOpticId)) r.opticId = r.lastOpticId;
+    applyRifle(); renderPickers(); applyLoad(); savePresets(); updateDirty(); schedule(); };
+  $("loadSel").onchange = e => { if (e.target.value === ADD_V) { e.target.value = curLoad()?.id || ""; $("loadNew").click(); return; }
+    const r = curRifle(); if (r) r.lastLoadId = e.target.value; applyLoad(); savePresets(); updateDirty(); schedule(); };
   $("rangeSel").onchange = e => { P.lastRangeId = e.target.value || null; applyRange(); savePresets(); updateDirty(); refreshWeather(); schedule(); };
   $("rifleNew").onclick = () => { const n = askName("Name for the new gun (starts from the gun details on screen):", ""); if (!n) return;
     const r = { id: uid(), name: n, ...pick(RIFLE_F), loads: [] };
@@ -169,9 +193,9 @@ export function init1() {
   $("rifleDup").onclick = () => { const r = curRifle(); if (!r) return;
     const c = JSON.parse(JSON.stringify(r)); c.id = uid(); let n = `${r.name} (copy)`.slice(0, 60), k = 2; while (P.rifles.some(x => x.name === n)) n = `${r.name} (copy ${k++})`.slice(0, 60); c.name = n;
     c.loads.forEach(l => { const nid = uid(); if (l.id === r.lastLoadId) c.lastLoadId = nid; l.id = nid; });
-    c.opticId = null; delete c.zeroUnconf;
+    c.opticId = null; delete c.zeroUnconf; delete c.sample;
     P.rifles.push(c); P.lastRifleId = c.id; pkRefresh(); toast(`Duplicated as “${n}” (${c.loads.length} load${c.loads.length === 1 ? "" : "s"}; chrono sessions stay with the original)`); };
-  $("rifleRename").onclick = () => { const r = curRifle(); if (!r) return; const n = askName("Rename gun:", r.name); if (!n) return; r.name = n; savePresets(); renderPickers(); flashSaved("rifle"); };
+  $("rifleRename").onclick = () => { const r = curRifle(); if (!r) return; const n = askName("Rename gun:", r.name); if (!n) return; r.name = n; if (r.sample) { delete r.sample; if (P.setup !== "done") P.setup = "done"; paintSample(); } savePresets(); renderPickers(); flashSaved("rifle"); };
   $("rifleDel").onclick = () => { const r = curRifle(); if (!r || !confirm(`Delete gun “${r.name}” and its ${r.loads.length} load(s)?\nChrono sessions are kept as unassigned.`)) return;
     const i = P.rifles.indexOf(r); P.rifles.splice(i, 1); P.lastRifleId = P.rifles[0]?.id || null; pkRefresh();
     toast(`Gun “${r.name}” deleted`, { label: "Undo", fn: () => { P.rifles.splice(Math.min(i, P.rifles.length), 0, r); P.lastRifleId = r.id; pkRefresh(); toast(`Gun “${r.name}” restored`); } }); };
@@ -223,7 +247,7 @@ export function init1() {
       if (!d || !Array.isArray(d.rifles)) throw new Error("not a presets file");
       const str = (v, n = 40) => v == null ? "" : String(v).slice(0, n);
       const rifles = d.rifles.filter(r => r && r.name).map(r => ({ id: str(r.id) || uid(), name: String(r.name).slice(0, 60),
-        ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null, opticId: str(r.opticId) || null,
+        ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null, lastOpticId: str(r.lastOpticId) || null, opticId: str(r.opticId) || null,
         ...(r.zeroUnconf && typeof r.zeroUnconf === "object" ? { zeroUnconf: { why: str(r.zeroUnconf.why, 120), at: str(r.zeroUnconf.at) } } : {}),
         loads: (Array.isArray(r.loads) ? r.loads : []).filter(l => l && l.name).map(l => ({ id: str(l.id) || uid(), name: String(l.name).slice(0, 60),
           ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k], LONG_F[k])])) })) }));
@@ -252,4 +276,4 @@ export function init2() {
   $("roundClk").checked = !!S.round;
 }
 
-export { curRifle, curLoad, curRange, fillOptions, renderPickers, applyRifle, applyGunKind, applyLoad, applyRange, same, isDirty, formFor, savedT, autosave, flashSaved, updateDirty, ldShort, recipeText, SNAP_F, recipeSnapshot, cleanRecipe, paintLdKind, askName, pick, pkRefresh, openPk, closePk, paintGearExtra };
+export { ADD_V, paintLoadMore, moreNeeded, paintSample, curRifle, curLoad, curRange, fillOptions, renderPickers, applyRifle, applyGunKind, applyLoad, applyRange, same, isDirty, formFor, savedT, autosave, flashSaved, updateDirty, ldShort, recipeText, SNAP_F, recipeSnapshot, cleanRecipe, paintLdKind, askName, pick, pkRefresh, openPk, closePk, paintGearExtra };

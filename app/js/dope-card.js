@@ -1,5 +1,5 @@
 // app/js/dope-card.js — Printable dope card view.
-// Generated from the single-file app by a mechanical split; statements are verbatim. Code that runs at start-up lives in
+// Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
 import { B, lastRun, mvAdjOn, solveShot, turretSpec, validate, windAt } from "./calc.js";

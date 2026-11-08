@@ -38,3 +38,23 @@
   #dcPrint.wrist { width: 3.4in; } #dcPrint.full { width: 100%; }
 }
 
+/* first-run setup card (new-user round) */
+#suWrap { margin: 0 0 12px; }
+#suCard { margin-bottom: 0; }
+#suCard h2 { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; }
+#suCard .suStep { font-size: 0.78rem; font-weight: 500; color: var(--muted); }
+#suCard .suDots { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0 0 10px; }
+#suCard .suDots li { flex: 1 1 0; min-width: 0; padding-top: 5px; border-top: 3px solid var(--border); font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#suCard .suDots li.done { border-top-color: var(--accent); }
+#suCard .suDots li.on { border-top-color: var(--accent); color: var(--text); font-weight: 700; }
+#suCard .suPane { border: 0; margin: 0; padding: 0; min-width: 0; }
+#suCard .suPane[hidden] { display: none; }
+#suCard .suSeg { display: flex; } #suCard .suSeg button { flex: 1 1 0; font-size: 0.95rem; }
+#suCard #suDb { margin-bottom: 4px; }
+#suCard .suNav { margin-top: 12px; flex-wrap: nowrap; }
+#suCard .suNav button { flex: 1 1 0; margin: 0; }
+#suCard .suNav #suBack { flex: 0 0 34%; }
+#suCard .suNav #suBack[hidden] { display: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+button.linkBtn { display: block; width: auto; margin: 2px auto 0; padding: 0 12px; background: none; border: 0; color: var(--accent); font-size: 0.85rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; min-height: 44px; }
+#dopeCard .dcDist .stepper.plain input { cursor: text; }

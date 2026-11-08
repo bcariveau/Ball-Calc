@@ -17,7 +17,7 @@
  * (The page also asks this worker to compare the cached page and every module with the network, so a forgotten bump
  *  still shows the banner.)
  */
-const VERSION = "2026-11-01.2";
+const VERSION = "2026-11-08.6";
 
 const PREFIX = "ballcalc-main-";
 const CACHE = PREFIX + VERSION;
@@ -47,6 +47,7 @@ const MODULES = [
   "app/js/dope.js",
   "app/js/gear.js",
   "app/js/hooks.js",
+  "app/js/link-v3.js",
   "app/js/log-import.js",
   "app/js/log.js",
   "app/js/main.js",
@@ -56,6 +57,7 @@ const MODULES = [
   "app/js/reassign.js",
   "app/js/recipes.js",
   "app/js/sensors.js",
+  "app/js/setup.js",
   "app/js/shooting.js",
   "app/js/shot-banner.js",
   "app/js/storage.js",

@@ -1,5 +1,5 @@
 // app/js/radar.js — Bluetooth radar (Athlon Rangecraft Velocity PRO): the pure RADAR-PARSER block and the live connection.
-// Generated from the single-file app by a mechanical split; statements are verbatim. Code that runs at start-up lives in
+// Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
 import { toast } from "./components.js";

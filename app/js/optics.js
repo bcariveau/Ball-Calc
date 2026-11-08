@@ -1,5 +1,5 @@
 // app/js/optics.js — Optics: attach-an-optic sheet, units following the optic, zero prompt, hints.
-// Generated from the single-file app by a mechanical split; statements are verbatim. Code that runs at start-up lives in
+// Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
 import { schedule } from "./app.js";
@@ -18,12 +18,31 @@ function curOptic() { const r = curRifle(); return r && r.opticId ? (P.optics ||
 function effSH() { return curOptic() && num("opSH") != null ? num("opSH") : num("sightHeight"); }   // optic/mount first, gun field = fallback
 var unitFollowed = null;
 function paintSeg(id, key) { $(id).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === S[key])); }
-function followUnits(force) {   // display unit follows the optic's reticle when the optic on screen changes (the MOA/MIL toggle still works for the session)
-  const o = curOptic(); if (!o) { unitFollowed = null; return; }
-  if (!force && unitFollowed === o.id) return; unitFollowed = o.id;
-  const u = $("opReticle").value === "moa" ? "MOA" : "MIL";
-  if (S.ang !== u) { S.ang = u; paintSeg("angSeg", "ang"); saveSettings(); if (lastRun) renderAll(); }
+function followUnits(force) {   // the Dope MOA/MIL toggle only changes how numbers read; it defaults to the turret's unit whenever the gun,
+  // optic or turret on screen changes (the toggle still works for the session). Clicks always use the turret unit.
+  const r = curRifle(); if (!r) { unitFollowed = null; return; }
+  const o = curOptic(), spec = turretSpec(), u = spec.u, key = `${r.id}|${o ? o.id : ""}|${u}`;
+  if (!(spec.v > 0)) return;
+  if (!force && unitFollowed === key) return; unitFollowed = key;
+  if (S.ang !== u && (u === "MIL" || u === "MOA")) { S.ang = u; paintSeg("angSeg", "ang"); saveSettings(); if (lastRun) renderAll(); }
 }
+// turret pickers (gun with no optic + optic): a MOA | MIL unit switch, then the click value for that unit
+const TU_DEF = { mil: "0.1mil", moa: "0.25moa" };
+const tuUnit = (sel, uSel) => { const v = $(sel).value; return v === "custom" ? ($(uSel).value === "moa" ? "moa" : "mil") : /moa/.test(v) ? "moa" : "mil"; };
+function paintTurretPick(sel, uSel, seg) {
+  const u = tuUnit(sel, uSel);
+  [...$(sel).options].forEach(op => { const off = op.value !== "custom" && (/moa/.test(op.value) ? "moa" : "mil") !== u; op.hidden = off; op.disabled = off;
+    if (op.value === "custom") op.textContent = `Custom ${u === "moa" ? "MOA" : "mil"} value…`; });
+  $(seg).querySelectorAll("button").forEach(b => { const on = b.dataset.v === u; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+}
+function setTurretUnit(sel, uSel, seg, u) {
+  if (tuUnit(sel, uSel) === u) return;
+  if ($(sel).value === "custom") $(uSel).value = u; else $(sel).value = TU_DEF[u];
+  paintTurretPick(sel, uSel, seg);
+  const el = $(sel).value === "custom" ? $(uSel) : $(sel);
+  el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
+}
+function paintTurrets() { paintTurretPick("turret", "turretU", "turretUSeg"); paintTurretPick("opTurret", "opTurretU", "opTurretUSeg"); }
 function applyOptic() {
   const o = curOptic();
   OPTIC_F.forEach(f => setVal(f, o ? ((o[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : o[f]) : (F_DEF[f] || "")));
@@ -39,7 +58,8 @@ function renderOpticSel() {
 function paintOptic() {
   const r = curRifle(), o = curOptic(), ts = turretSpec(), tu = ts.u === "MIL" ? "mil" : "MOA";
   $("opticPk").hidden = !r; $("opticBody").hidden = !o;
-  const c = $("opTurret").value === "custom"; $("opTurretCustom").hidden = !o || !c; $("opTurretCustomU").hidden = !o || !c;
+  const c = $("opTurret").value === "custom"; $("opTurretCustom").hidden = !o || !c; $("opTurretCustomU").hidden = true;   // the unit comes from the MOA | MIL switch
+  paintTurrets();
   $("opMagRow").hidden = $("opFP").value !== "SFP";
   document.querySelectorAll("#opticBody .u2").forEach(e => e.textContent = `(${tu})`);
   $("opticSum").textContent = o ? [`${ts.lbl} turret`, `${$("opReticle").value === "moa" ? "MOA" : "MIL"} reticle`, ts.sfp ? `SFP (true at ${fmt(ts.sfp, 1)}×)` : $("opFP").value,
@@ -61,7 +81,7 @@ function attachOptic(oid, fresh) {   // fresh = optic just created for this gun 
   const prev = r.opticId ? P.optics.find(x => x.id === r.opticId) : null;
   const snap = { rO: r.opticId || null, rZ: r.zeroUnconf, oZ: other?.zeroUnconf, up: o.opUp, re: o.opUpRe, sh: o.opSH, pUp: prev?.opUp, pRe: prev?.opUpRe };
   if (other) { other.opticId = null; flagZero(other, `optic “${o.name}” moved to “${r.name}”`); }
-  r.opticId = oid;
+  r.opticId = oid; r.lastOpticId = oid;
   if (!String(o.opSH ?? "").trim() && r.sightHeight) o.opSH = r.sightHeight;
   const upGone = !fresh && clearUp(o, true); if (prev) clearUp(prev);
   const ask = !prev && !other;   // first optic on a gun that had none → ask once instead of flagging
@@ -119,17 +139,19 @@ function paintRO() {
   const ro = (row, on, txt) => { $(row + "Ro").hidden = !on; $(row + "RoL").hidden = !on; if (on) $(row + "Ro").innerHTML = txt; };
   ro("gunSH", shO, shO ? `<span>${escapeHtml(val("opSH"))}"</span><small title="From the optic “${escapeHtml(o.name)}”; the gun's own value is kept as the fallback">gun's ${escapeHtml(val("sightHeight") || "—")}"</small>` : "");
   ro("gunTurret", !!o, o ? `<span>${escapeHtml(ts.lbl)}</span><small>from “${escapeHtml(o.name)}”</small>` : "");
-  $("sightHeight").hidden = shO; $("turret").hidden = !!o;
+  $("sightHeight").hidden = shO; $("turret").hidden = !!o; $("turretUSeg").hidden = !!o;
   if (o) { $("turretCustom").hidden = true; $("turretCustomU").hidden = true; }
 }
 
 export function init1() {
+  $("turretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("turret", "turretU", "turretUSeg", b.dataset.v); });
+  $("opTurretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("opTurret", "opTurretU", "opTurretUSeg", b.dataset.v); });
   $("opticSel").onchange = e => { const v = e.target.value; if (!v) detachOptic(); else if (attachOptic(v) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); };
   $("opNew").onclick = () => {
     const r = curRifle(); if (!r) return; const n = askName("Name for the new optic (e.g. Razor 4.5-27):", `${r.name} scope`); if (!n) return;
     const cur = curOptic(), gt = $("turret").value, base = cur ? pick(OPTIC_F) : {
-      opTurret: gt || (S.ang === "MIL" ? "0.1mil" : "0.25moa"), opTurretV: val("turretV"), opTurretU: $("turretU").value || "mil",
-      opReticle: (gt === "custom" ? $("turretU").value === "moa" : gt ? /moa/.test(gt) : S.ang === "MOA") ? "moa" : "mil", opFP: "FFP", opSH: val("sightHeight") };
+      opTurret: gt || (turretSpec().u === "MIL" ? "0.1mil" : "0.25moa"), opTurretV: val("turretV"), opTurretU: $("turretU").value || "mil",
+      opReticle: (gt === "custom" ? $("turretU").value === "moa" : gt ? /moa/.test(gt) : turretSpec().u === "MOA") ? "moa" : "mil", opFP: "FFP", opSH: val("sightHeight") };
     const o = { id: uid(), name: n, ...Object.fromEntries(OPTIC_F.map(f => [f, base[f] ?? ""])), opUp: "" };
     P.optics.push(o); const at = attachOptic(o.id, true); followUnits(true); if (at !== "ask") toast(`Optic “${n}” added to “${r.name}”`);
   };
@@ -160,4 +182,4 @@ export function init2() {
   document.addEventListener("keydown", e => { if (e.key === "Escape" && $("zpDlg").classList.contains("show")) { e.stopImmediatePropagation(); answerZero(false); } }, true);
 }
 
-export { curOptic, effSH, unitFollowed, paintSeg, followUnits, applyOptic, renderOpticSel, paintOptic, flagZero, attachOptic, clearUp, detachOptic, ZP, askZero, answerZero, paintShHint, paintUpNote, paintRO };
+export { TU_DEF, tuUnit, paintTurretPick, setTurretUnit, paintTurrets, curOptic, effSH, unitFollowed, paintSeg, followUnits, applyOptic, renderOpticSel, paintOptic, flagZero, attachOptic, clearUp, detachOptic, ZP, askZero, answerZero, paintShHint, paintUpNote, paintRO };

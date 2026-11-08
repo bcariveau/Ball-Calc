@@ -7,6 +7,7 @@
 #shView.show { display: flex; }
 body.shOn { overflow: hidden; }
 body.shOn #tabBar, body.shOn #shotBan { display: none !important; }
+#shGun { max-width: 9rem; margin-top: 2px; font-size: 0.75rem; min-height: 32px; }
 #shView button { margin: 0; }
 .shTop { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 .shTop #shExit { flex: 0 0 auto; }

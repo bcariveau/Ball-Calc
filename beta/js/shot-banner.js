@@ -21,9 +21,9 @@ function banPaint() {
   const t = tgView(s), sid = strOf(s, x), rd = readings(s, sid), st = shotStats(rd), k = rd.indexOf(x) + 1;
   $("sbV").textContent = fpsT(x.v);
   $("sbN").textContent = `Shot ${k} · String ${strNo(t, sid)} · Target ${tgtLetter(t, t.strings.find(q => q.id === sid).tid)}`;
-  $("sbSt").textContent = st.n ? `avg ${fpsT(st.avg)} · ES ${st.n > 1 ? fpsT(st.es) : "—"} · SD ${st.n > 1 ? st.sd.toFixed(1) : "—"}${st.n < rd.length ? ` · ${rd.length - st.n} discarded` : ""}` : "no kept shots";
+  $("sbSt").textContent = st.n ? `avg ${fpsT(st.avg)} · ES ${st.n > 1 ? fpsT(st.es) : "—"} · SD ${st.n > 1 ? st.sd.toFixed(1) : "—"}${st.n < rd.length ? ` · ${rd.length - st.n} removed` : ""}` : "no kept shots";
   el.querySelectorAll("#sbActs button[data-a]").forEach(b => { const a = b.dataset.a; if (a === "mark") { b.hidden = !t.mark; return; }
-    const on = !!x[a]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (a === "x") b.textContent = on ? "↺ Restore" : "Discard"; });
+    const on = !!x[a]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (a === "x") b.textContent = on ? "↺ Restore" : "Remove"; });
   el.classList.toggle("dis", !!x.x);
   const dock = banDocked();
   if (dock && el.parentElement !== $("sbDock")) $("sbDock").appendChild(el);

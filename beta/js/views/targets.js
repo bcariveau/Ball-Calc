@@ -13,6 +13,7 @@ export const targetEditor = `<div id="tgEd" class="ovl" role="dialog" aria-modal
   </div>
   <div class="seg" id="tgMode" role="group" aria-label="Marking mode"><button type="button" data-v="aim">⊕ Aim point</button><button type="button" data-v="hole">● Holes</button><button type="button" data-v="meas">📏 Measure</button></div>
   <div id="tgTip"></div>
+  <div id="tgHoleNote" class="hint"></div>
   <div id="tgZbar" role="group" aria-label="Zoom"><button type="button" id="tgZout" aria-label="Zoom out" disabled>－</button><span id="tgZoomT">×1</span><button type="button" id="tgZin" aria-label="Zoom in">＋</button><button type="button" id="tgZfit" disabled>Fit</button><span class="zh">Pinch to zoom · two fingers to pan</span></div>
   <div id="tgWrap"><svg id="tgSvg" viewBox="-6 -6 12 12" role="img" aria-label="Target sheet: tap to mark"></svg><div id="tgLoupe" hidden><svg id="tgLoupeSvg" viewBox="0 0 1 1" aria-hidden="true"></svg></div></div>
   <div id="tgTools"><button type="button" class="sm ghost" id="tgUndo" disabled>↶ Undo</button><input type="text" inputmode="decimal" id="tgAddV" placeholder="fps (optional)" aria-label="Velocity for the added shot (optional)"><button type="button" class="sm ghost" id="tgAddShot">＋ Add shot</button></div>

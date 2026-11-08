@@ -43,8 +43,22 @@ function validate() {
 /* ---------------- ballistics ---------------- */
 let B = null;
 let calcSeq = 0;
+function entryRequired() {
+  const o = curOptic();
+  if (o) { const t = $("opTurret").value; if (t === "custom") return !(num("opTurretV") > 0); return !TURRETS[t]; }
+  const t = $("turret").value;
+  if (!t) return true;
+  if (t === "custom") return !(num("turretV") > 0);
+  return !TURRETS[t];
+}
 async function calculate() {
   if (!B) return;
+  if (entryRequired()) {
+    statusEl.textContent = "Enter a turret click value before calculating. Nothing was invented."; statusEl.classList.add("bad");
+    if ($("rifleDetails")) $("rifleDetails").open = true;
+    noResult();
+    return;
+  }
   const bad = validate();
   if (bad.length) {
     statusEl.textContent = `Fix ${bad.length} highlighted field${bad.length > 1 ? "s" : ""} to calculate.`; statusEl.classList.add("bad");
@@ -137,20 +151,35 @@ function mkAtmo(c) {
 // js-ballistics: 0° = wind from behind (tailwind), 90° = from shooter's left. So add 180°.
 function windAt(ws, dir) { return ws > 0 ? [new B.Wind({ velocity: B.UNew.MPH(ws), directionFrom: B.UNew.Degree(norm360(dir + 180)) })] : []; }
 // zeroed shot: o.mv = MV at today's powder temp (truing), o.bcScale, o.winds
+function loadNum(L, key) {
+  if (!L || L[key] == null || String(L[key]).trim() === "") return null;
+  const n = parseFloat(L[key]);
+  return isFinite(n) ? n : null;
+}
 async function solveShot(o = {}) {
+  if (!o.allowBlank && entryRequired()) throw new Error("Enter a turret click value before calculating. Nothing was invented.");
   const { Calculator, Shot, Weapon, Ammo, DragModel, DragTables, UNew } = B;
-  const twist = num("twist") || 0, length = num("length") || 0, k = o.bcScale || 1;
-  const pts = bandsOn() ? bandPoints() : null;
+  const L = o.load && typeof o.load === "object" ? o.load : null;
+  const twist = o.twist != null ? o.twist : (num("twist") || 0), length = loadNum(L, "length") != null ? loadNum(L, "length") : (num("length") || 0), k = o.bcScale || 1;
+  const bc = loadNum(L, "bc") != null ? loadNum(L, "bc") : num("bc");
+  const weight = loadNum(L, "weight") != null ? loadNum(L, "weight") : num("weight");
+  const diameter = loadNum(L, "diameter") != null ? loadNum(L, "diameter") : num("diameter");
+  const drag = L && L.drag ? (/g1/i.test(L.drag) ? "G1" : "G7") : $("drag").value;
+  const pts = L ? null : (bandsOn() ? bandPoints() : null);
   const dm = pts ? B.DragModelMultiBC({ bcPoints: pts.map(p => new B.BCPoint({ BC: p.bc * k, V: UNew.FPS(p.v) })), dragTable: DragTables.G1,
-      weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) })
-    : new DragModel({ bc: num("bc") * k, dragTable: $("drag").value === "G1" ? DragTables.G1 : DragTables.G7,
-      weight: UNew.Grain(num("weight")), diameter: UNew.Inch(num("diameter")), length: UNew.Inch(length) });
-  const Tp = o.Tp != null ? o.Tp : powderT(), zc = zeroCond(o.cond), base = o.mv != null ? chronoFrom(o.mv, Tp) : num("mv");
-  const mvNow = mvAt(Tp, base), mvZero = zc ? mvAt(num("zTemp") ?? Tp, base) : mvNow;
-  const weapon = new Weapon({ sightHeight: UNew.Inch(effSH()), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
+      weight: UNew.Grain(weight), diameter: UNew.Inch(diameter), length: UNew.Inch(length) })
+    : new DragModel({ bc: bc * k, dragTable: drag === "G1" ? DragTables.G1 : DragTables.G7,
+      weight: UNew.Grain(weight), diameter: UNew.Inch(diameter), length: UNew.Inch(length) });
+  const Tp = o.Tp != null ? o.Tp : powderT(), zc = zeroCond(o.cond);
+  const sens = L ? loadNum(L, "ptSens") : num("ptSens"), t0 = L ? loadNum(L, "mvTemp") : num("mvTemp");
+  const recordedMv = loadNum(L, "mv");
+  const base = o.mv != null ? (sens && t0 != null && Tp != null ? o.mv - sens / 10 * (Tp - t0) : o.mv) : (recordedMv != null ? recordedMv : num("mv"));
+  const mvNow = mvAdjust(base, sens, t0, Tp), mvZero = zc ? mvAdjust(base, sens, t0, num("zTemp") ?? Tp) : mvNow;
+  const sh = o.sh != null && o.sh > 0 ? o.sh : effSH();
+  const weapon = new Weapon({ sightHeight: UNew.Inch(sh), ...(twist ? { twist: UNew.Inch(twist) } : {}) });
   const atmo = mkAtmo(o.cond || curCond()), calc = new Calculator();
   const zShot = new Shot({ weapon, ammo: new Ammo({ dm, mv: UNew.FPS(mvZero) }), atmo: zc ? mkAtmo(zc) : atmo });
-  await calc.setWeaponZero(zShot, UNew.Yard(num("zero")));
+  await calc.setWeaponZero(zShot, UNew.Yard(o.zero != null ? o.zero : num("zero")));
   const ammo = new Ammo({ dm, mv: UNew.FPS(mvNow) });
   const shot = new Shot({ weapon, ammo, atmo, winds: o.winds ?? windAt(num("windSpeed"), num("windDir")) });
   const withWind = (w, look) => { const s2 = new Shot({ weapon, ammo, atmo, winds: w }); if (look) s2.lookAngle = UNew.Degree(look); return s2; };
@@ -164,7 +193,7 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's own tu
     const t = $("opTurret").value, ret = $("opReticle").value === "moa" ? "MOA" : "MIL";
     if (t === "custom") { const v = num("opTurretV"), u = $("opTurretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) s = { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
     else if (TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; s = { u, v, lbl }; }
-    if (!s) s = ret === "MIL" ? { u: "MIL", v: 0.1, lbl: "0.1 mil" } : { u: "MOA", v: 0.25, lbl: "¼ MOA" };
+    if (!s) return { u: ret, v: null, lbl: "no click value", k: 1, optic: o, perTurn: null, cpt: 0, up: null, upSet: false, sfp: null, missing: true };
     const tk = num("opTrack"); s.k = tk >= 0.8 && tk <= 1.2 ? tk : 1; s.optic = o;
     s.perTurn = num("opTurn") > 0 ? num("opTurn") : null; s.cpt = s.perTurn ? Math.round(s.perTurn / s.v) : 0;
     const tr = num("opTravel"), cant = num("opCant") || 0, cantT = s.u === "MIL" ? cant / 3.437747 : cant;
@@ -176,12 +205,15 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's own tu
   const t = $("turret").value;
   if (t === "custom") { const v = num("turretV"), u = $("turretU").value === "moa" ? "MOA" : "MIL"; if (v > 0) s = { u, v, lbl: `${fmt(v, 3)} ${u === "MIL" ? "mil" : "MOA"}` }; }
   if (!s && TURRETS[t]) { const [u, v, lbl] = TURRETS[t]; s = { u, v, lbl }; }
-  if (!s) s = /moa/.test(t) || (t === "custom" && $("turretU").value === "moa") ? { u: "MOA", v: 0.25, lbl: "¼ MOA" } : { u: "MIL", v: 0.1, lbl: "0.1 mil" };   // only a custom turret with no value lands here (a field error)
+  if (!s) return { u: "", v: null, lbl: "no click value", k: 1, up: null, sfp: null, cpt: 0, perTurn: null, optic: null, missing: true };
   return Object.assign(s, { k: 1, up: null, sfp: null, cpt: 0, perTurn: null, optic: null });
 }
 const MOA_PER_MIL = 3.437747;
-function angs(p) {   // dial angles in the display unit (optionally rounded to whole clicks) + clicks in the turret unit; elevation dial ÷ tracking factor
-  const A = B.Angular, ts = turretSpec(), TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA, k = ts.k || 1;
+function angs(p, ts) {   // dial angles in the display unit. A passed turret is the recorded or chosen one; live dope omits it and reads the form.
+  const A = B.Angular;
+  ts = ts || turretSpec();
+  if (!(ts.v > 0)) throw new Error("Enter a turret click value before calculating. Nothing was invented.");
+  const TU = ts.u === "MIL" ? A.MRad : A.MOA, DU = S.ang === "MIL" ? A.MRad : A.MOA, k = ts.k || 1;
   const eT = -p.dropAngle.In(TU) / k, ec = Math.round(eT / ts.v), wc = Math.round(-p.windageAngle.In(TU) / ts.v);
   let e = -p.dropAngle.In(DU) / k, w = -p.windageAngle.In(DU);
   if (S.round) { const c = ts.u === S.ang ? 1 : S.ang === "MOA" ? MOA_PER_MIL : 1 / MOA_PER_MIL; e = ec * ts.v * c; w = wc * ts.v * c; }
@@ -223,4 +255,4 @@ export async function init() {
   }
 }
 
-export { RULES, validate, B, calcSeq, calculate, lastRun, pointVals, windHoldAt, powderT, mvAdjust, mvAdjOn, mvAt, chronoFrom, curCond, zeroCond, mkAtmo, windAt, solveShot, TURRETS, turretSpec, MOA_PER_MIL, angs, angDec, clkTxt, clkShort, perMph, TIPPED, millerSG, set_lastRun };
+export { RULES, validate, B, calcSeq, calculate, entryRequired, lastRun, pointVals, windHoldAt, powderT, mvAdjust, mvAdjOn, mvAt, chronoFrom, curCond, zeroCond, mkAtmo, windAt, solveShot, TURRETS, turretSpec, MOA_PER_MIL, angs, angDec, clkTxt, clkShort, perMph, TIPPED, millerSG, set_lastRun };

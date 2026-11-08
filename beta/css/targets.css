@@ -5,7 +5,9 @@ html[data-theme=night] { --s1: #ff3b2f; --s2: #ff8a5c; --s3: #ffb199; --s4: #ff6
 .ms.s1 { fill: var(--s1); } .ms.s2 { fill: var(--s2); } .ms.s3 { fill: var(--s3); } .ms.s4 { fill: var(--s4); } .ms.s5 { fill: var(--s5); } .ms.s6 { fill: var(--s6); }
 .mr.s1 { stroke: var(--s1); } .mr.s2 { stroke: var(--s2); } .mr.s3 { stroke: var(--s3); } .mr.s4 { stroke: var(--s4); } .mr.s5 { stroke: var(--s5); } .mr.s6 { stroke: var(--s6); }
 .ms polygon, .ms rect, .ms circle { stroke: var(--card); stroke-width: 1px; vector-effect: non-scaling-stroke; }
-.ms.dim, .aim.dim { opacity: 0.35; }
+.ms.dim, .aim.dim, svg .hole.rm { opacity: 0.35; }
+svg .hole.unk .ms { fill: none; }
+svg .hole.unk .ms circle, svg .hole.unk .ms polygon, svg .hole.unk .ms rect { stroke: var(--muted); stroke-dasharray: 1.5 1; }
 svg .mr { fill: none; stroke-width: 1.6px; stroke-dasharray: 3 2; }
 svg .selr { fill: none; stroke: var(--accent); stroke-width: 3px; }
 svg .hn { fill: var(--text); font-weight: 700; paint-order: stroke; stroke: var(--card); stroke-width: 3px; vector-effect: non-scaling-stroke; }

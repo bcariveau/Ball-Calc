@@ -3,15 +3,16 @@
 // init*() and is called by main.js in the original order.
 
 import { setTab } from "./app.js";
-import { B, angDec, angs, lastRun, solveShot, turretSpec } from "./calc.js";
+import { B, angDec, angs, entryRequired, lastRun, solveShot, turretSpec } from "./calc.js";
 import { shBtnPaint, toast } from "./components.js";
-import { $, escapeHtml, fmt, num } from "./core.js";
+import { $, escapeHtml, fmt, num, val } from "./core.js";
 import { CLOCK, lr, ud } from "./dope.js";
-import { curLoad, curRifle } from "./gear.js";
+import { applyLoad, applyRifle, curLoad, curRifle } from "./gear.js";
+import { calcFallback, histLoad, opticOn, recallFirearm } from "./link-v3.js";
 import { ED, LOG, addVelocities, closeEditor, commitEditor, curKeyIds, edDirty, openEditor, renderEditor, set_edDirty, shotStats } from "./log.js";
 import { RD, hasBT } from "./radar.js";
 import { banHide, wakeSync } from "./shot-banner.js";
-import { P, S } from "./storage.js";
+import { P, S, savePresets } from "./storage.js";
 import { dialView, tgAutoDial, tgNewString, tgSame } from "./strings.js";
 import { closeTgEd, openTgEd } from "./target-editor.js";
 import { LIVE, angU, fpsT, readings, strNo, tgDefDist, tgEnsure, tgYd, tgtLetter, tsFor, unpair } from "./targets.js";
@@ -109,21 +110,28 @@ function shDevCls(v, kept) {
 }
 function shDevWord(c) { return c === "dvB" ? "far off the average" : c === "dvW" ? "off the average" : ""; }
 function shSigned(n) { return n == null ? "" : (n >= 0 ? "+" : "−") + Math.abs(n); }
-function shTags(s) { return [s.cold && "Cold", s.clean && "Clean", s.fl && "Flier", s.note && "✎ " + s.note].filter(Boolean).join(" · "); }
+function shTags(s) { return [s.clean && "Clean", s.cold && "Cold bore", s.fl && "Flier", s.ie && "Input error", s.note && "✎ " + s.note].filter(Boolean).join(" · "); }
 function shPaint() {
   if (!SH.on || !ED) return;
   const { t, cur } = shCurStr(), sn = strNo(t, cur.id), rd = readings(ED, cur.id), w = shWeight(), q = shStatsOf(rd, w), g = t.targets.find(x => x.id === cur.tid);
   const yd = Math.round(tgYd(g) || tgDefDist());
   $("shStr").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
   const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
-  $("shFor").textContent = [r?.name, l?.name, `${yd} yd`].filter(Boolean).join(" · ");
+  const gunFired = P.rifles.find(x => x.id === cur.asFired?.rifleId) || r;
+  const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired), gunFired && curRifle() === gunFired ? turretSpec() : null);
+  $("shFor").textContent = [r?.name, l?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
+  const gun = $("shGun");
+  if (gun && gun.dataset.lock !== "1") {
+    gun.innerHTML = P.rifles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");
+    gun.value = curRifle()?.id || "";
+  }
   const x = q.last;
   $("shV").textContent = x ? fpsT(x.v) : "—";
   const keptV = rd.filter(s => !s.x).map(s => s.v), mc = x && !x.x ? shDevCls(x.v, keptV) : "";
-  $("shMeta").innerHTML = x ? `#${q.k}${x.x ? " · discarded" : q.dv != null ? ` · <span id="shDev"${mc ? ` class="${mc}"` : ""}>${shSigned(q.dv)}</span>` : ""}` : SH.ended ? "" : "Waiting for the first shot";
+  $("shMeta").innerHTML = x ? `#${q.k}${x.x ? " · removed" : q.dv != null ? ` · <span id="shDev"${mc ? ` class="${mc}"` : ""}>${shSigned(q.dv)}</span>` : ""}` : SH.ended ? "" : "Waiting for the first shot";
   $("shMeta").classList.toggle("wait", !x);
   $("shHero").classList.toggle("dis", !!(x && x.x));
-  $("shHero").setAttribute("aria-label", x ? `Last shot ${fpsT(x.v)} fps, shot ${q.k}${x.x ? ", discarded" : q.dv != null ? `, ${shSigned(q.dv)} from the string average${mc ? `, ${shDevWord(mc)}` : ""}` : ""}` : "No shots yet");
+  $("shHero").setAttribute("aria-label", x ? `Last shot ${fpsT(x.v)} fps, shot ${q.k}${x.x ? ", removed" : q.dv != null ? `, ${shSigned(q.dv)} from the string average${mc ? `, ${shDevWord(mc)}` : ""}` : ""}` : "No shots yet");
   const en = SH.ended === cur.id; $("shEndNote").hidden = !en;
   if (en) $("shEndNote").textContent = `String ${sn} ended · the next shot starts String ${t.strings.length + 1}`;
   const f1 = v => (+v).toFixed(1);
@@ -131,8 +139,8 @@ function shPaint() {
     ["Min", q.n ? fpsT(q.min) : "—"], ["Max", q.n ? fpsT(q.max) : "—"], ["Energy · last", q.ftlb != null ? `${Math.round(q.ftlb).toLocaleString()} ft-lb` : "—", "w2"]]
     .map(([k, v, c]) => `<div${c ? ` class="${c}"` : ""}><b>${v}</b><span>${k}</span></div>`).join("");
   $("shList").innerHTML = rd.length ? rd.map((s, i) => ({ s, i })).reverse().map(({ s, i }) => `<div class="shRow${s.x ? " dis" : ""}${s.id === SH.lastId && i === rd.length - 1 ? " new" : ""}" data-id="${escapeHtml(s.id)}">
-      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v, keptV); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "discarded" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
-      <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot ${i + 1}" title="${s.x ? "Restore" : "Discard (bad read)"}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
+      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v, keptV); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "removed" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
+      <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot ${i + 1}" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the string."}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
     : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap ＋ Add shot to type a velocity.</div>`;
   shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en); $("shStrBtn").classList.toggle("on", en);
   $("shStrBtn").innerHTML = en ? `String ▾<small>ended</small>` : "String ▾"; $("shStrFor").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
@@ -154,11 +162,28 @@ function shStatus() {
   c.hidden = RD.status === "connected" || RD.status === "connecting";
   c.textContent = RD.dev && (RD.status === "lost" || RD.status === "off") ? "↻ Reconnect" : "📡 Connect";
 }
+function formLoadBag() {
+  return { bc: val("bc"), drag: val("drag"), weight: val("weight"), diameter: val("diameter"), mv: val("mv"), length: val("length"), ptSens: val("ptSens"), mvTemp: val("mvTemp"), bulletName: val("bulletName") };
+}
+function histSolve(st, ts) {
+  const hl = histLoad(st?.asFired?.recipe, formLoadBag());
+  if (hl.source === "missing") return { blocked: hl.warning };
+  if (ts && !(ts.v > 0)) return { blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
+  const warn = [ts && ts.warning, hl.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean).join(" ");
+  return { load: hl.used, source: hl.source, warn, sh: ts && ts.sh, allowBlank: true };
+}
 // vertical spread at the target from the slowest vs fastest kept shot, same zero + conditions + angle as the Dope tab
 async function shEsAt(min, max, yd) {
+  let hist = null, solved = null;
+  if (ED) {
+    const cur = shCurStr().cur;
+    hist = tsFor(cur?.asFired?.rifleId || ED.rifleId, cur);
+    solved = histSolve(cur, hist);
+    if (solved.blocked) return null;
+  } else if (entryRequired()) return null;
   if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000) || !(max > min)) return null;
   try {
-    const sv = await solveShot({ winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    const sv = await solveShot({ ...(solved || {}), winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     const fire = async v => {
       const s2 = new B.Shot({ weapon: sv.shot.weapon, ammo: new B.Ammo({ dm: sv.shot.ammo.dm, mv: B.UNew.FPS(v) }), atmo: sv.shot.atmo, winds: [] });
       if (look) s2.lookAngle = B.UNew.Degree(look);
@@ -170,16 +195,21 @@ async function shEsAt(min, max, yd) {
     return { spread, half: spread / 2, inch: Math.abs(a.height.In(B.Distance.Inch) - b.height.In(B.Distance.Inch)), yd, u: S.ang };
   } catch { return null; }
 }
-async function shDopeAt(yd, st) {   // dope strip: the string's dial (else the app's dope there) + the wind hold for the Dope-tab wind
-  const ts = ED ? tsFor(ED.rifleId) : turretSpec(), o = { yd };
+async function shDopeAt(yd, st) {   // dope strip: recorded load and turret when the string has them; otherwise a labeled current fallback
+  const ts = st ? tsFor(st.asFired?.rifleId || ED?.rifleId, st) : turretSpec();
+  const solved = st ? histSolve(st, ts) : null;
+  if (solved && solved.blocked) return { yd, blocked: solved.blocked };
+  if (!(ts.v > 0)) return { yd, blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
+  const o = { yd, warn: (solved && solved.warn) || ts.warning || "" };
   if (st && st.dial) { const dv = dialView(st.dial, ts); o.elev = `${dv.txt}`; o.clk = dv.c != null ? `${Math.abs(dv.c)} clicks` : ""; o.src = st.dial.src === "app" ? "dialed" : "dialed (edited)"; }
-  if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return o;
+  if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000)) return o;
+  if (!solved && !tgSame()) return o;
   try {
-    const sv = await solveShot(), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    const sv = await solveShot(solved || {}), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     if (look) sv.shot.lookAngle = B.UNew.Degree(look);
     const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
     const p = r.samples[r.samples.length - 1]; if (!p) return o;
-    const a = angs(p), dd = angDec(turretSpec()), u = angU(S.ang);
+    const a = angs(p, ts), dd = angDec(ts), u = angU(S.ang);
     if (!o.elev) { o.elev = `${ud(a.e, dd)} ${u}`; o.clk = `${Math.abs(a.ec)} clicks`; o.src = "app dope"; }
     const ws = num("windSpeed") || 0;
     o.wind = `${lr(a.w, dd)} ${u}`; o.wtxt = ws ? `${fmt(ws, 1)} mph @ ${CLOCK(num("windDir") || 0)} o'clock` : "no wind";
@@ -198,13 +228,13 @@ function shCalc(q, yd, st) {
 function shCalcPaint(q) {
   const u = angU(S.ang), es = SH.es, d = SH.dope, { t, cur } = ED ? shCurStr() : {}, g = t && t.targets.find(x => x.id === cur.tid), yd = Math.round(t ? tgYd(g) || tgDefDist() : 0);
   $("shEs").innerHTML = q.n < 2 ? `ES at ${yd} yd: needs 2+ kept shots` : es && es.yd === yd && es.u === S.ang ? `ES ±${fmt(es.half, 2)} ${u} at ${yd} yd <small>· ${fmt(es.spread, 2)} ${u} (${fmt(es.inch, 1)}″) top to bottom</small>` : `ES at ${yd} yd: …`;
-  $("shDope").innerHTML = d && d.yd === yd ? `<span>🎯 ${yd} yd · ${escapeHtml(d.src || "dial")} <b>${escapeHtml(d.elev || "—")}</b>${d.clk ? ` (${escapeHtml(d.clk)})` : ""}</span><span>Wind hold <b>${escapeHtml(d.wind || "—")}</b>${d.wtxt ? ` · ${escapeHtml(d.wtxt)}` : ""}</span>` : `<span>🎯 ${yd} yd · dial …</span>`;
+  $("shDope").innerHTML = d && d.blocked ? `<span class="bad">${escapeHtml(d.blocked)}</span>` : d && d.yd === yd ? `<span>🎯 ${yd} yd · ${escapeHtml(d.src || "dial")} <b>${escapeHtml(d.elev || "—")}</b>${d.clk ? ` (${escapeHtml(d.clk)})` : ""}</span><span>Wind hold <b>${escapeHtml(d.wind || "—")}</b>${d.wtxt ? ` · ${escapeHtml(d.wtxt)}` : ""}</span>${d.warn ? `<span class="w">${escapeHtml(d.warn)}</span>` : ""}` : `<span>🎯 ${yd} yd · dial …</span>`;
 }
 async function shBad() {
   if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), k = rd.map(s => !s.x).lastIndexOf(true);
-  if (k < 0) { toast("No kept shot to discard"); return; }
+  if (k < 0) { toast("No kept shot to remove"); return; }
   const x = rd[k]; x.x = true; if (x.id) unpair(ED, x.id); set_edDirty(true); renderEditor(); await shSave(); shPaint();
-  toast(`Shot #${k + 1} (${fpsT(x.v)} fps) discarded · out of the stats`, { label: "Undo", ms: 5000, fn: async () => { if (!ED) return; delete x.x; set_edDirty(true); renderEditor(); await shSave(); shPaint(); } });
+  toast(`Shot #${k + 1} (${fpsT(x.v)} fps) removed · out of every stat, still in the log`, { label: "Undo", ms: 5000, fn: async () => { if (!ED) return; delete x.x; set_edDirty(true); renderEditor(); await shSave(); shPaint(); } });
 }
 async function shToggle(id, f) {
   if (!ED) return; const x = ED.shots.find(s => s.id === id); if (!x) return;
@@ -227,6 +257,15 @@ function shPanelOpen() { return ["shAddBox", "shTagBar", "shStrMenu"].find(p => 
 function shAddClose() { $("shVel").value = ""; $("shVel").blur(); shPanels(); $("shAdd").focus({ preventScroll: true }); }
 
 export function init() {
+  $("shGun").onchange = () => {
+    const r = P.rifles.find(x => x.id === $("shGun").value); if (!r) return;
+    const rec = recallFirearm(P, r);
+    P.lastRifleId = r.id;
+    if (rec.opticId) r.opticId = rec.opticId;
+    if (rec.loadId) r.lastLoadId = rec.loadId;
+    applyRifle(); applyLoad(); savePresets();
+    shPaint();
+  };
   $("shStartBtn").onclick = () => shStart();
   $("slStartBtn").onclick = () => shStart();
   $("shExit").onclick = () => shExit();

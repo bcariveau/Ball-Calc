@@ -2,7 +2,7 @@
 export const shootingView = `<div id="shView" hidden role="dialog" aria-modal="true" aria-labelledby="shStr">
   <div class="shTop">
     <button type="button" class="sm ghost" id="shExit" aria-label="Exit the shooting view">← Exit</button>
-    <div class="shTt"><b id="shStr">String 1 · Target A</b><small id="shFor"></small></div>
+    <div class="shTt"><b id="shStr">String 1 · Target A</b><small id="shFor"></small><select id="shGun" aria-label="Active firearm"></select></div>
     <div class="shRadBox"><span id="shRadar" role="status" aria-live="polite"></span><button type="button" class="sm" id="shConn" hidden>📡 Connect</button></div>
   </div>
   <div class="shMain">
@@ -21,7 +21,7 @@ export const shootingView = `<div id="shView" hidden role="dialog" aria-modal="t
       </div>
       <div id="shTagBar" hidden>
         <p class="lbl2" id="shTagFor">Tag the last shot</p>
-        <button type="button" data-f="cold" aria-pressed="false">❄ Cold</button><button type="button" data-f="clean" aria-pressed="false">🧽 Clean</button><button type="button" data-f="fl" aria-pressed="false">↯ Flier</button>
+        <button type="button" data-f="clean" aria-pressed="false">Clean</button><button type="button" data-f="cold" aria-pressed="false">Cold bore</button><button type="button" data-f="fl" aria-pressed="false">Flier</button><button type="button" data-f="ie" aria-pressed="false">Input error</button>
         <input type="text" id="shNote" maxlength="200" placeholder="Note for this shot" aria-label="Note for the last shot">
       </div>
       <div id="shStrMenu" hidden role="menu" aria-label="String actions">
@@ -31,7 +31,7 @@ export const shootingView = `<div id="shView" hidden role="dialog" aria-modal="t
         <button type="button" role="menuitem" id="shEndStr">■ End string<small>next shot = new</small></button>
       </div>
       <div class="shBtns">
-        <button type="button" class="bad" id="shBad">✗ Bad read<br><small>discard last</small></button>
+        <button type="button" class="bad" id="shBad">⊘ Remove<br><small>last kept shot</small></button>
         <button type="button" class="ghost" id="shTag" aria-expanded="false" aria-controls="shTagBar">🏷 Tag</button>
         <button type="button" id="shAdd" aria-expanded="false" aria-controls="shAddBox">＋ Add shot</button>
         <button type="button" class="ghost" id="shStrBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="shStrMenu">String ▾</button>
@@ -42,4 +42,4 @@ export const shootingView = `<div id="shView" hidden role="dialog" aria-modal="t
 </div>`;
 
 export const shotBanner = `<div id="shotBan" hidden role="status" aria-live="polite"><button type="button" id="sbMain" aria-label="Open the session"><span id="sbV"></span><span id="sbN"></span><span id="sbSt"></span></button>
-  <div id="sbActs"><button type="button" data-a="x">Discard</button><button type="button" data-a="cold" aria-pressed="false">Cold bore</button><button type="button" data-a="clean" aria-pressed="false">Clean bore</button><button type="button" data-a="fl" aria-pressed="false">Flier</button><button type="button" data-a="mark" hidden>🎯 Mark impact</button></div></div>`;
+  <div id="sbActs"><button type="button" data-a="x">Remove</button><button type="button" data-a="clean" aria-pressed="false">Clean</button><button type="button" data-a="cold" aria-pressed="false">Cold bore</button><button type="button" data-a="fl" aria-pressed="false">Flier</button><button type="button" data-a="ie" aria-pressed="false">Input error</button><button type="button" data-a="mark" hidden>🎯 Mark impact</button></div></div>`;

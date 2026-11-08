@@ -12,6 +12,7 @@ import { closeImport } from "./log-import.js";
 import { SEL, lpFired, paintSel, set_lpFired } from "./reassign.js";
 import { SH, shHide, shNeedGear, shPaint, shRollIfEnded } from "./shooting.js";
 import { banHide, banPaint, banShow } from "./shot-banner.js";
+import { asFiredFrom, cleanAsFired, assignShots, staleMv } from "./link-v3.js";
 import { P, load, savePresets, store, uid } from "./storage.js";
 import { paintStrBar, paintTgView } from "./strings.js";
 import { mkGlyph } from "./target-draw.js";
@@ -34,6 +35,8 @@ let slKey = null;
 let ED = null;
 let edDirty = false;
 let IMP = [];
+let SHOTSEL = null;
+let shotUndo = [];
 async function loadLog() {
   let d = null;
   try { d = await idbGet("shotlog"); } catch {}
@@ -52,13 +55,14 @@ function cleanSession(x) {
   if (!x || typeof x !== "object" || !Array.isArray(x.shots)) return null;
   const seenId = new Set();
   const shots = x.shots.map(sh => ({ v: nOrNull(sh && sh.v), t: sstr(sh && sh.t, 20), note: sstr(sh && sh.note, 200), cold: !!(sh && sh.cold), clean: !!(sh && sh.clean),
-      id: sstr(sh && sh.id, 20), str: sstr(sh && sh.str, 20), x: !!(sh && sh.x), fl: !!(sh && sh.fl) }))
-    .filter(sh => sh.v != null && sh.v >= 50 && sh.v <= 6000).map(sh => { ["t", "note", "id", "str"].forEach(k => { if (!sh[k]) delete sh[k]; }); ["cold", "clean", "x", "fl"].forEach(k => { if (!sh[k]) delete sh[k]; });
+      id: sstr(sh && sh.id, 20), str: sstr(sh && sh.str, 20), x: !!(sh && sh.x), fl: !!(sh && sh.fl), ie: !!(sh && sh.ie) }))
+    .filter(sh => sh.v != null && sh.v >= 50 && sh.v <= 6000).map(sh => { ["t", "note", "id", "str"].forEach(k => { if (!sh[k]) delete sh[k]; }); ["cold", "clean", "x", "fl", "ie"].forEach(k => { if (!sh[k]) delete sh[k]; });
       if (sh.id) { if (seenId.has(sh.id)) sh.id = uid(); seenId.add(sh.id); } return sh; });
   const d = new Date(x.date); const wx = x.wx || {};
   const out = { id: sstr(x.id, 40) || uid(), rifleId: sstr(x.rifleId, 40), loadId: sstr(x.loadId, 40), date: isNaN(d) ? new Date().toISOString() : d.toISOString(),
     source: ["manual", "athlon", "bluetooth"].includes(x.source) ? x.source : "manual", shots, notes: sstr(x.notes, 300),
     wx: { temp: nOrNull(wx.temp), humidity: nOrNull(wx.humidity), pressure: nOrNull(wx.pressure), altitude: nOrNull(wx.altitude), powder: nOrNull(wx.powder) }, barrel: nOrNull(x.barrel) };
+  { const af = cleanAsFired(x.asFired); if (af) out.asFired = af; }
   if (x.importKey) out.importKey = sstr(x.importKey, 2000);
   if (x.title) out.title = sstr(x.title, 120);
   { const rc = cleanRecipe(x.recipe); if (rc) out.recipe = rc; }
@@ -68,7 +72,7 @@ function cleanSession(x) {
   return out;
 }
 function shotStats(shots) {
-  const v = shots.filter(s => !s.x).map(s => s.v).filter(x => x != null), n = v.length;   // discarded (double reads) stay visible but out of stats
+  const v = shots.filter(s => !s.x).map(s => s.v).filter(x => x != null), n = v.length;   // removed shots (x) stay in the log but out of every stat. Tags never exclude.
   if (!n) return { n: 0 };
   const avg = v.reduce((a, b) => a + b, 0) / n, min = Math.min(...v), max = Math.max(...v);
   const sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - avg) ** 2, 0) / (n - 1)) : 0;   // sample SD (n−1)
@@ -213,10 +217,11 @@ function renderEditor() {
   $("slStats").innerHTML = [["Avg fps", st.n ? fpsT(st.avg) : "—"], ["SD", st.n > 1 ? f(st.sd) : "—"], ["ES", st.n > 1 ? fpsT(st.es) : "—"],
     ["Shots", st.n], ["Min", st.n ? fpsT(st.min) : "—"], ["Max", st.n ? fpsT(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
   const tv = tgView(ED), multi = tv.strings.length > 1;
-  const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}">
-    <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "discarded" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
-    <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot (double read)" title="${s.x ? "Restore" : "Discard (stays visible, out of stats)"}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
-    <div class="tgs"><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold">Cold</button><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean">Clean</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl">Flier</button>
+  const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}" data-id="${escapeHtml(s.id || "")}">
+    ${SHOTSEL ? `<input type="checkbox" class="shotCk" data-sel="${escapeHtml(s.id || "")}" ${s.id && SHOTSEL.has(s.id) ? "checked" : ""} aria-label="Select shot ${i + 1}">` : ""}
+    <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "removed" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
+    <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the log."}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
+    <div class="tgs"><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean" aria-pressed="${!!s.clean}">Clean</button><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold" aria-pressed="${!!s.cold}">Cold bore</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl" aria-pressed="${!!s.fl}">Flier</button><button type="button" class="tg${s.ie ? " on" : ""}" data-f="ie" aria-pressed="${!!s.ie}">Input error</button>
     <button type="button" class="tg${s.note ? " on" : ""}" data-f="noteT" aria-label="Note">✎</button>${multi ? `<span class="sl">${mkGlyph(si)}S${si + 1}</span>` : ""}</div>
     ${s.note || s._showNote ? `<input class="note" type="text" maxlength="200" placeholder="shot note" value="${escapeHtml(s.note || "")}">` : ""}</div>`;
   const all = ED.shots.map((s, i) => ({ s, i }));
@@ -225,12 +230,78 @@ function renderEditor() {
     : all.reverse().map(o => row(o, st, 0)).join("")) ||
     `<div class="hint" style="padding:8px 0">No shots yet.</div>`;
   paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
-  paintUseMV();
+  paintUseMV(); paintShotSel();
 }
-// "Use … as MV": the average of the kept shots, leaving out discarded (⊘), Cold bore and Flier shots; the label carries the numbers
+function paintShotSel() {
+  const bar = $("shotSelBar"), btn = $("shotSelBtn"); if (!bar || !btn) return;
+  const on = !!SHOTSEL; bar.hidden = !on; btn.hidden = on;
+  if (!on || !ED) return;
+  const keepG = $("shotDestGun").value, keepL = $("shotDestLoad").value;
+  $("shotDestGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join("");
+  $("shotDestGun").value = P.rifles.some(r => r.id === keepG) ? keepG : (curRifle()?.id || P.rifles[0]?.id || "");
+  const gun = P.rifles.find(r => r.id === $("shotDestGun").value);
+  $("shotDestLoad").innerHTML = (gun?.loads || []).map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join("");
+  if (keepL && (gun?.loads || []).some(l => l.id === keepL)) $("shotDestLoad").value = keepL;
+  $("shotSelN").textContent = `${SHOTSEL.size} selected`;
+  const ready = SHOTSEL.size && gun && (gun.loads || []).some(l => l.id === $("shotDestLoad").value);
+  $("shotMoveGo").disabled = !ready; $("shotSplit").disabled = !ready;
+}
+function chosenAsFired() {
+  const r = P.rifles.find(x => x.id === $("shotDestGun").value);
+  const l = r?.loads.find(x => x.id === $("shotDestLoad").value);
+  if (!r || !l) return null;
+  const oid = r.lastOpticId && (P.optics || []).some(o => o.id === r.lastOpticId) ? r.lastOpticId : (r.opticId || null);
+  const o = oid ? (P.optics || []).find(x => x.id === oid) : null;
+  return asFiredFrom(r, o, l, recipeSnapshot(r.id, l.id));
+}
+function sourceLoadOf(session, movedIds) {
+  const ids = new Set(movedIds);
+  const shot = (session.shots || []).find(s => ids.has(s.id));
+  const st = shot && session.tg && session.tg.strings.find(x => x.id === shot.str);
+  const lid = st?.asFired?.loadId || session.loadId;
+  const rid = st?.asFired?.rifleId || session.rifleId;
+  const r = P.rifles.find(x => x.id === rid);
+  return r?.loads.find(l => l.id === lid) || null;
+}
+function undoShotEdit() {
+  const prev = shotUndo.pop(); if (!prev || !ED) return;
+  ED.shots = prev.shots; ED.tg = prev.tg; edDirty = true; renderEditor(); toast("Shot move undone");
+}
+function sessionLoad() {
+  const r = ED && P.rifles.find(x => x.id === ED.rifleId);
+  return r?.loads.find(l => l.id === ED.loadId) || null;
+}
+function redoSourceMv(load, shots) {
+  let t = num("slPowder") ?? num("slTemp");
+  if (t == null && ED) t = ED.wx?.powder ?? ED.wx?.temp ?? null;
+  if (t == null) {
+    const pre = wx && wx.tempF != null ? String(Math.round(wx.tempF)) : "";
+    const a = prompt(`Temperature for the redone MV (°F)?\nRemoved shots stay out. Tags stay in.${pre ? " Prefilled from current weather." : ""}`, pre);
+    if (a == null) return null;
+    t = parseFloat(a);
+    if (!isFinite(t) || t < -40 || t > 140) { toast("Enter a temperature between −40 and 140 °F"); return null; }
+    setVal("slTemp", Math.round(t * 10) / 10); edDirty = true;
+  }
+  const st = shotStats((shots || []).filter(s => !s.x));
+  if (!st.n) { toast("No kept shots left on that load to redo the MV"); return null; }
+  load.mv = String(Math.round(st.avg)); load.mvSource = "measured"; load.mvTemp = String(t); savePresets();
+  if (curLoad() === load) { setVal("mv", load.mv); $("mvSource").value = "measured"; setVal("mvTemp", t); }
+  updateDirty(); schedule();
+  return `MV redone to ${load.mv} fps at ${fmt(t, 0)}°F from ${st.n} kept shot${st.n === 1 ? "" : "s"}`;
+}
+function applyShotResult(result) {
+  const load = sourceLoadOf(result.undo, result.movedIds);
+  const stale = staleMv(load, result.undo.shots, result.movedIds, result.undo);
+  shotUndo.push(result.undo);
+  ED.shots = result.session.shots; ED.tg = result.session.tg; edDirty = true; renderEditor();
+  const remain = (result.undo.shots || []).filter(s => !result.movedIds.includes(s.id) && (sourceLoadOf(result.undo, [s.id])?.id === load?.id));
+  return { stale, load, remain };
+}
+// "Use … as MV": the average of every shot that was not Removed. Tags (Clean, Cold bore, Flier, Input error) stay in the average.
+// Behavior change: Cold bore and Flier used to be left out automatically. They no longer are. Only the removed flag (x) excludes.
 function mvPick() {
-  const all = ED ? ED.shots : [], use = all.filter(s => !s.x && !s.cold && !s.fl), st = shotStats(use);
-  const out = { x: all.filter(s => s.x).length, cold: all.filter(s => !s.x && s.cold).length, fl: all.filter(s => !s.x && !s.cold && s.fl).length };
+  const all = ED ? ED.shots : [], use = all.filter(s => !s.x), st = shotStats(use);
+  const out = { x: all.filter(s => s.x).length };
   const r = ED && P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
   const t = num("slPowder") ?? num("slTemp");
   return { st, n: use.length, out, l, t, mv: st.n ? Math.round(st.avg) : null };
@@ -240,7 +311,7 @@ function paintUseMV() {
   const m = mvPick(), b = $("slUseMV"), note = $("slMvNote");
   b.disabled = !m.st.n || !m.l;
   b.textContent = !m.st.n ? "Use avg as MV (no kept shots yet)" : `Use ${m.mv} fps${m.t != null ? ` at ${fmt(m.t, 0)}°F` : ""} for ${m.l ? m.l.name : "this load"}`;
-  const left = [m.out.cold && `${m.out.cold} cold bore`, m.out.fl && `${m.out.fl} flier${m.out.fl > 1 ? "s" : ""}`, m.out.x && `${m.out.x} discarded`].filter(Boolean);
+  const left = [m.out.x && `${m.out.x} removed`].filter(Boolean);
   note.classList.toggle("warn", !!m.st.n && m.n < 5);
   note.textContent = !m.l ? "Assign this session to a saved load to use its average as the MV." : !m.st.n ? "" :
     `Average of ${m.n} shot${m.n === 1 ? "" : "s"}${left.length ? ` (left out: ${left.join(", ")})` : ""}${m.st.n > 1 ? ` · SD ${m.st.sd.toFixed(1)}` : ""}.` +
@@ -336,6 +407,23 @@ export function init() {
   $("slAdd").onclick = addFromInput;
   $("slVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addFromInput(); } });
   $("slVel").addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData)?.getData("text") || ""; if (/[\s,;]/.test(t.trim())) { e.preventDefault(); if (addVelocities(t)) { renderEditor(); banShow(ED.id, ED.shots[ED.shots.length - 1].id); } } });
+  $("shotSelBtn").onclick = () => { SHOTSEL = new Set(); shotUndo = []; renderEditor(); };
+  $("shotSelDone").onclick = () => { SHOTSEL = null; renderEditor(); };
+  $("shotDestGun").onchange = () => paintShotSel();
+  const shotToast = (done, msg) => {
+    const show = () => toast(msg, [
+      { label: "Undo", fn: undoShotEdit },
+      ...(done.stale && done.load ? [{ label: "Redo MV", fn: () => { const m = redoSourceMv(done.load, done.remain); if (m) toast(m, { label: "Undo", fn: undoShotEdit }); else show(); } }] : []),
+    ]);
+    show();
+  };
+  $("shotMoveGo").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const done = applyShotResult(assignShots(ED, [...SHOTSEL], af)); shotToast(done, done.stale ? done.stale.message : "Moved the selected shots onto that firearm and load. Other shots were left where they were."); };
+  $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const id = [...SHOTSEL][0]; const done = applyShotResult(assignShots(ED, [id], af, { splitFromId: id })); shotToast(done, done.stale ? done.stale.message : "Split from the selected shot onto that firearm and load. Date and weather stay on the session."); };
+  $("slShots").addEventListener("change", e => { const box = e.target.closest(".shotCk"); if (!box || !SHOTSEL) return; box.checked ? SHOTSEL.add(box.dataset.sel) : SHOTSEL.delete(box.dataset.sel); paintShotSel(); });
+  let shotLp;
+  $("slShots").addEventListener("pointerdown", e => { const row = e.target.closest(".shot"); if (!row || SHOTSEL || e.target.closest("button, input")) return; clearTimeout(shotLp);
+    shotLp = setTimeout(() => { SHOTSEL = new Set([row.dataset.id]); renderEditor(); navigator.vibrate?.(15); }, 550); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slShots").addEventListener(ev, () => clearTimeout(shotLp)));
   $("slShots").addEventListener("click", e => {
     const b = e.target.closest("button"), row = e.target.closest(".shot"); if (!b || !row) return;
     const i = +row.dataset.i, s = ED.shots[i], f = b.dataset.f;

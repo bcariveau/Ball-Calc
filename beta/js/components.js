@@ -6,6 +6,7 @@ import { turretSpec } from "./calc.js";
 import { $, escapeHtml, norm360, val } from "./core.js";
 import { renderAll } from "./dope.js";
 import { curLoad, curRifle } from "./gear.js";
+import { curOptic } from "./optics.js";
 import { shPick } from "./shooting.js";
 import { S, saveSettings } from "./storage.js";
 
@@ -13,21 +14,22 @@ import { S, saveSettings } from "./storage.js";
 /* ---------------- helpers ---------------- */
 let toastT;
 function toast(msg, act) {
-  const t = $("toast"); t.textContent = msg; t.classList.toggle("act", !!act);
-  if (act) { const b = document.createElement("button"); b.type = "button"; b.id = "toastAct"; b.textContent = act.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); act.fn(); }; t.appendChild(b); }
-  t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), act ? (act.ms || 7000) : 2200);
+  const acts = Array.isArray(act) ? act : (act ? [act] : []);
+  const t = $("toast"); t.textContent = msg; t.classList.toggle("act", acts.length > 0);
+  acts.forEach((a, i) => { const b = document.createElement("button"); b.type = "button"; b.id = i ? "toastAct" + i : "toastAct"; b.textContent = a.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); a.fn(); }; t.appendChild(b); });
+  t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), acts.length ? (acts[0].ms || 7000) : 2200);
 }
 /* ---------------- uniform: gun · load · zero · unit context line (Dope, Log, Gear) ---------------- */
 function ctxParts() {
-  const r = curRifle(), l = curLoad(); if (!r) return null;
+  const r = curRifle(), l = curLoad(), o = curOptic(); if (!r) return null;
   let u = ""; try { u = turretSpec().u; } catch {}
-  return { gun: r.name, load: l ? l.name : "no load", zero: `${val("zero") || "?"} yd zero`, unit: u, unconf: !!r.zeroUnconf, why: r.zeroUnconf?.why || "" };
+  return { gun: r.name, optic: o ? o.name : (r.opticId ? "saved optic missing" : "no optic saved"), load: l ? l.name : "no load", zero: `${val("zero") || "?"} yd zero`, unit: u, unconf: !!r.zeroUnconf, why: r.zeroUnconf?.why || "" };
 }
 function ctxPaint() {
   const c = ctxParts(), sep = `<span class="sep" aria-hidden="true">·</span>`;
   const h = !c ? `<span class="cG">Gun and load not saved yet</span>`
-    : `<span class="cG">${escapeHtml(c.gun)}</span>${sep}<span class="cL">${escapeHtml(c.load)}</span>${sep}<span class="cZ${c.unconf ? " unconf" : ""}">${escapeHtml(c.zero)}${c.unconf ? " ⚠" : ""}</span>${c.unit ? sep + `<span class="cU">${c.unit}</span>` : ""}`;
-  const t = !c ? "Gun and load not saved yet" : [c.gun, c.load, c.zero + (c.unconf ? " (not confirmed" + (c.why ? ": " + c.why : "") + ")" : ""), c.unit].filter(Boolean).join(" · ");
+    : `<span class="cG">${escapeHtml(c.gun)}</span>${sep}<span class="cO">${escapeHtml(c.optic)}</span>${sep}<span class="cL">${escapeHtml(c.load)}</span>${sep}<span class="cZ${c.unconf ? " unconf" : ""}">${escapeHtml(c.zero)}${c.unconf ? " ⚠" : ""}</span>${c.unit ? sep + `<span class="cU">${c.unit}</span>` : ""}`;
+  const t = !c ? "Gun and load not saved yet" : [c.gun, c.optic, c.load, c.zero + (c.unconf ? " (not confirmed" + (c.why ? ": " + c.why : "") + ")" : ""), c.unit].filter(Boolean).join(" · ");
   document.querySelectorAll(".ctx").forEach(e => { if (e.innerHTML !== h) e.innerHTML = h; e.title = t; e.setAttribute("aria-label", t); });
 }
 

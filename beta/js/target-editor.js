@@ -3,9 +3,11 @@
 // init*() and is called by main.js in the original order.
 
 import { setTab } from "./app.js";
+import { B, angDec, angs, solveShot } from "./calc.js";
 import { toast } from "./components.js";
-import { $, escapeHtml, fmt, setVal } from "./core.js";
+import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { curLoad, curRifle } from "./gear.js";
+import { dialComeUp, histLoad } from "./link-v3.js";
 import { ED, LOG, closeEditor, commitEditor, edDirty, openEditor, renderEditor, set_edDirty } from "./log.js";
 import { SEL, paintSel } from "./reassign.js";
 import { SH, shPaint } from "./shooting.js";
@@ -13,7 +15,7 @@ import { banHide, banPaint } from "./shot-banner.js";
 import { P, S, uid } from "./storage.js";
 import { dialTxt, teDialPaint, teSumPaint, tgAutoDial, tgRecent, tgRedope, tgSame } from "./strings.js";
 import { tgSvg } from "./target-draw.js";
-import { BAN, TE, angConv, angU, fpsT, grpStats, hoff, hpos, inPerU, lenTxt, readings, set_TE, strNo, tgDefDist, tgEnsure, tgView, tgYd, tgtLetter, tsFor, unpair, velVert } from "./targets.js";
+import { BAN, TE, angConv, angU, bulletDiaIn, fpsT, grpStats, hoff, hpos, inPerU, lenTxt, readings, set_TE, statHoles, strNo, tgDefDist, tgEnsure, tgView, tgYd, tgtLetter, tsFor, unpair, velVert } from "./targets.js";
 import { TR, openTrue, predAt, trPaint } from "./truing.js";
 
 
@@ -56,10 +58,11 @@ function teDraw() {
   const t = ED.tg, st = teStr(), g = teTgt(), yd = tgYd(g) || 100;
   if (!TE.drag || !TE.span) TE.span = teSpan(t, g);
   const layers = t.strings.map((s, i) => ({ s, i })).filter(o => o.s.tid === g.id).map(o => ({ i: o.i, sid: o.s.id, dim: o.s.id !== st.id, aim: o.s.aim,
-    holes: o.s.holes.map((h, k) => ({ p: hpos(o.s, h), n: k + 1, meas: !!h.m, sel: o.s.id === st.id && h.id === TE.sel, id: o.s.id === st.id ? h.id : "" })) }));
+    holes: o.s.holes.map((h, k) => ({ p: hpos(o.s, h), n: k + 1, meas: !!h.m, rm: !statHoles(ED, { holes: [h] }).length, sel: o.s.id === st.id && h.id === TE.sel, id: o.s.id === st.id ? h.id : "" })) }));
   layers.sort((a, b) => (a.dim ? 0 : 1) - (b.dim ? 0 : 1));
-  const z = TE.zoom || 1, c = teCenter(z), W = TE.span / z;
-  const sv = tgSvg({ span: W, gspan: TE.span, cx: c.x, cy: c.y, tpl: g.tpl, yd, layers, mk: Math.max(0.5, 1 / Math.sqrt(z)), px: W / Math.max(120, $("tgSvg").clientWidth || 380) });
+  const z = TE.zoom || 1, c = teCenter(z), W = TE.span / z, dia = bulletDiaIn(ED);
+  // No mk shrink: a real diameter is a fixed length on the sheet and grows with zoom. An unknown diameter stays a steady screen marker.
+  const sv = tgSvg({ span: W, gspan: TE.span, cx: c.x, cy: c.y, tpl: g.tpl, yd, layers, dia, px: W / Math.max(120, $("tgSvg").clientWidth || 380) });
   $("tgZoomT").textContent = `×${+z.toFixed(1)}`; $("tgZin").disabled = z >= 8; $("tgZout").disabled = z <= 1; $("tgZfit").disabled = z <= 1;
   const svg = $("tgSvg"); svg.setAttribute("viewBox", sv.vb); svg.innerHTML = sv.html; TE.vb = sv; TE.grid = sv.grid;
   return sv;
@@ -81,6 +84,9 @@ function teRender() {
     : TE.mode === "meas" ? (st.holes.length ? "Measure from the aim point to the center of each hole." : "Tap holes first (or ＋ Add shot), then measure them.")
     : !st.aim ? "Set the aim point first (⊕ Aim point)." : pn ? `Tap where shot ${pn} hit.` : "Tap each hole in the order fired · drag a hole to adjust · tap its center (or its row below) to select it.";
   teDraw(); teMeasPaint(); tePair(); teDialPaint(); teResults();
+  const dia = bulletDiaIn(ED), note = $("tgHoleNote");
+  if (note) note.textContent = dia ? `Holes are drawn at ${dia.toFixed(3)}" (the bullet diameter saved with this session) and get larger as you zoom in.`
+    : "Hole marks are not to scale — this session has no saved bullet diameter, so nothing is invented.";
 }
 function teMeasPaint() {
   const box = $("tgMeas"), st = teStr(); box.hidden = TE.mode !== "meas"; if (box.hidden) return;
@@ -112,7 +118,7 @@ function tgAfterEditQuiet() { set_edDirty(true); }
 function tePair() {   // one list: a row per hole (number, fps or "no reading", 📏/👆, ⋯), then readings with no hole (discarded double reads included)
   const st = teStr(), rd = readings(ED, st.id), rk = new Map(rd.map((x, k) => [x.id, k + 1])), used = new Set(), M = TE.menu;
   ED.tg.strings.forEach(q => q.holes.forEach(h => h.sh && used.add(h.sh)));
-  const tags = x => [x.cold && "cold bore", x.clean && "clean bore", x.fl && "flier"].filter(Boolean).join(" · "), E = escapeHtml, B2 = (m, t, cl, ex) => `<button type="button" class="${cl || ""}" data-m="${m}"${ex || ""}>${t}</button>`;
+  const tags = x => [x.clean && "Clean", x.cold && "Cold bore", x.fl && "Flier", x.ie && "Input error"].filter(Boolean).join(" · "), E = escapeHtml, B2 = (m, t, cl, ex) => `<button type="button" class="${cl || ""}" data-m="${m}"${ex || ""}>${t}</button>`;
   let h = st.holes.map((ho, i) => { const x = ho.sh && ED.shots.find(q => q.id === ho.sh), op = M && M.k === "h" && M.id === ho.id, tg = x && tags(x);
     let r = `<div class="lr${ho.id === TE.sel ? " on" : ""}${x ? "" : " np"}" data-h="${E(ho.id)}"><button type="button" class="lrM" aria-pressed="${ho.id === TE.sel}" aria-label="Hole ${i + 1}"><span class="hn">${i + 1}</span><span class="rv">${x ? `${fpsT(x.v)} fps` : ho.nr ? "no reading" : "unpaired"}</span><span class="rk">${x ? `reading ${rk.get(x.id) || "?"}${tg ? " · " + tg : ""}` : ho.nr ? "" : "tap ⋯ to pair"}</span><i title="${ho.m ? "measured" : "tapped"}">${ho.m ? "📏" : "👆"}</i></button><button type="button" class="lrX" aria-label="Hole ${i + 1} options" aria-expanded="${!!op}">⋯</button></div>`;
     if (op) r += `<div class="lmenu" role="menu" aria-label="Hole ${i + 1}">` + (M.step === "pair"
@@ -121,10 +127,10 @@ function tePair() {   // one list: a row per hole (number, fps or "no reading", 
     return r; }).join("");
   const un = rd.filter(x => !used.has(x.id));
   if (un.length) h += `<div class="lsub">Readings without a hole</div>` + un.map(x => { const op = M && M.k === "r" && M.id === x.id, tg = tags(x);
-    let r = `<div class="lr rdu${x.x ? " dis" : ""}" data-s="${E(x.id)}"><button type="button" class="lrM" aria-label="Reading ${rk.get(x.id)} options"><span class="hn">–</span><span class="rv">${fpsT(x.v)} fps</span><span class="rk">reading ${rk.get(x.id)}${x.x ? " · discarded" : " · no hole"}${tg ? " · " + tg : ""}</span><i></i></button><button type="button" class="lrX" aria-label="Reading ${rk.get(x.id)} options" aria-expanded="${!!op}">⋯</button></div>`;
+    let r = `<div class="lr rdu${x.x ? " dis" : ""}" data-s="${E(x.id)}"><button type="button" class="lrM" aria-label="Reading ${rk.get(x.id)} options"><span class="hn">–</span><span class="rv">${fpsT(x.v)} fps</span><span class="rk">reading ${rk.get(x.id)}${x.x ? " · removed" : " · no hole"}${tg ? " · " + tg : ""}</span><i></i></button><button type="button" class="lrX" aria-label="Reading ${rk.get(x.id)} options" aria-expanded="${!!op}">⋯</button></div>`;
     if (op) r += `<div class="lmenu" role="menu" aria-label="Reading ${rk.get(x.id)}">` + (M.step === "pair"
       ? `<div class="lmT">Pair reading ${rk.get(x.id)} (${fpsT(x.v)} fps) to hole:</div>` + (st.holes.map((z, j) => { const zx = z.sh && ED.shots.find(q => q.id === z.sh); return B2("ph", `Hole ${j + 1} · ${zx ? `${fpsT(zx.v)} fps` : z.nr ? "no reading" : "unpaired"}`, "", ` data-h="${E(z.id)}"`); }).join("") || `<div class="hint">No holes yet — tap the target first.</div>`) + B2("back", "‹ Back", "ghost")
-      : (x.x ? "" : B2("pair", "↔ Pair to hole")) + B2("x", x.x ? "↺ Restore" : "Discard (double read)", x.x ? "" : "danger")) + `</div>`;
+      : (x.x ? "" : B2("pair", "↔ Pair to hole")) + B2("x", x.x ? "↺ Restore" : "Remove (keeps the shot, out of stats)", x.x ? "" : "danger")) + `</div>`;
     return r; }).join("");
   $("tgList").innerHTML = h || `<div class="hint">No holes or readings yet.</div>`;
 }
@@ -162,10 +168,11 @@ function teUp(e) {
 
 /* results per string */
 function teResults() {
-  const st = teStr(), g = teTgt(), yd = tgYd(g), ts = tsFor(ED.rifleId), U = ts.u, box = $("tgRes");
-  const pts = st.holes.map(h => hoff(st, h)), gs = grpStats(pts), u = g.u;
-  if (!gs) { box.innerHTML = `<div class="hint">Results show once holes are marked.</div>`; return; }
-  const a = v => `${(v / inPerU(U, yd)).toFixed(2)} ${angU(U)}`, vv = velVert(ED, st), r = P.rifles.find(x => x.id === ED.rifleId), zr = r && parseFloat(r.zero);
+  const st = teStr(), g = teTgt(), yd = tgYd(g), ts = tsFor(st?.asFired?.rifleId || ED.rifleId, st), U = ts.u, box = $("tgRes");
+  const pts = statHoles(ED, st).map(h => hoff(st, h)), gs = grpStats(pts), u = g.u;
+  if (!gs) { box.innerHTML = st.holes.length ? `<div class="hint">Marked holes are all paired to removed shots, so the group stats are empty. Restore a shot to count it again.</div>` : `<div class="hint">Results show once holes are marked.</div>`; return; }
+  const blocked = !(ts.v > 0);
+  const a = v => blocked ? "" : `${(v / inPerU(U, yd)).toFixed(2)} ${angU(U)}`, vv = velVert(ED, st), r = P.rifles.find(x => x.id === (st?.asFired?.rifleId || ED.rifleId)), zr = r && parseFloat(r.zero);
   const atZero = zr > 0 && Math.abs(yd - zr) <= Math.max(1, zr * 0.02), same = curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId;
   let h = `<div class="sub">Results · String ${strNo(ED.tg, st.id)} · ${fmt(g.dist, 0)} ${g.du}</div><div class="resG">`;
   h += `<div><span>Group (c-c)</span><b id="tgResES">${gs.n > 1 ? lenTxt(gs.es, u) : "—"}</b><small>${gs.n > 1 ? a(gs.es) : "needs 2+ holes"}</small></div>`;
@@ -177,38 +184,73 @@ function teResults() {
     : vv.r >= 0.7 && vv.n >= 5 ? `<b class="w">⚠ Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.`
     : vv.r >= 0.5 ? `<span class="pt">Possible velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — needs 5+ paired shots with r ≥ 0.7 to call it.</span>`
     : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
-  if (atZero && gs.n) {
+  h += `<div class="hint" id="tgHist">…</div>`;
+  if (blocked) h += `<div class="zc bad" id="tgZero">${escapeHtml(ts.warning || "Enter a turret click value before calculating. Nothing was invented.")}</div>`;
+  else if (atZero && gs.n) {
     const k = ts.k || 1, e1 = -gs.cy / inPerU(ts.u, yd) / k, w1 = -gs.cx / inPerU(ts.u, yd), ce = Math.round(Math.abs(e1) / ts.v), cw = Math.round(Math.abs(w1) / ts.v);   // elevation ÷ tracking factor, as the dope does
-    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
+    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}${ts.source === "current" ? ", current turret" : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>${ts.source === "current" ? escapeHtml(ts.warning) + " " : ""}Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
   } else if (gs.n > 1) {
-    const vU = S.ang, need = -gs.cy / inPerU(vU, yd), d = st.dial;
-    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
-    h += `<button type="button" id="tgTrue"${TE.atDist && same ? "" : " disabled"}>🎯 Send vertical to Truing (${gs.cy >= 0 ? "group high" : "group low"} ${lenTxt(Math.abs(gs.cy), u)} = ${need >= 0 ? "U" : "D"} ${Math.abs(need).toFixed(2)} ${angU(vU)})</button>`;
-    h += `<div class="hint">${d ? `Sends dialed − offset (the elevation that would have centered the group) with this string's saved conditions and angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}Only the vertical offset is sent. Horizontal (${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}) is never sent — it's mostly wind.${same ? "" : " <b>Pick this session's gun + load on Gear to send it.</b>"}</div>`;
+    const d = st.dial, recordedId = st.asFired && st.asFired.loadId, canTrue = !!(recordedId || same);
+    const up = d ? dialComeUp(d, gs.cy, yd) : null;
+    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d, ts)} dialed` : "the app's dope dialed"}<small>${d ? `The dial is ${d.u}. Switching the display unit does not change that angle.` : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
+    h += `<button type="button" id="tgTrue"${TE.atDist && canTrue ? "" : " disabled"}>🎯 Send vertical to Truing${up ? ` (${up.mil.toFixed(2)} mil · ${up.moa.toFixed(2)} MOA)` : ""}</button>`;
+    h += `<div class="hint">${d ? `Sends the saved ${d.u} dial minus the group offset. The other unit is the same angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}${recordedId && curLoad()?.id !== recordedId ? "Save updates the recorded load, not the load on screen. " : ""}${!recordedId && !same ? "<b>This string has no recorded load, and the load on screen is a different one. Nothing is sent.</b> " : ""}Only the vertical offset is sent.</div>`;
   }
   box.innerHTML = h;
+  teHistDope(st, g, ts);
+}
+let histTok = 0;
+function formLoadBag() {
+  return { bc: val("bc"), drag: val("drag"), weight: val("weight"), diameter: val("diameter"), mv: val("mv"), length: val("length"), ptSens: val("ptSens"), mvTemp: val("mvTemp"), bulletName: val("bulletName") };
+}
+function teHistDope(st, g, ts) {
+  const box = $("tgHist"); if (!box || !st) return;
+  const yd = Math.round(tgYd(g)), hl = histLoad(st.asFired && st.asFired.recipe, formLoadBag());
+  const bits = [hl.warning, ts && ts.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean);
+  if (hl.source === "missing" || !(ts && ts.v > 0)) { box.textContent = bits[0] || "Enter the missing load or turret. Nothing was invented."; return; }
+  if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000)) { box.textContent = bits.join(" "); return; }
+  const tok = ++histTok;
+  const label = hl.source === "as-fired" ? `Recorded ${hl.used.bulletName || "load"} · ${hl.used.drag} ${hl.used.bc} · ${hl.used.mv} fps` : `Current ${hl.used.drag} ${hl.used.bc} · ${hl.used.mv} fps for missing ${hl.fromCurrent.join(", ")}`;
+  box.textContent = `${label} · …`;
+  (async () => {
+    try {
+      const sv = await solveShot({ allowBlank: true, load: hl.used, sh: ts.sh, winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+      if (look) sv.shot.lookAngle = B.UNew.Degree(look);
+      const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
+      const p = r.samples[r.samples.length - 1];
+      if (tok !== histTok || !p) return;
+      const a = angs(p, ts), dd = angDec(ts), shown = Math.abs(a.ec * ts.v);
+      box.textContent = `${label} · ${yd} yd · ${a.ec < 0 ? "D" : "U"} ${shown.toFixed(dd)} ${ts.u === "MOA" ? "MOA" : "mil"} (${Math.abs(a.ec)} clicks)${bits.length ? " · " + bits.join(" ") : ""}`;
+    } catch (e) { if (tok === histTok) box.textContent = e.message || String(e); }
+  })();
 }
 async function tgSendTrue() {
-  if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(st.holes.map(h => hoff(st, h))), yd = Math.round(tgYd(g)), sn = strNo(ED.tg, st.id);
-  if (!gs || gs.n < 2 || curRifle()?.id !== ED.rifleId || curLoad()?.id !== ED.loadId) return;
+  if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(statHoles(ED, st).map(h => hoff(st, h))), yd = Math.round(tgYd(g)), sn = strNo(ED.tg, st.id);
+  const recordedId = st?.asFired?.loadId || null, same = curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId;
+  if (!gs || gs.n < 2 || !(recordedId || same)) return;
   if (yd < 50 || yd > 3000) { toast("Truing needs 50–3000 yd"); return; }
+  const d = st.dial, up = d ? dialComeUp(d, gs.cy, yd) : null;
+  if (d && !up) { toast("The saved dial has no unit. Nothing was sent."); return; }
+  TR.loadId = recordedId || curLoad()?.id || null;
+  TR.loadRecipe = st.asFired && st.asFired.recipe || null;
+  TR.loadLabel = recordedId && curLoad()?.id !== recordedId ? "recorded" : (st.asFired && st.asFired.recipe ? "recorded" : "current");
+  TR.sh = tsFor(st.asFired?.rifleId || ED.rifleId, st).sh;
   await closeTgEd(); if (ED) { if (edDirty && ED.shots.length) await commitEditor(); closeEditor(true); }
   setTab("dope"); openTrue(); if (!$("trSheet").classList.contains("show")) return;
-  const U = S.ang, corr = gs.cy / inPerU(U, yd), d = st.dial;
-  TR.unit = U; trPaint(); setVal("trRange", yd);
-  if (d) {   // dialed − offset: the elevation that would have centered the group, under the conditions + angle saved with the string
-    const w = d.wx || {}, look = Math.max(-60, Math.min(60, w.look || 0)), dialT = angConv(d.e, d.u, U) * (d.k || 1), obs = dialT - corr;
-    TR.look = look; setVal("trAngle", look);
+  trPaint(); setVal("trRange", yd);
+  if (d) {
+    const w = d.wx || {}, look = Math.max(-60, Math.min(60, w.look || 0)), obs = d.u === "MOA" ? up.moa : up.mil;
+    TR.unit = d.u; TR.look = look; trPaint(); setVal("trAngle", look); setVal("trObs", obs.toFixed(2));
     TR.cond = w.temp != null || w.alt != null || w.press != null || w.hum != null ? { cond: { temp: w.temp ?? null, hum: w.hum ?? null, alt: w.alt ?? null, press: w.press ?? null }, ...(w.tp != null ? { Tp: w.tp } : {}) } : null;
-    setVal("trObs", obs.toFixed(2));
     const cTxt = TR.cond ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", w.tp != null ? `powder ${fmt(w.tp, 0)}°F` : ""].filter(Boolean).join(" · ") : "";
     if (TR.cond) $("trFor").textContent += ` · using the string's conditions: ${cTxt}`;
-    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d)}${d.k && d.k !== 1 ? ` (×${fmt(d.k, 3)} tracking = ${dialT.toFixed(2)} ${angU(U)})` : ""}, group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} (${Math.abs(corr).toFixed(2)} ${angU(U)}) at ${yd} yd → <b>${obs.toFixed(2)} ${angU(U)}</b> would have centered it. ${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only (horizontal is mostly wind). Tap Solve.`;
-  } else {   // old strings: today's prediction (current behavior)
-    TR.look = 0; setVal("trAngle", 0); TR.cond = null;
+    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d, tsFor(st.asFired?.rifleId || ED.rifleId, st))} (${up.mil.toFixed(2)} mil · ${up.moa.toFixed(2)} MOA, the same angle), group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → <b>${obs.toFixed(2)} ${d.u}</b> would have centered it. ${recordedId && curLoad()?.id !== recordedId ? "This trues the recorded load, not the load on screen. " : ""}${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only. Tap Solve.`;
+  } else {
+    const U = S.ang, corr = gs.cy / inPerU(U, yd);
+    TR.unit = U; TR.look = 0; trPaint(); setVal("trAngle", 0); TR.cond = null;
     const pred = await predAt(yd, {}); if (!pred) { $("trOut").innerHTML = `<span class="bad">${yd} yd is beyond this bullet's reach.</span>`; return; }
     const obs = pred[U] - corr; setVal("trObs", obs.toFixed(2));
-    $("trOut").innerHTML = `From the target: group center ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → the app's ${pred[U].toFixed(2)} ${angU(U)} would have needed <b>${obs.toFixed(2)} ${angU(U)}</b>. <span class="w">No dial was saved with this string, so this uses today's prediction with today's weather and angle.</span> Vertical only (horizontal is mostly wind). Tap Solve.`;
+    $("trOut").innerHTML = `From the target: group center ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → the app's ${pred[U].toFixed(2)} ${angU(U)} would have needed <b>${obs.toFixed(2)} ${angU(U)}</b>. <span class="w">No dial was saved with this string, so this uses today's prediction with today's weather and angle.</span> Vertical only. Tap Solve.`;
   }
   toast("Vertical offset sent to Truing — check it and tap Solve");
 }
@@ -220,7 +262,7 @@ function shotDetail(s) {
     const g = t.targets.find(q => q.id === st.tid), tag = `S${si + 1}/${tgtLetter(t, st.tid)}@${fmt(g.dist, 0)}${g.du}`, hn = new Map(st.holes.map((h, i) => [h.id, i + 1])), byShot = new Map(st.holes.filter(h => h.sh).map(h => [h.sh, h]));
     const off = h => { const o = hoff(st, h); return `${o.x >= 0 ? "R" : "L"}${Math.abs(o.x).toFixed(2)} ${o.y >= 0 ? "U" : "D"}${Math.abs(o.y).toFixed(2)} in ${h.m ? "measured" : "tapped"}`; };
     readings(s, st.id).forEach((x, k) => { const h = byShot.get(x.id);
-      out.push([tag, `#${k + 1}`, `${x.v} fps`, h ? `hole ${hn.get(h.id)} ${off(h)}` : "", x.x ? "discarded" : "", x.cold ? "cold bore" : "", x.clean ? "clean bore" : "", x.fl ? "flier" : ""].filter(Boolean).join(" ")); });
+      out.push([tag, `#${k + 1}`, `${x.v} fps`, h ? `hole ${hn.get(h.id)} ${off(h)}` : "", x.x ? "removed" : "", x.clean ? "Clean" : "", x.cold ? "Cold bore" : "", x.fl ? "Flier" : "", x.ie ? "Input error" : ""].filter(Boolean).join(" ")); });
     st.holes.filter(h => !h.sh).forEach(h => out.push(`${tag} hole ${hn.get(h.id)} no reading ${off(h)}`));
   });
   return out.join(" | ");
@@ -233,7 +275,7 @@ function tgThumb(s) {
   const g = t.targets.find(q => q.id === last.tid), strs = t.strings.map((st, i) => ({ st, i })).filter(o => o.st.tid === g.id && o.st.holes.length);
   let mx = 0; const layers = strs.map(o => ({ i: o.i, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = hoff(o.st, h); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: "" }; }) }));
   const span = Math.max(2, mx * 2.4), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: "in", layers, mk: 3.2 });
-  const gs = grpStats(last.holes.map(h => hoff(last, h))), U = tsFor(s.rifleId).u, yd = tgYd(g);
+  const kept = statHoles(s, last), gs = grpStats(kept.map(h => hoff(last, h))), U = tsFor(s.rifleId, last).u, yd = tgYd(g);
   const size = gs && gs.n > 1 ? `${lenTxt(gs.es, g.u)} · ${(gs.es / inPerU(U, yd)).toFixed(2)} ${angU(U)}` : `${last.holes.length} hole`;
   return { svg: `<svg class="tgS th" viewBox="${sv.vb}" aria-hidden="true">${sv.html.replace(/<text[^>]*>[^<]*<\/text>/g, "")}</svg>`, size, n: gs ? gs.n : 0 };
 }

@@ -21,9 +21,10 @@ function paintSeg(id, key) { $(id).querySelectorAll("button").forEach(b => b.cla
 function followUnits(force) {   // the Dope MOA/MIL toggle only changes how numbers read; it defaults to the turret's unit whenever the gun,
   // optic or turret on screen changes (the toggle still works for the session). Clicks always use the turret unit.
   const r = curRifle(); if (!r) { unitFollowed = null; return; }
-  const o = curOptic(), u = turretSpec().u, key = `${r.id}|${o ? o.id : ""}|${u}`;
+  const o = curOptic(), spec = turretSpec(), u = spec.u, key = `${r.id}|${o ? o.id : ""}|${u}`;
+  if (!(spec.v > 0)) return;
   if (!force && unitFollowed === key) return; unitFollowed = key;
-  if (S.ang !== u) { S.ang = u; paintSeg("angSeg", "ang"); saveSettings(); if (lastRun) renderAll(); }
+  if (S.ang !== u && (u === "MIL" || u === "MOA")) { S.ang = u; paintSeg("angSeg", "ang"); saveSettings(); if (lastRun) renderAll(); }
 }
 // turret pickers (gun with no optic + optic): a MOA | MIL unit switch, then the click value for that unit
 const TU_DEF = { mil: "0.1mil", moa: "0.25moa" };
@@ -80,7 +81,7 @@ function attachOptic(oid, fresh) {   // fresh = optic just created for this gun 
   const prev = r.opticId ? P.optics.find(x => x.id === r.opticId) : null;
   const snap = { rO: r.opticId || null, rZ: r.zeroUnconf, oZ: other?.zeroUnconf, up: o.opUp, re: o.opUpRe, sh: o.opSH, pUp: prev?.opUp, pRe: prev?.opUpRe };
   if (other) { other.opticId = null; flagZero(other, `optic “${o.name}” moved to “${r.name}”`); }
-  r.opticId = oid;
+  r.opticId = oid; r.lastOpticId = oid;
   if (!String(o.opSH ?? "").trim() && r.sightHeight) o.opSH = r.sightHeight;
   const upGone = !fresh && clearUp(o, true); if (prev) clearUp(prev);
   const ask = !prev && !other;   // first optic on a gun that had none → ask once instead of flagging

@@ -7,6 +7,8 @@ const OPTIC_KEYS = ["opTurret", "opTurretV", "opTurretU", "opReticle", "opFP", "
 const TURRET_TABLE = { "0.1mil": ["MIL", 0.1, "0.1 mil"], "0.05mil": ["MIL", 0.05, "0.05 mil"], "0.25moa": ["MOA", 0.25, "¼ MOA"], "0.125moa": ["MOA", 0.125, "⅛ MOA"], "0.5moa": ["MOA", 0.5, "½ MOA"] };
 const CURRENT_WARN = "No as-fired optic was saved for this string. Using this firearm's current turret settings. This is not written onto the string.";
 const MISSING_WARN = "No as-fired optic and no current turret. Enter a turret click value. Nothing was invented.";
+const MOA_PER_MIL_H = 3.437747;
+const LOAD_REQUIRED = ["bc", "drag", "weight", "diameter", "mv"];
 
 function opticSnap(o) {
   if (!o || !o.id) return null;
@@ -59,6 +61,44 @@ function recordedDial(d) {
   if (!d || d.c == null || d.e == null || (d.u !== "MIL" && d.u !== "MOA")) return null;
   const dir = d.e < 0 ? "D" : "U";
   return { c: Math.round(d.c), e: d.e, u: d.u, dir, lbl: d.cl || "" };
+}
+
+function fieldSet(src, key) {
+  return !!(src && src[key] != null && String(src[key]).trim() !== "");
+}
+
+function histLoad(recipe, current) {
+  const rec = recipe && typeof recipe === "object" ? recipe : null;
+  const used = {};
+  const fromCurrent = [];
+  const missing = [];
+  LOAD_REQUIRED.forEach((key) => {
+    if (fieldSet(rec, key)) used[key] = String(rec[key]).trim();
+    else if (fieldSet(current, key)) { used[key] = String(current[key]).trim(); fromCurrent.push(key); }
+    else missing.push(key);
+  });
+  ["length", "ptSens", "mvTemp", "bulletName"].forEach((key) => { if (fieldSet(rec, key)) used[key] = String(rec[key]).trim(); });
+  if (used.drag) used.drag = /g1/i.test(used.drag) ? "G1" : "G7";
+  let warning = null;
+  if (missing.length) warning = `This string is missing ${missing.join(", ")}. Enter ${missing.length > 1 ? "them" : "it"}. Nothing was invented.`;
+  else if (fromCurrent.length) warning = `No as-fired ${fromCurrent.join(", ")} was saved. Using the current load for ${fromCurrent.length > 1 ? "those" : "that"}. This is not written onto the string.`;
+  return { source: missing.length ? "missing" : fromCurrent.length ? "current" : "as-fired", used, missing, fromCurrent, warning };
+}
+
+function angConvert(v, from, to) {
+  if (from === to) return v;
+  if (from === "MIL" && to === "MOA") return v * MOA_PER_MIL_H;
+  if (from === "MOA" && to === "MIL") return v / MOA_PER_MIL_H;
+  return null;
+}
+
+function dialComeUp(dial, offsetInches, yd) {
+  if (!dial || dial.e == null || (dial.u !== "MIL" && dial.u !== "MOA") || !(yd > 0) || !isFinite(offsetInches)) return null;
+  const k = dial.k >= 0.8 && dial.k <= 1.2 ? dial.k : 1;
+  const dialMil = (dial.u === "MOA" ? dial.e / MOA_PER_MIL_H : dial.e) * k;
+  const offMil = offsetInches / (3.6 * yd / 100);
+  const mil = dialMil - offMil;
+  return { mil, moa: mil * MOA_PER_MIL_H, unit: dial.u };
 }
 
 function clicksFor(angle, spec) {
@@ -266,6 +306,6 @@ function stringStats(session, stringId) {
 }
 
 export {
-  clone, opticSnap, cleanAsFired, loadsOf, specFromSaved, recordedDial, clicksFor, currentTurretKnown, histSource, calcFallback, asFiredFrom, opticOn, recallFirearm,
+  clone, opticSnap, cleanAsFired, loadsOf, specFromSaved, recordedDial, clicksFor, histLoad, angConvert, dialComeUp, currentTurretKnown, histSource, calcFallback, asFiredFrom, opticOn, recallFirearm,
   migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, assignShots, stringStats,
 };

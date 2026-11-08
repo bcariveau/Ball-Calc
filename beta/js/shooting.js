@@ -5,10 +5,10 @@
 import { setTab } from "./app.js";
 import { B, angDec, angs, entryRequired, lastRun, solveShot, turretSpec } from "./calc.js";
 import { shBtnPaint, toast } from "./components.js";
-import { $, escapeHtml, fmt, num } from "./core.js";
+import { $, escapeHtml, fmt, num, val } from "./core.js";
 import { CLOCK, lr, ud } from "./dope.js";
 import { applyLoad, applyRifle, curLoad, curRifle } from "./gear.js";
-import { calcFallback, opticOn, recallFirearm } from "./link-v3.js";
+import { calcFallback, histLoad, opticOn, recallFirearm } from "./link-v3.js";
 import { ED, LOG, addVelocities, closeEditor, commitEditor, curKeyIds, edDirty, openEditor, renderEditor, set_edDirty, shotStats } from "./log.js";
 import { RD, hasBT } from "./radar.js";
 import { banHide, wakeSync } from "./shot-banner.js";
@@ -162,17 +162,28 @@ function shStatus() {
   c.hidden = RD.status === "connected" || RD.status === "connecting";
   c.textContent = RD.dev && (RD.status === "lost" || RD.status === "off") ? "↻ Reconnect" : "📡 Connect";
 }
+function formLoadBag() {
+  return { bc: val("bc"), drag: val("drag"), weight: val("weight"), diameter: val("diameter"), mv: val("mv"), length: val("length"), ptSens: val("ptSens"), mvTemp: val("mvTemp"), bulletName: val("bulletName") };
+}
+function histSolve(st, ts) {
+  const hl = histLoad(st?.asFired?.recipe, formLoadBag());
+  if (hl.source === "missing") return { blocked: hl.warning };
+  if (ts && !(ts.v > 0)) return { blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
+  const warn = [ts && ts.warning, hl.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean).join(" ");
+  return { load: hl.used, source: hl.source, warn, sh: ts && ts.sh, allowBlank: true };
+}
 // vertical spread at the target from the slowest vs fastest kept shot, same zero + conditions + angle as the Dope tab
 async function shEsAt(min, max, yd) {
-  let hist = null;
+  let hist = null, solved = null;
   if (ED) {
     const cur = shCurStr().cur;
     hist = tsFor(cur?.asFired?.rifleId || ED.rifleId, cur);
-    if (!(hist.v > 0)) return null;
+    solved = histSolve(cur, hist);
+    if (solved.blocked) return null;
   } else if (entryRequired()) return null;
   if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000) || !(max > min)) return null;
   try {
-    const sv = await solveShot(hist && hist.source === "as-fired" ? { allowBlank: true, winds: [], sh: hist.sh } : { winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    const sv = await solveShot({ ...(solved || {}), winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     const fire = async v => {
       const s2 = new B.Shot({ weapon: sv.shot.weapon, ammo: new B.Ammo({ dm: sv.shot.ammo.dm, mv: B.UNew.FPS(v) }), atmo: sv.shot.atmo, winds: [] });
       if (look) s2.lookAngle = B.UNew.Degree(look);
@@ -184,14 +195,17 @@ async function shEsAt(min, max, yd) {
     return { spread, half: spread / 2, inch: Math.abs(a.height.In(B.Distance.Inch) - b.height.In(B.Distance.Inch)), yd, u: S.ang };
   } catch { return null; }
 }
-async function shDopeAt(yd, st) {   // dope strip: recorded turret when the string has one; otherwise the labeled current turret
+async function shDopeAt(yd, st) {   // dope strip: recorded load and turret when the string has them; otherwise a labeled current fallback
   const ts = st ? tsFor(st.asFired?.rifleId || ED?.rifleId, st) : turretSpec();
+  const solved = st ? histSolve(st, ts) : null;
+  if (solved && solved.blocked) return { yd, blocked: solved.blocked };
   if (!(ts.v > 0)) return { yd, blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
-  const o = { yd, warn: ts.warning || "" };
+  const o = { yd, warn: (solved && solved.warn) || ts.warning || "" };
   if (st && st.dial) { const dv = dialView(st.dial, ts); o.elev = `${dv.txt}`; o.clk = dv.c != null ? `${Math.abs(dv.c)} clicks` : ""; o.src = st.dial.src === "app" ? "dialed" : "dialed (edited)"; }
-  if (typeof B === "undefined" || !B || !tgSame() || !(yd >= 5 && yd <= 3000)) return o;
+  if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000)) return o;
+  if (!solved && !tgSame()) return o;
   try {
-    const sv = await solveShot(ts.source === "as-fired" ? { allowBlank: true, sh: ts.sh } : {}), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+    const sv = await solveShot(solved || {}), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
     if (look) sv.shot.lookAngle = B.UNew.Degree(look);
     const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
     const p = r.samples[r.samples.length - 1]; if (!p) return o;

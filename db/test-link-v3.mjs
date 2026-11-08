@@ -2,7 +2,7 @@
 // Does not read or write a browser profile.
 import assert from "node:assert/strict";
 import {
-  asFiredFrom, assignShots, calcFallback, clicksFor, cleanAsFired, exportBundle, histSource, importBundle, migrateToV3, moveShots, recordedDial, specFromSaved,
+  angConvert, asFiredFrom, assignShots, calcFallback, clicksFor, cleanAsFired, dialComeUp, exportBundle, histLoad, histSource, importBundle, migrateToV3, moveShots, recordedDial, specFromSaved,
   recallFirearm, rollback, splitFrom, staleMv, stringStats,
 } from "../beta/js/link-v3.js";
 
@@ -135,6 +135,20 @@ const missed = histSource(bare, { turret: "custom", turretV: "" }, { id: "o1", o
 ok(missed.source === "missing" && missed.spec === null && bare.optic === null && /Nothing was invented/.test(missed.warning), "a missing current click value blocks and does not invent one");
 const oldDial = recordedDial({ e: 2.8, u: "MIL", c: 28, cl: "0.1 mil" });
 ok(oldDial.c === 28 && oldDial.u === "MIL" && oldDial.dir === "U", "a saved dial keeps its recorded clicks when the optic snapshot is missing");
+const recordedLoad = { bulletName: "140 ELD-M", bc: "0.326", drag: "G7", weight: "140", diameter: "0.264", mv: "2710" };
+const currentLoad = { bulletName: "150 FMJ", bc: "0.550", drag: "G1", weight: "150", diameter: "0.308", mv: "3200" };
+const rawLoad = JSON.stringify(recordedLoad);
+const keptLoad = histLoad(recordedLoad, currentLoad);
+ok(keptLoad.source === "as-fired" && keptLoad.used.mv === "2710" && keptLoad.used.bc === "0.326" && keptLoad.used.drag === "G7" && JSON.stringify(recordedLoad) === rawLoad, "a recorded load is used whole and is not rewritten");
+const partial = histLoad({ mv: "2710", drag: "G7" }, currentLoad);
+ok(partial.source === "current" && partial.used.mv === "2710" && partial.used.bc === "0.550" && partial.fromCurrent.includes("bc") && /not written/.test(partial.warning), "a missing recorded BC uses the current load and says so");
+const gone = histLoad({}, { bc: "", drag: "", weight: "", diameter: "", mv: "" });
+ok(gone.source === "missing" && /Nothing was invented/.test(gone.warning), "missing recorded and current load inputs block");
+const milUp = dialComeUp({ e: 2.8, u: "MIL", k: 1 }, 1.5, 600);
+const moaUp = dialComeUp({ e: 2.8 * 3.437747, u: "MOA", k: 1 }, 1.5, 600);
+ok(Math.abs(milUp.mil - moaUp.mil) < 1e-6 && Math.abs(milUp.moa - moaUp.moa) < 1e-6, "a mil dial and the same angle saved in MOA are one come-up");
+ok(Math.abs(angConvert(milUp.mil, "MIL", "MOA") - milUp.moa) < 1e-9, "display conversion does not change the angle");
+console.log("COMEUP mil", milUp.mil.toFixed(4), "moa", milUp.moa.toFixed(4));
 console.log("CLICKS recorded", milClicks.c, "current-quarter-moa", moaClicks.c);
 
 console.log("PASS link-v3 assertions", n);

@@ -3,9 +3,11 @@
 // init*() and is called by main.js in the original order.
 
 import { setTab } from "./app.js";
+import { B, angDec, angs, solveShot } from "./calc.js";
 import { toast } from "./components.js";
-import { $, escapeHtml, fmt, setVal } from "./core.js";
+import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { curLoad, curRifle } from "./gear.js";
+import { dialComeUp, histLoad } from "./link-v3.js";
 import { ED, LOG, closeEditor, commitEditor, edDirty, openEditor, renderEditor, set_edDirty } from "./log.js";
 import { SEL, paintSel } from "./reassign.js";
 import { SH, shPaint } from "./shooting.js";
@@ -182,39 +184,73 @@ function teResults() {
     : vv.r >= 0.7 && vv.n >= 5 ? `<b class="w">⚠ Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.`
     : vv.r >= 0.5 ? `<span class="pt">Possible velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — needs 5+ paired shots with r ≥ 0.7 to call it.</span>`
     : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
+  h += `<div class="hint" id="tgHist">…</div>`;
   if (blocked) h += `<div class="zc bad" id="tgZero">${escapeHtml(ts.warning || "Enter a turret click value before calculating. Nothing was invented.")}</div>`;
   else if (atZero && gs.n) {
     const k = ts.k || 1, e1 = -gs.cy / inPerU(ts.u, yd) / k, w1 = -gs.cx / inPerU(ts.u, yd), ce = Math.round(Math.abs(e1) / ts.v), cw = Math.round(Math.abs(w1) / ts.v);   // elevation ÷ tracking factor, as the dope does
     h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}${ts.source === "current" ? ", current turret" : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>${ts.source === "current" ? escapeHtml(ts.warning) + " " : ""}Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
   } else if (gs.n > 1) {
-    const vU = S.ang, need = -gs.cy / inPerU(vU, yd), d = st.dial;
-    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d, ts)} dialed` : "the app's dope dialed"}<small>${d ? "The dial saved with this string (edit it above)." : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
-    h += `<button type="button" id="tgTrue"${TE.atDist && same ? "" : " disabled"}>🎯 Send vertical to Truing (${gs.cy >= 0 ? "group high" : "group low"} ${lenTxt(Math.abs(gs.cy), u)} = ${need >= 0 ? "U" : "D"} ${Math.abs(need).toFixed(2)} ${angU(vU)})</button>`;
-    h += `<div class="hint">${d ? `Sends dialed − offset (the elevation that would have centered the group) with this string's saved conditions and angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}Only the vertical offset is sent. Horizontal (${gs.cx >= 0 ? "R" : "L"} ${lenTxt(Math.abs(gs.cx), u)}) is never sent — it's mostly wind.${same ? "" : " <b>Pick this session's gun + load on Gear to send it.</b>"}</div>`;
+    const d = st.dial, recordedId = st.asFired && st.asFired.loadId, canTrue = !!(recordedId || same);
+    const up = d ? dialComeUp(d, gs.cy, yd) : null;
+    h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d, ts)} dialed` : "the app's dope dialed"}<small>${d ? `The dial is ${d.u}. Switching the display unit does not change that angle.` : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
+    h += `<button type="button" id="tgTrue"${TE.atDist && canTrue ? "" : " disabled"}>🎯 Send vertical to Truing${up ? ` (${up.mil.toFixed(2)} mil · ${up.moa.toFixed(2)} MOA)` : ""}</button>`;
+    h += `<div class="hint">${d ? `Sends the saved ${d.u} dial minus the group offset. The other unit is the same angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}${recordedId && curLoad()?.id !== recordedId ? "Save updates the recorded load, not the load on screen. " : ""}${!recordedId && !same ? "<b>This string has no recorded load, and the load on screen is a different one. Nothing is sent.</b> " : ""}Only the vertical offset is sent.</div>`;
   }
   box.innerHTML = h;
+  teHistDope(st, g, ts);
+}
+let histTok = 0;
+function formLoadBag() {
+  return { bc: val("bc"), drag: val("drag"), weight: val("weight"), diameter: val("diameter"), mv: val("mv"), length: val("length"), ptSens: val("ptSens"), mvTemp: val("mvTemp"), bulletName: val("bulletName") };
+}
+function teHistDope(st, g, ts) {
+  const box = $("tgHist"); if (!box || !st) return;
+  const yd = Math.round(tgYd(g)), hl = histLoad(st.asFired && st.asFired.recipe, formLoadBag());
+  const bits = [hl.warning, ts && ts.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean);
+  if (hl.source === "missing" || !(ts && ts.v > 0)) { box.textContent = bits[0] || "Enter the missing load or turret. Nothing was invented."; return; }
+  if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000)) { box.textContent = bits.join(" "); return; }
+  const tok = ++histTok;
+  const label = hl.source === "as-fired" ? `Recorded ${hl.used.bulletName || "load"} · ${hl.used.drag} ${hl.used.bc} · ${hl.used.mv} fps` : `Current ${hl.used.drag} ${hl.used.bc} · ${hl.used.mv} fps for missing ${hl.fromCurrent.join(", ")}`;
+  box.textContent = `${label} · …`;
+  (async () => {
+    try {
+      const sv = await solveShot({ allowBlank: true, load: hl.used, sh: ts.sh, winds: [] }), look = num("shotAngle") || 0, cosA = Math.cos(look * Math.PI / 180);
+      if (look) sv.shot.lookAngle = B.UNew.Degree(look);
+      const r = await sv.calc.fire({ shot: sv.shot, trajectoryRange: B.UNew.Yard(yd * cosA), trajectoryStep: B.UNew.Yard(yd * cosA), raiseRangeError: false });
+      const p = r.samples[r.samples.length - 1];
+      if (tok !== histTok || !p) return;
+      const a = angs(p, ts), dd = angDec(ts), shown = Math.abs(a.ec * ts.v);
+      box.textContent = `${label} · ${yd} yd · ${a.ec < 0 ? "D" : "U"} ${shown.toFixed(dd)} ${ts.u === "MOA" ? "MOA" : "mil"} (${Math.abs(a.ec)} clicks)${bits.length ? " · " + bits.join(" ") : ""}`;
+    } catch (e) { if (tok === histTok) box.textContent = e.message || String(e); }
+  })();
 }
 async function tgSendTrue() {
   if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(statHoles(ED, st).map(h => hoff(st, h))), yd = Math.round(tgYd(g)), sn = strNo(ED.tg, st.id);
-  if (!gs || gs.n < 2 || curRifle()?.id !== ED.rifleId || curLoad()?.id !== ED.loadId) return;
+  const recordedId = st?.asFired?.loadId || null, same = curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId;
+  if (!gs || gs.n < 2 || !(recordedId || same)) return;
   if (yd < 50 || yd > 3000) { toast("Truing needs 50–3000 yd"); return; }
+  const d = st.dial, up = d ? dialComeUp(d, gs.cy, yd) : null;
+  if (d && !up) { toast("The saved dial has no unit. Nothing was sent."); return; }
+  TR.loadId = recordedId || curLoad()?.id || null;
+  TR.loadRecipe = st.asFired && st.asFired.recipe || null;
+  TR.loadLabel = recordedId && curLoad()?.id !== recordedId ? "recorded" : (st.asFired && st.asFired.recipe ? "recorded" : "current");
+  TR.sh = tsFor(st.asFired?.rifleId || ED.rifleId, st).sh;
   await closeTgEd(); if (ED) { if (edDirty && ED.shots.length) await commitEditor(); closeEditor(true); }
   setTab("dope"); openTrue(); if (!$("trSheet").classList.contains("show")) return;
-  const U = S.ang, corr = gs.cy / inPerU(U, yd), d = st.dial;
-  TR.unit = U; trPaint(); setVal("trRange", yd);
-  if (d) {   // dialed − offset: the elevation that would have centered the group, under the conditions + angle saved with the string
-    const w = d.wx || {}, look = Math.max(-60, Math.min(60, w.look || 0)), dialT = angConv(d.e, d.u, U) * (d.k || 1), obs = dialT - corr;
-    TR.look = look; setVal("trAngle", look);
+  trPaint(); setVal("trRange", yd);
+  if (d) {
+    const w = d.wx || {}, look = Math.max(-60, Math.min(60, w.look || 0)), obs = d.u === "MOA" ? up.moa : up.mil;
+    TR.unit = d.u; TR.look = look; trPaint(); setVal("trAngle", look); setVal("trObs", obs.toFixed(2));
     TR.cond = w.temp != null || w.alt != null || w.press != null || w.hum != null ? { cond: { temp: w.temp ?? null, hum: w.hum ?? null, alt: w.alt ?? null, press: w.press ?? null }, ...(w.tp != null ? { Tp: w.tp } : {}) } : null;
-    setVal("trObs", obs.toFixed(2));
     const cTxt = TR.cond ? [w.temp != null ? `${fmt(w.temp, 0)}°F` : "", w.alt != null ? `${fmt(w.alt, 0)} ft` : "", w.press != null ? `${fmt(w.press, 2)} inHg` : "", w.tp != null ? `powder ${fmt(w.tp, 0)}°F` : ""].filter(Boolean).join(" · ") : "";
     if (TR.cond) $("trFor").textContent += ` · using the string's conditions: ${cTxt}`;
-    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d)}${d.k && d.k !== 1 ? ` (×${fmt(d.k, 3)} tracking = ${dialT.toFixed(2)} ${angU(U)})` : ""}, group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} (${Math.abs(corr).toFixed(2)} ${angU(U)}) at ${yd} yd → <b>${obs.toFixed(2)} ${angU(U)}</b> would have centered it. ${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only (horizontal is mostly wind). Tap Solve.`;
-  } else {   // old strings: today's prediction (current behavior)
-    TR.look = 0; setVal("trAngle", 0); TR.cond = null;
+    $("trOut").innerHTML = `From the target: dialed ${dialTxt(d, tsFor(st.asFired?.rifleId || ED.rifleId, st))} (${up.mil.toFixed(2)} mil · ${up.moa.toFixed(2)} MOA, the same angle), group ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → <b>${obs.toFixed(2)} ${d.u}</b> would have centered it. ${recordedId && curLoad()?.id !== recordedId ? "This trues the recorded load, not the load on screen. " : ""}${TR.cond ? `Solved with String ${sn}'s saved conditions (${cTxt}) and ${fmt(look, 0)}° angle.` : `No conditions saved with the string — today's weather is used, ${fmt(look, 0)}° angle.`} Vertical only. Tap Solve.`;
+  } else {
+    const U = S.ang, corr = gs.cy / inPerU(U, yd);
+    TR.unit = U; TR.look = 0; trPaint(); setVal("trAngle", 0); TR.cond = null;
     const pred = await predAt(yd, {}); if (!pred) { $("trOut").innerHTML = `<span class="bad">${yd} yd is beyond this bullet's reach.</span>`; return; }
     const obs = pred[U] - corr; setVal("trObs", obs.toFixed(2));
-    $("trOut").innerHTML = `From the target: group center ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → the app's ${pred[U].toFixed(2)} ${angU(U)} would have needed <b>${obs.toFixed(2)} ${angU(U)}</b>. <span class="w">No dial was saved with this string, so this uses today's prediction with today's weather and angle.</span> Vertical only (horizontal is mostly wind). Tap Solve.`;
+    $("trOut").innerHTML = `From the target: group center ${gs.cy >= 0 ? "high" : "low"} ${lenTxt(Math.abs(gs.cy), "in")} at ${yd} yd → the app's ${pred[U].toFixed(2)} ${angU(U)} would have needed <b>${obs.toFixed(2)} ${angU(U)}</b>. <span class="w">No dial was saved with this string, so this uses today's prediction with today's weather and angle.</span> Vertical only. Tap Solve.`;
   }
   toast("Vertical offset sent to Truing — check it and tap Solve");
 }

@@ -86,6 +86,13 @@ The main app's `sw.js` only handles its own fixed file list, so it never interce
 - Location is requested only by ↻ Weather (`refreshWeather({ gps: true })`) and Gear › Range › 📍 Use my current location.
   Page load, back-online and range changes use the range's coordinates or the last stored place, never a permission prompt.
 
+## Display name, holes, and shot tags (BallisticBench round)
+The in-app name is **BallisticBench**. The logo artwork, `manifest-beta.webmanifest` identity, storage keys, and the repo URL are unchanged.
+
+Shot holes on the target sheet are the saved bullet diameter (`session.recipe.diameter`, inches). That length is in sheet inches, so it grows when you zoom. The old marks also passed `mk = max(0.5, 1/√zoom)`, which made the on-screen dots shrink as you zoomed in; that factor is gone. If a session has no saved diameter, the mark stays a fixed screen size and the sheet says so — the current load's diameter is not borrowed.
+
+Tags are Clean, Cold bore, Flier, and Input error. They combine, and none of them removes a shot from any statistic. **Behavior change:** Use avg as MV used to skip Cold bore and Flier shots. It no longer does. Only Remove (the existing `x` flag) does: the shot stays in the log, is shown as removed, can be restored, and is left out of velocity avg/SD/ES, deviations, flier coloring, group size, group center, velocity-vs-vertical, Use avg as MV, and the session summaries. There is no Hot bore tag.
+
 ## Tests
 `db/test-bluetooth.mjs` unit-tests the `RADAR-PARSER` block in `js/radar.js`. Keep the BEGIN/END markers and keep the
 block self-contained.

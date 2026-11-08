@@ -109,7 +109,7 @@ function shDevCls(v, kept) {
 }
 function shDevWord(c) { return c === "dvB" ? "far off the average" : c === "dvW" ? "off the average" : ""; }
 function shSigned(n) { return n == null ? "" : (n >= 0 ? "+" : "−") + Math.abs(n); }
-function shTags(s) { return [s.cold && "Cold", s.clean && "Clean", s.fl && "Flier", s.note && "✎ " + s.note].filter(Boolean).join(" · "); }
+function shTags(s) { return [s.clean && "Clean", s.cold && "Cold bore", s.fl && "Flier", s.ie && "Input error", s.note && "✎ " + s.note].filter(Boolean).join(" · "); }
 function shPaint() {
   if (!SH.on || !ED) return;
   const { t, cur } = shCurStr(), sn = strNo(t, cur.id), rd = readings(ED, cur.id), w = shWeight(), q = shStatsOf(rd, w), g = t.targets.find(x => x.id === cur.tid);
@@ -120,10 +120,10 @@ function shPaint() {
   const x = q.last;
   $("shV").textContent = x ? fpsT(x.v) : "—";
   const keptV = rd.filter(s => !s.x).map(s => s.v), mc = x && !x.x ? shDevCls(x.v, keptV) : "";
-  $("shMeta").innerHTML = x ? `#${q.k}${x.x ? " · discarded" : q.dv != null ? ` · <span id="shDev"${mc ? ` class="${mc}"` : ""}>${shSigned(q.dv)}</span>` : ""}` : SH.ended ? "" : "Waiting for the first shot";
+  $("shMeta").innerHTML = x ? `#${q.k}${x.x ? " · removed" : q.dv != null ? ` · <span id="shDev"${mc ? ` class="${mc}"` : ""}>${shSigned(q.dv)}</span>` : ""}` : SH.ended ? "" : "Waiting for the first shot";
   $("shMeta").classList.toggle("wait", !x);
   $("shHero").classList.toggle("dis", !!(x && x.x));
-  $("shHero").setAttribute("aria-label", x ? `Last shot ${fpsT(x.v)} fps, shot ${q.k}${x.x ? ", discarded" : q.dv != null ? `, ${shSigned(q.dv)} from the string average${mc ? `, ${shDevWord(mc)}` : ""}` : ""}` : "No shots yet");
+  $("shHero").setAttribute("aria-label", x ? `Last shot ${fpsT(x.v)} fps, shot ${q.k}${x.x ? ", removed" : q.dv != null ? `, ${shSigned(q.dv)} from the string average${mc ? `, ${shDevWord(mc)}` : ""}` : ""}` : "No shots yet");
   const en = SH.ended === cur.id; $("shEndNote").hidden = !en;
   if (en) $("shEndNote").textContent = `String ${sn} ended · the next shot starts String ${t.strings.length + 1}`;
   const f1 = v => (+v).toFixed(1);
@@ -131,8 +131,8 @@ function shPaint() {
     ["Min", q.n ? fpsT(q.min) : "—"], ["Max", q.n ? fpsT(q.max) : "—"], ["Energy · last", q.ftlb != null ? `${Math.round(q.ftlb).toLocaleString()} ft-lb` : "—", "w2"]]
     .map(([k, v, c]) => `<div${c ? ` class="${c}"` : ""}><b>${v}</b><span>${k}</span></div>`).join("");
   $("shList").innerHTML = rd.length ? rd.map((s, i) => ({ s, i })).reverse().map(({ s, i }) => `<div class="shRow${s.x ? " dis" : ""}${s.id === SH.lastId && i === rd.length - 1 ? " new" : ""}" data-id="${escapeHtml(s.id)}">
-      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v, keptV); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "discarded" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
-      <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot ${i + 1}" title="${s.x ? "Restore" : "Discard (bad read)"}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
+      <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v, keptV); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "removed" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
+      <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot ${i + 1}" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the string."}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
     : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap ＋ Add shot to type a velocity.</div>`;
   shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en); $("shStrBtn").classList.toggle("on", en);
   $("shStrBtn").innerHTML = en ? `String ▾<small>ended</small>` : "String ▾"; $("shStrFor").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
@@ -202,9 +202,9 @@ function shCalcPaint(q) {
 }
 async function shBad() {
   if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), k = rd.map(s => !s.x).lastIndexOf(true);
-  if (k < 0) { toast("No kept shot to discard"); return; }
+  if (k < 0) { toast("No kept shot to remove"); return; }
   const x = rd[k]; x.x = true; if (x.id) unpair(ED, x.id); set_edDirty(true); renderEditor(); await shSave(); shPaint();
-  toast(`Shot #${k + 1} (${fpsT(x.v)} fps) discarded · out of the stats`, { label: "Undo", ms: 5000, fn: async () => { if (!ED) return; delete x.x; set_edDirty(true); renderEditor(); await shSave(); shPaint(); } });
+  toast(`Shot #${k + 1} (${fpsT(x.v)} fps) removed · out of every stat, still in the log`, { label: "Undo", ms: 5000, fn: async () => { if (!ED) return; delete x.x; set_edDirty(true); renderEditor(); await shSave(); shPaint(); } });
 }
 async function shToggle(id, f) {
   if (!ED) return; const x = ED.shots.find(s => s.id === id); if (!x) return;

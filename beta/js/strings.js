@@ -11,7 +11,7 @@ import { banPaint } from "./shot-banner.js";
 import { uid } from "./storage.js";
 import { mkGlyph, tgSvg } from "./target-draw.js";
 import { openTgEd, teRender, teSnap, teStr, teTgt, tgAfterEditQuiet } from "./target-editor.js";
-import { BAN, TE, TV, angConv, angU, cleanDial, grpStats, hoff, inPerU, lenTxt, readings, strNo, tgDefDist, tgEnsure, tgView, tgYd, tgtLetter, tsFor } from "./targets.js";
+import { BAN, TE, TV, angConv, angU, bulletDiaIn, cleanDial, grpStats, hoff, inPerU, lenTxt, readings, statHoles, strNo, tgDefDist, tgEnsure, tgView, tgYd, tgtLetter, tsFor } from "./targets.js";
 
 
 /* ---- session editor: string bar + overlays ---- */
@@ -31,9 +31,9 @@ function paintTgView() {
   const shown = vis.filter(o => !TV.hide.has(o.st.id));
   const yds = [...new Set(shown.map(o => Math.round(tgYd(o.g))))], ts = tsFor(ED.rifleId), ang = yds.length > 1 ? ts.u : null, lu = shown[0]?.g.u || "in";
   const conv = (p, g) => ang ? { x: p.x / inPerU(ang, tgYd(g)), y: p.y / inPerU(ang, tgYd(g)) } : p;
-  let mx = 0; const layers = shown.map(o => ({ i: o.i, sid: o.st.id, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = conv(hoff(o.st, h), o.g); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: k + 1, meas: !!h.m, id: h.id }; }) }));
-  const span = Math.max(ang ? 2 : 3, mx * 2.5), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers, px: span / Math.max(200, box.clientWidth || 380) });
-  const chips = vis.map(o => { const on = !TV.hide.has(o.st.id), gs = grpStats(o.st.holes.map(h => hoff(o.st, h)));
+  let mx = 0; const layers = shown.map(o => ({ i: o.i, sid: o.st.id, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = conv(hoff(o.st, h), o.g); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: k + 1, meas: !!h.m, rm: !statHoles(ED, { holes: [h] }).length, id: h.id }; }) }));
+  const span = Math.max(ang ? 2 : 3, mx * 2.5), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers, dia: bulletDiaIn(ED), px: span / Math.max(200, box.clientWidth || 380) });
+  const chips = vis.map(o => { const on = !TV.hide.has(o.st.id), gs = grpStats(statHoles(ED, o.st).map(h => hoff(o.st, h)));
     return `<button type="button" class="sc${on ? " on" : ""}" data-s="${escapeHtml(o.st.id)}" aria-pressed="${on}">${mkGlyph(o.i)}S${o.i + 1} · ${tgtLetter(t, o.st.tid)} · ${fmt(o.g.dist, 0)} ${o.g.du}${gs && gs.n > 1 ? ` · ${lenTxt(gs.es, o.g.u)}` : ""}</button>`; }).join("");
   box.innerHTML = `<div class="scRow" role="group" aria-label="Show or hide strings">${chips}</div>` +
     (shown.length ? `<svg id="slTgSvg" class="tgS" viewBox="${sv.vb}" role="img" aria-label="Overlay of ${shown.length} string${shown.length > 1 ? "s" : ""}, aligned on their aim points">${sv.html}</svg>` : `<div class="hint">All strings hidden — tap a chip to show it.</div>`) +

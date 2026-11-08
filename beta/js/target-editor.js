@@ -13,7 +13,7 @@ import { banHide, banPaint } from "./shot-banner.js";
 import { P, S, uid } from "./storage.js";
 import { dialTxt, teDialPaint, teSumPaint, tgAutoDial, tgRecent, tgRedope, tgSame } from "./strings.js";
 import { tgSvg } from "./target-draw.js";
-import { BAN, TE, angConv, angU, fpsT, grpStats, hoff, hpos, inPerU, lenTxt, readings, set_TE, strNo, tgDefDist, tgEnsure, tgView, tgYd, tgtLetter, tsFor, unpair, velVert } from "./targets.js";
+import { BAN, TE, angConv, angU, bulletDiaIn, fpsT, grpStats, hoff, hpos, inPerU, lenTxt, readings, set_TE, statHoles, strNo, tgDefDist, tgEnsure, tgView, tgYd, tgtLetter, tsFor, unpair, velVert } from "./targets.js";
 import { TR, openTrue, predAt, trPaint } from "./truing.js";
 
 
@@ -56,10 +56,11 @@ function teDraw() {
   const t = ED.tg, st = teStr(), g = teTgt(), yd = tgYd(g) || 100;
   if (!TE.drag || !TE.span) TE.span = teSpan(t, g);
   const layers = t.strings.map((s, i) => ({ s, i })).filter(o => o.s.tid === g.id).map(o => ({ i: o.i, sid: o.s.id, dim: o.s.id !== st.id, aim: o.s.aim,
-    holes: o.s.holes.map((h, k) => ({ p: hpos(o.s, h), n: k + 1, meas: !!h.m, sel: o.s.id === st.id && h.id === TE.sel, id: o.s.id === st.id ? h.id : "" })) }));
+    holes: o.s.holes.map((h, k) => ({ p: hpos(o.s, h), n: k + 1, meas: !!h.m, rm: !statHoles(ED, { holes: [h] }).length, sel: o.s.id === st.id && h.id === TE.sel, id: o.s.id === st.id ? h.id : "" })) }));
   layers.sort((a, b) => (a.dim ? 0 : 1) - (b.dim ? 0 : 1));
-  const z = TE.zoom || 1, c = teCenter(z), W = TE.span / z;
-  const sv = tgSvg({ span: W, gspan: TE.span, cx: c.x, cy: c.y, tpl: g.tpl, yd, layers, mk: Math.max(0.5, 1 / Math.sqrt(z)), px: W / Math.max(120, $("tgSvg").clientWidth || 380) });
+  const z = TE.zoom || 1, c = teCenter(z), W = TE.span / z, dia = bulletDiaIn(ED);
+  // No mk shrink: a real diameter is a fixed length on the sheet and grows with zoom. An unknown diameter stays a steady screen marker.
+  const sv = tgSvg({ span: W, gspan: TE.span, cx: c.x, cy: c.y, tpl: g.tpl, yd, layers, dia, px: W / Math.max(120, $("tgSvg").clientWidth || 380) });
   $("tgZoomT").textContent = `×${+z.toFixed(1)}`; $("tgZin").disabled = z >= 8; $("tgZout").disabled = z <= 1; $("tgZfit").disabled = z <= 1;
   const svg = $("tgSvg"); svg.setAttribute("viewBox", sv.vb); svg.innerHTML = sv.html; TE.vb = sv; TE.grid = sv.grid;
   return sv;
@@ -81,6 +82,9 @@ function teRender() {
     : TE.mode === "meas" ? (st.holes.length ? "Measure from the aim point to the center of each hole." : "Tap holes first (or ＋ Add shot), then measure them.")
     : !st.aim ? "Set the aim point first (⊕ Aim point)." : pn ? `Tap where shot ${pn} hit.` : "Tap each hole in the order fired · drag a hole to adjust · tap its center (or its row below) to select it.";
   teDraw(); teMeasPaint(); tePair(); teDialPaint(); teResults();
+  const dia = bulletDiaIn(ED), note = $("tgHoleNote");
+  if (note) note.textContent = dia ? `Holes are drawn at ${dia.toFixed(3)}" (the bullet diameter saved with this session) and get larger as you zoom in.`
+    : "Hole marks are not to scale — this session has no saved bullet diameter, so nothing is invented.";
 }
 function teMeasPaint() {
   const box = $("tgMeas"), st = teStr(); box.hidden = TE.mode !== "meas"; if (box.hidden) return;
@@ -112,7 +116,7 @@ function tgAfterEditQuiet() { set_edDirty(true); }
 function tePair() {   // one list: a row per hole (number, fps or "no reading", 📏/👆, ⋯), then readings with no hole (discarded double reads included)
   const st = teStr(), rd = readings(ED, st.id), rk = new Map(rd.map((x, k) => [x.id, k + 1])), used = new Set(), M = TE.menu;
   ED.tg.strings.forEach(q => q.holes.forEach(h => h.sh && used.add(h.sh)));
-  const tags = x => [x.cold && "cold bore", x.clean && "clean bore", x.fl && "flier"].filter(Boolean).join(" · "), E = escapeHtml, B2 = (m, t, cl, ex) => `<button type="button" class="${cl || ""}" data-m="${m}"${ex || ""}>${t}</button>`;
+  const tags = x => [x.clean && "Clean", x.cold && "Cold bore", x.fl && "Flier", x.ie && "Input error"].filter(Boolean).join(" · "), E = escapeHtml, B2 = (m, t, cl, ex) => `<button type="button" class="${cl || ""}" data-m="${m}"${ex || ""}>${t}</button>`;
   let h = st.holes.map((ho, i) => { const x = ho.sh && ED.shots.find(q => q.id === ho.sh), op = M && M.k === "h" && M.id === ho.id, tg = x && tags(x);
     let r = `<div class="lr${ho.id === TE.sel ? " on" : ""}${x ? "" : " np"}" data-h="${E(ho.id)}"><button type="button" class="lrM" aria-pressed="${ho.id === TE.sel}" aria-label="Hole ${i + 1}"><span class="hn">${i + 1}</span><span class="rv">${x ? `${fpsT(x.v)} fps` : ho.nr ? "no reading" : "unpaired"}</span><span class="rk">${x ? `reading ${rk.get(x.id) || "?"}${tg ? " · " + tg : ""}` : ho.nr ? "" : "tap ⋯ to pair"}</span><i title="${ho.m ? "measured" : "tapped"}">${ho.m ? "📏" : "👆"}</i></button><button type="button" class="lrX" aria-label="Hole ${i + 1} options" aria-expanded="${!!op}">⋯</button></div>`;
     if (op) r += `<div class="lmenu" role="menu" aria-label="Hole ${i + 1}">` + (M.step === "pair"
@@ -121,10 +125,10 @@ function tePair() {   // one list: a row per hole (number, fps or "no reading", 
     return r; }).join("");
   const un = rd.filter(x => !used.has(x.id));
   if (un.length) h += `<div class="lsub">Readings without a hole</div>` + un.map(x => { const op = M && M.k === "r" && M.id === x.id, tg = tags(x);
-    let r = `<div class="lr rdu${x.x ? " dis" : ""}" data-s="${E(x.id)}"><button type="button" class="lrM" aria-label="Reading ${rk.get(x.id)} options"><span class="hn">–</span><span class="rv">${fpsT(x.v)} fps</span><span class="rk">reading ${rk.get(x.id)}${x.x ? " · discarded" : " · no hole"}${tg ? " · " + tg : ""}</span><i></i></button><button type="button" class="lrX" aria-label="Reading ${rk.get(x.id)} options" aria-expanded="${!!op}">⋯</button></div>`;
+    let r = `<div class="lr rdu${x.x ? " dis" : ""}" data-s="${E(x.id)}"><button type="button" class="lrM" aria-label="Reading ${rk.get(x.id)} options"><span class="hn">–</span><span class="rv">${fpsT(x.v)} fps</span><span class="rk">reading ${rk.get(x.id)}${x.x ? " · removed" : " · no hole"}${tg ? " · " + tg : ""}</span><i></i></button><button type="button" class="lrX" aria-label="Reading ${rk.get(x.id)} options" aria-expanded="${!!op}">⋯</button></div>`;
     if (op) r += `<div class="lmenu" role="menu" aria-label="Reading ${rk.get(x.id)}">` + (M.step === "pair"
       ? `<div class="lmT">Pair reading ${rk.get(x.id)} (${fpsT(x.v)} fps) to hole:</div>` + (st.holes.map((z, j) => { const zx = z.sh && ED.shots.find(q => q.id === z.sh); return B2("ph", `Hole ${j + 1} · ${zx ? `${fpsT(zx.v)} fps` : z.nr ? "no reading" : "unpaired"}`, "", ` data-h="${E(z.id)}"`); }).join("") || `<div class="hint">No holes yet — tap the target first.</div>`) + B2("back", "‹ Back", "ghost")
-      : (x.x ? "" : B2("pair", "↔ Pair to hole")) + B2("x", x.x ? "↺ Restore" : "Discard (double read)", x.x ? "" : "danger")) + `</div>`;
+      : (x.x ? "" : B2("pair", "↔ Pair to hole")) + B2("x", x.x ? "↺ Restore" : "Remove (keeps the shot, out of stats)", x.x ? "" : "danger")) + `</div>`;
     return r; }).join("");
   $("tgList").innerHTML = h || `<div class="hint">No holes or readings yet.</div>`;
 }
@@ -163,8 +167,8 @@ function teUp(e) {
 /* results per string */
 function teResults() {
   const st = teStr(), g = teTgt(), yd = tgYd(g), ts = tsFor(ED.rifleId), U = ts.u, box = $("tgRes");
-  const pts = st.holes.map(h => hoff(st, h)), gs = grpStats(pts), u = g.u;
-  if (!gs) { box.innerHTML = `<div class="hint">Results show once holes are marked.</div>`; return; }
+  const pts = statHoles(ED, st).map(h => hoff(st, h)), gs = grpStats(pts), u = g.u;
+  if (!gs) { box.innerHTML = st.holes.length ? `<div class="hint">Marked holes are all paired to removed shots, so the group stats are empty. Restore a shot to count it again.</div>` : `<div class="hint">Results show once holes are marked.</div>`; return; }
   const a = v => `${(v / inPerU(U, yd)).toFixed(2)} ${angU(U)}`, vv = velVert(ED, st), r = P.rifles.find(x => x.id === ED.rifleId), zr = r && parseFloat(r.zero);
   const atZero = zr > 0 && Math.abs(yd - zr) <= Math.max(1, zr * 0.02), same = curRifle()?.id === ED.rifleId && curLoad()?.id === ED.loadId;
   let h = `<div class="sub">Results · String ${strNo(ED.tg, st.id)} · ${fmt(g.dist, 0)} ${g.du}</div><div class="resG">`;
@@ -189,7 +193,7 @@ function teResults() {
   box.innerHTML = h;
 }
 async function tgSendTrue() {
-  if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(st.holes.map(h => hoff(st, h))), yd = Math.round(tgYd(g)), sn = strNo(ED.tg, st.id);
+  if (!TE || !TE.atDist) return; const st = teStr(), g = teTgt(), gs = grpStats(statHoles(ED, st).map(h => hoff(st, h))), yd = Math.round(tgYd(g)), sn = strNo(ED.tg, st.id);
   if (!gs || gs.n < 2 || curRifle()?.id !== ED.rifleId || curLoad()?.id !== ED.loadId) return;
   if (yd < 50 || yd > 3000) { toast("Truing needs 50–3000 yd"); return; }
   await closeTgEd(); if (ED) { if (edDirty && ED.shots.length) await commitEditor(); closeEditor(true); }
@@ -220,7 +224,7 @@ function shotDetail(s) {
     const g = t.targets.find(q => q.id === st.tid), tag = `S${si + 1}/${tgtLetter(t, st.tid)}@${fmt(g.dist, 0)}${g.du}`, hn = new Map(st.holes.map((h, i) => [h.id, i + 1])), byShot = new Map(st.holes.filter(h => h.sh).map(h => [h.sh, h]));
     const off = h => { const o = hoff(st, h); return `${o.x >= 0 ? "R" : "L"}${Math.abs(o.x).toFixed(2)} ${o.y >= 0 ? "U" : "D"}${Math.abs(o.y).toFixed(2)} in ${h.m ? "measured" : "tapped"}`; };
     readings(s, st.id).forEach((x, k) => { const h = byShot.get(x.id);
-      out.push([tag, `#${k + 1}`, `${x.v} fps`, h ? `hole ${hn.get(h.id)} ${off(h)}` : "", x.x ? "discarded" : "", x.cold ? "cold bore" : "", x.clean ? "clean bore" : "", x.fl ? "flier" : ""].filter(Boolean).join(" ")); });
+      out.push([tag, `#${k + 1}`, `${x.v} fps`, h ? `hole ${hn.get(h.id)} ${off(h)}` : "", x.x ? "removed" : "", x.clean ? "Clean" : "", x.cold ? "Cold bore" : "", x.fl ? "Flier" : "", x.ie ? "Input error" : ""].filter(Boolean).join(" ")); });
     st.holes.filter(h => !h.sh).forEach(h => out.push(`${tag} hole ${hn.get(h.id)} no reading ${off(h)}`));
   });
   return out.join(" | ");
@@ -233,7 +237,7 @@ function tgThumb(s) {
   const g = t.targets.find(q => q.id === last.tid), strs = t.strings.map((st, i) => ({ st, i })).filter(o => o.st.tid === g.id && o.st.holes.length);
   let mx = 0; const layers = strs.map(o => ({ i: o.i, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = hoff(o.st, h); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: "" }; }) }));
   const span = Math.max(2, mx * 2.4), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: "in", layers, mk: 3.2 });
-  const gs = grpStats(last.holes.map(h => hoff(last, h))), U = tsFor(s.rifleId).u, yd = tgYd(g);
+  const kept = statHoles(s, last), gs = grpStats(kept.map(h => hoff(last, h))), U = tsFor(s.rifleId).u, yd = tgYd(g);
   const size = gs && gs.n > 1 ? `${lenTxt(gs.es, g.u)} · ${(gs.es / inPerU(U, yd)).toFixed(2)} ${angU(U)}` : `${last.holes.length} hole`;
   return { svg: `<svg class="tgS th" viewBox="${sv.vb}" aria-hidden="true">${sv.html.replace(/<text[^>]*>[^<]*<\/text>/g, "")}</svg>`, size, n: gs ? gs.n : 0 };
 }

@@ -52,8 +52,8 @@ function cleanSession(x) {
   if (!x || typeof x !== "object" || !Array.isArray(x.shots)) return null;
   const seenId = new Set();
   const shots = x.shots.map(sh => ({ v: nOrNull(sh && sh.v), t: sstr(sh && sh.t, 20), note: sstr(sh && sh.note, 200), cold: !!(sh && sh.cold), clean: !!(sh && sh.clean),
-      id: sstr(sh && sh.id, 20), str: sstr(sh && sh.str, 20), x: !!(sh && sh.x), fl: !!(sh && sh.fl) }))
-    .filter(sh => sh.v != null && sh.v >= 50 && sh.v <= 6000).map(sh => { ["t", "note", "id", "str"].forEach(k => { if (!sh[k]) delete sh[k]; }); ["cold", "clean", "x", "fl"].forEach(k => { if (!sh[k]) delete sh[k]; });
+      id: sstr(sh && sh.id, 20), str: sstr(sh && sh.str, 20), x: !!(sh && sh.x), fl: !!(sh && sh.fl), ie: !!(sh && sh.ie) }))
+    .filter(sh => sh.v != null && sh.v >= 50 && sh.v <= 6000).map(sh => { ["t", "note", "id", "str"].forEach(k => { if (!sh[k]) delete sh[k]; }); ["cold", "clean", "x", "fl", "ie"].forEach(k => { if (!sh[k]) delete sh[k]; });
       if (sh.id) { if (seenId.has(sh.id)) sh.id = uid(); seenId.add(sh.id); } return sh; });
   const d = new Date(x.date); const wx = x.wx || {};
   const out = { id: sstr(x.id, 40) || uid(), rifleId: sstr(x.rifleId, 40), loadId: sstr(x.loadId, 40), date: isNaN(d) ? new Date().toISOString() : d.toISOString(),
@@ -68,7 +68,7 @@ function cleanSession(x) {
   return out;
 }
 function shotStats(shots) {
-  const v = shots.filter(s => !s.x).map(s => s.v).filter(x => x != null), n = v.length;   // discarded (double reads) stay visible but out of stats
+  const v = shots.filter(s => !s.x).map(s => s.v).filter(x => x != null), n = v.length;   // removed shots (x) stay in the log but out of every stat. Tags never exclude.
   if (!n) return { n: 0 };
   const avg = v.reduce((a, b) => a + b, 0) / n, min = Math.min(...v), max = Math.max(...v);
   const sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - avg) ** 2, 0) / (n - 1)) : 0;   // sample SD (n−1)
@@ -214,9 +214,9 @@ function renderEditor() {
     ["Shots", st.n], ["Min", st.n ? fpsT(st.min) : "—"], ["Max", st.n ? fpsT(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
   const tv = tgView(ED), multi = tv.strings.length > 1;
   const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}">
-    <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "discarded" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
-    <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Discard"} shot (double read)" title="${s.x ? "Restore" : "Discard (stays visible, out of stats)"}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
-    <div class="tgs"><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold">Cold</button><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean">Clean</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl">Flier</button>
+    <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "removed" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
+    <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the log."}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
+    <div class="tgs"><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean" aria-pressed="${!!s.clean}">Clean</button><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold" aria-pressed="${!!s.cold}">Cold bore</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl" aria-pressed="${!!s.fl}">Flier</button><button type="button" class="tg${s.ie ? " on" : ""}" data-f="ie" aria-pressed="${!!s.ie}">Input error</button>
     <button type="button" class="tg${s.note ? " on" : ""}" data-f="noteT" aria-label="Note">✎</button>${multi ? `<span class="sl">${mkGlyph(si)}S${si + 1}</span>` : ""}</div>
     ${s.note || s._showNote ? `<input class="note" type="text" maxlength="200" placeholder="shot note" value="${escapeHtml(s.note || "")}">` : ""}</div>`;
   const all = ED.shots.map((s, i) => ({ s, i }));
@@ -227,10 +227,11 @@ function renderEditor() {
   paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
   paintUseMV();
 }
-// "Use … as MV": the average of the kept shots, leaving out discarded (⊘), Cold bore and Flier shots; the label carries the numbers
+// "Use … as MV": the average of every shot that was not Removed. Tags (Clean, Cold bore, Flier, Input error) stay in the average.
+// Behavior change: Cold bore and Flier used to be left out automatically. They no longer are. Only the removed flag (x) excludes.
 function mvPick() {
-  const all = ED ? ED.shots : [], use = all.filter(s => !s.x && !s.cold && !s.fl), st = shotStats(use);
-  const out = { x: all.filter(s => s.x).length, cold: all.filter(s => !s.x && s.cold).length, fl: all.filter(s => !s.x && !s.cold && s.fl).length };
+  const all = ED ? ED.shots : [], use = all.filter(s => !s.x), st = shotStats(use);
+  const out = { x: all.filter(s => s.x).length };
   const r = ED && P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
   const t = num("slPowder") ?? num("slTemp");
   return { st, n: use.length, out, l, t, mv: st.n ? Math.round(st.avg) : null };
@@ -240,7 +241,7 @@ function paintUseMV() {
   const m = mvPick(), b = $("slUseMV"), note = $("slMvNote");
   b.disabled = !m.st.n || !m.l;
   b.textContent = !m.st.n ? "Use avg as MV (no kept shots yet)" : `Use ${m.mv} fps${m.t != null ? ` at ${fmt(m.t, 0)}°F` : ""} for ${m.l ? m.l.name : "this load"}`;
-  const left = [m.out.cold && `${m.out.cold} cold bore`, m.out.fl && `${m.out.fl} flier${m.out.fl > 1 ? "s" : ""}`, m.out.x && `${m.out.x} discarded`].filter(Boolean);
+  const left = [m.out.x && `${m.out.x} removed`].filter(Boolean);
   note.classList.toggle("warn", !!m.st.n && m.n < 5);
   note.textContent = !m.l ? "Assign this session to a saved load to use its average as the MV." : !m.st.n ? "" :
     `Average of ${m.n} shot${m.n === 1 ? "" : "s"}${left.length ? ` (left out: ${left.join(", ")})` : ""}${m.st.n > 1 ? ` · SD ${m.st.sd.toFixed(1)}` : ""}.` +

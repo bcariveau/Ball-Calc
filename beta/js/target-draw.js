@@ -48,8 +48,15 @@ function tgLabels(layers, r, fs) {   // place hole numbers so they don't sit on 
   });
   return out;
 }
+// Marker radius tracks the view so it stays a steady size on screen. A saved bullet diameter is a real
+// length on the sheet, so it grows when the view zooms in. mk < 1 was an extra shrink on top of that and made dots smaller as you zoomed.
+function holeRadii(span, mk, dia) {
+  const marker = span / 58 * (mk == null ? 1 : mk);
+  const caliber = typeof dia === "number" && dia > 0.05 && dia <= 1;
+  return { marker, hole: caliber ? dia / 2 : marker, caliber };
+}
 function tgSvg(o) {
-  const S2 = o.span, h = S2 / 2, cx = o.cx || 0, cy = o.cy || 0, r = S2 / 58 * (o.mk || 1), fs = Math.max(r * 1.9, (o.px || 0) * 13), g = tplGrid(o.tpl, o.yd, o.gspan || S2, o.u, h + Math.max(Math.abs(cx), Math.abs(cy)));
+  const S2 = o.span, h = S2 / 2, cx = o.cx || 0, cy = o.cy || 0, rad = holeRadii(S2, o.mk, o.dia), r = rad.marker, hr = rad.hole, fs = Math.max(r * 1.9, (o.px || 0) * 13), g = tplGrid(o.tpl, o.yd, o.gspan || S2, o.u, h + Math.max(Math.abs(cx), Math.abs(cy)));
   let s = `<rect class="sheet" x="${(cx - h).toFixed(3)}" y="${(-cy - h).toFixed(3)}" width="${S2.toFixed(3)}" height="${S2.toFixed(3)}"/>`;
   s += `<g class="grid" data-step="${g.step.toFixed(4)}" data-unit="${g.unit}" transform="translate(${(0).toFixed(3)},0)">${g.svg}</g>`;
   const LB = tgLabels(o.layers, r, fs);
@@ -58,13 +65,13 @@ function tgSvg(o) {
     if (Ly.aim) { const ax = Ly.aim.x, ay = -Ly.aim.y, a = r * 2.6;
       s += `<g class="aim${Ly.dim ? " dim" : ""}" data-s="${Ly.sid || ""}"><line x1="${(ax - a).toFixed(3)}" y1="${ay.toFixed(3)}" x2="${(ax + a).toFixed(3)}" y2="${ay.toFixed(3)}" vector-effect="non-scaling-stroke"/><line x1="${ax.toFixed(3)}" y1="${(ay - a).toFixed(3)}" x2="${ax.toFixed(3)}" y2="${(ay + a).toFixed(3)}" vector-effect="non-scaling-stroke"/><circle cx="${ax.toFixed(3)}" cy="${ay.toFixed(3)}" r="${(r * 1.3).toFixed(3)}" vector-effect="non-scaling-stroke"/></g>`; }
     Ly.holes.forEach((H, hi) => { const x = H.p.x, y = -H.p.y, L = LB.get(li + ":" + hi);
-      s += `<g class="hole${H.sel ? " sel" : ""}${H.meas ? " meas" : ""}" data-h="${H.id || ""}" data-n="${H.n}">` +
-        (H.sel ? `<circle class="selr" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(r * 2.3).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
-        (H.meas ? `<circle class="mr s${Ly.i % 6 + 1}" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(r * 1.75).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
-        `<g class="${cl}">${shpPath(sh, x, y, r)}</g>` + (L.lead ? `<line class="hl${Ly.dim ? " dim" : ""}" x1="${L.lx.toFixed(3)}" y1="${L.ly.toFixed(3)}" x2="${L.ex.toFixed(3)}" y2="${L.ey.toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
+      s += `<g class="hole${rad.caliber ? " cal" : " unk"}${H.rm ? " rm" : ""}${H.sel ? " sel" : ""}${H.meas ? " meas" : ""}" data-h="${H.id || ""}" data-n="${H.n}">` +
+        (H.sel ? `<circle class="selr" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(hr * 2.3).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
+        (H.meas ? `<circle class="mr s${Ly.i % 6 + 1}" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(hr * 1.75).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
+        `<g class="${cl}">${shpPath(sh, x, y, hr)}</g>` + (L.lead ? `<line class="hl${Ly.dim ? " dim" : ""}" x1="${L.lx.toFixed(3)}" y1="${L.ly.toFixed(3)}" x2="${L.ex.toFixed(3)}" y2="${L.ey.toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
         `<text class="hn${Ly.dim ? " dim" : ""}" x="${L.x.toFixed(3)}" y="${L.y.toFixed(3)}" font-size="${fs.toFixed(3)}" text-anchor="middle" dominant-baseline="central">${H.n}</text></g>`; });
   });
   return { vb: `${(cx - h).toFixed(3)} ${(-cy - h).toFixed(3)} ${S2.toFixed(3)} ${S2.toFixed(3)}`, html: s, grid: g };
 }
 
-export { shpPath, mkGlyph, tplGrid, tgLabels, tgSvg };
+export { shpPath, mkGlyph, tplGrid, tgLabels, tgSvg, holeRadii };

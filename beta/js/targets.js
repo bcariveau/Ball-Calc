@@ -65,6 +65,21 @@ function strNo(t, sid) { return t.strings.findIndex(q => q.id === sid) + 1; }
 function tgtLetter(t, tid) { const i = t.targets.findIndex(q => q.id === tid); return i < 26 ? String.fromCharCode(65 + Math.max(0, i)) : "T" + (i + 1); }
 function tgYd(g) { const d = +g.dist || 0; return g.du === "m" ? d * 1.0936133 : d; }
 function inPerU(u, yd) { return (u === "MIL" ? 3.6 : 1.0471976) * yd / 100; }   // inches per 1 mil / 1 MOA at that distance
+// Saved bullet diameter, inches. Only a number actually stored on the session's recipe counts — a missing or blank
+// legacy field stays unknown (do not borrow the load's current diameter; that may have been edited later).
+function bulletDiaIn(sess) {
+  const d = parseFloat(sess && sess.recipe && sess.recipe.diameter);
+  return d > 0.05 && d <= 1 ? d : null;
+}
+function shotRemoved(sh) { return !!(sh && sh.x); }
+// A hole stays in group / POI stats unless it is paired to a removed shot. Unpaired marks stay. Tags never exclude.
+function statHoles(sess, st) {
+  return (st && st.holes || []).filter(h => {
+    if (!h.sh || !sess) return true;
+    const sh = (sess.shots || []).find(q => q.id === h.sh);
+    return !shotRemoved(sh);
+  });
+}
 function hoff(st, h) { return h.m ? { x: h.m.x, y: h.m.y } : st.aim ? { x: h.x - st.aim.x, y: h.y - st.aim.y } : { x: h.x, y: h.y }; }   // measured wins
 function hpos(st, h) { const a = st.aim || { x: 0, y: 0 }; return h.m ? { x: a.x + h.m.x, y: a.y + h.m.y } : { x: h.x, y: h.y }; }
 function unpair(s, shid) { if (s.tg) s.tg.strings.forEach(st => st.holes.forEach(h => { if (h.sh === shid) h.sh = null; })); }
@@ -100,7 +115,7 @@ function tgNice(x) { const p = Math.pow(10, Math.floor(Math.log10(x))), f = x / 
 /* sidecar: survives a re-save by the stable page (which drops unknown fields) */
 function tgSidecar() {
   const m = {};
-  LOG.forEach(s => { if (s.tg || s.shots.some(x => x.id || x.x || x.fl)) m[s.id] = { sh: s.shots.map(x => ({ v: x.v, id: x.id, str: x.str, x: x.x, fl: x.fl })), tg: s.tg || null }; });
+  LOG.forEach(s => { if (s.tg || s.shots.some(x => x.id || x.x || x.fl || x.ie)) m[s.id] = { sh: s.shots.map(x => ({ v: x.v, id: x.id, str: x.str, x: x.x, fl: x.fl, ie: x.ie, cold: x.cold, clean: x.clean })), tg: s.tg || null }; });
   return m;
 }
 async function tgSaveSidecar() { const m = tgSidecar(); try { await idbPut(TGX_KEY, m); localStorage.removeItem(TGX_LS); } catch { store(TGX_LS, m); } }
@@ -110,7 +125,7 @@ async function tgRestore() {
   LOG.forEach((s, k) => {
     const e = sc[s.id]; if (!e || s.tg || s.shots.some(x => x.id)) return;   // intact (saved by this page)
     const sh = Array.isArray(e.sh) ? e.sh : []; let j = 0;
-    s.shots.forEach(x => { for (let q = j; q < sh.length; q++) if (sh[q] && sh[q].v === x.v) { const o = sh[q]; if (o.id) x.id = o.id; if (o.str) x.str = o.str; if (o.x) x.x = true; if (o.fl) x.fl = true; j = q + 1; break; } });
+    s.shots.forEach(x => { for (let q = j; q < sh.length; q++) if (sh[q] && sh[q].v === x.v) { const o = sh[q]; if (o.id) x.id = o.id; if (o.str) x.str = o.str; if (o.x) x.x = true; if (o.fl) x.fl = true; if (o.ie) x.ie = true; if (o.cold) x.cold = true; if (o.clean) x.clean = true; j = q + 1; break; } });
     if (e.tg) s.tg = e.tg; LOG[k] = cleanSession(s); n++;
   });
   return n;
@@ -122,4 +137,4 @@ function set_TE(v) { return TE = v; }
 function set_WL(v) { return WL = v; }
 function set_WLbusy(v) { return WLbusy = v; }
 
-export { TG_TPL, TG_SHAPES, TGX_KEY, TGX_LS, TE, TV, BAN, LIVE, WL, WLbusy, tgFin, tgPt, cleanTg, cleanDial, angConv, fpsT, tgDefDist, tgView, tgEnsure, strOf, readings, strNo, tgtLetter, tgYd, inPerU, hoff, hpos, unpair, grpStats, pearson, velVert, lenTxt, angU, tsFor, tgNice, tgSidecar, tgSaveSidecar, tgRestore, set_TE, set_LIVE, set_WL, set_WLbusy };
+export { TG_TPL, TG_SHAPES, TGX_KEY, TGX_LS, TE, TV, BAN, LIVE, WL, WLbusy, tgFin, tgPt, cleanTg, cleanDial, angConv, fpsT, tgDefDist, tgView, tgEnsure, strOf, readings, strNo, tgtLetter, tgYd, inPerU, bulletDiaIn, shotRemoved, statHoles, hoff, hpos, unpair, grpStats, pearson, velVert, lenTxt, angU, tsFor, tgNice, tgSidecar, tgSaveSidecar, tgRestore, set_TE, set_LIVE, set_WL, set_WLbusy };

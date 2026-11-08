@@ -2,7 +2,7 @@
 export const shootingView = `<div id="shView" hidden role="dialog" aria-modal="true" aria-labelledby="shStr">
   <div class="shTop">
     <button type="button" class="sm ghost" id="shExit" aria-label="Exit the shooting view">← Exit</button>
-    <div class="shTt"><b id="shStr">String 1 · Target A</b><small id="shFor"></small></div>
+    <div class="shTt"><b id="shStr">String 1 · Target A</b><small id="shFor"></small><select id="shGun" aria-label="Active firearm"></select></div>
     <div class="shRadBox"><span id="shRadar" role="status" aria-live="polite"></span><button type="button" class="sm" id="shConn" hidden>📡 Connect</button></div>
   </div>
   <div class="shMain">

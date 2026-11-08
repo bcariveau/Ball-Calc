@@ -1,0 +1,97 @@
+// B: linked firearm / optic / load, as-fired snapshots, copy-only migration, shot move.
+// Does not read or write a browser profile.
+import assert from "node:assert/strict";
+import {
+  asFiredFrom, calcFallback, cleanAsFired, exportBundle, importBundle, migrateToV3, moveShots,
+  recallFirearm, rollback, splitFrom, staleMv, stringStats,
+} from "../beta/js/link-v3.js";
+
+let n = 0;
+const ok = (cond, msg) => { assert.ok(cond, msg); n++; };
+
+const v2 = {
+  version: 2,
+  rifles: [{
+    id: "r1", name: "6.5", gunKind: "rifle", opticId: "o1", lastLoadId: "l1", turret: "0.1mil",
+    loads: [{ id: "l1", name: "140", diameter: "0.264", mv: "2710", mvSource: "measured", bc: "0.326" }, { id: "l2", name: "130", diameter: "0.264", mv: "2750" }],
+  }, {
+    id: "r2", name: "No optic", gunKind: "rifle", lastLoadId: "l3",
+    loads: [{ id: "l3", name: "150", diameter: "0.308", mv: "2700" }],
+  }],
+  optics: [{ id: "o1", name: "Razor", opTurret: "0.1mil", opTrack: "1" }],
+  ranges: [],
+};
+const sessions = [{
+  id: "s1", rifleId: "r1", loadId: "l1", date: "2026-06-01T00:00:00.000Z", source: "manual",
+  recipe: { loadName: "140", diameter: "0.264", mv: "2710" },
+  shots: [{ id: "a", v: 2700, str: "st1" }, { id: "b", v: 2710, str: "st1" }, { id: "c", v: 2800, str: "st1", ie: true }],
+  tg: { targets: [{ id: "t", dist: 100, du: "yd", u: "in" }], strings: [{ id: "st1", tid: "t", aim: { x: 0, y: 0 }, holes: [{ id: "h", x: 1, y: 0, sh: "c" }] }], cur: "st1" },
+  wx: { temp: 59 },
+}];
+const rawP = JSON.stringify(v2), rawS = JSON.stringify(sessions);
+
+const m1 = migrateToV3(v2, sessions);
+ok(JSON.stringify(v2) === rawP && JSON.stringify(sessions) === rawS, "inputs are not mutated");
+ok(m1.changed && m1.presets.version === 3, "version becomes 3");
+ok(m1.presets.loads.length === 3 && m1.presets.rifles[0].loadIds.join() === "l1,l2", "loads lifted, ids kept");
+ok(!m1.presets.rifles[0].loads, "nested loads removed only on the copy");
+ok(m1.presets.rifles[0].lastOpticId === "o1" && m1.presets.rifles[1].lastOpticId === null, "last optic only when one existed");
+ok(m1.sessions[0].tg.strings[0].asFired.opticId === "o1", "string with a saved optic keeps it");
+ok(m1.sessions[0].tg.strings[0].asFired.recipe.diameter === "0.264", "recipe identity kept");
+ok(m1.backup.presets.version === 2 && JSON.stringify(m1.backup.presets) === rawP, "backup is the original v2 bytes");
+
+const back = rollback(m1.backup);
+ok(JSON.stringify(back.presets) === rawP && JSON.stringify(back.sessions) === rawS, "rollback restores v2 and the log");
+
+const m2 = migrateToV3(m1.presets, m1.sessions);
+ok(!m2.changed && m2.presets.version === 3 && m2.presets.loads.length === 3, "idempotent");
+
+const bundle = exportBundle(m1.presets, m1.sessions);
+const again = importBundle(bundle);
+ok(again.presets.rifles[1].lastOpticId === null, "unknown optic stays null through export");
+ok(again.sessions[0].shots[2].ie === true && again.sessions[0].shots[2].id === "c", "shot identity and tag survive");
+
+const recalled = recallFirearm(m1.presets, m1.presets.rifles[0]);
+ok(recalled.opticId === "o1" && recalled.loadId === "l1", "firearm recalls its last optic and load");
+
+const rifle = m1.presets.rifles[0];
+const edited = { ...m1.presets.loads[0], mv: "2999" };
+const snap = m1.sessions[0].tg.strings[0].asFired;
+ok(snap.recipe.mv === "2710" && edited.mv === "2999", "editing the load does not rewrite the as-fired recipe");
+
+const none = calcFallback({ optic: null }, { turret: "0.1mil" }, null);
+ok(none.source === "current" && /not written/.test(none.warning), "missing optic uses current turret with a warning");
+const absent = calcFallback({ optic: null }, { turret: "custom", turretV: "" }, null);
+ok(absent.source === "missing" && /Nothing was invented/.test(absent.warning), "missing current turret requires entry");
+const known = calcFallback(snap, rifle, null);
+ok(known.source === "as-fired" && known.warning === null, "saved optic is not a fallback");
+
+const moved = moveShots(m1.sessions[0], ["c"], "st1");
+ok(moved.session.shots.find((s) => s.id === "a").str === "st1", "unselected shot stays");
+ok(moved.session.tg.strings[0].holes[0].sh === null, "moved shot drops its hole pairing");
+const undone = moved.undo;
+ok(undone.shots.find((s) => s.id === "c").str === "st1" && undone.tg.strings[0].holes[0].sh === "c", "undo restores pairing");
+
+const split = splitFrom(m1.sessions[0], "b");
+ok(split.session.shots.find((s) => s.id === "a").str === "st1", "shots before the split stay");
+ok(split.session.shots.find((s) => s.id === "b").str === split.newStringId, "split starts at the chosen shot");
+ok(split.session.shots.find((s) => s.id === "c").str === split.newStringId, "later shots follow the split");
+ok(split.undo.shots.map((s) => s.str).join() === "st1,st1,st1", "split undo is the original string");
+ok(split.session.wx === undefined || split.session.date === m1.sessions[0].date, "date stays on the session");
+
+const load = { mv: "2737", mvSource: "measured" };
+const stale = staleMv(load, [{ id: "a", v: 2700 }, { id: "b", v: 2774 }], ["b"]);
+ok(stale && /not changed/.test(stale.message), "stale measured MV is flagged and not rewritten");
+ok(staleMv({ mv: "2700", mvSource: "factory" }, [{ id: "a", v: 2700 }], ["a"]) === null, "a factory MV is not flagged");
+
+const mixed = split.session;
+const left = stringStats(mixed, "st1");
+const right = stringStats(mixed, split.newStringId);
+ok(left.stats.n === 1 && left.stats.avg === 2700, "first string keeps only its shot");
+ok(right.stats.n === 2 && right.stats.avg === 2755, "second string has the moved shots");
+ok(left.asFired.rifleId === "r1" && right.asFired.rifleId === "r1", "both strings keep the as-fired firearm");
+
+const fresh = asFiredFrom({ id: "r2" }, null, { id: "l3" }, { mv: "2700" });
+ok(fresh.opticId === null && fresh.optic === null, "a new string does not invent an optic");
+
+console.log("PASS link-v3 assertions", n);

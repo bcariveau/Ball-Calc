@@ -6,6 +6,7 @@ import { turretSpec } from "./calc.js";
 import { $, escapeHtml, norm360, val } from "./core.js";
 import { renderAll } from "./dope.js";
 import { curLoad, curRifle } from "./gear.js";
+import { curOptic } from "./optics.js";
 import { shPick } from "./shooting.js";
 import { S, saveSettings } from "./storage.js";
 
@@ -19,15 +20,15 @@ function toast(msg, act) {
 }
 /* ---------------- uniform: gun · load · zero · unit context line (Dope, Log, Gear) ---------------- */
 function ctxParts() {
-  const r = curRifle(), l = curLoad(); if (!r) return null;
+  const r = curRifle(), l = curLoad(), o = curOptic(); if (!r) return null;
   let u = ""; try { u = turretSpec().u; } catch {}
-  return { gun: r.name, load: l ? l.name : "no load", zero: `${val("zero") || "?"} yd zero`, unit: u, unconf: !!r.zeroUnconf, why: r.zeroUnconf?.why || "" };
+  return { gun: r.name, optic: o ? o.name : (r.opticId ? "saved optic missing" : "no optic saved"), load: l ? l.name : "no load", zero: `${val("zero") || "?"} yd zero`, unit: u, unconf: !!r.zeroUnconf, why: r.zeroUnconf?.why || "" };
 }
 function ctxPaint() {
   const c = ctxParts(), sep = `<span class="sep" aria-hidden="true">·</span>`;
   const h = !c ? `<span class="cG">Gun and load not saved yet</span>`
-    : `<span class="cG">${escapeHtml(c.gun)}</span>${sep}<span class="cL">${escapeHtml(c.load)}</span>${sep}<span class="cZ${c.unconf ? " unconf" : ""}">${escapeHtml(c.zero)}${c.unconf ? " ⚠" : ""}</span>${c.unit ? sep + `<span class="cU">${c.unit}</span>` : ""}`;
-  const t = !c ? "Gun and load not saved yet" : [c.gun, c.load, c.zero + (c.unconf ? " (not confirmed" + (c.why ? ": " + c.why : "") + ")" : ""), c.unit].filter(Boolean).join(" · ");
+    : `<span class="cG">${escapeHtml(c.gun)}</span>${sep}<span class="cO">${escapeHtml(c.optic)}</span>${sep}<span class="cL">${escapeHtml(c.load)}</span>${sep}<span class="cZ${c.unconf ? " unconf" : ""}">${escapeHtml(c.zero)}${c.unconf ? " ⚠" : ""}</span>${c.unit ? sep + `<span class="cU">${c.unit}</span>` : ""}`;
+  const t = !c ? "Gun and load not saved yet" : [c.gun, c.optic, c.load, c.zero + (c.unconf ? " (not confirmed" + (c.why ? ": " + c.why : "") + ")" : ""), c.unit].filter(Boolean).join(" · ");
   document.querySelectorAll(".ctx").forEach(e => { if (e.innerHTML !== h) e.innerHTML = h; e.title = t; e.setAttribute("aria-label", t); });
 }
 

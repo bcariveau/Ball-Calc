@@ -180,7 +180,9 @@ export function init1() {
   $("ldKindSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; $("ldKind").value = b.dataset.v; paintLdKind(); updateDirty(); });
 
   $("rifleSel").onchange = e => { if (e.target.value === ADD_V) { e.target.value = curRifle()?.id || ""; const n0 = P.rifles.length; $("rifleNew").click(); if (P.rifles.length > n0) $("rifleDetails").open = true; return; }
-    P.lastRifleId = e.target.value; applyRifle(); renderPickers(); applyLoad(); savePresets(); updateDirty(); schedule(); };
+    P.lastRifleId = e.target.value; const r = curRifle();
+    if (r?.lastOpticId && (P.optics || []).some(o => o.id === r.lastOpticId)) r.opticId = r.lastOpticId;
+    applyRifle(); renderPickers(); applyLoad(); savePresets(); updateDirty(); schedule(); };
   $("loadSel").onchange = e => { if (e.target.value === ADD_V) { e.target.value = curLoad()?.id || ""; $("loadNew").click(); return; }
     const r = curRifle(); if (r) r.lastLoadId = e.target.value; applyLoad(); savePresets(); updateDirty(); schedule(); };
   $("rangeSel").onchange = e => { P.lastRangeId = e.target.value || null; applyRange(); savePresets(); updateDirty(); refreshWeather(); schedule(); };
@@ -245,7 +247,7 @@ export function init1() {
       if (!d || !Array.isArray(d.rifles)) throw new Error("not a presets file");
       const str = (v, n = 40) => v == null ? "" : String(v).slice(0, n);
       const rifles = d.rifles.filter(r => r && r.name).map(r => ({ id: str(r.id) || uid(), name: String(r.name).slice(0, 60),
-        ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null, opticId: str(r.opticId) || null,
+        ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null, lastOpticId: str(r.lastOpticId) || null, opticId: str(r.opticId) || null,
         ...(r.zeroUnconf && typeof r.zeroUnconf === "object" ? { zeroUnconf: { why: str(r.zeroUnconf.why, 120), at: str(r.zeroUnconf.at) } } : {}),
         loads: (Array.isArray(r.loads) ? r.loads : []).filter(l => l && l.name).map(l => ({ id: str(l.id) || uid(), name: String(l.name).slice(0, 60),
           ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k], LONG_F[k])])) })) }));

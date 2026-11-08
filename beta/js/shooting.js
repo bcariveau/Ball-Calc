@@ -7,11 +7,13 @@ import { B, angDec, angs, lastRun, solveShot, turretSpec } from "./calc.js";
 import { shBtnPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, num } from "./core.js";
 import { CLOCK, lr, ud } from "./dope.js";
-import { curLoad, curRifle } from "./gear.js";
+import { applyLoad, applyRifle, curLoad, curRifle } from "./gear.js";
+import { calcFallback, recallFirearm } from "./link-v3.js";
 import { ED, LOG, addVelocities, closeEditor, commitEditor, curKeyIds, edDirty, openEditor, renderEditor, set_edDirty, shotStats } from "./log.js";
+import { curOptic } from "./optics.js";
 import { RD, hasBT } from "./radar.js";
 import { banHide, wakeSync } from "./shot-banner.js";
-import { P, S } from "./storage.js";
+import { P, S, savePresets } from "./storage.js";
 import { dialView, tgAutoDial, tgNewString, tgSame } from "./strings.js";
 import { closeTgEd, openTgEd } from "./target-editor.js";
 import { LIVE, angU, fpsT, readings, strNo, tgDefDist, tgEnsure, tgYd, tgtLetter, tsFor, unpair } from "./targets.js";
@@ -116,7 +118,13 @@ function shPaint() {
   const yd = Math.round(tgYd(g) || tgDefDist());
   $("shStr").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
   const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
-  $("shFor").textContent = [r?.name, l?.name, `${yd} yd`].filter(Boolean).join(" · ");
+  const fb = calcFallback(cur.asFired, P.rifles.find(x => x.id === cur.asFired?.rifleId) || r, curOptic());
+  $("shFor").textContent = [r?.name, l?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
+  const gun = $("shGun");
+  if (gun && gun.dataset.lock !== "1") {
+    gun.innerHTML = P.rifles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");
+    gun.value = curRifle()?.id || "";
+  }
   const x = q.last;
   $("shV").textContent = x ? fpsT(x.v) : "—";
   const keptV = rd.filter(s => !s.x).map(s => s.v), mc = x && !x.x ? shDevCls(x.v, keptV) : "";
@@ -227,6 +235,15 @@ function shPanelOpen() { return ["shAddBox", "shTagBar", "shStrMenu"].find(p => 
 function shAddClose() { $("shVel").value = ""; $("shVel").blur(); shPanels(); $("shAdd").focus({ preventScroll: true }); }
 
 export function init() {
+  $("shGun").onchange = () => {
+    const r = P.rifles.find(x => x.id === $("shGun").value); if (!r) return;
+    const rec = recallFirearm(P, r);
+    P.lastRifleId = r.id;
+    if (rec.opticId) r.opticId = rec.opticId;
+    if (rec.loadId) r.lastLoadId = rec.loadId;
+    applyRifle(); applyLoad(); savePresets();
+    shPaint();
+  };
   $("shStartBtn").onclick = () => shStart();
   $("slStartBtn").onclick = () => shStart();
   $("shExit").onclick = () => shExit();

@@ -5,10 +5,12 @@
 import { B, angs, curCond, powderT, solveShot, turretSpec } from "./calc.js";
 import { toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal } from "./core.js";
-import { curLoad, curRifle } from "./gear.js";
+import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
+import { asFiredFrom, calcFallback } from "./link-v3.js";
+import { curOptic } from "./optics.js";
 import { ED, commitEditor, edDirty, renderEditor, set_edDirty } from "./log.js";
 import { banPaint } from "./shot-banner.js";
-import { uid } from "./storage.js";
+import { P, uid } from "./storage.js";
 import { mkGlyph, tgSvg } from "./target-draw.js";
 import { openTgEd, teRender, teSnap, teStr, teTgt, tgAfterEditQuiet } from "./target-editor.js";
 import { BAN, TE, TV, angConv, angU, bulletDiaIn, cleanDial, grpStats, hoff, inPerU, lenTxt, readings, statHoles, strNo, tgDefDist, tgEnsure, tgView, tgYd, tgtLetter, tsFor } from "./targets.js";
@@ -18,7 +20,9 @@ import { BAN, TE, TV, angConv, angU, bulletDiaIn, cleanDial, grpStats, hoff, inP
 function paintStrBar() {
   if (!ED) return; const t = tgView(ED), cur = t.strings.find(q => q.id === t.cur), n = strNo(t, cur.id), rd = readings(ED, cur.id);
   $("tgHdrT").textContent = `String ${n} · Target ${tgtLetter(t, cur.tid)}`;
-  $("tgHdrS").textContent = `${rd.length} shot${rd.length === 1 ? "" : "s"} · ${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}${t.strings.length > 1 ? ` · ${t.strings.length} strings` : ""}`;
+  const af = cur.asFired, gun = af && P.rifles.find(x => x.id === af.rifleId);
+  const fb = af ? calcFallback(af, gun || curRifle(), curOptic()) : null;
+  $("tgHdrS").textContent = `${gun ? gun.name + " · " : ""}${rd.length} shot${rd.length === 1 ? "" : "s"} · ${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}${t.strings.length > 1 ? ` · ${t.strings.length} strings` : ""}${fb && fb.warning ? " · " + fb.warning : ""}`;
   $("tgMarkEach").checked = !!t.mark;
   $("tgMarkBtn").textContent = `🎯 Mark holes · String ${n}`;
 }
@@ -40,16 +44,20 @@ function paintTgView() {
     `<div class="hint" id="slTgNote">${shown.length ? `Aligned on each string's aim point · grid ${fmt(sv.grid.step, 2)} ${ang ? angU(ang) : "in"}${ang ? ` · <b>different distances (${yds.join(", ")} yd) — plotted in ${angU(ang)}</b> so groups compare by angle` : ""}` : ""}</div>`;
 }
 function tgAfterEdit() { set_edDirty(true); if (ED.source === "bluetooth" && !ED._new) commitEditor(); renderEditor(); }
+function newString(tid) {
+  const r = curRifle(), l = curLoad();
+  return { id: uid(), tid, aim: null, holes: [], asFired: asFiredFrom(r, curOptic(), l, r && l ? recipeSnapshot(r.id, l.id) : null) };
+}
 function tgNewString(newTarget) {
   if (!ED) return; const t = tgEnsure(ED), cur = t.strings.find(s => s.id === t.cur), rdN = readings(ED, cur.id).length, empty = !cur.holes.length && !rdN;
   const needMark = !empty && !cur.holes.length && rdN > 0, curNo = strNo(t, cur.id);
   if (newTarget) {
     const g0 = t.targets.find(g => g.id === cur.tid), g = { ...g0, id: uid() }; t.targets.push(g);
     if (empty) { const old = cur.tid; cur.tid = g.id; cur.aim = null; if (!t.strings.some(s => s.tid === old)) t.targets = t.targets.filter(q => q.id !== old); }
-    else { const s = { id: uid(), tid: g.id, aim: null, holes: [] }; t.strings.push(s); t.cur = s.id; }
+    else { const s = newString(g.id); t.strings.push(s); t.cur = s.id; }
   } else {
     if (empty) { toast(`String ${curNo} has no shots yet`); return; }
-    const s = { id: uid(), tid: cur.tid, aim: null, holes: [] }; t.strings.push(s); t.cur = s.id;
+    const s = newString(cur.tid); t.strings.push(s); t.cur = s.id;
   }
   tgAfterEdit();
   const nc = t.strings.find(s => s.id === t.cur), msg = `String ${strNo(t, nc.id)} · Target ${tgtLetter(t, nc.tid)}${newTarget ? " (fresh sheet)" : " (same sheet, new aim point)"}`;

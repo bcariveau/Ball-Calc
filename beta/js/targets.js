@@ -5,7 +5,9 @@
 import { idbGet, idbPut } from "./bulletdb.js";
 import { TURRETS, turretSpec } from "./calc.js";
 import { num } from "./core.js";
-import { curRifle } from "./gear.js";
+import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
+import { curOptic } from "./optics.js";
+import { asFiredFrom, cleanAsFired } from "./link-v3.js";
 import { LOG, cleanSession, nOrNull, sstr } from "./log.js";
 import { P, S, load, store, uid } from "./storage.js";
 
@@ -33,12 +35,15 @@ function cleanTg(t, ids) {
     dist: nOrNull(g.dist), du: g.du === "m" ? "m" : "yd", u: g.u === "cm" ? "cm" : "in" }));
   if (!targets.length) return null;
   const tids = new Set(targets.map(g => g.id)), used = new Set();
-  const strings = t.strings.filter(s => s && typeof s === "object").slice(0, 300).map(s => ({ id: sstr(s.id, 20) || uid(), tid: tids.has(s.tid) ? s.tid : targets[0].id, aim: tgPt(s.aim),
-    holes: (Array.isArray(s.holes) ? s.holes : []).filter(h => h && typeof h === "object").slice(0, 200).map(h => {
-      const p = tgPt(h) || { x: 0, y: 0 }, m = tgPt(h.m); let sh = h.sh != null && ids.has(String(h.sh)) ? String(h.sh) : null;
-      if (sh && used.has(sh)) sh = null; if (sh) used.add(sh);   // one reading ↔ one hole
-      const o = { id: sstr(h.id, 20) || uid(), x: p.x, y: p.y, sh }; if (m) o.m = m; if (!sh && h.nr) o.nr = true; if (h.ad && !m) o.ad = true; return o; }) }))
-    .map((st, i) => { const d = cleanDial(t.strings.filter(q => q && typeof q === "object")[i].dial); if (d) st.dial = d; return st; });
+  const strings = t.strings.filter(s => s && typeof s === "object").slice(0, 300).map(s => {
+    const st = { id: sstr(s.id, 20) || uid(), tid: tids.has(s.tid) ? s.tid : targets[0].id, aim: tgPt(s.aim),
+      holes: (Array.isArray(s.holes) ? s.holes : []).filter(h => h && typeof h === "object").slice(0, 200).map(h => {
+        const p = tgPt(h) || { x: 0, y: 0 }, m = tgPt(h.m); let sh = h.sh != null && ids.has(String(h.sh)) ? String(h.sh) : null;
+        if (sh && used.has(sh)) sh = null; if (sh) used.add(sh);
+        const o = { id: sstr(h.id, 20) || uid(), x: p.x, y: p.y, sh }; if (m) o.m = m; if (!sh && h.nr) o.nr = true; if (h.ad && !m) o.ad = true; return o; }) };
+    const af = cleanAsFired(s.asFired); if (af) st.asFired = af;
+    return st;
+  }).map((st, i) => { const d = cleanDial(t.strings.filter(q => q && typeof q === "object")[i].dial); if (d) st.dial = d; return st; });
   if (!strings.length) return null;
   return { targets, strings, cur: strings.some(s => s.id === t.cur) ? t.cur : strings[strings.length - 1].id, mark: !!t.mark };
 }
@@ -56,7 +61,8 @@ function tgDefDist() { const d = num("target"); return d > 0 ? d : 100; }
 function tgView(s) { return s.tg || { targets: [{ id: "_t", tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: "_s", tid: "_t", aim: null, holes: [] }], cur: "_s", mark: false, virt: true }; }
 function tgEnsure(s) {
   s.shots.forEach(x => { if (!x.id) x.id = uid(); });
-  if (!s.tg) { const tid = uid(), sid = uid(); s.tg = { targets: [{ id: tid, tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: sid, tid, aim: null, holes: [] }], cur: sid, mark: false }; }
+  if (!s.tg) { const tid = uid(), sid = uid(); const r = curRifle(), l = curLoad();
+    s.tg = { targets: [{ id: tid, tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: sid, tid, aim: null, holes: [], asFired: asFiredFrom(r, curOptic(), l, r && l ? recipeSnapshot(r.id, l.id) : null) }], cur: sid, mark: false }; }
   return s.tg;
 }
 function strOf(s, x) { const t = tgView(s); return x.str && t.strings.some(q => q.id === x.str) ? x.str : t.strings[0].id; }

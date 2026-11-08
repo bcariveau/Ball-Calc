@@ -80,7 +80,7 @@ function attachOptic(oid, fresh) {   // fresh = optic just created for this gun 
   const prev = r.opticId ? P.optics.find(x => x.id === r.opticId) : null;
   const snap = { rO: r.opticId || null, rZ: r.zeroUnconf, oZ: other?.zeroUnconf, up: o.opUp, re: o.opUpRe, sh: o.opSH, pUp: prev?.opUp, pRe: prev?.opUpRe };
   if (other) { other.opticId = null; flagZero(other, `optic “${o.name}” moved to “${r.name}”`); }
-  r.opticId = oid;
+  r.opticId = oid; r.lastOpticId = oid;
   if (!String(o.opSH ?? "").trim() && r.sightHeight) o.opSH = r.sightHeight;
   const upGone = !fresh && clearUp(o, true); if (prev) clearUp(prev);
   const ask = !prev && !other;   // first optic on a gun that had none → ask once instead of flagging

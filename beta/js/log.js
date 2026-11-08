@@ -12,6 +12,7 @@ import { closeImport } from "./log-import.js";
 import { SEL, lpFired, paintSel, set_lpFired } from "./reassign.js";
 import { SH, shHide, shNeedGear, shPaint, shRollIfEnded } from "./shooting.js";
 import { banHide, banPaint, banShow } from "./shot-banner.js";
+import { calcFallback, cleanAsFired, moveShots, splitFrom, staleMv } from "./link-v3.js";
 import { P, load, savePresets, store, uid } from "./storage.js";
 import { paintStrBar, paintTgView } from "./strings.js";
 import { mkGlyph } from "./target-draw.js";
@@ -34,6 +35,8 @@ let slKey = null;
 let ED = null;
 let edDirty = false;
 let IMP = [];
+let SHOTSEL = null;
+let shotUndo = [];
 async function loadLog() {
   let d = null;
   try { d = await idbGet("shotlog"); } catch {}
@@ -59,6 +62,7 @@ function cleanSession(x) {
   const out = { id: sstr(x.id, 40) || uid(), rifleId: sstr(x.rifleId, 40), loadId: sstr(x.loadId, 40), date: isNaN(d) ? new Date().toISOString() : d.toISOString(),
     source: ["manual", "athlon", "bluetooth"].includes(x.source) ? x.source : "manual", shots, notes: sstr(x.notes, 300),
     wx: { temp: nOrNull(wx.temp), humidity: nOrNull(wx.humidity), pressure: nOrNull(wx.pressure), altitude: nOrNull(wx.altitude), powder: nOrNull(wx.powder) }, barrel: nOrNull(x.barrel) };
+  { const af = cleanAsFired(x.asFired); if (af) out.asFired = af; }
   if (x.importKey) out.importKey = sstr(x.importKey, 2000);
   if (x.title) out.title = sstr(x.title, 120);
   { const rc = cleanRecipe(x.recipe); if (rc) out.recipe = rc; }
@@ -213,7 +217,8 @@ function renderEditor() {
   $("slStats").innerHTML = [["Avg fps", st.n ? fpsT(st.avg) : "—"], ["SD", st.n > 1 ? f(st.sd) : "—"], ["ES", st.n > 1 ? fpsT(st.es) : "—"],
     ["Shots", st.n], ["Min", st.n ? fpsT(st.min) : "—"], ["Max", st.n ? fpsT(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
   const tv = tgView(ED), multi = tv.strings.length > 1;
-  const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}">
+  const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}" data-id="${escapeHtml(s.id || "")}">
+    ${SHOTSEL ? `<input type="checkbox" class="shotCk" data-sel="${escapeHtml(s.id || "")}" ${s.id && SHOTSEL.has(s.id) ? "checked" : ""} aria-label="Select shot ${i + 1}">` : ""}
     <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "removed" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
     <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the log."}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
     <div class="tgs"><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean" aria-pressed="${!!s.clean}">Clean</button><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold" aria-pressed="${!!s.cold}">Cold bore</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl" aria-pressed="${!!s.fl}">Flier</button><button type="button" class="tg${s.ie ? " on" : ""}" data-f="ie" aria-pressed="${!!s.ie}">Input error</button>
@@ -225,7 +230,30 @@ function renderEditor() {
     : all.reverse().map(o => row(o, st, 0)).join("")) ||
     `<div class="hint" style="padding:8px 0">No shots yet.</div>`;
   paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
-  paintUseMV();
+  paintUseMV(); paintShotSel();
+}
+function paintShotSel() {
+  const bar = $("shotSelBar"), btn = $("shotSelBtn"); if (!bar || !btn) return;
+  const on = !!SHOTSEL; bar.hidden = !on; btn.hidden = on;
+  if (!on || !ED) return;
+  const t = tgView(ED);
+  $("shotMoveTo").innerHTML = t.strings.map((s, i) => `<option value="${escapeHtml(s.id)}">String ${i + 1}${s.asFired && s.asFired.rifleId ? "" : ""}</option>`).join("");
+  $("shotSelN").textContent = `${SHOTSEL.size} selected`;
+  $("shotMoveGo").disabled = !SHOTSEL.size; $("shotSplit").disabled = !SHOTSEL.size;
+}
+function undoShotEdit() {
+  const prev = shotUndo.pop(); if (!prev || !ED) return;
+  ED.shots = prev.shots; ED.tg = prev.tg; edDirty = true; renderEditor(); toast("Shot move undone");
+}
+function sessionLoad() {
+  const r = ED && P.rifles.find(x => x.id === ED.rifleId);
+  return r?.loads.find(l => l.id === ED.loadId) || null;
+}
+function applyShotResult(result) {
+  const stale = staleMv(sessionLoad(), result.undo.shots, result.movedIds);
+  shotUndo.push(result.undo);
+  ED.shots = result.session.shots; ED.tg = result.session.tg; edDirty = true; renderEditor();
+  if (stale) toast(stale.message);
 }
 // "Use … as MV": the average of every shot that was not Removed. Tags (Clean, Cold bore, Flier, Input error) stay in the average.
 // Behavior change: Cold bore and Flier used to be left out automatically. They no longer are. Only the removed flag (x) excludes.
@@ -337,6 +365,15 @@ export function init() {
   $("slAdd").onclick = addFromInput;
   $("slVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addFromInput(); } });
   $("slVel").addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData)?.getData("text") || ""; if (/[\s,;]/.test(t.trim())) { e.preventDefault(); if (addVelocities(t)) { renderEditor(); banShow(ED.id, ED.shots[ED.shots.length - 1].id); } } });
+  $("shotSelBtn").onclick = () => { SHOTSEL = new Set(); shotUndo = []; renderEditor(); };
+  $("shotSelDone").onclick = () => { SHOTSEL = null; renderEditor(); };
+  $("shotMoveGo").onclick = () => { if (!ED || !SHOTSEL?.size) return; applyShotResult(moveShots(ED, [...SHOTSEL], $("shotMoveTo").value)); toast("Moved the selected shots. Other shots were left where they were.", { label: "Undo", fn: undoShotEdit }); };
+  $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const id = [...SHOTSEL][0]; applyShotResult(splitFrom(ED, id)); toast("Split into a new string from the selected shot. Date and weather stay on the session.", { label: "Undo", fn: undoShotEdit }); };
+  $("slShots").addEventListener("change", e => { const box = e.target.closest(".shotCk"); if (!box || !SHOTSEL) return; box.checked ? SHOTSEL.add(box.dataset.sel) : SHOTSEL.delete(box.dataset.sel); paintShotSel(); });
+  let shotLp;
+  $("slShots").addEventListener("pointerdown", e => { const row = e.target.closest(".shot"); if (!row || SHOTSEL || e.target.closest("button, input")) return; clearTimeout(shotLp);
+    shotLp = setTimeout(() => { SHOTSEL = new Set([row.dataset.id]); renderEditor(); navigator.vibrate?.(15); }, 550); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev => $("slShots").addEventListener(ev, () => clearTimeout(shotLp)));
   $("slShots").addEventListener("click", e => {
     const b = e.target.closest("button"), row = e.target.closest(".shot"); if (!b || !row) return;
     const i = +row.dataset.i, s = ED.shots[i], f = b.dataset.f;

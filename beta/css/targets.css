@@ -36,8 +36,8 @@ svg.mk { width: 14px; height: 14px; flex: 0 0 14px; vertical-align: -2px; margin
 #slStrBar .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; } #slStrBar .row button { flex: 1 1 40%; margin: 0; }
 .tgChk { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 0.86rem; cursor: pointer; }
 .tgChk input { width: 22px; height: 22px; flex: 0 0 22px; margin: 0; accent-color: var(--accent); }
-.shot { grid-template-columns: 30px 1fr 44px 44px; }
-.shot .tgs { grid-column: 2 / -1; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.shot { grid-template-columns: auto minmax(0, 1fr) auto auto auto; }
+.shot .tgs { grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; align-items: center; }
 .shot .tgs .sl { font-size: 0.74rem; color: var(--muted); display: inline-flex; align-items: center; }
 .shot.dis .v, .shot.dis .dv { text-decoration: line-through; color: var(--hint); }
 .shot button.xd.on { color: var(--err); }

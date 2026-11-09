@@ -16,11 +16,37 @@
 #slAddRow input { font-size: 1.5rem; text-align: center; flex: 1; }
 #slAddRow button { width: 96px; margin: 0; }
 #slShots { margin-top: 8px; }
-.shot { display: grid; grid-template-columns: 30px 1fr auto auto auto 34px; gap: 4px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.shot { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; gap: 4px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+#slEditor.selecting .shot { grid-template-columns: 28px auto minmax(0, 1fr); }
 .shot .n { color: var(--muted); font-size: 0.75rem; }
 .shot .v { font-size: 1.05rem; }
 .shot .dv { font-size: 0.72rem; color: var(--muted); }
-.shot input.note { grid-column: 2 / -1; padding: 5px 8px; font-size: 0.8rem; }
+.shot input.note { grid-column: 1 / -1; padding: 5px 8px; font-size: 0.8rem; }
+.shot .del { color: var(--err); background: var(--danger-bg); border: 1px solid var(--danger-b); border-radius: 8px; width: 44px; min-width: 44px; min-height: 44px; }
+.shot .noteBtn { width: auto; min-height: 44px; padding: 4px 8px; }
+#slEditor.show { overflow: hidden; }
+#slEdScroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+#slAddHint:not(.open) .h1 { display: inline-block; max-width: calc(100% - 52px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+#shotSelDone { align-self: flex-end; width: auto; min-height: 44px; margin: 0 0 6px; }
+#shotSelBar { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; background: var(--card); border-top: 1px solid var(--border); padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); z-index: 6; }
+#shotSelBar[hidden] { display: none !important; }
+#shotSelBar .n { font-weight: 700; }
+#shotMoveOpen, #shotSplit, #shotMoveGo { width: 100%; min-height: 44px; }
+#shotDestSheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 46; max-height: 78vh; overflow: auto; background: var(--card); color: var(--text); border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; padding: 12px 12px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 24px rgba(0,0,0,.35); }
+#shotDestSheet[hidden] { display: none !important; }
+#shotDestSheet .sheetHd { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 800; margin-bottom: 8px; }
+#shotDestSheet select, #shotDestList { width: 100%; }
+#shotDestList { display: flex; flex-direction: column; gap: 6px; }
+.destPick { width: 100%; min-height: 44px; height: auto; text-align: left; white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }
+.destPick.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+#shotDelDlg { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; }
+#shotDelDlg[hidden] { display: none !important; }
+#shotDelDlg .box { width: min(420px, 100%); background: var(--card); color: var(--text); border-radius: 16px 16px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
+#shotDelDlg .row { display: flex; gap: 8px; }
+#shotDelDlg .row button { flex: 1; min-height: 44px; }
+#shotDelGo { background: var(--danger-bg); color: var(--err); border: 1px solid var(--danger-b); }
+body:has(#slEditor.show) #toast.show { top: max(8px, env(safe-area-inset-top)); bottom: auto; }
+body:has(#toast.show):has(#slEditor.show) #slEditor { padding-top: 76px; }
 .tg { width: auto; margin: 0; padding: 4px 7px; font-size: 0.7rem; border-radius: 999px; background: none; color: var(--muted); border: 1px solid var(--border); font-weight: 600; }
 .tg.on { background: var(--chip); color: var(--accent); border-color: var(--accent); }
 .x { width: 34px; margin: 0; padding: 4px 0; font-size: 0.9rem; background: none; color: var(--err); border: 0; }

@@ -123,7 +123,12 @@ async function openFirst() {
 async function startSelect() {
   if (await page.locator("#shotSelBtn").isHidden()) await page.click("#shotSelDone");
   await page.click("#shotSelBtn");
-  await page.waitForSelector("#shotDestKind");
+  await page.waitForSelector("#shotMoveOpen");
+}
+async function pickExisting(value) {
+  await page.click("#shotMoveOpen");
+  await page.selectOption("#shotDestKind", "existing");
+  await page.click(`.destPick[data-dest="${value}"]`);
 }
 const snap = () => page.evaluate(() => {
   const log = window.__bc.log.map((s) => (window.__bc.ED && window.__bc.ED.id === s.id ? window.__bc.ED : s));
@@ -147,19 +152,20 @@ try {
   const before = await snap();
   await startSelect();
   await page.click("input.shotCk[data-sel='c']");
+  await page.click("#shotMoveOpen");
   await page.selectOption("#shotDestKind", "existing");
+  await page.click("#shotDestClose");
   await page.click("#shotSelDone");
   const cancelled = await snap();
   ok(JSON.stringify(cancelled.sessions) === JSON.stringify(before.sessions), "cancel leaves every shot, tag, and hole where it was");
 
   await startSelect();
   await page.click("input.shotCk[data-sel='c']");
-  await page.selectOption("#shotDestKind", "existing");
-  await page.selectOption("#shotDestStr", "sess1::st2");
+  await pickExisting("sess1::st2");
   const note = await page.locator("#shotDestNote").innerText();
   ok(/Rifle B/.test(note) && /Load B/.test(note) && /not changed/.test(note), "the picker says the shot lands under the destination string");
   ok(/Nothing was invented/.test(note), "a destination with no optic warns instead of inventing one");
-  await page.locator("#shotSelBar").scrollIntoViewIfNeeded();
+  await page.locator("#shotDestSheet").scrollIntoViewIfNeeded();
   await page.screenshot({ path: ART + "/move-picker-360.png" });
   await page.screenshot({ path: ART + "/move-warning-360.png" });
   const moveH = await page.locator("#shotMoveGo").evaluate((el) => el.getBoundingClientRect().height);
@@ -167,8 +173,8 @@ try {
   await page.click("#shotMoveGo");
   await page.waitForSelector("#toastAct");
   const toast1 = await page.locator("#toast").innerText();
-  ok(/Nothing was invented/.test(toast1), "the move repeats the missing-optic warning");
-  ok(/was not changed/.test(toast1) && /Redo dest MV/.test(toast1), "both loads say their measured MV was left alone");
+  ok(/Moved 1 shot to Rifle B · String 2/.test(toast1) && /Undo/.test(toast1), "the move toast names the destination and stays short");
+  ok(/Redo source MV/.test(toast1) && /Redo dest MV/.test(toast1), "both loads can still redo a measured MV");
   const moved = await snap();
   const s1 = moved.sessions.find((s) => s.id === "sess1");
   const shotC = s1.shots.find((s) => s.id === "c");
@@ -191,8 +197,7 @@ try {
 
   await startSelect();
   await page.click("input.shotCk[data-sel='c']");
-  await page.selectOption("#shotDestKind", "existing");
-  await page.selectOption("#shotDestStr", "sess1::st2");
+  await pickExisting("sess1::st2");
   await page.click("#shotMoveGo");
   await page.waitForSelector("#toastAct1");
   promptAnswer = "70";
@@ -223,8 +228,7 @@ try {
   await openFirst();
   await startSelect();
   await page.click("input.shotCk[data-sel='b']");
-  await page.selectOption("#shotDestKind", "existing");
-  await page.selectOption("#shotDestStr", "sess2::st9");
+  await pickExisting("sess2::st9");
   const crossNote = await page.locator("#shotDestNote").innerText();
   ok(/Load A2/.test(crossNote) && /not changed/.test(crossNote) && !/Nothing was invented/.test(crossNote), "a different session and load says where the shot will count");
   const afBefore = JSON.stringify((await snap()).sessions.find((s) => s.id === "sess2").holes[0].af);
@@ -246,10 +250,9 @@ try {
   await openFirst();
   await startSelect();
   await page.click("input.shotCk[data-sel='b']");
-  await page.selectOption("#shotDestKind", "existing");
-  await page.selectOption("#shotDestStr", "sess2::st9");
+  await pickExisting("sess2::st9");
   await page.click("#shotMoveGo");
-  await page.waitForFunction(() => document.getElementById("toast").innerText.includes("These shots will count under"));
+  await page.waitForFunction(() => document.getElementById("toast").innerText.includes("Moved 1 shot"));
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => window.__bc && window.__bc.log.length === 2);
   crossed = await snap();

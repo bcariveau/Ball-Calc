@@ -153,13 +153,14 @@ try {
 
   await startSelect();
   await page.locator(".shot[data-id='c'] .shotCk").check();
+  await page.click("#shotMoveOpen");
   await page.selectOption("#shotDestGun", "r2");
   await page.selectOption("#shotDestLoad", "l3");
   await page.screenshot({ path: ART + "/move-360.png" });
   await page.click("#shotMoveGo");
   await page.waitForSelector("#toastAct1");
   const toast1 = await page.locator("#toast").innerText();
-  ok(toast1.includes("not changed") && toast1.includes("Redo MV") && toast1.includes("Undo"), "stale MV offers Undo and Redo");
+  ok(/Moved 1 shot to Rifle B/.test(toast1) && toast1.includes("Redo MV") && toast1.includes("Undo"), "the move toast names the destination and still offers Undo and Redo");
   const moved = await page.evaluate(() => {
     const s = window.__bc.ED;
     const dest = s.tg.strings.find((st) => st.id !== "st1" && st.id !== "st2");
@@ -198,8 +199,10 @@ try {
 
   await startSelect();
   await page.locator(".shot[data-id='b'] .shotCk").check();
+  await page.click("#shotMoveOpen");
   await page.selectOption("#shotDestGun", "r1");
   await page.selectOption("#shotDestLoad", "l2");
+  await page.click("#shotDestClose");
   await page.click("#shotSplit");
   await page.waitForFunction(() => window.__bc.ED.shots.find((s) => s.id === "b").str !== "st1" && window.__bc.ED.shots.find((s) => s.id === "a").str === "st1");
   const split = await page.evaluate(() => {
@@ -220,6 +223,7 @@ try {
 
   await startSelect();
   await page.locator(".shot[data-id='c'] .shotCk").check();
+  await page.click("#shotMoveOpen");
   await page.selectOption("#shotDestGun", "r2");
   await page.selectOption("#shotDestLoad", "l3");
   await page.click("#shotMoveGo");
@@ -244,6 +248,7 @@ try {
   await page.fill("#slTemp", "70");
   await startSelect();
   await page.locator(".shot[data-id='c'] .shotCk").check();
+  await page.click("#shotMoveOpen");
   await page.selectOption("#shotDestGun", "r2");
   await page.selectOption("#shotDestLoad", "l3");
   const promptsMid = dialogs.length;

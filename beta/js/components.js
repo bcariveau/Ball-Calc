@@ -88,13 +88,15 @@ function shBtnPaint() {
 export function init1() {
   document.querySelectorAll(".stepper").forEach(box => {
     const el = box.querySelector("input"), noSwipe = el.id === "windSpeed" || el.id === "windDir";   // the wind boxes sit in the scroll path: − / + only
-    const mk = (txt, n, label) => { const b = document.createElement("button"); b.type = "button"; b.textContent = txt; b.setAttribute("aria-label", label);
+    const mk = (txt, n, label) => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = txt; b.setAttribute("aria-label", label);
       let t1, t2; const stop = () => { clearTimeout(t1); clearInterval(t2); };
       b.addEventListener("pointerdown", e => { e.preventDefault(); bump(el, n); t1 = setTimeout(() => t2 = setInterval(() => bump(el, n), 70), 400); });
       ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, stop));
       b.addEventListener("contextmenu", e => e.preventDefault());
       return b; };
-    box.prepend(mk("−", -1, "decrease")); box.append(mk("+", 1, "increase"));
+    const minus = "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/></svg>";
+    const plus = "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg>";
+    box.prepend(mk(minus, -1, "decrease")); box.append(mk(plus, 1, "increase"));
     if (el.id === "target") { box.classList.add("plain"); return; }   // the Dope distance is a normal editable number box: tap and type, − / + still step it
     // horizontal swipe on the number changes it; vertical swipe still scrolls the page (touch-action: pan-y)
     // Read-only until tapped, so a swipe never pops the keyboard; a plain tap (or keyboard focus) allows typing.

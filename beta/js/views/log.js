@@ -36,6 +36,8 @@ ${startBtn("slStartBtn")}
 
 export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-modal="true" aria-label="Chronograph session">
   ${sheetHead("Session", "slEdClose", { titleId: "slEdTitle" })}
+  <button type="button" class="sm ghost" id="shotSelDone" hidden>Done</button>
+  <div id="slEdScroll">
   <div id="sbDock"></div>
   <div class="summary" id="slEdFor"></div>
   <div id="slEdRecipe"></div>
@@ -49,9 +51,8 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
     <div class="row"><button type="button" class="sm" id="tgMarkBtn"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes</button></div>
     <label class="tgl" for="tgMarkEach"><span>Mark each shot<small>Adds <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark impact to the shot banner</small></span><input type="checkbox" id="tgMarkEach" role="switch"></label></div>
   <div id="slAddRow"><input type="text" inputmode="decimal" autocomplete="off" id="slVel" placeholder="fps" enterkeyhint="done" aria-label="Velocity (fps)"><button type="button" id="slAdd"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add</button></div>
-  <div class="hint">Type a velocity and tap Add (or Enter). You can paste several at once, e.g. "2701 2698 2710". Tags (Clean, Cold bore, Flier, Input error) can be combined and never change the stats. <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><path d='m4.9 4.9 14.2 14.2'/></svg> Remove keeps the shot in the log, grays it, and leaves it out of every stat until you restore it.</div>
+  <p class="hint sh" id="slAddHint"><span class="h1">Type a velocity and tap Add (or Enter).</span> <button type="button" class="info" id="slAddHelp" aria-expanded="false" aria-label="More about adding shots">?</button><span class="more" hidden> You can paste several at once, e.g. "2701 2698 2710". Tags (Clean, Cold bore, Flier, Input error) can be combined and never change the stats. Remove keeps the shot in the log, grays it, and leaves it out of every stat until you restore it.</span></p>
   <div class="row" id="shotSelTools"><button class="sm ghost" type="button" id="shotSelBtn"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5'/><path d='m9 11 3 3L22 4'/></svg> Select shots</button></div>
-  <div class="row" id="shotSelBar" hidden><span class="n" id="shotSelN">0 selected</span><select id="shotDestKind" aria-label="Where to move the selected shots"><option value="new">New string for a firearm and load</option><option value="existing">An existing string</option></select><select id="shotDestStr" aria-label="Existing string to move the selected shots to" hidden></select><select id="shotDestGun" aria-label="Firearm to assign the selected shots to"></select><select id="shotDestLoad" aria-label="Load to assign the selected shots to"></select><button class="sm" type="button" id="shotMoveGo" disabled>Move to</button><button class="sm ghost" type="button" id="shotSplit" disabled>Split from here</button><button class="sm ghost" type="button" id="shotSelDone">Done</button><p class="hint" id="shotDestNote"></p></div>
   <div id="slShots"></div>
   <div class="sub" style="margin-top:10px">Targets</div>
   <div id="slTgView"></div>
@@ -74,6 +75,31 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
   </div>
   <div class="row" style="margin-top:28px;justify-content:flex-end">
     <button type="button" class="danger" id="slDel" style="flex:0 0 auto;width:auto;padding:10px 16px"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 6h18'/><path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/><path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/></svg> Delete session…</button>
+  </div>
+  </div>
+  <div id="shotSelBar" hidden>
+    <span class="n" id="shotSelN">0 selected</span>
+    <button type="button" id="shotMoveOpen" disabled>Move 0 shots</button>
+    <button type="button" class="ghost" id="shotSplit" hidden>Split</button>
+  </div>
+</div>
+<div id="shotDestSheet" hidden role="dialog" aria-modal="true" aria-label="Where to move the selected shots">
+  <div class="sheetHd"><span>Move shots</span><button type="button" class="sm ghost" id="shotDestClose">Cancel</button></div>
+  <select id="shotDestKind" aria-label="Where to move the selected shots"><option value="new">New string for a firearm and load</option><option value="existing">An existing string</option></select>
+  <select id="shotDestStr" aria-label="Existing string to move the selected shots to" hidden></select>
+  <select id="shotDestGun" aria-label="Firearm to assign the selected shots to"></select>
+  <select id="shotDestLoad" aria-label="Load to assign the selected shots to"></select>
+  <div id="shotDestList"></div>
+  <p class="hint" id="shotDestNote"></p>
+  <button type="button" id="shotMoveGo" disabled><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move 0 shots</button>
+</div>
+<div id="shotDelDlg" hidden role="dialog" aria-modal="true" aria-labelledby="shotDelMsg">
+  <div class="box">
+    <p id="shotDelMsg">Delete this shot?</p>
+    <div class="row">
+      <button type="button" class="ghost" id="shotDelCancel">Cancel</button>
+      <button type="button" class="danger" id="shotDelGo"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 6h18'/><path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/><path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/></svg> Delete</button>
+    </div>
   </div>
 </div>
 <div id="mvSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Move session">

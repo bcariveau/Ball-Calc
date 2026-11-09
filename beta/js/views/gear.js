@@ -14,7 +14,7 @@ ${ctxRow("ctxGear")}
     <div class="lbl"><span>Gun</span><span class="saved" id="rifleSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="rifleSel" aria-label="Gun"></select>
-      <button class="ghost pkMenuBtn" type="button" id="rifleMenu" aria-label="Gun actions" aria-haspopup="dialog" title="Gun: new, duplicate, rename, delete">⋯</button>
+      <button class="ghost pkMenuBtn" type="button" id="rifleMenu" aria-label="Gun actions" aria-haspopup="dialog" title="Gun: new, duplicate, rename, delete"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
     </div>
     <div class="summary" id="rifleSum"></div>
     <div id="sampleNote" class="zflag sampleNote" hidden><span>This is sample data, not your rifle.</span><button class="sm" type="button" id="suResume">Set up my rifle</button></div>
@@ -23,7 +23,7 @@ ${ctxRow("ctxGear")}
       <div class="lbl"><span><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M6 21h6'/><path d='M9 21v-4'/><path d='M14 5 9 3 4 5l5 3Z'/><path d='M9 8v9'/><path d='m14 5 5 2v4c0 4-3 6-5 7-2-1-5-3-5-7V7'/></svg> Optic</span><span class="saved" id="opticSaved" aria-live="polite"></span></div>
       <div class="row pkRow">
         <select id="opticSel" aria-label="Optic on this gun"></select>
-        <button class="ghost pkMenuBtn" type="button" id="opticMenu" aria-label="Optic actions" aria-haspopup="dialog" title="Optic: new, rename, duplicate, delete, attach">⋯</button>
+        <button class="ghost pkMenuBtn" type="button" id="opticMenu" aria-label="Optic actions" aria-haspopup="dialog" title="Optic: new, rename, duplicate, delete, attach"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
       </div>
       <div class="summary" id="opticSum"></div>
       <div id="opticBody" hidden>
@@ -77,7 +77,7 @@ ${ctxRow("ctxGear")}
     <div class="lbl"><span>Load (ammo for this gun)</span><span class="saved" id="loadSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="loadSel" aria-label="Load"></select>
-      <button class="ghost pkMenuBtn" type="button" id="loadMenu" aria-label="Load actions" aria-haspopup="dialog" title="Load: new, duplicate, rename, delete">⋯</button>
+      <button class="ghost pkMenuBtn" type="button" id="loadMenu" aria-label="Load actions" aria-haspopup="dialog" title="Load: new, duplicate, rename, delete"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
     </div>
     <div class="summary" id="loadSum"></div>
     <div class="grid" id="loadBasic">
@@ -149,7 +149,7 @@ ${ctxRow("ctxGear")}
     <div class="lbl"><span>Shooting range / location</span><span class="saved" id="rangeSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="rangeSel" aria-label="Range"></select>
-      <button class="ghost pkMenuBtn" type="button" id="rangeMenu" aria-label="Range actions" aria-haspopup="dialog" title="Range: new, duplicate, rename, delete">⋯</button>
+      <button class="ghost pkMenuBtn" type="button" id="rangeMenu" aria-label="Range actions" aria-haspopup="dialog" title="Range: new, duplicate, rename, delete"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
     </div>
     <div class="summary" id="rangeSum"></div>
     <details id="rangeDetails">

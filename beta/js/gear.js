@@ -33,8 +33,8 @@ function renderPickers() {
   if (!curRifle() && P.rifles.length) P.lastRifleId = P.rifles[0].id;
   const r = curRifle();
   if (r && !r.loads.find(l => l.id === r.lastLoadId) && r.loads.length) r.lastLoadId = r.loads[0].id;
-  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns yet", "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add rifle…");
-  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads yet" : "Add a gun first"), r ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add load…" : "");
+  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns yet", "+ Add rifle…");
+  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads yet" : "Add a gun first"), r ? "+ Add load…" : "");
   fillOptions($("rangeSel"), P.ranges, curRange(), "Current location");
   updateDirty();
 }

@@ -92,6 +92,30 @@ try {
   await page.click("#shotDestClose");
   await page.click("#shotSplit");
   await page.waitForFunction(() => document.querySelectorAll(".sgh").length === 3);
+  await page.waitForSelector("#toast.show");
+  const toastInfo = await page.evaluate(() => {
+    const t = document.getElementById("toast");
+    const span = t.querySelector("span");
+    const tr = t.getBoundingClientRect();
+    const lh = parseFloat(getComputedStyle(span).lineHeight) || 16;
+    const hits = [...document.querySelectorAll("#slShots .shot, #slShots .sgh")].some((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.height < 2 || r.bottom < 0 || r.top > innerHeight) return false;
+      return !(tr.bottom <= r.top || tr.top >= r.bottom || tr.right <= r.left || tr.left >= r.right);
+    });
+    return { text: span.textContent.trim(), oneLine: span.getBoundingClientRect().height <= lh * 1.35, fits: span.scrollWidth <= span.clientWidth + 2, hits, buttons: [...t.querySelectorAll("button")].map((b) => b.textContent.trim()) };
+  });
+  ok(/^Moved \d+ shots? to .+ · String \d+\. .+ MV (stale|unchanged|redone)\.$/.test(toastInfo.text), "the move toast is one short sentence: " + toastInfo.text);
+  ok(toastInfo.oneLine && toastInfo.fits, "the toast message stays on one line at 360 px");
+  ok(!toastInfo.hits, "the toast does not cover the string list");
+  ok(toastInfo.buttons[0] === "Undo" && toastInfo.buttons.includes("Redo MV"), "Undo and Redo MV stay compact");
+  await page.evaluate(() => {
+    const sc = document.getElementById("slEdScroll");
+    const toast = document.getElementById("toast").getBoundingClientRect();
+    const head = document.querySelector("#slShots .sgh");
+    if (sc && head) sc.scrollTop += head.getBoundingClientRect().top - (toast.bottom + 12);
+  });
+  await page.screenshot({ path: ART + "/toast-after.png" });
   const left = expect([{ v: 2700 }]);
   const right = expect([{ v: 2710 }, { v: 2800 }, { v: 2500, x: true }]);
   const stay = expect([{ v: 2810 }]);

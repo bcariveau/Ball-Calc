@@ -45,8 +45,11 @@
 #shotDelDlg .row { display: flex; gap: 8px; }
 #shotDelDlg .row button { flex: 1; min-height: 44px; }
 #shotDelGo { background: var(--danger-bg); color: var(--err); border: 1px solid var(--danger-b); }
-body:has(#slEditor.show) #toast.show { top: max(8px, env(safe-area-inset-top)); bottom: auto; }
-body:has(#toast.show):has(#slEditor.show) #slEditor { padding-top: 76px; }
+body:has(#slEditor.show) #toast.show { top: max(6px, env(safe-area-inset-top)); bottom: auto; left: 6px; right: 6px; width: auto; max-width: none; transform: none; }
+body:has(#slEditor.show) #toast.act { flex-wrap: wrap; padding: 4px 8px; gap: 6px; }
+body:has(#slEditor.show) #toast.act > span { flex: 1 0 100%; white-space: nowrap; font-size: 0.72rem; line-height: 1.3; }
+body:has(#slEditor.show) #toast.act button { min-height: 36px; padding: 4px 10px; font-size: 0.78rem; }
+body:has(#toast.show):has(#slEditor.show) #slEditor { padding-top: 108px; }
 .tg { width: auto; margin: 0; padding: 4px 7px; font-size: 0.7rem; border-radius: 999px; background: none; color: var(--muted); border: 1px solid var(--border); font-weight: 600; }
 .tg.on { background: var(--chip); color: var(--accent); border-color: var(--accent); }
 .x { width: 34px; margin: 0; padding: 4px 0; font-size: 0.9rem; background: none; color: var(--err); border: 0; }

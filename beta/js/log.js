@@ -527,14 +527,27 @@ export function init() {
     if (!ED || i == null || !ED.shots[i]) return;
     const s = ED.shots[i]; if (s.id) unpair(ED, s.id); ED.shots.splice(i, 1); edDirty = true; renderEditor();
   };
+  const mvClause = (items) => {
+    const named = (items || []).filter(i => i && i.name);
+    if (!named.length) return "MV unchanged.";
+    const stale = named.filter(i => i.stale), redone = named.filter(i => i.redone);
+    const bits = [];
+    if (stale.length === 1) bits.push(`${stale[0].name} MV stale.`);
+    else if (stale.length > 1) bits.push(`${stale.map(i => i.name).join(" and ")} MV stale.`);
+    if (redone.length === 1) bits.push(`${redone[0].name} MV redone.`);
+    else if (redone.length > 1) bits.push(`${redone.map(i => i.name).join(" and ")} MV redone.`);
+    if (!bits.length) return named.length === 1 ? `${named[0].name} MV unchanged.` : "MV unchanged.";
+    return bits.join(" ");
+  };
+  const movedLine = (n, gunName, stringNo, clause) => `Moved ${n} shot${n === 1 ? "" : "s"} to ${gunName} · String ${stringNo}. ${clause}`;
   const shotToast = (done, msg) => {
-    const show = () => toast(msg, [
+    const line = `${msg} ${mvClause([{ name: done.load && done.load.name, stale: !!done.stale }])}`.replace(/\s+/g, " ").trim();
+    const show = () => toast(line, [
       { label: "Undo", fn: undoShotEdit },
-      ...(done.stale && done.load ? [{ label: "Redo MV", fn: () => { const m = redoSourceMv(done.load, done.remain); if (m) toast(m, { label: "Undo", fn: undoShotEdit }); else show(); } }] : []),
+      ...(done.stale && done.load ? [{ label: "Redo MV", fn: () => { const m = redoSourceMv(done.load, done.remain); if (m) toast(`${done.load.name} MV ${done.load.mv}.`, [{ label: "Undo", fn: undoShotEdit }]); else show(); } }] : []),
     ]);
     show();
   };
-  const movedLine = (n, gunName, stringNo) => `Moved ${n} shot${n === 1 ? "" : "s"} to ${gunName} · String ${stringNo}.`;
   $("shotMoveGo").onclick = async () => { if (!ED || !SHOTSEL?.size) return;
     if ($("shotDestKind").value === "existing") { await moveToExisting(); return; }
     const af = chosenAsFired(); if (!af) return;
@@ -543,7 +556,7 @@ export function init() {
     const gun = P.rifles.find(r => r.id === af.rifleId);
     const strNo = result.session.tg.strings.findIndex(st => st.id === result.destId) + 1;
     $("shotDestSheet").hidden = true;
-    shotToast(done, movedLine(result.movedIds.length, gun ? gun.name : "the saved firearm", strNo));
+    shotToast(done, `Moved ${result.movedIds.length} shot${result.movedIds.length === 1 ? "" : "s"} to ${gun ? gun.name : "the saved firearm"} · String ${strNo}.`);
   };
   async function moveToExisting() {
     const ctx = destContext($("shotDestStr").value); if (!ctx.sess || !ctx.st) return;
@@ -572,13 +585,18 @@ export function init() {
     }
     const gunName = (ctx.rifle && ctx.rifle.name) || "the saved firearm";
     const strNo = ctx.sess.tg.strings.findIndex(st => st.id === result.destStringId) + 1;
-    const msg = movedLine(result.movedIds.length, gunName, strNo);
+    const nMoved = result.movedIds.length;
     let srcDone = false, dstDone = false;
-    const showMove = (extra) => {
+    const showMove = () => {
+      const clause = mvClause([
+        srcLoad && { name: srcLoad.name, stale: !!(srcStale && !srcDone), redone: !!srcDone },
+        destLoad && (!srcLoad || destLoad.id !== srcLoad.id) && { name: destLoad.name, stale: !!(dstStale && !dstDone), redone: !!dstDone },
+      ]);
+      const both = !!(srcStale && !srcDone && dstStale && !dstDone);
       const acts = [{ label: "Undo", fn: undoShotEdit }];
-      if (!srcDone && srcStale && srcLoad) acts.push({ label: "Redo source MV", fn: () => { const m = redoSourceMv(srcLoad, remainSrc); if (m) { srcDone = true; showMove(m); } else showMove(); } });
-      if (!dstDone && dstStale && destLoad) acts.push({ label: "Redo dest MV", fn: () => { const m = redoSourceMv(destLoad, remainDst); if (m) { dstDone = true; showMove(m); } else showMove(); } });
-      toast(extra || msg, acts);
+      if (!srcDone && srcStale && srcLoad) acts.push({ label: both ? "Redo A" : "Redo MV", fn: () => { const m = redoSourceMv(srcLoad, remainSrc); if (m) { srcDone = true; showMove(); } else showMove(); } });
+      if (!dstDone && dstStale && destLoad) acts.push({ label: (srcStale && !srcDone) ? "Redo B" : "Redo MV", fn: () => { const m = redoSourceMv(destLoad, remainDst); if (m) { dstDone = true; showMove(); } else showMove(); } });
+      toast(movedLine(nMoved, gunName, strNo, clause), acts);
     };
     showMove();
   }
@@ -596,7 +614,7 @@ export function init() {
     if (avg == null || Math.round(avg) !== Math.round(parseFloat(load.mv))) return null;
     return { message: "The destination load's MV matched its kept shots before this move. It was not changed. Redo dest MV uses the shots now on that load and drops removed shots." };
   }
-  $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const id = [...SHOTSEL][0]; const done = applyShotResult(assignShots(ED, [id], af, { splitFromId: id })); shotToast(done, done.stale ? done.stale.message : "Split from the selected shot onto that firearm and load. Date and weather stay on the session."); };
+  $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const id = [...SHOTSEL][0]; const result = assignShots(ED, [id], af, { splitFromId: id }); const done = applyShotResult(result); const gun = P.rifles.find(r => r.id === af.rifleId); const strNo = result.session.tg.strings.findIndex(st => st.id === result.destId) + 1; shotToast(done, `Moved ${result.movedIds.length} shot${result.movedIds.length === 1 ? "" : "s"} to ${gun ? gun.name : "the saved firearm"} · String ${strNo}.`); };
   $("slShots").addEventListener("change", e => { const box = e.target.closest(".shotCk"); if (!box || !SHOTSEL) return; box.checked ? SHOTSEL.add(box.dataset.sel) : SHOTSEL.delete(box.dataset.sel); paintShotSel(); });
   let shotLp;
   $("slShots").addEventListener("pointerdown", e => { const row = e.target.closest(".shot"); if (!row || SHOTSEL || e.target.closest("button, input")) return; clearTimeout(shotLp);

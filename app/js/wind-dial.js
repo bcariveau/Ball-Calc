@@ -31,7 +31,8 @@ function drawDial() {
   c.beginPath(); c.arc(cx, cy, R, 0, 7); c.fillStyle = cv("panel"); c.fill(); c.strokeStyle = cv("border"); c.lineWidth = 2; c.stroke();
   c.fillStyle = cv("muted"); c.font = "11px system-ui"; c.textAlign = "center"; c.textBaseline = "middle";
   for (let h = 1; h <= 12; h++) { const a = h * 30 * Math.PI / 180; c.fillText(h, cx + Math.sin(a) * (R - 11), cy - Math.cos(a) * (R - 11)); }
-  c.fillStyle = cv("accent"); c.fillText("🎯", cx, cy - 30);   // target is straight ahead (12 o'clock)
+  c.save(); c.translate(cx, cy - 30); c.strokeStyle = cv("accent"); c.lineWidth = 1.4;   // target is straight ahead (12 o'clock), same three rings as the Lucide target
+  [7, 4.2, 1.4].forEach((r) => { c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.stroke(); }); c.restore();
   c.beginPath(); c.arc(cx, cy, 4, 0, 7); c.fill();          // shooter
   const d = num("windDir");
   dial.setAttribute("aria-valuenow", d ?? "");
@@ -92,9 +93,9 @@ function dialEnd(cx, cy) {
   windUndoSoon(); return true;
 }
 function dialCancel() { if (WG) { clearTimeout(WG.hold); WG = null; dial.classList.remove("on"); } }
-/* 🔒 wind lock: the dial ignores input (− / + still work) */
+/*  wind lock: the dial ignores input (− / + still work) */
 function windLockPaint() {
-  const on = !!S.windLock, b = $("windLock"); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "🔒 Dial locked" : "🔓 Lock dial";
+  const on = !!S.windLock, b = $("windLock"); b.setAttribute("aria-pressed", String(on)); b.innerHTML = on ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg> Dial locked" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 9.9-1'/></svg> Lock dial";
   b.title = on ? "The wind dial ignores touches — tap to unlock" : "Lock the wind dial so a stray touch can't move it";
   dial.classList.toggle("locked", on); dial.setAttribute("aria-disabled", String(on));
 }
@@ -122,7 +123,7 @@ export function init() {
   dial.addEventListener("pointermove", e => { if (e.pointerType !== "touch" && WG) dialMove(e.clientX, e.clientY); });
   dial.addEventListener("pointerup", e => { if (e.pointerType !== "touch") dialEnd(e.clientX, e.clientY); });
   dial.addEventListener("pointercancel", e => { if (e.pointerType !== "touch") dialCancel(); });
-  $("windLock").onclick = () => { S.windLock = !S.windLock; if (!S.windLock) delete S.windLock; store(K_SETTINGS, S); windLockPaint(); toast(S.windLock ? "🔒 Wind dial locked (− / + still work)" : "🔓 Wind dial unlocked"); };
+  $("windLock").onclick = () => { S.windLock = !S.windLock; if (!S.windLock) delete S.windLock; store(K_SETTINGS, S); windLockPaint(); toast(S.windLock ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg> Wind dial locked (− / + still work)" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 9.9-1'/></svg> Wind dial unlocked"); };
   windLockPaint();
   $("windDir").addEventListener("input", () => { if (!WU.busy && WU.from != null) windUndoSoon(); });
   $("windDir").addEventListener("focus", () => windUndoArm());

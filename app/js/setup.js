@@ -5,7 +5,7 @@
 import { schedule, setTab } from "./app.js";
 import { bandStr, openDB } from "./bulletdb.js";
 import { ctxPaint, toast } from "./components.js";
-import { $, fmt, num, setVal, val } from "./core.js";
+import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { curLoad, curRifle, paintSample, renderPickers, updateDirty } from "./gear.js";
 import { LOG } from "./log.js";
 import { followUnits } from "./optics.js";
@@ -40,7 +40,7 @@ function paintStep() {
   document.querySelectorAll("#suCard .suPane").forEach(p => p.hidden = +p.dataset.i !== step);
   document.querySelectorAll("#suCard .suDots li").forEach((li, i) => { li.classList.toggle("on", i === step); li.classList.toggle("done", i < step); });
   $("suStepTxt").textContent = `Step ${step + 1} of 3 · ${STEPS[step]}`;
-  $("suBack").hidden = step === 0; $("suNext").textContent = step === 2 ? "✓ Finish setup" : "Next ›";
+  $("suBack").hidden = step === 0; $("suNext").innerHTML = step === 2 ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg> Finish setup" : "Next <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg>";
 }
 function chk(id, lo, hi, req, msg) {
   const raw = val(id), v = parseFloat(raw); let m = "";
@@ -65,7 +65,7 @@ function suOnBullet(b) {   // a database pick during setup fills step 3 (nothing
   picked = b; picking = false; const g7 = b.g7 != null;
   setVal("suBc", g7 ? b.g7 : b.g1); $("suDrag").value = g7 ? "G7" : "G1"; setVal("suWt", b.weight_gr); setVal("suDia", b.diameter_in);
   if (!val("suLoad")) setVal("suLoad", `${b.weight_gr}gr ${b.line || b.brand}`.slice(0, 60));
-  $("suBullet").textContent = `From database: ${b.brand} ${b.name}` + (b.length_in != null ? ` · length ${b.length_in}"` : " · no length listed (add it later under Gear › Load › More for spin drift)");
+  $("suBullet").innerHTML = `From database: ${escapeHtml(b.brand)} ${escapeHtml(b.name)}` + (b.length_in != null ? ` · length ${escapeHtml(b.length_in)}"` : " · no length listed (add it later under Gear <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> Load <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> More for spin drift)");
   setTimeout(() => { $("suMv").focus(); }, 60);
 }
 function finish() {

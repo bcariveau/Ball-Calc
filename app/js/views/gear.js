@@ -7,23 +7,23 @@ export const gearTab = `
 ${ctxRow("ctxGear")}
 <!-- ===== Presets ===== -->
 <div class="section" id="gearSec">
-  <h2>Gear <span class="row"><button class="sm ghost" id="exportBtn" type="button">⇩ Export</button><button class="sm ghost" id="importBtn" type="button">⇧ Import</button></span></h2>
+  <h2>Gear <span class="row"><button class="sm ghost" id="exportBtn" type="button"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' x2='12' y1='15' y2='3'/></svg> Export</button><button class="sm ghost" id="importBtn" type="button"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' x2='12' y1='3' y2='15'/></svg> Import</button></span></h2>
   <input type="file" id="importFile" accept="application/json,.json" hidden>
 
   <div class="picker">
     <div class="lbl"><span>Gun</span><span class="saved" id="rifleSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="rifleSel" aria-label="Gun"></select>
-      <button class="ghost pkMenuBtn" type="button" id="rifleMenu" aria-label="Gun actions" aria-haspopup="dialog" title="Gun: new, duplicate, rename, delete">⋯</button>
+      <button class="ghost pkMenuBtn" type="button" id="rifleMenu" aria-label="Gun actions" aria-haspopup="dialog" title="Gun: new, duplicate, rename, delete"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
     </div>
     <div class="summary" id="rifleSum"></div>
     <div id="sampleNote" class="zflag sampleNote" hidden><span>This is sample data, not your rifle.</span><button class="sm" type="button" id="suResume">Set up my rifle</button></div>
-    <div id="zeroFlag" class="zflag" hidden><span id="zeroFlagTxt">⚠ Zero not confirmed</span><button class="sm" type="button" id="zeroConfirm">✓ Confirm zero</button></div>
+    <div id="zeroFlag" class="zflag" hidden><span id="zeroFlagTxt"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Zero not confirmed</span><button class="sm" type="button" id="zeroConfirm"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg> Confirm zero</button></div>
     <div class="opPk" id="opticPk">
-      <div class="lbl"><span>🔭 Optic</span><span class="saved" id="opticSaved" aria-live="polite"></span></div>
+      <div class="lbl"><span><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M6 21h6'/><path d='M9 21v-4'/><path d='M14 5 9 3 4 5l5 3Z'/><path d='M9 8v9'/><path d='m14 5 5 2v4c0 4-3 6-5 7-2-1-5-3-5-7V7'/></svg> Optic</span><span class="saved" id="opticSaved" aria-live="polite"></span></div>
       <div class="row pkRow">
         <select id="opticSel" aria-label="Optic on this gun"></select>
-        <button class="ghost pkMenuBtn" type="button" id="opticMenu" aria-label="Optic actions" aria-haspopup="dialog" title="Optic: new, rename, duplicate, delete, attach">⋯</button>
+        <button class="ghost pkMenuBtn" type="button" id="opticMenu" aria-label="Optic actions" aria-haspopup="dialog" title="Optic: new, rename, duplicate, delete, attach"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
       </div>
       <div class="summary" id="opticSum"></div>
       <div id="opticBody" hidden>
@@ -66,7 +66,7 @@ ${ctxRow("ctxGear")}
             <div><label for="zHum">Humidity (%)</label><input type="number" inputmode="numeric" id="zHum" placeholder="blank = today"><div class="err" id="e-zHum"></div></div>
             <div><label for="zAlt">Altitude (ft)</label><input type="number" inputmode="numeric" id="zAlt" placeholder="blank = today"><div class="err" id="e-zAlt"></div></div>
             <div><label for="zPress">Station pressure (inHg)</label><input type="number" inputmode="decimal" id="zPress" step="0.01" placeholder="blank = today"><div class="err" id="e-zPress"></div></div>
-            <div class="full"><button class="sm ghost" type="button" id="zUseCur" style="width:100%;padding:10px">📋 Use current conditions</button></div>
+            <div class="full"><button class="sm ghost" type="button" id="zUseCur" style="width:100%;padding:10px"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='8' height='4' x='8' y='2' rx='1' ry='1'/><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/></svg> Use current conditions</button></div>
             <div class="full hint">Conditions on the day you zeroed. Blank = today's conditions.</div>
           </div></details></div>
       </div>
@@ -77,11 +77,11 @@ ${ctxRow("ctxGear")}
     <div class="lbl"><span>Load (ammo for this gun)</span><span class="saved" id="loadSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="loadSel" aria-label="Load"></select>
-      <button class="ghost pkMenuBtn" type="button" id="loadMenu" aria-label="Load actions" aria-haspopup="dialog" title="Load: new, duplicate, rename, delete">⋯</button>
+      <button class="ghost pkMenuBtn" type="button" id="loadMenu" aria-label="Load actions" aria-haspopup="dialog" title="Load: new, duplicate, rename, delete"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
     </div>
     <div class="summary" id="loadSum"></div>
     <div class="grid" id="loadBasic">
-        <div class="full"><button class="sm ghost" type="button" id="dbOpen" style="width:100%;padding:10px">📚 Pick bullet from database</button>
+        <div class="full"><button class="sm ghost" type="button" id="dbOpen" style="width:100%;padding:10px"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m16 6 4 14'/><path d='M12 6v14'/><path d='M8 8v12'/><path d='M4 4v16'/></svg> Pick bullet from database</button>
           <div id="bulletInfo"></div>
           <button class="sm ghost rcBtn" type="button" id="rcBulletBtn" hidden></button>
           <input type="hidden" id="bulletId"><input type="hidden" id="bulletName"><input type="hidden" id="bcBands"></div>
@@ -90,7 +90,7 @@ ${ctxRow("ctxGear")}
         <div class="full"><label for="mv">Muzzle velocity (fps)</label><input type="number" inputmode="numeric" id="mv" step="5" value="2750"><div class="err" id="e-mv"></div></div>
     </div>
     <details id="loadDetails">
-      <summary><span>More <span class="mArr" aria-hidden="true">▾</span></span><span class="rsum" id="loadMoreSum"></span></summary>
+      <summary><span>More <span class="mArr" aria-hidden="true"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg></span></span><span class="rsum" id="loadMoreSum"></span></summary>
       <div class="grid">
         <div><label for="weight">Bullet weight (gr)</label><input type="number" inputmode="decimal" id="weight" step="1" value="168"><div class="err" id="e-weight"></div></div>
         <div><label for="diameter">Diameter (in)</label><input type="number" inputmode="decimal" id="diameter" step="0.001" value="0.308"><div class="err" id="e-diameter"></div></div>
@@ -115,7 +115,7 @@ ${ctxRow("ctxGear")}
       </div>
       <details id="recipeDetails">
         <summary>Load data <span class="rsum" id="recipeSum" hidden></span></summary>
-        <span class="seg" id="ldKindSeg" role="group" aria-label="Ammo type"><button type="button" data-v="hand">🧪 Handload</button><button type="button" data-v="factory">📦 Factory ammo</button></span>
+        <span class="seg" id="ldKindSeg" role="group" aria-label="Ammo type"><button type="button" data-v="hand"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg> Handload</button><button type="button" data-v="factory"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z'/><path d='M12 22V12'/><path d='m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7'/></svg> Factory ammo</button></span>
         <input type="hidden" id="ldKind" value="hand">
         <button class="sm ghost rcBtn" type="button" id="rcFind" hidden></button>
         <div class="grid" id="ldHand">
@@ -149,7 +149,7 @@ ${ctxRow("ctxGear")}
     <div class="lbl"><span>Shooting range / location</span><span class="saved" id="rangeSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="rangeSel" aria-label="Range"></select>
-      <button class="ghost pkMenuBtn" type="button" id="rangeMenu" aria-label="Range actions" aria-haspopup="dialog" title="Range: new, duplicate, rename, delete">⋯</button>
+      <button class="ghost pkMenuBtn" type="button" id="rangeMenu" aria-label="Range actions" aria-haspopup="dialog" title="Range: new, duplicate, rename, delete"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg></button>
     </div>
     <div class="summary" id="rangeSum"></div>
     <details id="rangeDetails">
@@ -157,7 +157,7 @@ ${ctxRow("ctxGear")}
       <div class="grid">
         <div><label for="rangeLat">Latitude</label><input type="number" inputmode="decimal" id="rangeLat" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLat"></div></div>
         <div><label for="rangeLon">Longitude</label><input type="number" inputmode="decimal" id="rangeLon" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLon"></div></div>
-        <div class="full"><button class="sm ghost" type="button" id="rangeHere">📍 Use my current location</button></div>
+        <div class="full"><button class="sm ghost" type="button" id="rangeHere"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/><circle cx='12' cy='10' r='3'/></svg> Use my current location</button></div>
         <div class="full hint">A range saves its location (for weather), shooting direction, altitude and default target distance (set them on the Dope tab; changes save automatically). Leave lat/lon blank to use your phone's location.</div>
       </div>
     </details>
@@ -168,35 +168,35 @@ ${ctxRow("ctxGear")}
 export const gearSheets = `<div id="pkMenu" role="dialog" aria-modal="true" aria-labelledby="pkTitle"><div class="box">
   <h3 id="pkTitle">Actions</h3>
   <div class="grp" data-k="rifle">
-    <button type="button" id="rifleNew">＋ New gun</button>
-    <button type="button" id="rifleDup">⧉ Duplicate gun (with its loads)</button>
-    <button type="button" id="rifleRename">✎ Rename gun</button>
+    <button type="button" id="rifleNew"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New gun</button>
+    <button type="button" id="rifleDup"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='14' height='14' x='8' y='8' rx='2' ry='2'/><path d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/></svg> Duplicate gun (with its loads)</button>
+    <button type="button" id="rifleRename"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg> Rename gun</button>
     <div class="sep"></div>
-    <button type="button" class="del" id="rifleDel">🗑 Delete gun…</button>
+    <button type="button" class="del" id="rifleDel"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 6h18'/><path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/><path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/></svg> Delete gun…</button>
   </div>
   <div class="grp" data-k="load">
-    <button type="button" id="loadNew">＋ New load</button>
-    <button type="button" id="loadCopy">📑 Duplicate / copy to another gun…</button>
-    <button type="button" id="loadMove">↔ Move to another gun…</button>
-    <button type="button" id="loadRename">✎ Rename load</button>
+    <button type="button" id="loadNew"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New load</button>
+    <button type="button" id="loadCopy"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='14' height='14' x='8' y='8' rx='2' ry='2'/><path d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/></svg> Duplicate / copy to another gun…</button>
+    <button type="button" id="loadMove"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move to another gun…</button>
+    <button type="button" id="loadRename"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg> Rename load</button>
     <div class="sep"></div>
-    <button type="button" class="del" id="loadDel">🗑 Delete load…</button>
+    <button type="button" class="del" id="loadDel"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 6h18'/><path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/><path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/></svg> Delete load…</button>
   </div>
   <div class="grp" data-k="optic">
-    <button type="button" id="opNew">＋ New optic on this gun</button>
-    <button type="button" id="opAttach">🔗 Attach existing optic…</button>
-    <button type="button" id="opDup">⧉ Duplicate optic</button>
-    <button type="button" id="opRename">✎ Rename optic</button>
-    <button type="button" id="opDetach">⛓ Detach from this gun</button>
+    <button type="button" id="opNew"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New optic on this gun</button>
+    <button type="button" id="opAttach"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg> Attach existing optic…</button>
+    <button type="button" id="opDup"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='14' height='14' x='8' y='8' rx='2' ry='2'/><path d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/></svg> Duplicate optic</button>
+    <button type="button" id="opRename"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg> Rename optic</button>
+    <button type="button" id="opDetach"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18.84 12.25 1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='m5.17 11.75-1.71 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71'/><line x1='8' x2='8' y1='2' y2='5'/><line x1='2' x2='5' y1='8' y2='8'/><line x1='16' x2='16' y1='19' y2='22'/><line x1='19' x2='22' y1='16' y2='16'/></svg> Detach from this gun</button>
     <div class="sep"></div>
-    <button type="button" class="del" id="opDel">🗑 Delete optic…</button>
+    <button type="button" class="del" id="opDel"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 6h18'/><path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/><path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/></svg> Delete optic…</button>
   </div>
   <div class="grp" data-k="range">
-    <button type="button" id="rangeNew">＋ New range</button>
-    <button type="button" id="rangeDup">⧉ Duplicate range</button>
-    <button type="button" id="rangeRename">✎ Rename range</button>
+    <button type="button" id="rangeNew"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New range</button>
+    <button type="button" id="rangeDup"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='14' height='14' x='8' y='8' rx='2' ry='2'/><path d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/></svg> Duplicate range</button>
+    <button type="button" id="rangeRename"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg> Rename range</button>
     <div class="sep"></div>
-    <button type="button" class="del" id="rangeDel">🗑 Delete range…</button>
+    <button type="button" class="del" id="rangeDel"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 6h18'/><path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/><path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/></svg> Delete range…</button>
   </div>
   <button type="button" class="ghost" id="pkCancel">Cancel</button>
 </div></div>
@@ -207,12 +207,12 @@ export const gearSheets = `<div id="pkMenu" role="dialog" aria-modal="true" aria
   <div class="row"><button type="button" class="ghost" id="zpNo">No — not yet</button><button type="button" id="zpYes">Yes, it's zeroed</button></div>
 </div></div>
 <div id="opSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Attach an optic">
-  ${sheetHead("🔗 Attach an optic", "opSheetClose")}
+  ${sheetHead("<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg> Attach an optic", "opSheetClose")}
   <div class="summary" id="opSheetFor"></div>
   <div class="list" id="opList"></div>
 </div>
 <div id="trSheet" class="ovl" role="dialog" aria-modal="true" aria-label="True muzzle velocity or BC">
-  ${sheetHead("🎯 True to an observed drop", "trClose")}
+  ${sheetHead("<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> True to an observed drop", "trClose")}
   <div class="summary" id="trFor"></div>
   <div class="list">
     <div class="grid">
@@ -223,7 +223,7 @@ export const gearSheets = `<div id="pkMenu" role="dialog" aria-modal="true" aria
       <div class="full"><span class="seg" id="trWhat" role="group" aria-label="What to solve"><button type="button" data-v="mv">Solve MV</button><button type="button" data-v="bc">Solve BC scale</button></span></div>
       <div class="full"><button type="button" id="trGo">Solve</button></div>
       <div class="full" id="trOut" aria-live="polite"></div>
-      <div class="full"><button type="button" class="ghost" id="trSave" disabled>💾 Save to this load</button></div>
+      <div class="full"><button type="button" class="ghost" id="trSave" disabled><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/><path d='M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7'/><path d='M7 3v4a1 1 0 0 0 1 1h7'/></svg> Save to this load</button></div>
       <div class="full hint">Shoot at a known range in today's conditions and enter the elevation that actually centered the group (or how many inches low the shots landed with the predicted dial). Solve MV at medium range (supersonic); solve a BC scale at long range once MV is right.</div>
     </div>
   </div>
@@ -234,10 +234,10 @@ export const gearSheets2 = `<div id="sheet" role="dialog" aria-modal="true">
   <div id="sheetVal">—</div>
   <div id="sheetSub"></div>
   <div id="sheetHelp"></div>
-  <div class="row"><button type="button" class="ghost" id="sheetCancel">Cancel</button><button type="button" id="sheetLock">🔒 Lock</button></div>
+  <div class="row"><button type="button" class="ghost" id="sheetCancel">Cancel</button><button type="button" id="sheetLock"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg> Lock</button></div>
 </div>
 <div id="dbSheet" role="dialog" aria-modal="true" aria-label="Bullet database">
-  ${sheetHead("📚 Bullet database", "dbClose")}
+  ${sheetHead("<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m16 6 4 14'/><path d='M12 6v14'/><path d='M8 8v12'/><path d='M4 4v16'/></svg> Bullet database", "dbClose")}
   <div class="filters">
     <input type="search" id="dbQ" placeholder="Search, e.g. 6.5 140 ELD" autocomplete="off" enterkeyhint="search">
     <span class="seg" id="dbKind" role="group" aria-label="Bullet type"><button type="button" data-v="" class="on">All</button><button type="button" data-v="rifle">Rifle</button><button type="button" data-v="handgun">Handgun</button></span>
@@ -249,7 +249,7 @@ export const gearSheets2 = `<div id="sheet" role="dialog" aria-modal="true">
   <div id="dbList"></div>
 </div>
 <div id="rcSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Saved recipes for this bullet">
-  ${sheetHead("📖 Saved recipes", "rcClose")}
+  ${sheetHead("<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M12 7v14'/><path d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/></svg> Saved recipes", "rcClose")}
   <div class="summary" id="rcFor"></div>
   <div class="hint">Recipes saved on any of your guns for this same bullet (same database bullet, or same diameter, weight and BC). Tap one to put it in this load's data (saved automatically). Velocities from another gun or barrel will differ — always work up again.</div>
   <div class="list" id="rcList"></div>
@@ -258,7 +258,7 @@ export const gearSheets2 = `<div id="sheet" role="dialog" aria-modal="true">
   ${sheetHead("Copy load", "cpClose", { titleId: "cpTitle" })}
   <div class="summary" id="cpFor"></div>
   <div class="list">
-    <button type="button" id="cpDup">➕ Duplicate on this gun</button>
+    <button type="button" id="cpDup"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Duplicate on this gun</button>
     <div class="hint">Same bullet, MV and load data under a new name — handy for a ladder or seating-depth test at a new charge.</div>
     <div class="sub">Copy to another gun</div>
     <div class="row" id="cpMvRow"><span class="hint" style="margin:0">Muzzle velocity on the other gun</span><span class="seg" id="cpMv" role="group" aria-label="Muzzle velocity on the other gun"><button type="button" data-v="est">Estimate for its barrel</button><button type="button" data-v="keep">Keep, mark estimated</button></span></div>

@@ -1,4 +1,4 @@
-// app/js/weather.js — Weather/conditions: fetching, station/altitude, atmosphere inputs and the ↻ Weather button.
+// app/js/weather.js — Weather/conditions: fetching, station/altitude, atmosphere inputs and the  Weather button.
 // Generated from the single-file beta by a mechanical split; statements are verbatim. Code that runs at start-up lives in
 // init*() and is called by main.js in the original order.
 
@@ -40,8 +40,8 @@ function renderChips() {
     c.className = "chip"; c.textContent = ""; c.onclick = null; c.title = "";
     if (!a) continue;
     const name = a.src === "range" ? "range" : "weather";
-    if (!manual.has(f) || same(a.v, $(f).value)) { c.classList.add("wx"); c.textContent = a.src === "range" ? "📍 range" : "🌤 local weather"; }
-    else { c.classList.add("man"); c.textContent = `✎ manual · ↺ ${name}`; c.title = `Revert to ${name} value (${a.v})`;
+    if (!manual.has(f) || same(a.v, $(f).value)) { c.classList.add("wx"); c.innerHTML = a.src === "range" ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/><circle cx='12' cy='10' r='3'/></svg> range" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='4'/><path d='M12 2v2'/><path d='M12 20v2'/><path d='m4.93 4.93 1.41 1.41'/><path d='m17.66 17.66 1.41 1.41'/><path d='M2 12h2'/><path d='M20 12h2'/><path d='m6.34 17.66-1.41 1.41'/><path d='m19.07 4.93-1.41 1.41'/></svg> local weather"; }
+    else { c.classList.add("man"); c.innerHTML = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg> manual · <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 7v6h6'/><path d='M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13'/></svg> ${name}`; c.title = `Revert to ${name} value (${a.v})`;
       c.onclick = (e) => { e.preventDefault(); manual.delete(f); setVal(f, a.v); applyAuto(); schedule(); }; }
   }
   paintShHint();
@@ -67,13 +67,13 @@ function getPosition() {
   });
 }
 let wxBusy = false;
-// Location is asked for ONLY when the user taps ↻ Weather (wxBtn, or the Dope ↻ button): refreshWeather({ gps: true }).
+// Location is asked for ONLY when the user taps  Weather (wxBtn, or the Dope  button): refreshWeather({ gps: true }).
 // Every other caller (page load, back online, range change, place search) uses the range's saved coordinates or the last
 // place stored on this phone, and never triggers a permission prompt.
 async function refreshWeather(opts) {
   const gps = !!(opts && opts.gps === true);
   if (wxBusy) return;
-  if (navigator.onLine === false) { wxStatus("📴 Offline — weather needs a connection. Keeping your manual values; it'll refresh when you're back online.", true); return; }
+  if (navigator.onLine === false) { wxStatus("<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10.1 2.182a10 10 0 0 1 3.8 0'/><path d='M17.6 3.71a10 10 0 0 1 1.69 1.69'/><path d='M21.82 10.1a10 10 0 0 1 0 3.8'/><path d='M20.29 17.6a10 10 0 0 1-1.69 1.69'/><path d='M13.9 21.82a10 10 0 0 1-3.8 0'/><path d='M6.4 20.29a10 10 0 0 1-1.69-1.69'/><path d='M2.18 13.9a10 10 0 0 1 0-3.8'/><path d='M3.71 6.4a10 10 0 0 1 1.69-1.69'/></svg> Offline — weather needs a connection. Keeping your manual values; it'll refresh when you're back online.", true); return; }
   wxBusy = true; $("wxBtn").disabled = true;
   try {
     let loc, note = "";
@@ -81,8 +81,8 @@ async function refreshWeather(opts) {
     if (g && val("rangeLat") !== "" && val("rangeLon") !== "" && !isNaN(num("rangeLat")) && !isNaN(num("rangeLon"))) loc = { lat: num("rangeLat"), lon: num("rangeLon"), label: g.name };
     else if (!gps) {
       const last = load(K_LOC, null);
-      if (!last || typeof last.lat !== "number" || typeof last.lon !== "number") { wxStatus("Tap ↻ Weather for live wind and temperature where you are (it asks for your location then), or keep entering them by hand."); return; }
-      loc = last; note = opts && opts.place ? "" : " (last place · tap ↻ Weather to update)";
+      if (!last || typeof last.lat !== "number" || typeof last.lon !== "number") { wxStatus("Tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> Weather for live wind and temperature where you are (it asks for your location then), or keep entering them by hand."); return; }
+      loc = last; note = opts && opts.place ? "" : " (last place · tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> Weather to update)";
     } else {
       wxStatus("Getting your location…");
       try { loc = await getPosition(); }
@@ -100,11 +100,11 @@ async function refreshWeather(opts) {
       inHg: c.surface_pressure ? c.surface_pressure * 0.0295300 : null, elevFt: (d.elevation ?? 0) * 3.28084, at: new Date() };
     $("placeBox").style.display = "none"; $("wxWindNote").hidden = false;
     applyAuto();
-    wxStatus(`🌤 ${loc.label}: wind ${Math.round(wx.wind)} mph from ${compass(wx.windFrom)}` + (wx.gust ? ` (gusts ${Math.round(wx.gust)})` : "") +
+    wxStatus(`<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='4'/><path d='M12 2v2'/><path d='M12 20v2'/><path d='m4.93 4.93 1.41 1.41'/><path d='m17.66 17.66 1.41 1.41'/><path d='M2 12h2'/><path d='M20 12h2'/><path d='m6.34 17.66-1.41 1.41'/><path d='m19.07 4.93-1.41 1.41'/></svg> ${loc.label}: wind ${Math.round(wx.wind)} mph from ${compass(wx.windFrom)}` + (wx.gust ? ` (gusts ${Math.round(wx.gust)})` : "") +
       ` · ${Math.round(wx.tempF)}°F · ${Math.round(wx.rh)}% RH · updated ${wx.at.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}${note}`);
     schedule();
   } catch (e) {
-    if (navigator.onLine === false || (e instanceof TypeError && /fetch|network|load/i.test(e.message))) { wxStatus(navigator.onLine === false ? "📴 Offline — weather needs a connection. Keeping your manual values; it'll refresh when you're back online." : "Weather unavailable (no connection?) — keeping your manual values.", true); return; }
+    if (navigator.onLine === false || (e instanceof TypeError && /fetch|network|load/i.test(e.message))) { wxStatus(navigator.onLine === false ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10.1 2.182a10 10 0 0 1 3.8 0'/><path d='M17.6 3.71a10 10 0 0 1 1.69 1.69'/><path d='M21.82 10.1a10 10 0 0 1 0 3.8'/><path d='M20.29 17.6a10 10 0 0 1-1.69 1.69'/><path d='M13.9 21.82a10 10 0 0 1-3.8 0'/><path d='M6.4 20.29a10 10 0 0 1-1.69-1.69'/><path d='M2.18 13.9a10 10 0 0 1 0-3.8'/><path d='M3.71 6.4a10 10 0 0 1 1.69-1.69'/></svg> Offline — weather needs a connection. Keeping your manual values; it'll refresh when you're back online." : "Weather unavailable (no connection?) — keeping your manual values.", true); return; }
     const msg = e.name === "AbortError" ? "Weather request timed out" : e.message.startsWith("Location") ? e.message : "Weather unavailable (" + e.message + ")";
     wxStatus(msg + (msg.includes("manually") ? "" : " — keeping your manual values."), true);
   } finally { wxBusy = false; $("wxBtn").disabled = false; }

@@ -41,7 +41,7 @@ function shNeedGear(kind) {   // no gun / load yet: show the pickers, then offer
 function shPendCheck() {
   if (!SH.pend || SH.on || !curRifle() || !curLoad()) return;
   const k = SH.pend; SH.pend = null;
-  toast(`Ready: ${curRifle().name} · ${curLoad().name}`, { label: k === "shoot" ? "▶ Start shooting" : "＋ Session", fn: () => k === "shoot" ? shStart() : openEditor(null) });
+  toast(`Ready: ${curRifle().name} · ${curLoad().name}`, { label: k === "shoot" ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><polygon points='6 3 20 12 6 21 6 3'/></svg> Start shooting" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Session", fn: () => k === "shoot" ? shStart() : openEditor(null) });
 }
 async function shStart() {
   if (SH.on) return;
@@ -110,16 +110,16 @@ function shDevCls(v, kept) {
 }
 function shDevWord(c) { return c === "dvB" ? "far off the average" : c === "dvW" ? "off the average" : ""; }
 function shSigned(n) { return n == null ? "" : (n >= 0 ? "+" : "−") + Math.abs(n); }
-function shTags(s) { return [s.clean && "Clean", s.cold && "Cold bore", s.fl && "Flier", s.ie && "Input error", s.note && "✎ " + s.note].filter(Boolean).join(" · "); }
+function shTags(s) { return [s.clean && "Clean", s.cold && "Cold bore", s.fl && "Flier", s.ie && "Input error", s.note && "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg> " + s.note].filter(Boolean).join(" · "); }
 function shPaint() {
   if (!SH.on || !ED) return;
   const { t, cur } = shCurStr(), sn = strNo(t, cur.id), rd = readings(ED, cur.id), w = shWeight(), q = shStatsOf(rd, w), g = t.targets.find(x => x.id === cur.tid);
   const yd = Math.round(tgYd(g) || tgDefDist());
   $("shStr").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
-  const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
-  const gunFired = P.rifles.find(x => x.id === cur.asFired?.rifleId) || r;
+  const gunFired = P.rifles.find(x => x.id === (cur.asFired?.rifleId || ED.rifleId));
+  const loadFired = gunFired && (gunFired.loads || []).find(x => x.id === (cur.asFired?.loadId || ED.loadId));
   const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired), gunFired && curRifle() === gunFired ? turretSpec() : null);
-  $("shFor").textContent = [r?.name, l?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
+  $("shFor").textContent = [gunFired?.name, loadFired?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
   const gun = $("shGun");
   if (gun && gun.dataset.lock !== "1") {
     gun.innerHTML = P.rifles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");
@@ -135,15 +135,15 @@ function shPaint() {
   const en = SH.ended === cur.id; $("shEndNote").hidden = !en;
   if (en) $("shEndNote").textContent = `String ${sn} ended · the next shot starts String ${t.strings.length + 1}`;
   const f1 = v => (+v).toFixed(1);
-  $("shStats").innerHTML = [["Avg", q.n ? fpsT(q.avg) : "—"], ["SD", q.n > 1 ? f1(q.sd) : "—"], ["ES", q.n > 1 ? fpsT(q.es) : "—"], ["Shots", q.n + (q.disc ? ` <small>+${q.disc}⊘</small>` : "")],
+  $("shStats").innerHTML = [["Avg", q.n ? fpsT(q.avg) : "—"], ["SD", q.n > 1 ? f1(q.sd) : "—"], ["ES", q.n > 1 ? fpsT(q.es) : "—"], ["Shots", q.n + (q.disc ? ` <small>+${q.disc}<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><path d='m4.9 4.9 14.2 14.2'/></svg></small>` : "")],
     ["Min", q.n ? fpsT(q.min) : "—"], ["Max", q.n ? fpsT(q.max) : "—"], ["Energy · last", q.ftlb != null ? `${Math.round(q.ftlb).toLocaleString()} ft-lb` : "—", "w2"]]
     .map(([k, v, c]) => `<div${c ? ` class="${c}"` : ""}><b>${v}</b><span>${k}</span></div>`).join("");
   $("shList").innerHTML = rd.length ? rd.map((s, i) => ({ s, i })).reverse().map(({ s, i }) => `<div class="shRow${s.x ? " dis" : ""}${s.id === SH.lastId && i === rd.length - 1 ? " new" : ""}" data-id="${escapeHtml(s.id)}">
       <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v, keptV); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "removed" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
-      <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot ${i + 1}" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the string."}">${s.x ? "↺" : "⊘"}</button></div>`).join("")
-    : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap ＋ Add shot to type a velocity.</div>`;
+      <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot ${i + 1}" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the string."}">${s.x ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 7v6h6'/><path d='M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13'/></svg>" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><path d='m4.9 4.9 14.2 14.2'/></svg>"}</button></div>`).join("")
+    : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add shot to type a velocity.</div>`;
   shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en); $("shStrBtn").classList.toggle("on", en);
-  $("shStrBtn").innerHTML = en ? `String ▾<small>ended</small>` : "String ▾"; $("shStrFor").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
+  $("shStrBtn").innerHTML = en ? `String <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg><small>ended</small>` : "String <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg>"; $("shStrFor").innerHTML = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
   $("shBad").disabled = !rd.some(s => !s.x);
   shCalc(q, yd, cur);
 }
@@ -155,12 +155,12 @@ function shTagPaint() {
 }
 function shStatus() {
   if (!SH.on) return; const st = $("shRadar"), c = $("shConn");
-  if (!hasBT) { st.textContent = "📡 No radar here · type shots"; st.className = ""; c.hidden = true; return; }
-  const bt = RD.battery != null ? ` · 🔋 ${RD.battery}%` : "";
-  st.textContent = { connected: `📡 Connected${bt}`, connecting: "📡 Connecting…", lost: `📡 Lost${RD.retries ? " · retrying" : ""}${bt}` }[RD.status] || "📡 Disconnected";
+  if (!hasBT) { st.innerHTML = "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> No radar here · type shots"; st.className = ""; c.hidden = true; return; }
+  const bt = RD.battery != null ? ` · <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='16' height='10' x='2' y='7' rx='2' ry='2'/><line x1='22' x2='22' y1='11' y2='13'/></svg> ${RD.battery}%` : "";
+  st.innerHTML = { connected: `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Connected${bt}`, connecting: "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Connecting…", lost: `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Lost${RD.retries ? " · retrying" : ""}${bt}` }[RD.status] || "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Disconnected";
   st.className = RD.status === "connected" ? "ok" : RD.status === "lost" ? "bad" : "";
   c.hidden = RD.status === "connected" || RD.status === "connecting";
-  c.textContent = RD.dev && (RD.status === "lost" || RD.status === "off") ? "↻ Reconnect" : "📡 Connect";
+  c.innerHTML = RD.dev && (RD.status === "lost" || RD.status === "off") ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> Reconnect" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Connect";
 }
 function formLoadBag() {
   return { bc: val("bc"), drag: val("drag"), weight: val("weight"), diameter: val("diameter"), mv: val("mv"), length: val("length"), ptSens: val("ptSens"), mvTemp: val("mvTemp"), bulletName: val("bulletName") };
@@ -228,7 +228,7 @@ function shCalc(q, yd, st) {
 function shCalcPaint(q) {
   const u = angU(S.ang), es = SH.es, d = SH.dope, { t, cur } = ED ? shCurStr() : {}, g = t && t.targets.find(x => x.id === cur.tid), yd = Math.round(t ? tgYd(g) || tgDefDist() : 0);
   $("shEs").innerHTML = q.n < 2 ? `ES at ${yd} yd: needs 2+ kept shots` : es && es.yd === yd && es.u === S.ang ? `ES ±${fmt(es.half, 2)} ${u} at ${yd} yd <small>· ${fmt(es.spread, 2)} ${u} (${fmt(es.inch, 1)}″) top to bottom</small>` : `ES at ${yd} yd: …`;
-  $("shDope").innerHTML = d && d.blocked ? `<span class="bad">${escapeHtml(d.blocked)}</span>` : d && d.yd === yd ? `<span>🎯 ${yd} yd · ${escapeHtml(d.src || "dial")} <b>${escapeHtml(d.elev || "—")}</b>${d.clk ? ` (${escapeHtml(d.clk)})` : ""}</span><span>Wind hold <b>${escapeHtml(d.wind || "—")}</b>${d.wtxt ? ` · ${escapeHtml(d.wtxt)}` : ""}</span>${d.warn ? `<span class="w">${escapeHtml(d.warn)}</span>` : ""}` : `<span>🎯 ${yd} yd · dial …</span>`;
+  $("shDope").innerHTML = d && d.blocked ? `<span class="bad">${escapeHtml(d.blocked)}</span>` : d && d.yd === yd ? `<span><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> ${yd} yd · ${escapeHtml(d.src || "dial")} <b>${escapeHtml(d.elev || "—")}</b>${d.clk ? ` (${escapeHtml(d.clk)})` : ""}</span><span>Wind hold <b>${escapeHtml(d.wind || "—")}</b>${d.wtxt ? ` · ${escapeHtml(d.wtxt)}` : ""}</span>${d.warn ? `<span class="w">${escapeHtml(d.warn)}</span>` : ""}` : `<span><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> ${yd} yd · dial …</span>`;
 }
 async function shBad() {
   if (!ED) return; const { cur } = shCurStr(), rd = readings(ED, cur.id), k = rd.map(s => !s.x).lastIndexOf(true);
@@ -246,10 +246,10 @@ async function shEnd() {
   if (!ED) return; const { t, cur } = shCurStr(), rd = readings(ED, cur.id), n = strNo(t, cur.id), st = shotStats(rd);
   if (!rd.length) { toast(`String ${n} has no shots yet`); return; }
   SH.ended = cur.id; await shSave(); shPaint();
-  toast(`String ${n} ended · ${st.n} shot${st.n === 1 ? "" : "s"}${st.n > 1 ? `, SD ${st.sd.toFixed(1)}, ES ${fpsT(st.es)}` : ""}`, { label: "🎯 Mark holes", fn: () => shMark() });
+  toast(`String ${n} ended · ${st.n} shot${st.n === 1 ? "" : "s"}${st.n > 1 ? `, SD ${st.sd.toFixed(1)}, ES ${fpsT(st.es)}` : ""}`, { label: "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes", fn: () => shMark() });
 }
 function shMark() { if (!ED) return; const { t } = shCurStr(); openTgEd(SH.ended && t.strings.some(q => q.id === SH.ended) ? SH.ended : t.cur); }
-// one panel at a time over the buttons: the fps entry, the tag bar or the String ▾ menu (all closed by default)
+// one panel at a time over the buttons: the fps entry, the tag bar or the String  menu (all closed by default)
 function shPanels(open) {
   [["shAddBox", "shAdd"], ["shTagBar", "shTag"], ["shStrMenu", "shStrBtn"]].forEach(([p, b]) => { const on = p === open; $(p).hidden = !on; $(b).setAttribute("aria-expanded", String(on)); });
 }

@@ -49,7 +49,7 @@ function recipeMatches(cur = pick(LOAD_F), withStats) {
   return out.sort((a, b) => (b.r === r0) - (a.r === r0) || (a.best?.s.stats.n >= 3 ? a.best.s.stats.sd : 99) - (b.best?.s.stats.n >= 3 ? b.best.s.stats.sd : 99) || a.l.name.localeCompare(b.l.name));
 }
 function paintRecipeBtns() {
-  const n = recipeMatches().length, t = `📖 Use a saved recipe for this bullet (${n})`;
+  const n = recipeMatches().length, t = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M12 7v14'/><path d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/></svg> Use a saved recipe for this bullet (${n})`;
   ["rcFind", "rcBulletBtn"].forEach(id => { $(id).hidden = !n; $(id).textContent = t; });
 }
 function openRecipes() {
@@ -61,8 +61,8 @@ function openRecipes() {
     const where = `${x.r.name} · ${x.l.name} · ${x.r.gunKind === "handgun" ? "Handgun" : "Rifle"}${bar ? ` · ${bar}" barrel` : ""}`;
     const extra = x.l.ldKind !== "factory" ? [x.l.ldCase ? x.l.ldCase + (x.l.ldFired ? ` ×${x.l.ldFired}` : "") : "", n3(x.l.ldCBTO) ? `CBTO ${n3(x.l.ldCBTO)}"` : "", n3(x.l.ldJump) ? `jump ${n3(x.l.ldJump)}"` : ""].filter(Boolean).join(" · ") : "";
     let warn = "";
-    if (other) warn = bar && myBar && Math.abs(bar - myBar) >= 0.5 ? `⚠ ${bar}" barrel vs your ${myBar}" — velocity will differ (≈${myBar > bar ? "+" : "−"}${Math.round(Math.abs(myBar - bar) * 25)} fps). Work up again.`
-      : `⚠ Another gun${bar ? "" : " (barrel length not set)"} — chamber and velocity may differ. Work up again.`;
+    if (other) warn = bar && myBar && Math.abs(bar - myBar) >= 0.5 ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> ${bar}" barrel vs your ${myBar}" — velocity will differ (≈${myBar > bar ? "+" : "−"}${Math.round(Math.abs(myBar - bar) * 25)} fps). Work up again.`
+      : `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Another gun${bar ? "" : " (barrel length not set)"} — chamber and velocity may differ. Work up again.`;
     const stats = st ? `${Math.round(st.avg)} fps<small>SD ${st.n > 1 ? st.sd.toFixed(1) : "—"} · ${st.n} shot${st.n === 1 ? "" : "s"}${x.best.n > 1 ? ` · best of ${x.best.n}` : ""}${x.best.thisRecipe ? "" : " · older recipe"}</small>`
       : x.l.mv ? `${x.l.mv} fps<small class="none">saved MV${({ measured: " (chrono)", factory: " (box)", estimate: " (est.)" })[x.l.mvSource] || ""}</small>` : `<small class="none">no chrono data</small>`;
     return `<button type="button" class="rcItem" data-i="${i}"><span>${escapeHtml(recipeText(x.l))}${x.m === "spec" ? '<span class="tag">same weight + BC</span>' : ""}</span><span class="s">${stats}</span>` +
@@ -102,7 +102,7 @@ function openCopy(mode) {
   const l = curLoad(); if (!l) { toast("Pick a load first"); return; }
   cpMode = mode === "move" ? "move" : "copy";
   const cur = pick(LOAD_F), rt = recipeText(cur);
-  $("cpTitle").textContent = cpMode === "move" ? `↔ Move “${l.name}” to another gun` : `📑 Copy “${l.name}”`;
+  $("cpTitle").innerHTML = cpMode === "move" ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move “${escapeHtml(l.name)}” to another gun` : `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='14' height='14' x='8' y='8' rx='2' ry='2'/><path d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/></svg> Copy “${escapeHtml(l.name)}”`;
   $("cpDup").hidden = cpMode === "move";
   $("cpFor").textContent = `${projLabel(cur)} · ${cur.mv || "?"} fps${rt ? " · " + rt : ""}`;
   cpAll = false; renderCopy(); openOvl("cpSheet");
@@ -117,8 +117,8 @@ function renderCopy() {
     const d = gunDias(g), bar = fnum(g.barrel), m = copyMV(src, r0, g, cpMv), ok = fits(g);
     const info = [g.gunKind === "handgun" ? "Handgun" : "Rifle", bar ? `${bar}" barrel` : "barrel not set", g.loads.length ? `${g.loads.length} load${g.loads.length === 1 ? "" : "s"}` + (d.length ? ", bullets " + d.map(dia3).join(", ") : "") : "no loads yet"].join(" · ");
     return `<button type="button" class="rcItem" data-id="${escapeHtml(g.id)}"><span>${escapeHtml(g.name)}</span><span class="s">${cpMode === "move" ? "Move →" : "Copy →"}</span><span class="d">${escapeHtml(info)}${m.note ? "<br>" + escapeHtml(m.note) : ""}</span>` +
-      (ok ? "" : `<span class="w">⚠ Different bullet diameter (${escapeHtml(d.map(dia3).join(", "))}) — make sure this is the right gun</span>`) + "</button>";
-  }).join("") : `<div class="hint">${others.length ? `No other guns with ${dia3(src.diameter) || "this"} bullets.` : "No other guns saved yet — add one with ＋ New under Gun."}</div>`;
+      (ok ? "" : `<span class="w"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Different bullet diameter (${escapeHtml(d.map(dia3).join(", "))}) — make sure this is the right gun</span>`) + "</button>";
+  }).join("") : `<div class="hint">${others.length ? `No other guns with ${dia3(src.diameter) || "this"} bullets.` : "No other guns saved yet — add one with <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New under Gun."}</div>`;
   const hid = others.length - nFit;
   $("cpAllBtn").hidden = !hid; $("cpAllBtn").textContent = cpAll ? "Show only guns with the same bullet diameter" : `Show all guns (${hid} with other bullet diameters)`;
 }

@@ -67,7 +67,7 @@ function paintOptic() {
     : r ? "No optic attached — the dope uses the gun's turret and sight height (Gun details)." : "";
   $("opMoreSum").textContent = o ? [$("opFP").value, ts.perTurn ? `${fmt(ts.perTurn, 2)}/turn` : "", num("opTravel") ? `${val("opTravel")} travel` : "", num("opCant") ? `${val("opCant")} MOA base` : "", num("opUp") > 0 ? `${val("opUp")} up` : ""].filter(Boolean).join(" · ") : "";
   $("gunOptNote").hidden = !o; $("gunOptNote").textContent = o ? `Sight height and turret come from the optic “${o.name}”${num("opSH") == null ? ` (no sight height there, so the gun's ${val("sightHeight") || "?"}" is used)` : ""}.` : "";
-  const z = r?.zeroUnconf; $("zeroFlag").hidden = !z; $("zeroFlagTxt").textContent = z ? `⚠ Zero not confirmed — ${z.why || "optic changed"}` : "";
+  const z = r?.zeroUnconf; $("zeroFlag").hidden = !z; $("zeroFlagTxt").innerHTML = z ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Zero not confirmed — ${escapeHtml(z.why || "optic changed")}` : "";
   $("opNew").disabled = !r; $("opAttach").disabled = !r || !(P.optics || []).length;
   ["opDup", "opRename", "opDetach", "opDel"].forEach(id => $(id).disabled = !o);
   paintRO();
@@ -156,7 +156,7 @@ export function init1() {
     P.optics.push(o); const at = attachOptic(o.id, true); followUnits(true); if (at !== "ask") toast(`Optic “${n}” added to “${r.name}”`);
   };
   $("opRename").onclick = () => { const o = curOptic(); if (!o) return; const n = askName("Rename optic:", o.name); if (!n) return; o.name = n; savePresets(); renderOpticSel(); paintOptic(); flashSaved("optic"); };
-  $("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60), opUp: "" }; delete c.opUpRe; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ › Attach)`); };
+  $("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60), opUp: "" }; delete c.opUpRe; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> Attach)`); };
   $("opDetach").onclick = () => detachOptic();
   $("opDel").onclick = () => {
     const o = curOptic(), r = curRifle(); if (!o || !confirm(`Delete optic “${o.name}”?\nThe gun falls back to its own turret settings and its zero is marked not confirmed.`)) return;
@@ -169,7 +169,7 @@ export function init1() {
     const r = curRifle(); if (!r) return;
     $("opSheetFor").textContent = `Pick the optic now mounted on “${r.name}”. Moving an optic marks the zero of both guns “not confirmed”.`;
     $("opList").innerHTML = (P.optics || []).map(o => { const on = P.rifles.find(g => g.opticId === o.id), ts = TURRETS[o.opTurret];
-      return `<button type="button" class="opItem${on === r ? " on" : ""}" data-id="${escapeHtml(o.id)}">${escapeHtml(o.name)}<small>${ts ? ts[2] : escapeHtml(o.opTurretV ? `${o.opTurretV} ${o.opTurretU}` : "custom")} turret · ${o.opReticle === "moa" ? "MOA" : "MIL"} reticle · ${on ? (on === r ? "on this gun" : `on “${escapeHtml(on.name)}”`) : "not attached"}</small></button>`; }).join("") || `<div class="summary">No optics saved yet — use ⋯ › New optic.</div>`;
+      return `<button type="button" class="opItem${on === r ? " on" : ""}" data-id="${escapeHtml(o.id)}">${escapeHtml(o.name)}<small>${ts ? ts[2] : escapeHtml(o.opTurretV ? `${o.opTurretV} ${o.opTurretU}` : "custom")} turret · ${o.opReticle === "moa" ? "MOA" : "MIL"} reticle · ${on ? (on === r ? "on this gun" : `on “${escapeHtml(on.name)}”`) : "not attached"}</small></button>`; }).join("") || `<div class="summary">No optics saved yet — use ⋯ <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> New optic.</div>`;
     openOvl("opSheet");
   };
   $("opList").addEventListener("click", e => { const b = e.target.closest(".opItem"); if (!b) return; closeOvl("opSheet"); if (attachOptic(b.dataset.id) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); });

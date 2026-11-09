@@ -5,7 +5,7 @@
 import { closeOvl, openOvl, toast } from "./components.js";
 import { $, escapeHtml, setVal } from "./core.js";
 import { cleanRecipe, curRifle, recipeText } from "./gear.js";
-import { ED, LOG, SRC_LBL, fmtDate, maybeRenderLog, paintEdFor, paintEdRecipe, saveLog, sessHome, set_slKey, shotStats, slKey } from "./log.js";
+import { ED, LOG, SRC_LBL, fmtDate, maybeRenderLog, paintEdFor, paintEdRecipe, saveLog, sessHome, set_slKey, slKey } from "./log.js";
 import { dia3, fnum } from "./recipes.js";
 import { P, REC_F } from "./storage.js";
 
@@ -37,9 +37,9 @@ function openMove(ids) {
   const h = sessHome(ss[0]);
   MV = { ids: ss.map(s => s.id), gunId: (h.r || curRifle() || P.rifles.find(r => r.loads.length)).id, loadId: h.l ? h.l.id : "" };
   if (ss.some(s => s.rifleId !== ss[0].rifleId || s.loadId !== ss[0].loadId)) MV.loadId = "";
-  $("mvTitle").textContent = ss.length > 1 ? `↔ Move ${ss.length} sessions` : "↔ Move session";
-  const n = ss.reduce((a, s) => a + shotStats(s.shots).n, 0);
-  $("mvFrom").textContent = ss.length > 1 ? `${ss.length} sessions · ${n} shots` : `${fmtDate(ss[0].date)} · ${shotStats(ss[0].shots).n} shots · ${SRC_LBL[ss[0].source] || ss[0].source}`;
+  $("mvTitle").innerHTML = ss.length > 1 ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move ${ss.length} sessions` : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move session";
+  const n = ss.reduce((a, s) => a + ((s.tg && s.tg.strings && s.tg.strings.length) || 1), 0);
+  $("mvFrom").textContent = ss.length > 1 ? `${ss.length} sessions · ${n} strings` : `${fmtDate(ss[0].date)} · ${((ss[0].tg && ss[0].tg.strings && ss[0].tg.strings.length) || 1)} strings · ${SRC_LBL[ss[0].source] || ss[0].source}`;
   $("mvGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)} — ${r.gunKind === "handgun" ? "Handgun" : "Rifle"}${r.barrel ? ` · ${r.barrel}"` : ""} (${r.loads.length} load${r.loads.length === 1 ? "" : "s"})</option>`).join("");
   $("mvGun").value = MV.gunId; $("mvUpd").checked = true;
   renderMove(); openOvl("mvSheet");
@@ -51,7 +51,7 @@ function renderMove() {
   $("mvLoads").innerHTML = r && r.loads.length ? r.loads.map(l => {
     const rt = recipeText(l), cur = curIds.has(r.id + "|" + l.id), n = LOG.filter(s => s.rifleId === r.id && s.loadId === l.id).length;
     return `<button type="button" class="rcItem${l.id === MV.loadId ? " on" : ""}${cur ? " cur" : ""}" data-id="${escapeHtml(l.id)}"><span>${escapeHtml(l.name)}${cur ? '<span class="tag">current</span>' : ""}</span><span class="s"><small>${n} session${n === 1 ? "" : "s"}</small></span>` +
-      `<span class="d">${escapeHtml(bulletText(l) || "no bullet data")}${l.mv ? ` · ${escapeHtml(l.mv)} fps` : ""}</span><span class="r">${rt ? (l.ldKind === "factory" ? "📦 " : "🧪 ") + escapeHtml(rt) : '<span style="color:var(--hint)">No load data saved</span>'}</span></button>`;
+      `<span class="d">${escapeHtml(bulletText(l) || "no bullet data")}${l.mv ? ` · ${escapeHtml(l.mv)} fps` : ""}</span><span class="r">${rt ? (l.ldKind === "factory" ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z'/><path d='M12 22V12'/><path d='m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7'/></svg> " : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg> ") + escapeHtml(rt) : '<span style="color:var(--hint)">No load data saved</span>'}</span></button>`;
   }).join("") : `<div class="hint">No saved loads on this gun — add one under Load first.</div>`;
   const l = r?.loads.find(x => x.id === MV.loadId), upd = $("mvUpd").checked;
   if (!l) { $("mvDiff").innerHTML = `<div class="hint" style="padding:10px">Pick a load to see what changes.</div>`; $("mvGo").disabled = true; $("mvNote").textContent = ""; return; }
@@ -96,7 +96,7 @@ async function undoMove(undo) {
   if (ED && undo.some(u => u.id === ED.id)) setVal("slBarrel", ED.barrel);
   await afterMove(); toast(`Move undone (${undo.length} session${undo.length === 1 ? "" : "s"})`);
 }
-// select mode (tap "☑ Select" or long-press a session)
+// select mode (tap " Select" or long-press a session)
 function paintSel() {
   const on = !!SEL, list = $("slList");
   list.classList.toggle("selecting", on); $("slSelBar").hidden = !on; $("slSelBtn").hidden = on || !list.querySelector(".slItem");
@@ -119,7 +119,7 @@ export function init() {
   $("mvClose").onclick = $("mvCancel").onclick = () => closeOvl("mvSheet");
   $("mvGo").onclick = () => doMove();
   $("slMoveBtn").onclick = () => { if (ED) openMove([ED.id]); };
-  $("slSelBtn").onclick = () => { SEL = new Set(); paintSel(); toast("Tap sessions to select them, then ↔ Move"); };
+  $("slSelBtn").onclick = () => { SEL = new Set(); paintSel(); toast("Tap sessions to select them, then <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move"); };
   $("slSelDone").onclick = () => { SEL = null; paintSel(); };
   $("slSelAll").onclick = () => { const vis = [...$("slList").querySelectorAll(".slItem")].map(b => b.dataset.id); SEL = new Set(SEL.size === vis.length ? [] : vis); paintSel(); };
   $("slSelMove").onclick = () => { if (SEL && SEL.size) openMove([...SEL]); };

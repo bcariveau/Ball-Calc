@@ -152,16 +152,16 @@ function renderChart(samples) {
 function paintWarn() {   // warnings stay on the card; plain info goes behind "Details"
   const R = lastRun, warn = [], info = []; if (!R) { $("dcWarn").innerHTML = ""; $("dcChips").innerHTML = ""; return; }
   const g = R.sg, ts = turretSpec(), r = curRifle();
-  if (r?.zeroUnconf) warn.push(`<span class="bad zcw" title="${escapeHtml("Zero not confirmed: " + (r.zeroUnconf.why || "optic changed"))}">⚠ Zero not confirmed<button type="button" class="sm" id="dcZeroOk">✓ Confirm zero</button></span>`);
+  if (r?.zeroUnconf) warn.push(`<span class="bad zcw" title="${escapeHtml("Zero not confirmed: " + (r.zeroUnconf.why || "optic changed"))}"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Zero not confirmed<button type="button" class="sm" id="dcZeroOk"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg> Confirm zero</button></span>`);
   if (R.tgt && ts.up != null) { const a = angs(R.tgt), tu = ts.u === "MIL" ? "mil" : "MOA";
-    if (a.eT > ts.up + 1e-9) warn.push(`<span class="bad">⚠ Needs U ${a.eT.toFixed(1)} ${tu} — only ${ts.upSet ? "" : "~"}${ts.up.toFixed(1)} ${tu} up travel; hold the last ${(a.eT - ts.up).toFixed(1)} ${tu}</span>`); }
+    if (a.eT > ts.up + 1e-9) warn.push(`<span class="bad"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Needs U ${a.eT.toFixed(1)} ${tu} — only ${ts.upSet ? "" : "~"}${ts.up.toFixed(1)} ${tu} up travel; hold the last ${(a.eT - ts.up).toFixed(1)} ${tu}</span>`); }
   if (g && g.sg != null) {
     const t = `SG ${g.sg.toFixed(2)}`, why = `Miller stability ${g.sg.toFixed(2)} at ${Math.round(R.mvNow)} fps, ${fmt(R.aT, 0)}°F${g.tip ? `, ${g.assumed ? "assumed " : ""}${g.tip}" plastic tip` : ""}`;
-    (g.sg < 1.4 ? warn : info).push(g.sg < 1 ? `<span class="bad" title="${escapeHtml(why)}">✖ ${t} unstable — bullet may tumble</span>` : g.sg < 1.4 ? `<span class="w" title="${escapeHtml(why)}">⚠ ${t} marginal (&lt;1.4) — BC may suffer</span>` : `<span title="${escapeHtml(why)}">${t} stable${g.assumed ? " (tip est.)" : ""}</span>`);
+    (g.sg < 1.4 ? warn : info).push(g.sg < 1 ? `<span class="bad" title="${escapeHtml(why)}"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M18 6 6 18'/><path d='m6 6 12 12'/></svg> ${t} unstable — bullet may tumble</span>` : g.sg < 1.4 ? `<span class="w" title="${escapeHtml(why)}"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> ${t} marginal (&lt;1.4) — BC may suffer</span>` : `<span title="${escapeHtml(why)}">${t} stable${g.assumed ? " (tip est.)" : ""}</span>`);
   } else if (g && g.none && num("twist")) info.push(`<span>Stability: ${g.none === "length" ? "bullet length unknown — add it under Gear" : "needs bullet data"}</span>`);
   if (R.trans) {
     const past = R.td && R.trans.range <= R.td;
-    (past ? warn : info).push(`<span class="${past ? "w" : ""}">${past ? "⚠ " : ""}${R.trans.range ? `Transonic at ${R.trans.range} yd` : "Transonic from the muzzle"} (&lt;${Math.round(R.vT)} fps = Mach 1.2 @ ${fmt(R.aT, 0)}°F)${past ? " — before target" : ""}</span>`);
+    (past ? warn : info).push(`<span class="${past ? "w" : ""}">${past ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> " : ""}${R.trans.range ? `Transonic at ${R.trans.range} yd` : "Transonic from the muzzle"} (&lt;${Math.round(R.vT)} fps = Mach 1.2 @ ${fmt(R.aT, 0)}°F)${past ? " — before target" : ""}</span>`);
   }
   if (R.zc) info.push(`<span>Zeroed @ ${fmt(R.zc.temp, 0)}°F${num("zAlt") != null ? ` · ${fmt(R.zc.alt, 0)} ft` : ""}${R.zc.press != null ? ` · ${R.zc.press.toFixed(2)} inHg` : ""}</span>`);
   if (ts.k !== 1) info.push(`<span>Tracking ×${fmt(ts.k, 3)}: dial = required ÷ ${fmt(ts.k, 3)}</span>`);
@@ -185,7 +185,7 @@ function paintScroll() {
 export function init() {
   $("dcWarn").addEventListener("click", e => { if (e.target.closest("#dcZeroOk")) $("zeroConfirm").onclick(); });
   $("zeroConfirm").onclick = () => { const r = curRifle(); if (!r) return; delete r.zeroUnconf; savePresets(); updateDirty(); ctxPaint(); if (lastRun) renderCard(); toast(`Zero confirmed for “${r.name}”`); };
-  $("dcMoreBtn").onclick = () => { const open = $("dcMore").hidden; $("dcMore").hidden = !open; $("dcMoreBtn").setAttribute("aria-expanded", String(open)); $("dcMoreBtn").textContent = open ? "Details ▴" : "Details ▾"; };
+  $("dcMoreBtn").onclick = () => { const open = $("dcMore").hidden; $("dcMore").hidden = !open; $("dcMoreBtn").setAttribute("aria-expanded", String(open)); $("dcMoreBtn").innerHTML = open ? "Details <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 15-6-6-6 6'/></svg>" : "Details <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg>"; };
 }
 
 export { renderAll, setStale, noResult, fieldName, goToField, ud, lr, CLOCK, renderCard, renderTable, niceStep, chartLabels, renderChart, paintWarn, paintPt, gustSpread, turnsTxt, paintScroll };

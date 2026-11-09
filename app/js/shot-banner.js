@@ -23,7 +23,7 @@ function banPaint() {
   $("sbN").textContent = `Shot ${k} · String ${strNo(t, sid)} · Target ${tgtLetter(t, t.strings.find(q => q.id === sid).tid)}`;
   $("sbSt").textContent = st.n ? `avg ${fpsT(st.avg)} · ES ${st.n > 1 ? fpsT(st.es) : "—"} · SD ${st.n > 1 ? st.sd.toFixed(1) : "—"}${st.n < rd.length ? ` · ${rd.length - st.n} removed` : ""}` : "no kept shots";
   el.querySelectorAll("#sbActs button[data-a]").forEach(b => { const a = b.dataset.a; if (a === "mark") { b.hidden = !t.mark; return; }
-    const on = !!x[a]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (a === "x") b.textContent = on ? "↺ Restore" : "Remove"; });
+    const on = !!x[a]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (a === "x") b.innerHTML = on ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 7v6h6'/><path d='M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13'/></svg> Restore" : "Remove"; });
   el.classList.toggle("dis", !!x.x);
   const dock = banDocked();
   if (dock && el.parentElement !== $("sbDock")) $("sbDock").appendChild(el);

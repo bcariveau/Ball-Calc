@@ -15,7 +15,13 @@ import { S, saveSettings } from "./storage.js";
 let toastT;
 function toast(msg, act) {
   const acts = Array.isArray(act) ? act : (act ? [act] : []);
-  const t = $("toast"); t.textContent = msg; t.classList.toggle("act", acts.length > 0);
+  const t = $("toast"); t.replaceChildren(); t.classList.toggle("act", acts.length > 0);
+  const span = document.createElement("span");
+  String(msg).split(/(<svg class='ic'[\s\S]*?<\/svg>)/).forEach(part => {
+    if (part.startsWith("<svg class='ic'")) { const hold = document.createElement("span"); hold.innerHTML = part; if (hold.firstChild && hold.firstChild.tagName === "svg") span.appendChild(hold.firstChild); }
+    else span.appendChild(document.createTextNode(part));
+  });
+  t.appendChild(span);
   acts.forEach((a, i) => { const b = document.createElement("button"); b.type = "button"; b.id = i ? "toastAct" + i : "toastAct"; b.textContent = a.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); a.fn(); }; t.appendChild(b); });
   t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), acts.length ? (acts[0].ms || 7000) : 2200);
 }
@@ -28,7 +34,7 @@ function ctxParts() {
 function ctxPaint() {
   const c = ctxParts(), sep = `<span class="sep" aria-hidden="true">·</span>`;
   const h = !c ? `<span class="cG">Gun and load not saved yet</span>`
-    : `<span class="cG">${escapeHtml(c.gun)}</span>${sep}<span class="cO">${escapeHtml(c.optic)}</span>${sep}<span class="cL">${escapeHtml(c.load)}</span>${sep}<span class="cZ${c.unconf ? " unconf" : ""}">${escapeHtml(c.zero)}${c.unconf ? " ⚠" : ""}</span>${c.unit ? sep + `<span class="cU">${c.unit}</span>` : ""}`;
+    : `<span class="cG">${escapeHtml(c.gun)}</span>${sep}<span class="cO">${escapeHtml(c.optic)}</span>${sep}<span class="cL">${escapeHtml(c.load)}</span>${sep}<span class="cZ${c.unconf ? " unconf" : ""}">${escapeHtml(c.zero)}${c.unconf ? " <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg>" : ""}</span>${c.unit ? sep + `<span class="cU">${c.unit}</span>` : ""}`;
   const t = !c ? "Gun and load not saved yet" : [c.gun, c.optic, c.load, c.zero + (c.unconf ? " (not confirmed" + (c.why ? ": " + c.why : "") + ")" : ""), c.unit].filter(Boolean).join(" · ");
   document.querySelectorAll(".ctx").forEach(e => { if (e.innerHTML !== h) e.innerHTML = h; e.title = t; e.setAttribute("aria-label", t); });
 }
@@ -47,7 +53,7 @@ function bump(el, n) {
   v = clampStep(el, +v.toFixed(4));
   if (String(v) !== el.value) { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }
 }
-// long helper paragraphs: first sentence on one line, ⓘ expands the rest
+// long helper paragraphs: first sentence on one line,  expands the rest
 function shortenHints() {
   document.querySelectorAll(".hint:not([data-sh])").forEach(h => {
     h.dataset.sh = "1";
@@ -57,7 +63,7 @@ function shortenHints() {
     if (m) { first = m[1]; rest = m[2]; } else { const k = t.lastIndexOf(" ", 60); if (k < 20) return; first = t.slice(0, k) + "…"; rest = "…" + t.slice(k + 1); }
     h.textContent = ""; h.classList.add("sh");
     const a = document.createElement("span"); a.className = "h1"; a.textContent = first;
-    const b = document.createElement("button"); b.type = "button"; b.className = "info"; b.textContent = "ⓘ"; b.setAttribute("aria-label", "More about this"); b.setAttribute("aria-expanded", "false");
+    const b = document.createElement("button"); b.type = "button"; b.className = "info"; b.innerHTML = "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><path d='M12 16v-4'/><path d='M12 8h.01'/></svg>"; b.setAttribute("aria-label", "More about this"); b.setAttribute("aria-expanded", "false");
     const r = document.createElement("span"); r.className = "more"; r.hidden = true; r.textContent = " " + rest;
     b.onclick = () => { r.hidden = !r.hidden; h.classList.toggle("open", !r.hidden); b.classList.toggle("on", !r.hidden); b.setAttribute("aria-expanded", String(!r.hidden)); };
     h.append(a, b, r);
@@ -76,19 +82,21 @@ function shBtnPaint() {
   const bs = [$("shStartBtn"), $("slStartBtn")].filter(Boolean); if (!bs.length) return; let s = null;
   try { s = curLoad() ? shPick() : null; } catch { s = null; }
   const n = s ? s.shots.filter(x => !x.x).length : 0;
-  for (const b of bs) b.innerHTML = s ? `▶ Continue shooting<small>${n} shot${n === 1 ? "" : "s"} in today's session · radar or typed</small>` : `▶ Start shooting<small>chronograph view · radar or typed shots</small>`;
+  for (const b of bs) b.innerHTML = s ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><polygon points='6 3 20 12 6 21 6 3'/></svg> Continue shooting<small>${n} shot${n === 1 ? "" : "s"} in today's session · radar or typed</small>` : `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><polygon points='6 3 20 12 6 21 6 3'/></svg> Start shooting<small>chronograph view · radar or typed shots</small>`;
 }
 
 export function init1() {
   document.querySelectorAll(".stepper").forEach(box => {
     const el = box.querySelector("input"), noSwipe = el.id === "windSpeed" || el.id === "windDir";   // the wind boxes sit in the scroll path: − / + only
-    const mk = (txt, n, label) => { const b = document.createElement("button"); b.type = "button"; b.textContent = txt; b.setAttribute("aria-label", label);
+    const mk = (txt, n, label) => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = txt; b.setAttribute("aria-label", label);
       let t1, t2; const stop = () => { clearTimeout(t1); clearInterval(t2); };
       b.addEventListener("pointerdown", e => { e.preventDefault(); bump(el, n); t1 = setTimeout(() => t2 = setInterval(() => bump(el, n), 70), 400); });
       ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, stop));
       b.addEventListener("contextmenu", e => e.preventDefault());
       return b; };
-    box.prepend(mk("−", -1, "decrease")); box.append(mk("+", 1, "increase"));
+    const minus = "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/></svg>";
+    const plus = "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg>";
+    box.prepend(mk(minus, -1, "decrease")); box.append(mk(plus, 1, "increase"));
     if (el.id === "target") { box.classList.add("plain"); return; }   // the Dope distance is a normal editable number box: tap and type, − / + still step it
     // horizontal swipe on the number changes it; vertical swipe still scrolls the page (touch-action: pan-y)
     // Read-only until tapped, so a swipe never pops the keyboard; a plain tap (or keyboard focus) allows typing.

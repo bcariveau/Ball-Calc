@@ -17,7 +17,7 @@ import { P, load, savePresets, store, uid } from "./storage.js";
 import { paintStrBar, paintTgView } from "./strings.js";
 import { mkGlyph } from "./target-draw.js";
 import { shotDetail, tgThumbA, tgThumbB } from "./target-editor.js";
-import { BAN, LIVE, TE, cleanTg, fpsT, set_LIVE, set_TE, strOf, tgEnsure, tgRestore, tgSaveSidecar, tgView, tgtLetter, unpair } from "./targets.js";
+import { BAN, LIVE, TE, cleanTg, fpsT, set_LIVE, set_TE, strNo, strOf, tgEnsure, tgRestore, tgSaveSidecar, tgView, tgtLetter, unpair } from "./targets.js";
 import { cv } from "./themes.js";
 import { wx } from "./weather.js";
 
@@ -260,10 +260,70 @@ function renderEditor() {
   const all = ED.shots.map((s, i) => ({ s, i }));
   $("slShots").innerHTML = (tv.strings.map((q, si) => ({ q, si })).reverse().map(({ q, si }) => { const mine = all.filter(o => strOf(ED, o.s) === q.id), sst = shotStats(mine.map(o => o.s));
       const who = stringWho(q), removed = mine.filter(o => o.s.x).length, n = sst.n || 0;
-      return `<div class="sgh" data-str="${escapeHtml(q.id)}"><div class="sghTop"><span class="sghId">${mkGlyph(si)}String ${si + 1} · Target ${tgtLetter(tv, q.tid)}</span>${who ? `<span class="sghWho">${escapeHtml(who)}</span>` : ""}</div><small>${n} shot${n === 1 ? "" : "s"}${n ? ` · avg ${fpsT(sst.avg)}` : ""}${n > 1 ? ` · SD ${sst.sd.toFixed(1)} · ES ${fpsT(sst.es)}` : ""}${removed ? ` · ${removed} removed` : ""}</small></div>` + mine.reverse().map(o => row(o, sst, si)).join(""); }).join("")) ||
+      const on = q.id === tv.cur;
+      return `<div class="sgh${on ? " active" : ""}" data-str="${escapeHtml(q.id)}" aria-current="${on ? "true" : "false"}"><div class="sghTop"><span class="sghId">${mkGlyph(si)}String ${si + 1} · Target ${tgtLetter(tv, q.tid)}</span>${who ? `<span class="sghWho">${escapeHtml(who)}</span>` : ""}</div><small>${on ? `<span class="sghLive"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Recording</span> · ` : ""}${n} shot${n === 1 ? "" : "s"}${n ? ` · avg ${fpsT(sst.avg)}` : ""}${n > 1 ? ` · SD ${sst.sd.toFixed(1)} · ES ${fpsT(sst.es)}` : ""}${removed ? ` · ${removed} removed` : ""}</small></div>` + mine.reverse().map(o => row(o, sst, si)).join(""); }).join("")) ||
     `<div class="hint" style="padding:8px 0">No shots yet.</div>`;
-  paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
+  paintStrBar(); paintTgView(); paintStrRec(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
   paintUseMV(); paintShotSel();
+}
+function stringGear(st) {
+  const af = st && st.asFired;
+  const gun = af && P.rifles.find(r => r.id === af.rifleId);
+  const load = gun && (gun.loads || []).find(l => l.id === af.loadId);
+  const named = af && af.opticId && (P.optics || []).find(o => o.id === af.opticId);
+  const opticName = named && named.name ? named.name : (af && af.optic ? "saved optic" : "no optic saved");
+  const fb = calcFallback(af, gun || null, opticOn(P, gun || null), null);
+  return { gun: gun ? gun.name : "", load: load ? load.name : "", opticName, warning: (fb && fb.warning) || "" };
+}
+function recText(st, t) {
+  const g = stringGear(st);
+  const who = [g.gun, g.load].filter(Boolean).join(" · ") || "this string";
+  return { line: `Recording to: String ${strNo(t, st.id)} · ${who}`, optic: g.opticName, warning: g.warning };
+}
+function paintStrRec() {
+  if (!ED) return;
+  const t = ED.tg || tgView(ED), st = t.strings.find(s => s.id === t.cur) || t.strings[t.strings.length - 1];
+  if (!st) return;
+  const rec = recText(st, t);
+  document.querySelectorAll(".strRec").forEach(b => {
+    const line = b.querySelector(".strRecTo"), opt = b.querySelector(".strRecOpt");
+    if (line) line.textContent = rec.line;
+    if (opt) opt.textContent = rec.optic;
+    b.setAttribute("aria-label", `${rec.line}. Optic: ${rec.optic}. Change the string new shots record to.`);
+  });
+  if ($("strPickSheet") && !$("strPickSheet").hidden) paintStrPick();
+}
+function paintStrPick() {
+  if (!ED) return;
+  const t = ED.tg || tgView(ED), cur = t.strings.find(s => s.id === t.cur) || t.strings[t.strings.length - 1];
+  $("strPickList").innerHTML = t.strings.map((st, i) => {
+    const g = stringGear(st), on = st.id === t.cur;
+    const who = [g.gun, g.load].filter(Boolean).join(" · ") || "No saved firearm";
+    const sub = [g.opticName, g.warning].filter(Boolean).join(" · ");
+    return `<button type="button" class="destPick${on ? " on" : ""}" data-str="${escapeHtml(st.id)}"><b>String ${i + 1} · ${escapeHtml(who)}</b><small>${escapeHtml(sub)}</small></button>`;
+  }).join("");
+  const g = stringGear(cur);
+  $("strPickNote").textContent = g.warning || "New shots record to the string you pick, using that string's saved firearm, optic, and load. Nothing is invented, and the snapshot is not changed.";
+}
+async function setActiveString(id) {
+  if (!ED) return;
+  const had = !!ED.tg;
+  const t = tgEnsure(ED);
+  let use = id;
+  if (!t.strings.some(s => s.id === use)) {
+    if (!had && t.strings.length === 1) use = t.strings[0].id;
+    else { $("strPickSheet").hidden = true; return; }
+  }
+  if (t.cur !== use) {
+    t.cur = use;
+    if (SH.ended && SH.ended !== use) SH.ended = null;
+    SH.hold = true;
+    edDirty = true;
+    if (!ED._new || ED.shots.length) await commitEditor();
+  }
+  $("strPickSheet").hidden = true;
+  renderEditor();
+  if (SH.on) { SH.calcKey = ""; shPaint(); }
 }
 function paintShotSel() {
   const bar = $("shotSelBar"), btn = $("shotSelBtn"); if (!bar || !btn) return;
@@ -417,7 +477,8 @@ function paintUseMV() {
 }
 function addVelocities(text) {
   const vals = String(text).split(/[\s,;]+/).map(parseFloat).filter(v => isFinite(v) && v >= 50 && v <= 6000);
-  vals.forEach(v => ED.shots.push({ v: +v.toFixed(1), id: uid(), ...(ED.tg ? { str: ED.tg.cur } : {}) })); if (vals.length) edDirty = true; return vals.length;
+  if (vals.length) { const cur = tgEnsure(ED).cur; vals.forEach(v => ED.shots.push({ v: +v.toFixed(1), id: uid(), str: cur })); edDirty = true; }
+  return vals.length;
 }
 function addFromInput() {
   const t = $("slVel").value; if (!t.trim()) return;
@@ -450,7 +511,7 @@ async function addShotsToLiveSession(shots, opts = {}) {
   if (SH.on && ED && ED.id === SH.sid) {   // the shooting view is open: its session takes the shot
     const arr = mk(); if (!arr.length) return ED.id;
     if (!ED.shots.length && ED._new) { ED.source = source; $("slSource").value = SRC_LBL[source] || source; }
-    shRollIfEnded(); arr.forEach(x => { x.str = tgEnsure(ED).cur; }); ED.shots.push(...arr); SH.lastId = arr[arr.length - 1].id;
+    shRollIfEnded(); const cur = tgEnsure(ED).cur; arr.forEach(x => { x.str = cur; }); ED.shots.push(...arr); SH.lastId = arr[arr.length - 1].id;
     renderEditor(); await commitEditor(); $("slDel").style.display = ""; set_LIVE({ id: ED.id, source }); shPaint();
     return ED.id;
   }
@@ -458,7 +519,7 @@ async function addShotsToLiveSession(shots, opts = {}) {
     const k = curKeyIds(); if (!k.loadId) return null;
     let L = LIVE && LIVE.source === source && LOG.find(s => s.id === LIVE.id && s.rifleId === k.rifleId && s.loadId === k.loadId);
     if (!L) { L = cleanSession(newSession(source)); LOG.push(L); set_LIVE({ id: L.id, source }); }
-    const arr = mk(); arr.forEach(x => { if (L.tg) x.str = L.tg.cur; }); L.shots.push(...arr);
+    const arr = mk(); const cur = tgEnsure(L).cur; arr.forEach(x => { x.str = cur; }); L.shots.push(...arr);
     const i = LOG.indexOf(L); LOG[i] = cleanSession(L); await saveLog(); slKey = null; maybeRenderLog();
     if (arr.length && opts.banner !== false) banShow(L.id, arr[arr.length - 1].id);
     return L.id;
@@ -468,7 +529,7 @@ async function addShotsToLiveSession(shots, opts = {}) {
     openEditor(null); if (!ED) return null; ED.source = source; $("slSource").value = SRC_LBL[source] || source;
     if (source === "bluetooth") setTimeout(() => { if (document.activeElement === $("slVel")) $("slVel").blur(); }, 80);   // no keyboard pop-up for radar shots
   }
-  const arr = mk(); arr.forEach(x => { if (ED.tg) x.str = ED.tg.cur; });
+  const arr = mk(); const cur = tgEnsure(ED).cur; arr.forEach(x => { x.str = cur; });
   ED.shots.push(...arr); renderEditor(); await commitEditor(); $("slDel").style.display = ""; set_LIVE({ id: ED.id, source });
   if (arr.length && opts.banner !== false) banShow(ED.id, arr[arr.length - 1].id);
   return ED.id;
@@ -502,6 +563,9 @@ export function init() {
     const s = recipeSnapshot(ED.rifleId, ED.loadId); if (!s) { toast("This session's load no longer exists"); return; }
     ED.recipe = s; edDirty = true; paintEdRecipe(); toast("Load data attached: tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/><path d='M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7'/><path d='M7 3v4a1 1 0 0 0 1 1h7'/></svg> Save session");
   };
+  document.querySelectorAll(".strRec").forEach(b => { b.onclick = () => { if (!ED) return; $("strPickSheet").hidden = false; paintStrPick(); }; });
+  $("strPickClose").onclick = () => { $("strPickSheet").hidden = true; };
+  $("strPickList").addEventListener("click", e => { const b = e.target.closest("[data-str]"); if (!b) return; setActiveString(b.dataset.str); });
   $("slAdd").onclick = addFromInput;
   $("slVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addFromInput(); } });
   $("slVel").addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData)?.getData("text") || ""; if (/[\s,;]/.test(t.trim())) { e.preventDefault(); if (addVelocities(t)) { renderEditor(); banShow(ED.id, ED.shots[ED.shots.length - 1].id); } } });
@@ -660,4 +724,4 @@ export function init() {
   document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("slEditor").classList.contains("show")) closeEditor(); else if ($("slImport").classList.contains("show")) closeImport(); });
 }
 
-export { mvPick, paintUseMV, SHEETJS_URLS, ENGINE_URLS, K_LOG, MPS, LOG, slKey, ED, edDirty, IMP, loadLog, saveLog, nOrNull, sstr, cleanSession, shotStats, stringWho, stringStatRows, stringStatText, exportSessions, curKeyIds, sessFor, fmtDate, SRC_LBL, maybeRenderLog, renderLog, slEmptyHTML, cmpScope, renderCompare, sessHome, orphanSessions, orphanHTML, sessionsCSV, drawLogChart, toLocalInput, newSession, openEditor, paintEdFor, paintEdRecipe, renderEditor, addVelocities, addFromInput, readEditor, commitEditor, closeEditor, addShotsToLiveSession, set_LOG, set_slKey, set_edDirty, set_IMP };
+export { mvPick, paintUseMV, SHEETJS_URLS, ENGINE_URLS, K_LOG, MPS, LOG, slKey, ED, edDirty, IMP, loadLog, saveLog, nOrNull, sstr, cleanSession, shotStats, stringWho, stringStatRows, stringStatText, exportSessions, curKeyIds, sessFor, fmtDate, SRC_LBL, maybeRenderLog, renderLog, slEmptyHTML, cmpScope, renderCompare, sessHome, orphanSessions, orphanHTML, sessionsCSV, drawLogChart, toLocalInput, newSession, openEditor, paintEdFor, paintEdRecipe, renderEditor, paintStrRec, addVelocities, addFromInput, readEditor, commitEditor, closeEditor, addShotsToLiveSession, set_LOG, set_slKey, set_edDirty, set_IMP };

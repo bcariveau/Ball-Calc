@@ -50,6 +50,7 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
     <div class="row"><button type="button" class="sm ghost" id="tgNewStr"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New string <small>(same sheet)</small></button><button type="button" class="sm ghost" id="tgNewTgt"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New target <small>(fresh sheet)</small></button></div>
     <div class="row"><button type="button" class="sm" id="tgMarkBtn"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes</button></div>
     <label class="tgl" for="tgMarkEach"><span>Mark each shot<small>Adds <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark impact to the shot banner</small></span><input type="checkbox" id="tgMarkEach" role="switch"></label></div>
+  <button type="button" id="strRec" class="strRec" aria-haspopup="dialog" aria-controls="strPickSheet"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg><span><span class="strRecTo">Recording to: String 1</span><small class="strRecOpt"></small></span></button>
   <div id="slAddRow"><input type="text" inputmode="decimal" autocomplete="off" id="slVel" placeholder="fps" enterkeyhint="done" aria-label="Velocity (fps)"><button type="button" id="slAdd"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add</button></div>
   <p class="hint sh" id="slAddHint"><span class="h1">Type a velocity and tap Add (or Enter).</span> <button type="button" class="info" id="slAddHelp" aria-expanded="false" aria-label="More about adding shots">?</button><span class="more" hidden> You can paste several at once, e.g. "2701 2698 2710". Tags (Clean, Cold bore, Flier, Input error) can be combined and never change the stats. Remove keeps the shot in the log, grays it, and leaves it out of every stat until you restore it.</span></p>
   <div class="row" id="shotSelTools"><button class="sm ghost" type="button" id="shotSelBtn"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5'/><path d='m9 11 3 3L22 4'/></svg> Select shots</button></div>
@@ -82,6 +83,11 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
     <button type="button" id="shotMoveOpen" disabled>Move 0 shots</button>
     <button type="button" class="ghost" id="shotSplit" hidden>Split</button>
   </div>
+</div>
+<div id="strPickSheet" hidden role="dialog" aria-modal="true" aria-label="Which string to record to">
+  <div class="sheetHd"><span>Recording to</span><button type="button" class="sm ghost" id="strPickClose">Cancel</button></div>
+  <div id="strPickList"></div>
+  <p class="hint" id="strPickNote"></p>
 </div>
 <div id="shotDestSheet" hidden role="dialog" aria-modal="true" aria-label="Where to move the selected shots">
   <div class="sheetHd"><span>Move shots</span><button type="button" class="sm ghost" id="shotDestClose">Cancel</button></div>

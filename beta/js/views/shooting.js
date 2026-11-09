@@ -14,6 +14,7 @@ export const shootingView = `<div id="shView" hidden role="dialog" aria-modal="t
       <div id="shDope"></div>
     </div>
     <div class="shR">
+      <button type="button" id="shRec" class="strRec" aria-haspopup="dialog" aria-controls="strPickSheet"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg><span><span class="strRecTo">Recording to: String 1</span><small class="strRecOpt"></small></span></button>
       <div id="shList" aria-label="Shots in this string, newest first"></div>
       <div id="shAddBox" hidden>
         <input type="number" inputmode="decimal" id="shVel" placeholder="fps" aria-label="Shot velocity in fps">

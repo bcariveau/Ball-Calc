@@ -56,11 +56,30 @@ details.section > summary { color: var(--accent); font-size: 1rem; font-weight: 
 #tabGear[data-gearsect="load"][data-gearview="edit"] #gunPicker,
 #tabGear[data-gearsect="load"][data-gearview="edit"] #rangePicker { display: none !important; }
 #tabGear[data-gearsect="optic"][data-gearview="edit"] #loadPicker,
-#tabGear[data-gearsect="optic"][data-gearview="edit"] #rangePicker,
 #tabGear[data-gearsect="optic"][data-gearview="edit"] #gunEss,
 #tabGear[data-gearsect="optic"][data-gearview="edit"] #rifleDetails,
 #tabGear[data-gearsect="optic"][data-gearview="edit"] #zeroFlag,
-#tabGear[data-gearsect="optic"][data-gearview="edit"] #sampleNote { display: none !important; }
+#tabGear[data-gearsect="optic"][data-gearview="edit"] #sampleNote,
+#tabGear[data-gearsect="optic"][data-gearview="edit"] #gunPicker > .lbl,
+#tabGear[data-gearsect="optic"][data-gearview="edit"] #gunPicker > .pkRow,
+#tabGear[data-gearsect="optic"][data-gearview="edit"] #rifleSum,
+#tabGear[data-gearsect="gun"][data-gearview="edit"] #opticBody,
+#tabGear[data-gearsect="gun"][data-gearview="edit"] #rifleSum,
+#tabGear[data-gearsect="gun"][data-gearview="edit"] #opticSum,
+#tabGear[data-gearsect="load"][data-gearview="edit"] #loadSum,
+#tabGear[data-gearsect="load"][data-gearview="edit"] #loadRecipe { display: none !important; }
+#tabGear[data-gearview="edit"] .ctxRow,
+#tabGear[data-gearview="edit"] #gearSec > h2,
+#tabGear[data-gearsect="gun"][data-gearview="edit"] #opticPk > .lbl { display: none !important; }
+#tabGear[data-gearview="edit"] #gearListBar { margin-bottom: 4px; }
+#tabGear[data-gearview="edit"] #gunEss,
+#tabGear[data-gearview="edit"] #loadBasic { gap: 4px 8px; }
+#tabGear details.more > summary::before { display: none; }
+#tabGear details.more > summary { justify-content: space-between; gap: 8px; }
+#tabGear details.more > summary .chev { margin-left: auto; flex: 0 0 auto; transition: transform .15s; }
+#tabGear details.more[open] > summary .chev { transform: rotate(180deg); }
+#tabGear details.more > summary .rsum { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; color: var(--muted); }
+#tabGear details.more > summary .rsum:empty { display: none; }
 #gearDlg { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; }
 #gearDlg[hidden] { display: none !important; }
 #gearDlg .box { width: min(420px, 100%); background: var(--card); color: var(--text); border-radius: 16px 16px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }

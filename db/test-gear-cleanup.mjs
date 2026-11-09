@@ -2,6 +2,7 @@
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import assert from "node:assert/strict";
 
 const require = createRequire(import.meta.url);
@@ -117,12 +118,44 @@ try {
   await page.click('#gearSwitch button[data-sec="gun"]');
   await page.locator("#gearList .gearItem").filter({ hasText: "Rifle A" }).click();
   await page.waitForSelector("#gunEss");
-  ok(await page.locator("#rifleDetails").evaluate((el) => !el.open), "More starts collapsed");
+  const moreBox = await page.locator("#rifleDetails > summary").boundingBox();
+  const tabBox = await page.locator("#tabBar").boundingBox();
+  ok(moreBox && tabBox && moreBox.y >= 0 && moreBox.y + moreBox.height <= tabBox.y + 1, "the firearm More toggle sits above the tab bar on a 360px screen");
+  ok(await page.locator("#rifleDetails").evaluate((el) => !el.open && !!el.querySelector("summary svg.ic.chev")), "firearm More starts closed and uses a Lucide chevron");
+  ok(await page.locator("#zero").isVisible() && await page.locator("#barrel").isVisible() && await page.locator("#twist").isVisible() && await page.locator("#rifleSel").isVisible(), "name, zero, barrel, and twist stay up front");
+  ok(!(await page.locator("#zTemp").isVisible()) && !(await page.locator("#rangeLat").isVisible()) && !(await page.locator("#sightHeight").isVisible()), "firearm More fields are hidden while More is closed");
+  await page.screenshot({ path: ART + "/edit-screen.png" });
+  await page.screenshot({ path: ART + "/more-closed.png" });
   await page.screenshot({ path: ART + "/after-edit-more-closed.png" });
-  await page.evaluate(() => { document.getElementById("rifleDetails").open = true; document.getElementById("zeroDetails").open = true; });
-  ok(await page.locator("#zTemp").isVisible() && await page.locator("#sightHeight").count() === 1, "More still contains the rest of the firearm fields");
+  await page.locator("#rifleDetails > summary").click();
+  ok(await page.locator("#zTemp").isVisible() && await page.locator("#rangeLat").isVisible() && (await page.locator("#sightHeight").count()) === 1, "opening More shows the rest of the firearm fields");
+  await page.locator("#rifleDetails").evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await page.screenshot({ path: ART + "/more-open.png" });
   await page.screenshot({ path: ART + "/after-edit-more-open.png" });
+  const hash = (name) => crypto.createHash("sha256").update(fs.readFileSync(ART + "/" + name)).digest("hex");
+  ok(hash("more-closed.png") !== hash("more-open.png"), "the closed and open More screenshots are different images");
+
   await page.click("#gearBack");
+  await page.click('#gearSwitch button[data-sec="optic"]');
+  await page.locator("#gearList .gearItem").first().click();
+  const opticMore = await page.locator("#opMore > summary").boundingBox();
+  ok(opticMore && opticMore.y + opticMore.height <= tabBox.y + 1, "the optic More toggle sits above the tab bar");
+  ok(await page.locator("#opTurret").isVisible() && !(await page.locator("#opReticle").isVisible()) && !(await page.locator("#opTrack").isVisible()), "an optic edit shows the turret and hides the other specs");
+  await page.locator("#opMore > summary").click();
+  ok(await page.locator("#opReticle").isVisible() && await page.locator("#opFP").isVisible() && await page.locator("#opSH").isVisible() && await page.locator("#opTrack").isVisible(), "optic More reveals every optic spec");
+  await page.click("#gearBack");
+  await page.click('#gearSwitch button[data-sec="load"]');
+  await page.locator('#gearList .gearItem[data-id="l1"]').click();
+  const loadMore = await page.locator("#loadDetails > summary").boundingBox();
+  ok(loadMore && loadMore.y + loadMore.height <= tabBox.y + 1, "the load More toggle sits above the tab bar");
+  ok(await page.locator("#bc").isVisible() && await page.locator("#mv").isVisible() && await page.locator("#drag").isVisible() && !(await page.locator("#weight").isVisible()) && !(await page.locator("#ldPowder").isVisible()), "a load edit shows BC, drag, and MV, with the rest closed");
+  await page.locator("#loadDetails > summary").click();
+  ok(await page.locator("#weight").isVisible() && await page.locator("#diameter").isVisible() && await page.locator("#length").isVisible() && await page.locator("#ldPowder").isVisible() && await page.locator("#ldCharge").isVisible() && await page.locator("#refMV").isVisible(), "load More reveals the remaining load and recipe fields");
+  const fields = ["gunKind", "sightHeight", "zero", "twist", "barrel", "turret", "turretV", "turretU", "zTemp", "zPress", "zAlt", "zHum", "opTurret", "opTurretV", "opTurretU", "opReticle", "opFP", "opMag", "opTurn", "opTravel", "opCant", "opUp", "opSH", "opWTravel", "opTrack", "bc", "drag", "weight", "diameter", "mv", "length", "mvSource", "refMV", "refBarrel", "fpsPerInch", "bulletId", "bulletName", "bcBands", "useBands", "ptSens", "mvTemp", "tipLen", "trued", "ldKind", "ldPowder", "ldCharge", "ldPrimer", "ldCOAL", "ldCBTO", "ldJump", "ldCase", "ldFired", "ldTrim", "ldPrep", "ldMaker", "ldProduct", "ldLot", "ldNotes", "rangeLat", "rangeLon"];
+  const missing = await page.evaluate((ids) => ids.filter((id) => !document.getElementById(id)), fields);
+  ok(!missing.length, "every gear field is still in the form: " + missing.join(", "));
+  await page.click("#gearBack");
+  await page.click('#gearSwitch button[data-sec="gun"]');
 
   const beforeRecall = await page.evaluate(() => {
     const b = window.__bc.P.rifles.find((r) => r.id === "r2");

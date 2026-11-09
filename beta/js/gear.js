@@ -133,7 +133,7 @@ function renderPickers() {
 }
 function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; applyGunKind(); applyOptic(); }
 function applyGunKind() { const hg = $("gunKind").value === "handgun"; $("barrel").placeholder = hg ? "optional, e.g. 4.25" : "optional, e.g. 20"; }
-function applyLoad() { if (SH.pend) setTimeout(shPendCheck, 0); const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); if (moreNeeded()) $("loadDetails").open = true; }
+function applyLoad() { if (SH.pend) setTimeout(shPendCheck, 0); const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); if (moreNeeded() && !gearEditing) $("loadDetails").open = true; }
 function applyRange() {
   const g = curRange();
   if (g) {
@@ -316,7 +316,7 @@ export function init1() {
     else if (gearSec === "optic") $("opNew").click();
     else $("loadNew").click();
     const after = gearSec === "gun" ? P.rifles.length : gearSec === "optic" ? (P.optics || []).length : ((curRifle() && curRifle().loads.length) || 0);
-    if (after > before) { gearEditing = true; ["rifleDetails", "loadDetails", "opMore", "rangeDetails", "zeroDetails"].forEach(id => { const el = $(id); if (el) el.open = false; }); paintGearList(); }
+    if (after > before) { gearEditing = true; ["rifleDetails", "loadDetails", "opMore"].forEach(id => { const el = $(id); if (el) el.open = false; }); paintGearList(); }
   };
   $("gearArchive").onclick = () => {
     const rec = currentGearRecord(); if (!rec) return;
@@ -459,7 +459,7 @@ function showGear(kind, id) {
       $("opticBody").hidden = false;
     }
   }
-  ["rifleDetails", "loadDetails", "opMore", "rangeDetails", "zeroDetails"].forEach(elId => { const el = $(elId); if (el) el.open = false; });
+  ["rifleDetails", "loadDetails", "opMore"].forEach(elId => { const el = $(elId); if (el) el.open = false; });
   paintGearList();
   updateDirty();
 }

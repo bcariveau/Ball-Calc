@@ -25,13 +25,13 @@ function paintStrBar() {
   const fb = af ? calcFallback(af, gun, opticOn(P, gun), live && live.v > 0 ? live : null) : null;
   $("tgHdrS").textContent = `${gun ? gun.name + " · " : ""}${rd.length} shot${rd.length === 1 ? "" : "s"} · ${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}${t.strings.length > 1 ? ` · ${t.strings.length} strings` : ""}${fb && fb.warning ? " · " + fb.warning : ""}`;
   $("tgMarkEach").checked = !!t.mark;
-  $("tgMarkBtn").textContent = `🎯 Mark holes · String ${n}`;
+  $("tgMarkBtn").innerHTML = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes · String ${n}`;
 }
 function paintTgView() {
   if (!ED) return; const box = $("slTgView"), t = tgView(ED);
   if (TV.sid !== ED.id) { TV.sid = ED.id; TV.hide = new Set(); }
   const any = t.strings.some(st => st.holes.length);
-  if (!any) { box.innerHTML = `<div class="hint">No holes marked yet. Tap 🎯 Mark holes after a string (or turn on Mark each shot).</div>`; return; }
+  if (!any) { box.innerHTML = `<div class="hint">No holes marked yet. Tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes after a string (or turn on Mark each shot).</div>`; return; }
   const vis = t.strings.map((st, i) => ({ st, i, g: t.targets.find(q => q.id === st.tid) })).filter(o => o.st.holes.length);
   const shown = vis.filter(o => !TV.hide.has(o.st.id));
   const yds = [...new Set(shown.map(o => Math.round(tgYd(o.g))))], ts = tsFor(ED.rifleId, t.strings.find(q => q.id === t.cur)), ang = yds.length > 1 ? ts.u : null, lu = shown[0]?.g.u || "in";
@@ -139,7 +139,7 @@ function teSumPaint() {   // one tappable line for String/Template/Distance/Meas
   const parts = [o ? o.textContent : g.tpl, g.dist > 0 ? `${fmt(g.dist, 0)} ${g.du}` : "distance?"]; if (g.u === "cm") parts.push("cm");
   parts.push(dv ? `${dv.dir} ${dv.s} ${angU(dv.u)} (${Math.abs(dv.c)})` : "dial?");
   const open = !!TE.setOpen, b = $("tgSum");
-  b.innerHTML = `<span class="t">${escapeHtml(parts.join(" · "))}</span><span class="i" aria-hidden="true">${open ? "▴" : "✎"}</span>`;
+  b.innerHTML = `<span class="t">${escapeHtml(parts.join(" · "))}</span><span class="i" aria-hidden="true">${open ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 15-6-6-6 6'/></svg>" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg>"}</span>`;
   b.setAttribute("aria-expanded", String(open)); b.setAttribute("aria-label", `Setup: ${parts.join(", ")}. ${open ? "Tap to collapse" : "Tap to edit"}`);
   $("tgEd").classList.toggle("setc", !open);
 }

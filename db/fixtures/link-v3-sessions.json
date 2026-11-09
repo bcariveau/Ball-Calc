@@ -1,0 +1,58 @@
+[
+  {
+    "id": "sess1",
+    "rifleId": "r1",
+    "loadId": "l1",
+    "date": "2026-06-01T15:00:00.000Z",
+    "source": "manual",
+    "notes": "fixture",
+    "recipe": { "loadName": "Load A", "gunName": "Rifle A", "mv": "2737", "diameter": "0.264", "bc": "0.326", "drag": "G7", "weight": "140" },
+    "asFired": {
+      "rifleId": "r1",
+      "opticId": "o1",
+      "loadId": "l1",
+      "optic": { "id": "o1", "opTurret": "0.1mil", "opReticle": "mil", "opFP": "FFP", "opTrack": "1", "opSH": "1.75" },
+      "recipe": { "loadName": "Load A", "gunName": "Rifle A", "mv": "2737", "diameter": "0.264" }
+    },
+    "shots": [
+      { "id": "a", "v": 2700, "str": "st1" },
+      { "id": "b", "v": 2710, "str": "st1" },
+      { "id": "c", "v": 2800, "str": "st1", "ie": true },
+      { "id": "d", "v": 2500, "str": "st1", "x": true },
+      { "id": "f", "v": 2810, "str": "st2" }
+    ],
+    "tg": {
+      "targets": [{ "id": "t", "tpl": "grid1", "dist": 100, "du": "yd", "u": "in" }],
+      "strings": [
+        {
+          "id": "st1",
+          "tid": "t",
+          "aim": { "x": 0, "y": 0 },
+          "holes": [{ "id": "h1", "x": 1, "y": 0, "sh": "c" }],
+          "asFired": {
+            "rifleId": "r1",
+            "opticId": "o1",
+            "loadId": "l1",
+            "optic": { "id": "o1", "opTurret": "0.1mil", "opReticle": "mil", "opFP": "FFP", "opTrack": "1", "opSH": "1.75" },
+            "recipe": { "loadName": "Load A", "gunName": "Rifle A", "mv": "2737", "diameter": "0.264" }
+          }
+        },
+        {
+          "id": "st2",
+          "tid": "t",
+          "aim": null,
+          "holes": [],
+          "asFired": {
+            "rifleId": "r2",
+            "opticId": null,
+            "loadId": "l3",
+            "optic": null,
+            "recipe": { "loadName": "Load B", "gunName": "Rifle B", "mv": "2800", "diameter": "0.308" }
+          }
+        }
+      ],
+      "cur": "st1",
+      "mark": false
+    }
+  }
+]

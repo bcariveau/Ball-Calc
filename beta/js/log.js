@@ -12,7 +12,7 @@ import { closeImport } from "./log-import.js";
 import { SEL, lpFired, paintSel, set_lpFired } from "./reassign.js";
 import { SH, shHide, shNeedGear, shPaint, shRollIfEnded } from "./shooting.js";
 import { banHide, banPaint, banShow } from "./shot-banner.js";
-import { asFiredFrom, cleanAsFired, assignShots, staleMv } from "./link-v3.js";
+import { asFiredFrom, cleanAsFired, assignShots, calcFallback, opticOn, placeOnString, staleMv } from "./link-v3.js";
 import { P, load, savePresets, store, uid } from "./storage.js";
 import { paintStrBar, paintTgView } from "./strings.js";
 import { mkGlyph } from "./target-draw.js";
@@ -91,7 +91,7 @@ function renderLog() {
   if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = (emp ? slEmptyHTML(false) : "") + orphanHTML(orph); $("slChartBox").style.display = "none"; $("slCmp").hidden = true; paintSel(); return; }
   const all = list.flatMap(s => s.shots), st = shotStats(all);
   $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} · ${st.n} shots for “${l.name}” · all-shot avg ${st.avg.toFixed(0)} fps, SD ${st.sd.toFixed(1)}`
-    : `No sessions yet for “${l.name}”. Tap ＋ Session to type velocities, or import an Athlon file.`;
+    : `No sessions yet for “${l.name}”. Tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Session to type velocities, or import an Athlon file.`;
   $("slList").innerHTML = list.slice().reverse().map(s => `${tgThumbA(s)}<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
     <span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
     <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
@@ -102,7 +102,7 @@ function renderLog() {
   renderCompare();
 }
 function slEmptyHTML(hasLoad) {
-  return "";   // the static #slEmpty line ("No sessions yet.") covers the empty state; ▶ Start shooting sits right above
+  return "";   // the static #slEmpty line ("No sessions yet.") covers the empty state;  Start shooting sits right above
 }
 /* compare sessions (ladder / charge tests) */
 let cmpScope = "load";
@@ -133,7 +133,7 @@ function sessHome(s) { const r = P.rifles.find(x => x.id === s.rifleId), l = r?.
 function orphanSessions() { return LOG.filter(s => sessHome(s).why).sort((a, b) => b.date.localeCompare(a.date)); }
 function orphanHTML(list) {
   if (!list.length) return "";
-  return `<div class="slGrp">⚠ Unassigned sessions (${list.length}) — their gun or load was deleted. Tap one and use ↔ Move to give it a home.</div>` + list.map(s => {
+  return `<div class="slGrp"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Unassigned sessions (${list.length}) — their gun or load was deleted. Tap one and use <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move to give it a home.</div>` + list.map(s => {
     const h = sessHome(s), was = [s.recipe?.gunName, s.recipe?.loadName].filter(Boolean).join(" · ");
     return `<button type="button" class="slItem orphan" data-id="${escapeHtml(s.id)}"><span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
     <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}</span><span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
@@ -205,12 +205,12 @@ function paintEdFor() {
   $("slEdFor").textContent = h.why ? `Unassigned (${h.why})${was ? " · was " + was : ""}` : `${h.r.name} · ${h.l.name}${ED.title ? " · " + ED.title : ""}`;
   $("slEdFor").style.color = h.why ? "var(--warn)" : "";
   $("slMoveBtn").classList.toggle("hot", !!h.why);
-  $("slMoveBtn").textContent = h.why ? "↔ Assign to a saved gun + load" : "↔ Move / reassign (gun, load)";
+  $("slMoveBtn").innerHTML = h.why ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Assign to a saved gun + load" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move / reassign (gun, load)";
 }
 function paintEdRecipe() {
   const t = recipeText(ED.recipe, true);
-  $("slEdRecipe").textContent = t ? (ED.recipe.ldKind === "factory" ? "📦 " : "🧪 ") + t : "No load data saved with this session.";
-  $("slEdRecipeBtn").textContent = t ? "↻ Replace with the load's current data" : "📎 Attach the load's current data";
+  $("slEdRecipe").innerHTML = t ? (ED.recipe.ldKind === "factory" ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z'/><path d='M12 22V12'/><path d='m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7'/></svg> " : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg> ") + escapeHtml(t) : "No load data saved with this session.";
+  $("slEdRecipeBtn").innerHTML = t ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> Replace with the load's current data" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/></svg> Attach the load's current data";
 }
 function renderEditor() {
   const st = shotStats(ED.shots), f = v => v == null ? "—" : (+v).toFixed(1);
@@ -220,9 +220,9 @@ function renderEditor() {
   const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}" data-id="${escapeHtml(s.id || "")}">
     ${SHOTSEL ? `<input type="checkbox" class="shotCk" data-sel="${escapeHtml(s.id || "")}" ${s.id && SHOTSEL.has(s.id) ? "checked" : ""} aria-label="Select shot ${i + 1}">` : ""}
     <span class="n">#${i + 1}</span><span><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "removed" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
-    <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the log."}">${s.x ? "↺" : "⊘"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot">✕</button>
+    <button type="button" class="x xd${s.x ? " on" : ""}" data-f="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the log."}">${s.x ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 7v6h6'/><path d='M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13'/></svg>" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><path d='m4.9 4.9 14.2 14.2'/></svg>"}</button><button type="button" class="x" data-f="del" aria-label="Delete shot"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M18 6 6 18'/><path d='m6 6 12 12'/></svg></button>
     <div class="tgs"><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean" aria-pressed="${!!s.clean}">Clean</button><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold" aria-pressed="${!!s.cold}">Cold bore</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl" aria-pressed="${!!s.fl}">Flier</button><button type="button" class="tg${s.ie ? " on" : ""}" data-f="ie" aria-pressed="${!!s.ie}">Input error</button>
-    <button type="button" class="tg${s.note ? " on" : ""}" data-f="noteT" aria-label="Note">✎</button>${multi ? `<span class="sl">${mkGlyph(si)}S${si + 1}</span>` : ""}</div>
+    <button type="button" class="tg${s.note ? " on" : ""}" data-f="noteT" aria-label="Note"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/><path d='m15 5 4 4'/></svg></button>${multi ? `<span class="sl">${mkGlyph(si)}S${si + 1}</span>` : ""}</div>
     ${s.note || s._showNote ? `<input class="note" type="text" maxlength="200" placeholder="shot note" value="${escapeHtml(s.note || "")}">` : ""}</div>`;
   const all = ED.shots.map((s, i) => ({ s, i }));
   $("slShots").innerHTML = (multi ? tv.strings.map((q, si) => ({ q, si })).reverse().map(({ q, si }) => { const mine = all.filter(o => strOf(ED, o.s) === q.id), sst = shotStats(mine.map(o => o.s));
@@ -236,15 +236,50 @@ function paintShotSel() {
   const bar = $("shotSelBar"), btn = $("shotSelBtn"); if (!bar || !btn) return;
   const on = !!SHOTSEL; bar.hidden = !on; btn.hidden = on;
   if (!on || !ED) return;
-  const keepG = $("shotDestGun").value, keepL = $("shotDestLoad").value;
+  const keepG = $("shotDestGun").value, keepL = $("shotDestLoad").value, keepS = $("shotDestStr").value;
+  const existing = $("shotDestKind").value === "existing";
+  $("shotDestStr").hidden = !existing; $("shotDestGun").hidden = existing; $("shotDestLoad").hidden = existing;
+  $("shotDestStr").innerHTML = stringChoices().map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join("");
+  if (keepS && [...$("shotDestStr").options].some(o => o.value === keepS)) $("shotDestStr").value = keepS;
   $("shotDestGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join("");
   $("shotDestGun").value = P.rifles.some(r => r.id === keepG) ? keepG : (curRifle()?.id || P.rifles[0]?.id || "");
   const gun = P.rifles.find(r => r.id === $("shotDestGun").value);
   $("shotDestLoad").innerHTML = (gun?.loads || []).map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join("");
   if (keepL && (gun?.loads || []).some(l => l.id === keepL)) $("shotDestLoad").value = keepL;
   $("shotSelN").textContent = `${SHOTSEL.size} selected`;
-  const ready = SHOTSEL.size && gun && (gun.loads || []).some(l => l.id === $("shotDestLoad").value);
-  $("shotMoveGo").disabled = !ready; $("shotSplit").disabled = !ready;
+  const readyNew = SHOTSEL.size && gun && (gun.loads || []).some(l => l.id === $("shotDestLoad").value);
+  const readyOld = SHOTSEL.size && $("shotDestStr").value;
+  $("shotMoveGo").disabled = existing ? !readyOld : !readyNew; $("shotSplit").disabled = !readyNew;
+  $("shotDestNote").textContent = existing ? destNote($("shotDestStr").value) : "Move creates or reuses a string for the firearm and load you pick. Split still uses that firearm and load.";
+}
+function stringChoices() {
+  const out = [];
+  LOG.forEach(sess => {
+    const tg = sess.tg; if (!tg || !tg.strings) return;
+    tg.strings.forEach((st, i) => {
+      const af = st.asFired, gun = af && P.rifles.find(r => r.id === af.rifleId), load = gun && (gun.loads || []).find(l => l.id === af.loadId);
+      const where = sess.id === ED.id ? "This session" : fmtDate(sess.date);
+      const who = af ? `${gun ? gun.name : "saved firearm"} · ${load ? load.name : "saved load"}` : "no saved firearm or load";
+      out.push({ value: `${sess.id}::${st.id}`, label: `${where} · String ${i + 1} · ${who}${af && af.optic ? "" : " · no optic saved"}` });
+    });
+  });
+  return out;
+}
+function destContext(value) {
+  const [sid, strId] = String(value || "").split("::");
+  const sess = LOG.find(s => s.id === sid);
+  const st = sess && sess.tg && sess.tg.strings.find(s => s.id === strId);
+  const af = st && st.asFired;
+  const rifle = af && P.rifles.find(r => r.id === af.rifleId);
+  return { sess, st, af, rifle, optic: opticOn(P, rifle) };
+}
+function destNote(value) {
+  const c = destContext(value); if (!c.sess || !c.st) return "Pick a string. Nothing has been moved.";
+  const load = c.rifle && (c.rifle.loads || []).find(l => l.id === c.af.loadId);
+  const who = c.af ? `${c.rifle ? c.rifle.name : "the saved firearm"} · ${load ? load.name : "the saved load"}` : "a string with no saved firearm or load";
+  const fb = c.af ? calcFallback(c.af, c.rifle, c.optic) : null;
+  const base = c.af ? `These shots will count under ${who}. That string's saved setup is not changed.` : "This string has no saved firearm or load. Nothing will be invented, and its snapshot will not be changed.";
+  return [base, fb && fb.warning].filter(Boolean).join(" ");
 }
 function chosenAsFired() {
   const r = P.rifles.find(x => x.id === $("shotDestGun").value);
@@ -263,8 +298,14 @@ function sourceLoadOf(session, movedIds) {
   const r = P.rifles.find(x => x.id === rid);
   return r?.loads.find(l => l.id === lid) || null;
 }
-function undoShotEdit() {
-  const prev = shotUndo.pop(); if (!prev || !ED) return;
+async function undoShotEdit() {
+  const prev = shotUndo.pop(); if (!prev) return;
+  if (prev.cross) {
+    const put = (sess) => { const c = cleanSession(sess); const i = LOG.findIndex(s => s.id === c.id); if (i >= 0) LOG[i] = c; if (ED && ED.id === c.id) { ED.shots = c.shots; ED.tg = c.tg; edDirty = false; } };
+    put(prev.source); put(prev.dest); await saveLog(); if (ED) renderEditor(); toast("Shot move undone. Both sessions are saved.");
+    return;
+  }
+  if (!ED) return;
   ED.shots = prev.shots; ED.tg = prev.tg; edDirty = true; renderEditor(); toast("Shot move undone");
 }
 function sessionLoad() {
@@ -315,7 +356,7 @@ function paintUseMV() {
   note.classList.toggle("warn", !!m.st.n && m.n < 5);
   note.textContent = !m.l ? "Assign this session to a saved load to use its average as the MV." : !m.st.n ? "" :
     `Average of ${m.n} shot${m.n === 1 ? "" : "s"}${left.length ? ` (left out: ${left.join(", ")})` : ""}${m.st.n > 1 ? ` · SD ${m.st.sd.toFixed(1)}` : ""}.` +
-    (m.t == null ? " No session temperature yet: you'll be asked for it." : "") + (m.n < 5 ? ` ⚠ Only ${m.n} shot${m.n === 1 ? "" : "s"}; 5 or more give a steadier MV.` : "");
+    (m.t == null ? " No session temperature yet: you'll be asked for it." : "") + (m.n < 5 ? ` <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Only ${m.n} shot${m.n === 1 ? "" : "s"}; 5 or more give a steadier MV.` : "");
 }
 function addVelocities(text) {
   const vals = String(text).split(/[\s,;]+/).map(parseFloat).filter(v => isFinite(v) && v >= 50 && v <= 6000);
@@ -402,7 +443,7 @@ export function init() {
     if (!ED) return;
     if (ED.recipe && recipeText(ED.recipe) && !confirm("Replace this session's saved load data with the load's current data?")) return;
     const s = recipeSnapshot(ED.rifleId, ED.loadId); if (!s) { toast("This session's load no longer exists"); return; }
-    ED.recipe = s; edDirty = true; paintEdRecipe(); toast("Load data attached: tap 💾 Save session");
+    ED.recipe = s; edDirty = true; paintEdRecipe(); toast("Load data attached: tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/><path d='M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7'/><path d='M7 3v4a1 1 0 0 0 1 1h7'/></svg> Save session");
   };
   $("slAdd").onclick = addFromInput;
   $("slVel").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addFromInput(); } });
@@ -410,6 +451,8 @@ export function init() {
   $("shotSelBtn").onclick = () => { SHOTSEL = new Set(); shotUndo = []; renderEditor(); };
   $("shotSelDone").onclick = () => { SHOTSEL = null; renderEditor(); };
   $("shotDestGun").onchange = () => paintShotSel();
+  $("shotDestKind").onchange = () => paintShotSel();
+  $("shotDestStr").onchange = () => paintShotSel();
   const shotToast = (done, msg) => {
     const show = () => toast(msg, [
       { label: "Undo", fn: undoShotEdit },
@@ -417,7 +460,58 @@ export function init() {
     ]);
     show();
   };
-  $("shotMoveGo").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const done = applyShotResult(assignShots(ED, [...SHOTSEL], af)); shotToast(done, done.stale ? done.stale.message : "Moved the selected shots onto that firearm and load. Other shots were left where they were."); };
+  $("shotMoveGo").onclick = async () => { if (!ED || !SHOTSEL?.size) return;
+    if ($("shotDestKind").value === "existing") { await moveToExisting(); return; }
+    const af = chosenAsFired(); if (!af) return; const done = applyShotResult(assignShots(ED, [...SHOTSEL], af)); shotToast(done, done.stale ? done.stale.message : "Moved the selected shots onto that firearm and load. Other shots were left where they were.");
+  };
+  async function moveToExisting() {
+    const ctx = destContext($("shotDestStr").value); if (!ctx.sess || !ctx.st) return;
+    const beforeSrc = JSON.stringify(ED), beforeDst = ctx.sess.id === ED.id ? null : JSON.stringify(ctx.sess);
+    const result = placeOnString(ED, ctx.sess, [...SHOTSEL], ctx.st.id, { rifle: ctx.rifle, optic: ctx.optic });
+    if (result.error) { toast(result.error); return; }
+    if (JSON.stringify(ED) !== beforeSrc || (beforeDst && JSON.stringify(ctx.sess) !== beforeDst)) { toast("The move touched a session it should have copied. Nothing was saved."); return; }
+    const srcLoad = sourceLoadOf(result.undoSource, result.movedIds);
+    const srcStale = staleMv(srcLoad, result.undoSource.shots, result.movedIds, result.undoSource);
+    const destBefore = result.undoDest || result.undoSource;
+    const destLoad = loadOfAsFired(result.destAsFired, destBefore);
+    const movedShots = result.undoSource.shots.filter(s => result.movedIds.includes(s.id));
+    const dstStale = staleIncoming(destLoad, destBefore, result.destStringId, movedShots);
+    const destAfter = result.dest || result.source;
+    const remainSrc = result.source.shots.filter(s => !result.movedIds.includes(s.id) && sourceLoadOf(result.undoSource, [s.id])?.id === srcLoad?.id);
+    const remainDst = destAfter.shots.filter(s => !s.x && (result.destAsFired ? (destAfter.tg.strings.find(st => st.id === s.str)?.asFired?.loadId === result.destAsFired.loadId) : s.str === result.destStringId));
+    if (result.same) { shotUndo.push(result.undoSource); ED.shots = result.source.shots; ED.tg = result.source.tg; edDirty = true; renderEditor(); }
+    else {
+      const cs = cleanSession(result.source), cd = cleanSession(result.dest);
+      const si = LOG.findIndex(s => s.id === cs.id), di = LOG.findIndex(s => s.id === cd.id);
+      if (!cs || !cd || si < 0 || di < 0) { toast("Both sessions have to be here before a move is saved. Nothing was saved."); return; }
+      LOG[si] = cs; LOG[di] = cd; ED.shots = cs.shots; ED.tg = cs.tg; edDirty = false;
+      shotUndo.push({ cross: true, source: result.undoSource, dest: result.undoDest });
+      await saveLog(); renderEditor();
+    }
+    const msg = [result.differs ? destNote($("shotDestStr").value) : "Moved the selected shots. Other shots were left where they were.", result.differs ? null : result.warning, srcStale && srcStale.message, dstStale && dstStale.message].filter(Boolean).join(" ");
+    let srcDone = false, dstDone = false;
+    const showMove = (extra) => {
+      const acts = [{ label: "Undo", fn: undoShotEdit }];
+      if (!srcDone && srcStale && srcLoad) acts.push({ label: "Redo source MV", fn: () => { const m = redoSourceMv(srcLoad, remainSrc); if (m) { srcDone = true; showMove(m); } else showMove(); } });
+      if (!dstDone && dstStale && destLoad) acts.push({ label: "Redo dest MV", fn: () => { const m = redoSourceMv(destLoad, remainDst); if (m) { dstDone = true; showMove(m); } else showMove(); } });
+      toast(extra || msg, acts);
+    };
+    showMove();
+  }
+  function loadOfAsFired(af, session) {
+    const rid = af?.rifleId || session.rifleId, lid = af?.loadId || session.loadId;
+    const r = P.rifles.find(x => x.id === rid);
+    return r?.loads.find(l => l.id === lid) || null;
+  }
+  function staleIncoming(load, destBefore, destStringId, movedShots) {
+    if (!load || load.mvSource !== "measured" || !(parseFloat(load.mv) > 0)) return null;
+    const before = (destBefore.shots || []).filter(s => !s.x && ((destBefore.tg && destBefore.tg.strings.find(st => st.id === s.str)?.asFired?.loadId) || destBefore.loadId) === load.id);
+    const adding = (movedShots || []).filter(s => !s.x);
+    if (!before.length || !adding.length) return null;
+    const avg = shotStats(before).avg;
+    if (avg == null || Math.round(avg) !== Math.round(parseFloat(load.mv))) return null;
+    return { message: "The destination load's MV matched its kept shots before this move. It was not changed. Redo dest MV uses the shots now on that load and drops removed shots." };
+  }
   $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const id = [...SHOTSEL][0]; const done = applyShotResult(assignShots(ED, [id], af, { splitFromId: id })); shotToast(done, done.stale ? done.stale.message : "Split from the selected shot onto that firearm and load. Date and weather stay on the session."); };
   $("slShots").addEventListener("change", e => { const box = e.target.closest(".shotCk"); if (!box || !SHOTSEL) return; box.checked ? SHOTSEL.add(box.dataset.sel) : SHOTSEL.delete(box.dataset.sel); paintShotSel(); });
   let shotLp;

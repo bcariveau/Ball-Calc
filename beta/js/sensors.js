@@ -51,11 +51,11 @@ async function openSensor(mode) {
   try {
     const DOE = window.DeviceOrientationEvent;
     if (DOE && typeof DOE.requestPermission === "function") {   // iOS 13+ — must be called from a tap
-      const r = await DOE.requestPermission(); if (r !== "granted") throw new Error("Motion & orientation access was denied. Allow it in your browser site settings (iPhone: Settings › Apps › Safari › Motion & Orientation Access), then reload.");
+      const r = await DOE.requestPermission(); if (r !== "granted") throw new Error("Motion & orientation access was denied. Allow it in your browser site settings (iPhone: Settings <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> Apps <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> Safari <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> Motion & Orientation Access), then reload.");
     }
   } catch (e) { toast(e.message || "Sensor permission failed"); return; }
   sens = { mode, n: 0, last: null };
-  $("sheetTitle").textContent = mode === "aim" ? "🧭 Aim at target" : "📐 Measure shot angle";
+  $("sheetTitle").innerHTML = mode === "aim" ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76'/></svg> Aim at target" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z'/><path d='m14.5 12.5 2-2'/><path d='m11.5 9.5 2-2'/><path d='m8.5 6.5 2-2'/><path d='m17.5 15.5 2-2'/></svg> Measure shot angle";
   $("sheetVal").textContent = "—"; $("sheetSub").textContent = "Waiting for sensor…";
   $("sheetHelp").textContent = mode === "aim"
     ? "Hold the phone upright and point the back camera at the target (or lay it flat with the top edge toward the target). Keep it away from metal and magnets, then tap Lock. Reads magnetic north."

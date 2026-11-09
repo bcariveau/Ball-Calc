@@ -71,7 +71,7 @@ function teCenter(z) {   // view center (sheet in), kept inside the sheet
   if (z <= 1) return { x: 0, y: 0 }; const st = teStr(), c = TE.zc || (st && st.aim) || { x: 0, y: 0 }, lim = TE.span / 2 - TE.span / z / 2;
   return { x: Math.max(-lim, Math.min(lim, c.x)), y: Math.max(-lim, Math.min(lim, c.y)) };
 }
-function teZoomTo(z) { z = Math.max(1, Math.min(8, z)); TE.zoom = z; TE.zc = z <= 1 ? null : teCenter(z); teDraw(); }   // ＋/－ keep the current center (the aim point when starting from ×1)
+function teZoomTo(z) { z = Math.max(1, Math.min(8, z)); TE.zoom = z; TE.zc = z <= 1 ? null : teCenter(z); teDraw(); }   // /－ keep the current center (the aim point when starting from ×1)
 function teRender() {
   if (!TE || !ED) return; const t = ED.tg, st = teStr(), g = teTgt(), n = strNo(t, st.id);
   $("tgEdT").textContent = `String ${n} · Target ${tgtLetter(t, g.id)}`;
@@ -81,8 +81,8 @@ function teRender() {
   $("tgMode").querySelectorAll("button").forEach(b => { const on = b.dataset.v === TE.mode; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
   const rd = readings(ED, st.id), pn = TE.pairNext && rd.findIndex(x => x.id === TE.pairNext) + 1;
   $("tgTip").textContent = TE.mode === "aim" ? `Tap the aim point for String ${n} (drag to adjust).`
-    : TE.mode === "meas" ? (st.holes.length ? "Measure from the aim point to the center of each hole." : "Tap holes first (or ＋ Add shot), then measure them.")
-    : !st.aim ? "Set the aim point first (⊕ Aim point)." : pn ? `Tap where shot ${pn} hit.` : "Tap each hole in the order fired · drag a hole to adjust · tap its center (or its row below) to select it.";
+    : TE.mode === "meas" ? (st.holes.length ? "Measure from the aim point to the center of each hole." : "Tap holes first (or <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add shot), then measure them.")
+    : !st.aim ? "Set the aim point first (<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M12 5v14'/><path d='M5 12h14'/></svg> Aim point)." : pn ? `Tap where shot ${pn} hit.` : "Tap each hole in the order fired · drag a hole to adjust · tap its center (or its row below) to select it.";
   teDraw(); teMeasPaint(); tePair(); teDialPaint(); teResults();
   const dia = bulletDiaIn(ED), note = $("tgHoleNote");
   if (note) note.textContent = dia ? `Holes are drawn at ${dia.toFixed(3)}" (the bullet diameter saved with this session) and get larger as you zoom in.`
@@ -94,43 +94,43 @@ function teMeasPaint() {
   $("tgMeasBody").hidden = false;
   if (!TE.m || TE.m.i >= st.holes.length) teMeasEnter(Math.min(TE.m ? TE.m.i : 0, st.holes.length - 1), true);
   const m = TE.m, u = teTgt().u;
-  $("tgMeasT").textContent = `Hole ${m.i + 1} of ${st.holes.length}${st.holes[m.i].m ? " · 📏 measured" : st.holes[m.i].ad ? " · not placed yet" : " · 👆 tapped"}`;
+  $("tgMeasT").innerHTML = `Hole ${m.i + 1} of ${st.holes.length}${st.holes[m.i].m ? " · <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z'/><path d='m14.5 12.5 2-2'/><path d='m11.5 9.5 2-2'/><path d='m8.5 6.5 2-2'/><path d='m17.5 15.5 2-2'/></svg> measured" : st.holes[m.i].ad ? " · not placed yet" : " · <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2'/><path d='M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2'/><path d='M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8'/><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/></svg> tapped"}`;
   $("tgMPf").textContent = m.fr && (m.fr.xs || m.fr.ys) ? (st.holes[m.i].m ? "Showing the saved measurement — type to replace it." : "Pre-filled from where you tapped — type to replace, or Next to keep it.") : "";
   [["tgMH", m.hd], ["tgMV", m.vd], ["tgMU", u]].forEach(([id, v]) => $(id).querySelectorAll("button").forEach(b => { const on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }));
   $("tgMX").textContent = `${m.xs || "0"} ${u}`; $("tgMY").textContent = `${m.ys || "0"} ${u}`;
   $("tgMX").classList.toggle("on", m.f === "x"); $("tgMY").classList.toggle("on", m.f === "y"); $("tgMX").classList.toggle("pf", !!(m.fr && m.fr.xs)); $("tgMY").classList.toggle("pf", !!(m.fr && m.fr.ys));
-  $("tgMNext").textContent = m.i < st.holes.length - 1 ? `Next · hole ${m.i + 2} ›` : "Next ›";
+  $("tgMNext").innerHTML = m.i < st.holes.length - 1 ? `Next · hole ${m.i + 2} <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg>` : "Next <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg>";
 }
 function teMeasEnter(i, quiet) {
-  // pre-fill with the measured offset, else the tapped one (so you only correct it); only never-tapped holes (＋ Add shot) start at 0
+  // pre-fill with the measured offset, else the tapped one (so you only correct it); only never-tapped holes ( Add shot) start at 0
   const st = teStr(), h = st.holes[i], u = teTgt().u, k = u === "cm" ? 2.54 : 1, o = h.m || (h.ad ? null : hoff(st, h));
   const f = v => v == null ? "" : String(+(Math.abs(v) * k).toFixed(2));
   TE.m = { i, f: "x", xs: o ? f(o.x) : "", ys: o ? f(o.y) : "", hd: o && o.x < 0 ? "L" : "R", vd: o && o.y < 0 ? "D" : "U", dirty: false, fr: { xs: !!o, ys: !!o } };   // fr: pre-filled, the first digit replaces it
   TE.sel = h.id; if (!quiet) teRender();
 }
 function teMeasCommit() {
-  const m = TE && TE.m, st = TE && teStr(); if (!m || !st || !st.holes[m.i] || !m.dirty || (m.xs === "" && m.ys === "")) return false;   // untouched pre-fill stays 👆 tapped
+  const m = TE && TE.m, st = TE && teStr(); if (!m || !st || !st.holes[m.i] || !m.dirty || (m.xs === "" && m.ys === "")) return false;   // untouched pre-fill stays  tapped
   const k = teTgt().u === "cm" ? 1 / 2.54 : 1, x = (parseFloat(m.xs) || 0) * k * (m.hd === "L" ? -1 : 1), y = (parseFloat(m.ys) || 0) * k * (m.vd === "D" ? -1 : 1), h = st.holes[m.i];
   if (h.m && Math.abs(h.m.x - x) < 1e-6 && Math.abs(h.m.y - y) < 1e-6) return false;
   teSnap(); h.m = { x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 }; delete h.ad; m.dirty = false; TE.span = null; return true;
 }
 function tgAfterEditQuiet() { set_edDirty(true); }
-function tePair() {   // one list: a row per hole (number, fps or "no reading", 📏/👆, ⋯), then readings with no hole (discarded double reads included)
+function tePair() {   // one list: a row per hole (number, fps or "no reading", /, ⋯), then readings with no hole (discarded double reads included)
   const st = teStr(), rd = readings(ED, st.id), rk = new Map(rd.map((x, k) => [x.id, k + 1])), used = new Set(), M = TE.menu;
   ED.tg.strings.forEach(q => q.holes.forEach(h => h.sh && used.add(h.sh)));
   const tags = x => [x.clean && "Clean", x.cold && "Cold bore", x.fl && "Flier", x.ie && "Input error"].filter(Boolean).join(" · "), E = escapeHtml, B2 = (m, t, cl, ex) => `<button type="button" class="${cl || ""}" data-m="${m}"${ex || ""}>${t}</button>`;
   let h = st.holes.map((ho, i) => { const x = ho.sh && ED.shots.find(q => q.id === ho.sh), op = M && M.k === "h" && M.id === ho.id, tg = x && tags(x);
-    let r = `<div class="lr${ho.id === TE.sel ? " on" : ""}${x ? "" : " np"}" data-h="${E(ho.id)}"><button type="button" class="lrM" aria-pressed="${ho.id === TE.sel}" aria-label="Hole ${i + 1}"><span class="hn">${i + 1}</span><span class="rv">${x ? `${fpsT(x.v)} fps` : ho.nr ? "no reading" : "unpaired"}</span><span class="rk">${x ? `reading ${rk.get(x.id) || "?"}${tg ? " · " + tg : ""}` : ho.nr ? "" : "tap ⋯ to pair"}</span><i title="${ho.m ? "measured" : "tapped"}">${ho.m ? "📏" : "👆"}</i></button><button type="button" class="lrX" aria-label="Hole ${i + 1} options" aria-expanded="${!!op}">⋯</button></div>`;
+    let r = `<div class="lr${ho.id === TE.sel ? " on" : ""}${x ? "" : " np"}" data-h="${E(ho.id)}"><button type="button" class="lrM" aria-pressed="${ho.id === TE.sel}" aria-label="Hole ${i + 1}"><span class="hn">${i + 1}</span><span class="rv">${x ? `${fpsT(x.v)} fps` : ho.nr ? "no reading" : "unpaired"}</span><span class="rk">${x ? `reading ${rk.get(x.id) || "?"}${tg ? " · " + tg : ""}` : ho.nr ? "" : "tap ⋯ to pair"}</span><i title="${ho.m ? "measured" : "tapped"}">${ho.m ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z'/><path d='m14.5 12.5 2-2'/><path d='m11.5 9.5 2-2'/><path d='m8.5 6.5 2-2'/><path d='m17.5 15.5 2-2'/></svg>" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2'/><path d='M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2'/><path d='M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8'/><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/></svg>"}</i></button><button type="button" class="lrX" aria-label="Hole ${i + 1} options" aria-expanded="${!!op}">⋯</button></div>`;
     if (op) r += `<div class="lmenu" role="menu" aria-label="Hole ${i + 1}">` + (M.step === "pair"
-      ? `<div class="lmT">Pair hole ${i + 1} to a reading:</div>` + (rd.filter(q => !q.x).map(q => { const oh = st.holes.findIndex(z => z.sh === q.id); return B2("pk", `Reading ${rk.get(q.id)} · ${fpsT(q.v)} fps${oh >= 0 ? ` <small>(hole ${oh + 1})</small>` : ""}`, q.id === ho.sh ? "on" : "", ` data-s="${E(q.id)}"`); }).join("") || `<div class="hint">No kept readings in this string.</div>`) + B2("back", "‹ Back", "ghost")
-      : B2("pair", "↔ Re-pair to reading") + B2("nr", "No reading") + B2("meas", "📏 Measure") + B2("del", "Remove hole", "danger")) + `</div>`;
+      ? `<div class="lmT">Pair hole ${i + 1} to a reading:</div>` + (rd.filter(q => !q.x).map(q => { const oh = st.holes.findIndex(z => z.sh === q.id); return B2("pk", `Reading ${rk.get(q.id)} · ${fpsT(q.v)} fps${oh >= 0 ? ` <small>(hole ${oh + 1})</small>` : ""}`, q.id === ho.sh ? "on" : "", ` data-s="${E(q.id)}"`); }).join("") || `<div class="hint">No kept readings in this string.</div>`) + B2("back", "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m15 18-6-6 6-6'/></svg> Back", "ghost")
+      : B2("pair", "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Re-pair to reading") + B2("nr", "No reading") + B2("meas", "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z'/><path d='m14.5 12.5 2-2'/><path d='m11.5 9.5 2-2'/><path d='m8.5 6.5 2-2'/><path d='m17.5 15.5 2-2'/></svg> Measure") + B2("del", "Remove hole", "danger")) + `</div>`;
     return r; }).join("");
   const un = rd.filter(x => !used.has(x.id));
   if (un.length) h += `<div class="lsub">Readings without a hole</div>` + un.map(x => { const op = M && M.k === "r" && M.id === x.id, tg = tags(x);
     let r = `<div class="lr rdu${x.x ? " dis" : ""}" data-s="${E(x.id)}"><button type="button" class="lrM" aria-label="Reading ${rk.get(x.id)} options"><span class="hn">–</span><span class="rv">${fpsT(x.v)} fps</span><span class="rk">reading ${rk.get(x.id)}${x.x ? " · removed" : " · no hole"}${tg ? " · " + tg : ""}</span><i></i></button><button type="button" class="lrX" aria-label="Reading ${rk.get(x.id)} options" aria-expanded="${!!op}">⋯</button></div>`;
     if (op) r += `<div class="lmenu" role="menu" aria-label="Reading ${rk.get(x.id)}">` + (M.step === "pair"
-      ? `<div class="lmT">Pair reading ${rk.get(x.id)} (${fpsT(x.v)} fps) to hole:</div>` + (st.holes.map((z, j) => { const zx = z.sh && ED.shots.find(q => q.id === z.sh); return B2("ph", `Hole ${j + 1} · ${zx ? `${fpsT(zx.v)} fps` : z.nr ? "no reading" : "unpaired"}`, "", ` data-h="${E(z.id)}"`); }).join("") || `<div class="hint">No holes yet — tap the target first.</div>`) + B2("back", "‹ Back", "ghost")
-      : (x.x ? "" : B2("pair", "↔ Pair to hole")) + B2("x", x.x ? "↺ Restore" : "Remove (keeps the shot, out of stats)", x.x ? "" : "danger")) + `</div>`;
+      ? `<div class="lmT">Pair reading ${rk.get(x.id)} (${fpsT(x.v)} fps) to hole:</div>` + (st.holes.map((z, j) => { const zx = z.sh && ED.shots.find(q => q.id === z.sh); return B2("ph", `Hole ${j + 1} · ${zx ? `${fpsT(zx.v)} fps` : z.nr ? "no reading" : "unpaired"}`, "", ` data-h="${E(z.id)}"`); }).join("") || `<div class="hint">No holes yet — tap the target first.</div>`) + B2("back", "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m15 18-6-6 6-6'/></svg> Back", "ghost")
+      : (x.x ? "" : B2("pair", "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Pair to hole")) + B2("x", x.x ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 7v6h6'/><path d='M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13'/></svg> Restore" : "Remove (keeps the shot, out of stats)", x.x ? "" : "danger")) + `</div>`;
     return r; }).join("");
   $("tgList").innerHTML = h || `<div class="hint">No holes or readings yet.</div>`;
 }
@@ -181,7 +181,7 @@ function teResults() {
   if (!st.aim && st.holes.some(x => !x.m)) h += `<div class="hint bad">No aim point set — tapped offsets are from the sheet center.</div>`;
   // a warning needs 5+ paired shots with r ≥ 0.7; fewer shots (or a weaker r) give at most a muted "possible trend" note
   h += `<div class="hint" id="tgVV">${vv.r == null ? `Velocity vs vertical needs 3+ paired shots (${vv.n} now).`
-    : vv.r >= 0.7 && vv.n >= 5 ? `<b class="w">⚠ Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.`
+    : vv.r >= 0.7 && vv.n >= 5 ? `<b class="w"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Fast shots printed high, slow shots low</b> (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — vertical is tracking velocity; tighten SD before chasing the rest.`
     : vv.r >= 0.5 ? `<span class="pt">Possible velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — needs 5+ paired shots with r ≥ 0.7 to call it.</span>`
     : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
   h += `<div class="hint" id="tgHist">…</div>`;
@@ -193,7 +193,7 @@ function teResults() {
     const d = st.dial, recordedId = st.asFired && st.asFired.loadId, canTrue = !!(recordedId || same);
     const up = d ? dialComeUp(d, gs.cy, yd) : null;
     h += `<label class="tgl" for="tgAtDist"><span>Fired at ${fmt(g.dist, 0)} ${g.du} with ${d ? `${dialTxt(d, ts)} dialed` : "the app's dope dialed"}<small>${d ? `The dial is ${d.u}. Switching the display unit does not change that angle.` : "No dial saved with this string — Truing uses today's prediction, weather and angle."}</small></span><input type="checkbox" id="tgAtDist" role="switch"${TE.atDist ? " checked" : ""}></label>`;
-    h += `<button type="button" id="tgTrue"${TE.atDist && canTrue ? "" : " disabled"}>🎯 Send vertical to Truing${up ? ` (${up.mil.toFixed(2)} mil · ${up.moa.toFixed(2)} MOA)` : ""}</button>`;
+    h += `<button type="button" id="tgTrue"${TE.atDist && canTrue ? "" : " disabled"}><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Send vertical to Truing${up ? ` (${up.mil.toFixed(2)} mil · ${up.moa.toFixed(2)} MOA)` : ""}</button>`;
     h += `<div class="hint">${d ? `Sends the saved ${d.u} dial minus the group offset. The other unit is the same angle. ` : `<b>No dial saved for this string</b> — falls back to today's prediction, weather and angle. `}${recordedId && curLoad()?.id !== recordedId ? "Save updates the recorded load, not the load on screen. " : ""}${!recordedId && !same ? "<b>This string has no recorded load, and the load on screen is a different one. Nothing is sent.</b> " : ""}Only the vertical offset is sent.</div>`;
   }
   box.innerHTML = h;
@@ -294,7 +294,7 @@ export function init() {
     else if (b.dataset.k != null) { const k = b.dataset.k, f = m.f === "x" ? "xs" : "ys"; let v = m[f];
       if (k === "back") v = v.slice(0, -1); else if (k === ".") { if (!v.includes(".")) v = (v || "0") + "."; } else if (m.fr && m.fr[f]) v = k; else if (v.length < 6) v = v === "0" ? k : v + k;
       if (k === ".") { if (m.fr && m.fr[f]) v = "0."; } if (m.fr) m.fr[f] = false; m[f] = v; m.dirty = true; }
-    else if (b.id === "tgMNext") { teMeasCommit(); if (m.i < st.holes.length - 1) { teMeasEnter(m.i + 1); return; } toast(`All ${st.holes.length} holes done — tap ✓ Done`); }
+    else if (b.id === "tgMNext") { teMeasCommit(); if (m.i < st.holes.length - 1) { teMeasEnter(m.i + 1); return; } toast(`All ${st.holes.length} holes done — tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg> Done`); }
     else if (b.id === "tgMPrev") { teMeasCommit(); if (m.i > 0) { teMeasEnter(m.i - 1); return; } }
     else if (b.id === "tgMDone") { teMeasCommit(); TE.mode = "hole"; TE.m = null; teRender(); tgAfterEditQuiet(); return; }
     else return;

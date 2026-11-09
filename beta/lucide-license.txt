@@ -1,4 +1,4 @@
-Tab icons crosshair, wrench, and clipboard-list are inline copies from lucide-static 0.544.0.
+Tab icons and the other inline icons are copies of Lucide paths (lucide-static 0.544.0 and the Feather set Lucide ships). The logo artwork is not a Lucide icon.
 
 ISC License
 

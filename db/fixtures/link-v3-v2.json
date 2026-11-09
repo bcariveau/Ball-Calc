@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "setup": "done",
+  "lastRifleId": "r1",
+  "rifles": [
+    {
+      "id": "r1",
+      "name": "Rifle A",
+      "gunKind": "rifle",
+      "sightHeight": "1.75",
+      "zero": "100",
+      "twist": "8",
+      "barrel": "24",
+      "turret": "0.1mil",
+      "opticId": "o1",
+      "lastOpticId": "o1",
+      "lastLoadId": "l1",
+      "loads": [
+        {
+          "id": "l1",
+          "name": "Load A",
+          "bulletName": "140 ELD-M",
+          "bc": "0.326",
+          "drag": "G7",
+          "weight": "140",
+          "diameter": "0.264",
+          "length": "1.390",
+          "mv": "2737",
+          "mvSource": "measured",
+          "ldKind": "hand"
+        },
+        {
+          "id": "l2",
+          "name": "Load A2",
+          "bulletName": "130 ELD-M",
+          "bc": "0.290",
+          "drag": "G7",
+          "weight": "130",
+          "diameter": "0.264",
+          "length": "1.320",
+          "mv": "2810",
+          "mvSource": "factory",
+          "ldKind": "hand"
+        }
+      ]
+    },
+    {
+      "id": "r2",
+      "name": "Rifle B",
+      "gunKind": "rifle",
+      "sightHeight": "1.50",
+      "zero": "100",
+      "twist": "10",
+      "barrel": "20",
+      "turret": "",
+      "lastLoadId": "l3",
+      "loads": [
+        {
+          "id": "l3",
+          "name": "Load B",
+          "bulletName": "150 FMJ",
+          "bc": "0.210",
+          "drag": "G1",
+          "weight": "150",
+          "diameter": "0.308",
+          "length": "1.100",
+          "mv": "2800",
+          "mvSource": "factory",
+          "ldKind": "hand"
+        }
+      ]
+    }
+  ],
+  "optics": [
+    { "id": "o1", "name": "Razor", "opTurret": "0.1mil", "opReticle": "mil", "opFP": "FFP", "opTrack": "1", "opSH": "1.75" }
+  ],
+  "ranges": []
+}

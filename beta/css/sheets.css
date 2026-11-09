@@ -23,7 +23,7 @@
 #mvLoads .rcItem { position: relative; padding-right: 34px; }
 #mvLoads .rcItem .r { grid-column: 1 / -1; color: var(--accent); font-size: 0.75rem; font-weight: 500; }
 #mvLoads .rcItem.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--hover); }
-#mvLoads .rcItem.on::after { content: "✓"; position: absolute; right: 12px; top: 10px; color: var(--accent); font-weight: 800; }
+#mvLoads .rcItem.on::after { content: ""; position: absolute; right: 12px; top: 14px; width: 16px; height: 16px; background: currentColor; color: var(--accent); -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat; mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat; }
 #mvLoads .rcItem.cur .tag { background: none; }
 .mvChk { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0 4px; font-size: 0.84rem; color: var(--text); cursor: pointer; }
 .mvChk input { width: 22px; height: 22px; flex: 0 0 22px; margin: 0; accent-color: var(--accent); padding: 0; }
@@ -49,7 +49,7 @@
 #slList.selecting .slItem::before { content: ""; position: absolute; left: 11px; top: 50%; width: 18px; height: 18px; margin-top: -11px; border: 2px solid var(--muted); border-radius: 50%; }
 #slList.selecting .slItem.sel { border-color: var(--accent); background: var(--hover); }
 #slList.selecting .slItem.sel::before { background: var(--accent); border-color: var(--accent); }
-#slList.selecting .slItem.sel::after { content: "✓"; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--on-accent); font-size: 0.78rem; font-weight: 800; }
+#slList.selecting .slItem.sel::after { content: ""; position: absolute; left: 14px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); background: currentColor; color: var(--on-accent); -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat; mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M20 6 9 17l-5-5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat; }
 #slSelBar { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); z-index: 12; display: flex; gap: 6px; align-items: center; background: var(--card); border: 1px solid var(--accent); border-radius: 12px; padding: 8px; margin-top: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
 #slSelBar .n { flex: 1 1 auto; font-size: 0.84rem; font-weight: 700; color: var(--text); padding-left: 4px; }
 #slSelBar button { flex: 0 0 auto; }

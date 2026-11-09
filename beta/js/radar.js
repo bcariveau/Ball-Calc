@@ -3,7 +3,7 @@
 // init*() and is called by main.js in the original order.
 
 import { toast } from "./components.js";
-import { $ } from "./core.js";
+import { $, escapeHtml } from "./core.js";
 import { curLoad } from "./gear.js";
 import { ED, LOG, addShotsToLiveSession, closeEditor } from "./log.js";
 import { SH, shStatus } from "./shooting.js";
@@ -71,28 +71,28 @@ function radarPaint() {
   const st = $("radarStatus"), c = $("radarConnect"), rc = $("radarReconnect"), dc = $("radarDisconnect");
   if (!hasBT) {
     c.disabled = true; c.hidden = true; rc.hidden = true; dc.hidden = true; $("radarMore").hidden = true;
-    const m = !window.isSecureContext ? "📡 Radar needs the https site — use ⇧ Athlon file to import shots." : "📡 Radar needs Chrome on Android — use ⇧ Athlon file to import shots.";
-    st.textContent = m; st.className = "summary bad"; $("radarNo").textContent = m; $("radarNo").hidden = false; return;
+    const m = !window.isSecureContext ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Radar needs the https site — use <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' x2='12' y1='3' y2='15'/></svg> Athlon file to import shots." : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Radar needs Chrome on Android — use <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' x2='12' y1='3' y2='15'/></svg> Athlon file to import shots.";
+    st.innerHTML = m; st.className = "summary bad"; $("radarNo").innerHTML = m; $("radarNo").hidden = false; return;
   }
   $("radarMore").hidden = RD.status === "idle" && !RD.opened;
-  const name = RD.dev?.name || "radar", bt = RD.battery != null ? ` · 🔋 ${RD.battery}%` : "", fw = RD.fw ? ` · fw ${RD.fw}` : "";
+  const name = escapeHtml(RD.dev?.name || "radar"), bt = RD.battery != null ? ` · <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='16' height='10' x='2' y='7' rx='2' ry='2'/><line x1='22' x2='22' y1='11' y2='13'/></svg> ${RD.battery}%` : "", fw = RD.fw ? ` · fw ${escapeHtml(RD.fw)}` : "";
   const last = RD.last ? ` · last ${fpsT(RD.last.fps)} fps (#${RD.last.n})` : "";
   const wait = RD.pending.length ? ` · ${RD.pending.length} shot${RD.pending.length > 1 ? "s" : ""} waiting: pick a load` : "";
   const txt = {
-    idle: "Not connected.", connecting: `Connecting to ${name}…`, connected: `🟢 Connected: ${name}${bt}${fw}${last}${wait}`,
-    lost: `🟠 ${name} disconnected${RD.retries ? ", retrying…" : "."}${last}${wait}`, off: `Disconnected from ${name}.${last}${wait}`
+    idle: "Not connected.", connecting: `Connecting to ${name}…`, connected: `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/></svg> Connected: ${name}${bt}${fw}${last}${wait}`,
+    lost: `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/></svg> ${name} disconnected${RD.retries ? ", retrying…" : "."}${last}${wait}`, off: `Disconnected from ${name}.${last}${wait}`
   }[RD.status] || "";
-  st.textContent = txt; st.className = "summary" + (RD.status === "connected" ? " ok" : RD.status === "lost" ? " bad" : "");
+  st.innerHTML = txt; st.className = "summary" + (RD.status === "connected" ? " ok" : RD.status === "lost" ? " bad" : "");
   c.hidden = RD.status === "connected" || RD.status === "connecting"; c.disabled = false;
-  rc.hidden = !(RD.dev && (RD.status === "lost" || RD.status === "off")); rc.textContent = `↻ Reconnect${RD.dev?.name ? " " + RD.dev.name : ""}`;
+  rc.hidden = !(RD.dev && (RD.status === "lost" || RD.status === "off")); rc.innerHTML = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> Reconnect${RD.dev?.name ? " " + escapeHtml(RD.dev.name) : ""}`;
   dc.hidden = !(RD.status === "connected" || RD.status === "connecting" || (RD.status === "lost" && RD.retries));
-  const ed = $("slEdRadar"); if (ed) ed.textContent = RD.status === "idle" ? "" : "📡 " + txt.replace(/^[🟢🟠] /u, "");
+  const ed = $("slEdRadar"); if (ed) ed.innerHTML = RD.status === "idle" ? "" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> " + String(txt).replace(/^(?:<svg[\s\S]*?<\/svg>\s*)+/, "");
 }
 function radarRawPush(dir, bytes, note) {
   RD.raw.unshift({ t: new Date(), dir, hex: vprHex(bytes), note: note || "" });
   if (RD.raw.length > 20) RD.raw.length = 20;
   $("radarRawN").textContent = RD.raw.length;
-  $("radarRawPre").textContent = RD.raw.map(r => `${r.t.toLocaleTimeString()} ${r.dir} ${r.hex}${r.note ? "  ← " + r.note : ""}`).join("\n");
+  $("radarRawPre").textContent = RD.raw.map(r => `${r.t.toLocaleTimeString()} ${r.dir} ${r.hex}${r.note ? "  — " + r.note : ""}`).join("\n");
 }
 async function radarFlush() {
   if (RD.flushing || !RD.pending.length || !curLoad()) return;
@@ -111,17 +111,17 @@ async function radarFlush() {
 }
 function radarFrame(f) {
   const p = vprParse(f);
-  if (!p.ok) { radarRawPush("◇", f, "unparsed"); return; }
-  if (!p.shot) { radarRawPush("·", f, `type 0x${(p.type ?? 0).toString(16).padStart(2, "0")}${p.timeStr ? " " + p.timeStr : ""}`); return; }
+  if (!p.ok) { radarRawPush("raw", f, "unparsed"); return; }
+  if (!p.shot) { radarRawPush("pkt", f, `type 0x${(p.type ?? 0).toString(16).padStart(2, "0")}${p.timeStr ? " " + p.timeStr : ""}`); return; }
   const s = p.shot, dup = RD.seen.includes(s.key);
-  radarRawPush(dup ? "=" : "★", f, `shot #${s.n} ${s.fps.toFixed(1)} fps${p.timeStr ? " " + p.timeStr : ""}${dup ? " (duplicate, ignored)" : ""} · hi ${s.hiFps} lo ${s.loFps} avg ${s.avgFps} es ${s.esFps}`);
+  radarRawPush(dup ? "=" : "shot", f, `shot #${s.n} ${s.fps.toFixed(1)} fps${p.timeStr ? " " + p.timeStr : ""}${dup ? " (duplicate, ignored)" : ""} · hi ${s.hiFps} lo ${s.loFps} avg ${s.avgFps} es ${s.esFps}`);
   if (dup) return;
   RD.seen.push(s.key); if (RD.seen.length > 300) RD.seen.splice(0, RD.seen.length - 300);
   try { localStorage.setItem(K_RSEEN, JSON.stringify(RD.seen)); } catch {}
   RD.last = { n: s.n, fps: s.fps };
   RD.pending.push({ n: s.n, fps: s.fps, timeStr: p.timeStr });
   if (!curLoad()) toast(`Radar shot ${fpsT(s.fps)} fps held: pick a load to log it`);
-  else if (!SH.on) toast(`📡 Shot #${s.n}: ${fpsT(s.fps)} fps`);
+  else if (!SH.on) toast(`<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M19.07 4.93A10 10 0 0 0 6.99 3.34'/><path d='M4 6h.01'/><path d='M2.29 9.62A10 10 0 1 0 21.31 8.35'/><path d='M16.24 7.76A6 6 0 1 0 8.23 16.67'/><path d='M12 18h.01'/><path d='M17.99 11.66A6 6 0 0 1 15.77 16.67'/><circle cx='12' cy='12' r='2'/><path d='m13.41 10.59 5.66-5.66'/></svg> Shot #${s.n}: ${fpsT(s.fps)} fps`);
   if (navigator.vibrate) try { navigator.vibrate(40); } catch {}
   radarFlush();
 }
@@ -131,7 +131,7 @@ function radarBytes(chunk) {
   RD.bufT = now;
   const { frames, rest } = vprReassemble(RD.buf, chunk);
   RD.buf = rest;
-  if (!frames.length && !rest.length) radarRawPush("◇", chunk, "no frame header");
+  if (!frames.length && !rest.length) radarRawPush("raw", chunk, "no frame header");
   frames.forEach(radarFrame);
   radarPaint();
 }
@@ -222,7 +222,7 @@ export function init() {
     try { RD.dev && RD.dev.gatt.connected ? RD.dev.gatt.disconnect() : onRadarGone(); } catch { onRadarGone(); }
   };
   $("radarCopy").onclick = async () => {
-    const txt = RD.raw.map(r => `${r.t.toISOString()} ${r.dir} ${r.hex}${r.note ? "  ← " + r.note : ""}`).join("\n") || "(no packets yet)";
+    const txt = RD.raw.map(r => `${r.t.toISOString()} ${r.dir} ${r.hex}${r.note ? "  — " + r.note : ""}`).join("\n") || "(no packets yet)";
     try { await navigator.clipboard.writeText(txt); toast("Packets copied"); }
     catch { const r = document.createRange(); r.selectNodeContents($("radarRawPre")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Select-all done: long-press to copy"); }
   };

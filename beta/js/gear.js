@@ -6,7 +6,7 @@ import { schedule } from "./app.js";
 import { bandsOn, renderBulletInfo } from "./bulletdb.js";
 import { mvAdjOn, mvAdjust, powderT, zeroCond } from "./calc.js";
 import { ctxPaint, toast } from "./components.js";
-import { $, compass, fmt, n1, n3, num, setVal, val } from "./core.js";
+import { $, compass, escapeHtml, fmt, n1, n3, num, setVal, val } from "./core.js";
 import { LOG, cleanSession, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
 import { applyOptic, curOptic, effSH, paintOptic } from "./optics.js";
 import { openCopy, paintRecipeBtns } from "./recipes.js";
@@ -21,7 +21,7 @@ const curRifle = () => P.rifles.find(r => r.id === P.lastRifleId) || null;
 const curLoad = () => { const r = curRifle(); return r ? (r.loads.find(l => l.id === r.lastLoadId) || null) : null; };
 const curRange = () => P.ranges.find(r => r.id === P.lastRangeId) || null;
 
-const ADD_V = "__add";   // the "＋ Add …" row at the bottom of the gun / load pickers
+const ADD_V = "__add";   // the " Add …" row at the bottom of the gun / load pickers
 function fillOptions(sel, items, cur, emptyText, addText) {
   sel.innerHTML = "";
   if (emptyText !== undefined) { const o = new Option(emptyText, ""); sel.add(o); }
@@ -33,8 +33,8 @@ function renderPickers() {
   if (!curRifle() && P.rifles.length) P.lastRifleId = P.rifles[0].id;
   const r = curRifle();
   if (r && !r.loads.find(l => l.id === r.lastLoadId) && r.loads.length) r.lastLoadId = r.loads[0].id;
-  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns yet", "＋ Add rifle…");
-  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads yet" : "Add a gun first"), r ? "＋ Add load…" : "");
+  fillOptions($("rifleSel"), P.rifles, r, P.rifles.length ? undefined : "No guns yet", "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add rifle…");
+  fillOptions($("loadSel"), r ? r.loads : [], curLoad(), (r && r.loads.length) ? undefined : (r ? "No loads yet" : "Add a gun first"), r ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add load…" : "");
   fillOptions($("rangeSel"), P.ranges, curRange(), "Current location");
   updateDirty();
 }
@@ -70,7 +70,7 @@ function autosave() {
   if (!done.length) return false;
   savePresets(); done.forEach(flashSaved); return true;
 }
-function flashSaved(k) { const el = $(k + "Saved"); if (!el) return; el.textContent = "✓ Saved"; el.classList.add("show"); clearTimeout(savedT[k]); savedT[k] = setTimeout(() => el.classList.remove("show"), 1500); }
+function flashSaved(k) { const el = $(k + "Saved"); if (!el) return; el.innerHTML = "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg> Saved"; el.classList.add("show"); clearTimeout(savedT[k]); savedT[k] = setTimeout(() => el.classList.remove("show"), 1500); }
 function updateDirty() {
   const r = curRifle(), l = curLoad(), g = curRange();
   autosave();
@@ -89,7 +89,7 @@ function updateDirty() {
   if (val("barrel")) $("rifleSum").textContent += ` · ${val("barrel")}" barrel`;
   $("rifleSum").textContent = ($("gunKind").value === "handgun" ? "Handgun · " : "Rifle · ") + $("rifleSum").textContent;
   const rt = recipeText(pick(LOAD_F));
-  $("loadRecipe").textContent = rt ? (val("ldKind") === "factory" ? "📦 " : "🧪 ") + rt : "";
+  $("loadRecipe").innerHTML = rt ? (val("ldKind") === "factory" ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z'/><path d='M12 22V12'/><path d='m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7'/></svg> " : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg> ") + escapeHtml(rt) : "";
   const ls = ldShort(pick(LOAD_F)); $("recipeSum").textContent = ls; $("recipeSum").hidden = !ls;
   paintLoadMore(ls); paintSample();
   const b = num("bearing");
@@ -99,7 +99,7 @@ function updateDirty() {
     (g && val("rangeLat") && val("rangeLon") ? ` · ${(+val("rangeLat")).toFixed(3)}, ${(+val("rangeLon")).toFixed(3)}` : "");
   paintGearExtra();
 }
-// basics-first load form: bullet, BC + drag model and MV stay on screen; the rest lives under More ▾, whose summary lists what is set
+// basics-first load form: bullet, BC + drag model and MV stay on screen; the rest lives under More , whose summary lists what is set
 function paintLoadMore(ls) {
   const tw = num("twist"), parts = [val("weight") ? `${val("weight")} gr` : "", val("diameter") ? `${val("diameter")}"` : "",
     val("length") ? `L ${val("length")}"` : (tw ? "no length (spin drift off)" : ""), val("tipLen") ? `tip ${val("tipLen")}"` : "",
@@ -170,7 +170,7 @@ function paintGearExtra() {
   paintOptic();
   const zc = zeroCond();
   $("zeroSum").textContent = zc ? [num("zTemp") != null ? `${val("zTemp")}°F` : "", num("zHum") != null ? `${val("zHum")}%` : "", num("zAlt") != null ? `${val("zAlt")} ft` : "", num("zPress") != null ? `${val("zPress")} inHg` : ""].filter(Boolean).join(" · ") : "same as today";
-  const tn = val("trued"); $("truedNote").hidden = !tn; $("truedNote").textContent = tn ? "🎯 " + tn : "";
+  const tn = val("trued"); $("truedNote").hidden = !tn; $("truedNote").innerHTML = tn ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> " + escapeHtml(tn) : "";
 }
 
 export function init1() {
@@ -226,7 +226,7 @@ export function init1() {
       setVal("rangeLat", c.lat.toFixed(5)); setVal("rangeLon", c.lon.toFixed(5));
       if (navigator.onLine !== false) try { const e = await fetchJSON(`https://api.open-meteo.com/v1/elevation?latitude=${c.lat}&longitude=${c.lon}`);
         if (e.elevation?.[0] != null) { setVal("altitude", Math.round(e.elevation[0] * 3.28084)); manual.add("altitude"); } } catch {}
-      updateDirty(); toast((curRange() ? `Location saved to “${curRange().name}”` : "Location filled — use ⋯ › New range to save it as a range") + (navigator.onLine === false ? " (offline: enter elevation by hand)" : ""));
+      updateDirty(); toast((curRange() ? `Location saved to “${curRange().name}”` : "Location filled — use ⋯ <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> New range to save it as a range") + (navigator.onLine === false ? " (offline: enter elevation by hand)" : ""));
     } catch (e) { toast("Couldn't get location: " + e.message); }
   };
 

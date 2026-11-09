@@ -274,6 +274,37 @@ function assignShots(session, shotIds, asFired, opts = {}) {
   const sourceIds = [...new Set((undo.shots || []).filter((s) => idset.has(s.id)).map((s) => s.str).filter(Boolean))];
   return { session: { ...clone(session), shots, tg: unpairMoved({ ...tg, cur: dest.id }, idset) }, undo, movedIds: [...idset], destId: dest.id, sourceIds };
 }
+function placeOnString(source, destSession, shotIds, destStringId, ctx = {}) {
+  const ids = [...new Set(shotIds || [])];
+  const idset = new Set(ids);
+  if (!source || !destSession || !idset.size) return { error: "Choose at least one shot. Nothing was moved." };
+  const destStr = destSession.tg && destSession.tg.strings.find((st) => st.id === destStringId);
+  if (!destStr) return { error: "That string is no longer there. Nothing was moved." };
+  const found = (source.shots || []).filter((s) => idset.has(s.id));
+  if (found.length !== idset.size) return { error: "A selected shot is no longer in this session. Nothing was moved." };
+  if (source.id === destSession.id && found.every((s) => s.str === destStringId)) return { error: "Those shots are already on that string. Nothing was moved." };
+  if (source.id !== destSession.id && (destSession.shots || []).some((s) => idset.has(s.id))) return { error: "The other session already has one of these shots. Nothing was moved." };
+  const undoSource = clone(source);
+  const undoDest = source.id === destSession.id ? null : clone(destSession);
+  const moved = found.map((s) => ({ ...s, str: destStringId }));
+  let sourceNext, destNext;
+  if (source.id === destSession.id) {
+    const shots = source.shots.map((s) => idset.has(s.id) ? { ...s, str: destStringId } : { ...s });
+    sourceNext = { ...clone(source), shots, tg: unpairMoved(source.tg, idset) };
+    destNext = null;
+  } else {
+    sourceNext = { ...clone(source), shots: source.shots.filter((s) => !idset.has(s.id)), tg: unpairMoved(source.tg, idset) };
+    destNext = { ...clone(destSession), shots: [...destSession.shots, ...moved], tg: unpairMoved(destSession.tg, idset) };
+  }
+  const srcStr = source.tg && source.tg.strings.find((st) => st.id === found[0].str);
+  const differs = !sameFired(srcStr && srcStr.asFired, destStr.asFired);
+  const fb = destStr.asFired ? calcFallback(destStr.asFired, ctx.rifle || null, ctx.optic || null) : null;
+  const warning = !destStr.asFired ? "This string has no saved firearm or load. Nothing was invented, and its snapshot was not changed." : (fb && fb.warning);
+  return {
+    same: source.id === destSession.id, source: sourceNext, dest: destNext, undoSource, undoDest,
+    movedIds: ids, destStringId, destAsFired: destStr.asFired || null, differs, warning,
+  };
+}
 function moveShots(session, shotIds, destStringId) {
   const ids = new Set(shotIds);
   const undo = clone(session);
@@ -307,5 +338,5 @@ function stringStats(session, stringId) {
 
 export {
   clone, opticSnap, cleanAsFired, loadsOf, specFromSaved, recordedDial, clicksFor, histLoad, angConvert, dialComeUp, currentTurretKnown, histSource, calcFallback, asFiredFrom, opticOn, recallFirearm,
-  migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, assignShots, stringStats,
+  migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, assignShots, placeOnString, stringStats,
 };

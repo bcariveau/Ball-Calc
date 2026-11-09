@@ -8,7 +8,7 @@ import { shBtnPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, num, val } from "./core.js";
 import { CLOCK, lr, ud } from "./dope.js";
 import { applyLoad, applyRifle, curLoad, curRifle } from "./gear.js";
-import { calcFallback, histLoad, opticOn, recallFirearm } from "./link-v3.js";
+import { calcFallback, histLoad, opticOn, recallFirearm, scopeSentence } from "./link-v3.js";
 import { ED, LOG, addVelocities, closeEditor, commitEditor, curKeyIds, edDirty, openEditor, paintStrRec, renderEditor, set_edDirty, shotStats } from "./log.js";
 import { RD, hasBT } from "./radar.js";
 import { banHide, wakeSync } from "./shot-banner.js";
@@ -119,7 +119,8 @@ function shPaint() {
   const gunFired = P.rifles.find(x => x.id === (cur.asFired?.rifleId || ED.rifleId));
   const loadFired = gunFired && (gunFired.loads || []).find(x => x.id === (cur.asFired?.loadId || ED.loadId));
   const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired), gunFired && curRifle() === gunFired ? turretSpec() : null);
-  $("shFor").textContent = [gunFired?.name, loadFired?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
+  const scope = fb && fb.source !== "as-fired" ? scopeSentence(gunFired && gunFired.name, fb.source, fb.spec && fb.spec.lbl) : "";
+  $("shFor").textContent = [gunFired?.name, loadFired?.name, `${yd} yd`, scope].filter(Boolean).join(" · ");
   const gun = $("shGun");
   if (gun && gun.dataset.lock !== "1") {
     gun.innerHTML = P.rifles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");
@@ -168,8 +169,8 @@ function formLoadBag() {
 function histSolve(st, ts) {
   const hl = histLoad(st?.asFired?.recipe, formLoadBag());
   if (hl.source === "missing") return { blocked: hl.warning };
-  if (ts && !(ts.v > 0)) return { blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
-  const warn = [ts && ts.warning, hl.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean).join(" ");
+  if (ts && !(ts.v > 0)) return { blocked: "Enter a turret click value before calculating." };
+  const warn = [hl.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean).join(" ");
   return { load: hl.used, source: hl.source, warn, sh: ts && ts.sh, allowBlank: true };
 }
 // vertical spread at the target from the slowest vs fastest kept shot, same zero + conditions + angle as the Dope tab
@@ -199,8 +200,8 @@ async function shDopeAt(yd, st) {   // dope strip: recorded load and turret when
   const ts = st ? tsFor(st.asFired?.rifleId || ED?.rifleId, st) : turretSpec();
   const solved = st ? histSolve(st, ts) : null;
   if (solved && solved.blocked) return { yd, blocked: solved.blocked };
-  if (!(ts.v > 0)) return { yd, blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
-  const o = { yd, warn: (solved && solved.warn) || ts.warning || "" };
+  if (!(ts.v > 0)) return { yd, blocked: "Enter a turret click value before calculating." };
+  const o = { yd, warn: (solved && solved.warn) || "" };
   if (st && st.dial) { const dv = dialView(st.dial, ts); o.elev = `${dv.txt}`; o.clk = dv.c != null ? `${Math.abs(dv.c)} clicks` : ""; o.src = st.dial.src === "app" ? "dialed" : "dialed (edited)"; }
   if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000)) return o;
   if (!solved && !tgSame()) return o;

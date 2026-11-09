@@ -3,7 +3,7 @@
 // init*() and is called by main.js in the original order.
 
 import { schedule } from "./app.js";
-import { toast } from "./components.js";
+import { setIconText, toast } from "./components.js";
 import { $, compass, norm360, num, setVal, val } from "./core.js";
 import { curRange, same, updateDirty } from "./gear.js";
 import { paintShHint } from "./optics.js";
@@ -50,7 +50,7 @@ function renderChips() {
     : b == null ? `Weather wind is from ${compass(wx.windFrom)} (${Math.round(wx.windFrom)}°). Enter the direction you're facing to convert it to your shot.`
     : `Weather wind from ${compass(wx.windFrom)} (${Math.round(wx.windFrom)}°) while facing ${compass(b)} → ${Math.round(norm360(wx.windFrom - b))}° relative.`;
 }
-function wxStatus(msg, bad) { const s = $("wxStatus"); s.textContent = msg; s.classList.toggle("bad", !!bad); }
+function wxStatus(msg, bad) { const s = $("wxStatus"); setIconText(s, msg); s.classList.toggle("bad", !!bad); }
 async function fetchJSON(url) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 10000);
   try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }

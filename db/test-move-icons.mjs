@@ -164,7 +164,7 @@ try {
   await pickExisting("sess1::st2");
   const note = await page.locator("#shotDestNote").innerText();
   ok(/Rifle B/.test(note) && /Load B/.test(note) && /not changed/.test(note), "the picker says the shot lands under the destination string");
-  ok(/Nothing was invented/.test(note), "a destination with no optic warns instead of inventing one");
+  ok(/Rifle B has no scope saved, and it has no turret click value/.test(note) && !/No as-fired optic/.test(note), "a destination with no optic names the missing scope and does not invent one");
   await page.locator("#shotDestSheet").scrollIntoViewIfNeeded();
   await page.screenshot({ path: ART + "/move-picker-360.png" });
   await page.screenshot({ path: ART + "/move-warning-360.png" });
@@ -174,7 +174,7 @@ try {
   await page.waitForSelector("#toastAct");
   const toast1 = await page.locator("#toast").innerText();
   ok(/Moved 1 shot to Rifle B · String 2/.test(toast1) && /Undo/.test(toast1), "the move toast names the destination and stays short");
-  ok(/Redo source MV/.test(toast1) && /Redo dest MV/.test(toast1), "both loads can still redo a measured MV");
+  ok(/Redo A/.test(toast1) && /Redo B/.test(toast1), "both loads can still redo a measured MV");
   const moved = await snap();
   const s1 = moved.sessions.find((s) => s.id === "sess1");
   const shotC = s1.shots.find((s) => s.id === "c");

@@ -118,7 +118,7 @@ try {
   await page.waitForFunction(() => /current turret/.test(document.querySelector("#tgZero").textContent));
   view = await readCalc();
   console.log("FALLBACK", JSON.stringify(view));
-  ok(view.zero.includes("D 4") && view.zero.includes("¼ MOA") && /not written/.test(view.zero), "unknown history converts the same inch with the current ¼ MOA turret and says it is not saved");
+  ok(view.zero.includes("D 4") && view.zero.includes("¼ MOA") && /Rifle A has no scope saved, so clicks use its current turret \(¼ MOA\)/.test(view.zero) && !/No as-fired optic/.test(view.zero), "unknown history converts the same inch with the current ¼ MOA turret and names the missing scope once");
   ok(view.center.includes("0.95 MOA"), "the fallback angular size follows the current unit");
   ok(view.saved === "0.1mil" && view.unknown === null, "fallback did not write the current turret into either string");
   await page.locator("#tgZero").scrollIntoViewIfNeeded();
@@ -133,7 +133,7 @@ try {
   await openTarget("st2");
   view = await readCalc();
   console.log("BLOCKED", JSON.stringify(view));
-  ok(/Nothing was invented/.test(view.zero) && !view.zero.includes("D 4"), "a missing current click value blocks the fallback calculation");
+  ok(/has no turret click value/.test(view.zero) && !/No as-fired optic/.test(view.zero) && !view.zero.includes("D 4"), "a missing current click value blocks the fallback calculation");
   await page.locator("#tgZero").scrollIntoViewIfNeeded();
   await page.screenshot({ path: ART + "/blocked-360.png" });
   if (await page.locator("#tgStrSel").isHidden()) await page.click("#tgSum");

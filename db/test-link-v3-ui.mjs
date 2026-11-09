@@ -186,7 +186,10 @@ try {
   ok(moved.a === "st1" && moved.f === "st2" && moved.stayShot && moved.srcLoad === "l1", "unrelated shots and the source as-fired load stay");
   ok(moved.hole === null && moved.srcOptic === "0.1mil", "the moved shot's hole pairing is dropped and the source optic snapshot stays");
   ok(moved.text.includes("avg 2705") && moved.text.includes("avg 2800"), "source and destination averages both redraw");
-  ok(/Nothing was invented/.test(moved.hdr) && moved.dest.optic === null, "a string with no optic and no current turret asks for a click value and does not store one");
+  await page.click("#strRec");
+  const scopeNote = await page.locator("#strPickNote").innerText();
+  await page.click("#strPickClose");
+  ok(/Rifle B has no scope saved, and it has no turret click value/.test(scopeNote) && !/No as-fired optic/.test(scopeNote) && moved.dest.optic === null, "a string with no optic and no current turret asks for a scope and does not store one");
   await page.screenshot({ path: ART + "/fallback-360.png" });
   const beforeUndo = JSON.stringify(moved.dest);
   await page.click("#toastAct");

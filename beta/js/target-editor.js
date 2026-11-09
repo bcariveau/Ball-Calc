@@ -7,7 +7,7 @@ import { B, angDec, angs, solveShot } from "./calc.js";
 import { toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { curLoad, curRifle } from "./gear.js";
-import { dialComeUp, histLoad } from "./link-v3.js";
+import { dialComeUp, histLoad, scopeSentence } from "./link-v3.js";
 import { ED, LOG, closeEditor, commitEditor, edDirty, openEditor, renderEditor, set_edDirty } from "./log.js";
 import { SEL, paintSel } from "./reassign.js";
 import { SH, shPaint } from "./shooting.js";
@@ -185,10 +185,11 @@ function teResults() {
     : vv.r >= 0.5 ? `<span class="pt">Possible velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots) — needs 5+ paired shots with r ≥ 0.7 to call it.</span>`
     : `No velocity-vs-vertical trend (r = ${vv.r.toFixed(2)}, ${vv.n} shots).`}</div>`;
   h += `<div class="hint" id="tgHist">…</div>`;
-  if (blocked) h += `<div class="zc bad" id="tgZero">${escapeHtml(ts.warning || "Enter a turret click value before calculating. Nothing was invented.")}</div>`;
+  const scope = scopeSentence(r && r.name, ts.source, ts.v > 0 ? ts.lbl : "");
+  if (blocked) h += `<div class="zc bad" id="tgZero">${escapeHtml(scope || "Enter a turret click value before calculating.")}</div>`;
   else if (atZero && gs.n) {
     const k = ts.k || 1, e1 = -gs.cy / inPerU(ts.u, yd) / k, w1 = -gs.cx / inPerU(ts.u, yd), ce = Math.round(Math.abs(e1) / ts.v), cw = Math.round(Math.abs(w1) / ts.v);   // elevation ÷ tracking factor, as the dope does
-    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}${ts.source === "current" ? ", current turret" : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>${ts.source === "current" ? escapeHtml(ts.warning) + " " : ""}Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
+    h += `<div class="zc" id="tgZero"><b>Zero correction</b> (${fmt(zr, 0)} yd zero, ${ts.lbl} clicks${k !== 1 ? `, tracking ×${fmt(k, 3)}` : ""}${ts.source === "current" ? ", current turret" : ""}): ${ce ? `${e1 >= 0 ? "U" : "D"} ${ce}` : "elevation OK"} · ${cw ? `${w1 >= 0 ? "R" : "L"} ${cw}` : "windage OK"}<small>${scope ? escapeHtml(scope) + " " : ""}Dial these to move the group onto the aim point${gs.n < 3 ? " — 3+ shots give a steadier center" : ""}.</small></div>`;
   } else if (gs.n > 1) {
     const d = st.dial, recordedId = st.asFired && st.asFired.loadId, canTrue = !!(recordedId || same);
     const up = d ? dialComeUp(d, gs.cy, yd) : null;
@@ -206,7 +207,7 @@ function formLoadBag() {
 function teHistDope(st, g, ts) {
   const box = $("tgHist"); if (!box || !st) return;
   const yd = Math.round(tgYd(g)), hl = histLoad(st.asFired && st.asFired.recipe, formLoadBag());
-  const bits = [hl.warning, ts && ts.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean);
+  const bits = [hl.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean);
   if (hl.source === "missing" || !(ts && ts.v > 0)) { box.textContent = bits[0] || "Enter the missing load or turret. Nothing was invented."; return; }
   if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000)) { box.textContent = bits.join(" "); return; }
   const tok = ++histTok;

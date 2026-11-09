@@ -13,16 +13,23 @@ import { S, saveSettings } from "./storage.js";
 
 /* ---------------- helpers ---------------- */
 let toastT;
+function appendIconText(el, s) {
+  String(s).split(/(<svg class='ic'[\s\S]*?<\/svg>)/).forEach(part => {
+    if (part.startsWith("<svg class='ic'")) {
+      const hold = document.createElement("span"); hold.innerHTML = part;
+      const svg = hold.firstChild;
+      if (svg && svg.tagName && svg.tagName.toLowerCase() === "svg") el.appendChild(svg);
+    } else if (part) el.appendChild(document.createTextNode(part));
+  });
+}
+function setIconText(el, s) { if (!el) return; el.replaceChildren(); appendIconText(el, s == null ? "" : s); }
 function toast(msg, act) {
   const acts = Array.isArray(act) ? act : (act ? [act] : []);
   const t = $("toast"); t.replaceChildren(); t.classList.toggle("act", acts.length > 0);
   const span = document.createElement("span");
-  String(msg).split(/(<svg class='ic'[\s\S]*?<\/svg>)/).forEach(part => {
-    if (part.startsWith("<svg class='ic'")) { const hold = document.createElement("span"); hold.innerHTML = part; if (hold.firstChild && hold.firstChild.tagName === "svg") span.appendChild(hold.firstChild); }
-    else span.appendChild(document.createTextNode(part));
-  });
+  appendIconText(span, msg);
   t.appendChild(span);
-  acts.forEach((a, i) => { const b = document.createElement("button"); b.type = "button"; b.id = i ? "toastAct" + i : "toastAct"; b.textContent = a.label; b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); a.fn(); }; t.appendChild(b); });
+  acts.forEach((a, i) => { const b = document.createElement("button"); b.type = "button"; b.id = i ? "toastAct" + i : "toastAct"; appendIconText(b, a.label); b.onclick = () => { clearTimeout(toastT); t.classList.remove("show", "act"); a.fn(); }; t.appendChild(b); });
   t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show", "act"), acts.length ? (acts[0].ms || 7000) : 2200);
 }
 /* ---------------- uniform: gun · load · zero · unit context line (Dope, Log, Gear) ---------------- */
@@ -137,4 +144,4 @@ export function init2() {
   new MutationObserver(() => { clearTimeout(shT); shT = setTimeout(shortenHints, 40); }).observe(document.body, { childList: true, subtree: true });
 }
 
-export { toastT, toast, ctxParts, ctxPaint, clampStep, bump, shortenHints, shT, seg, openOvl, closeOvl, shBtnPaint };
+export { toastT, toast, setIconText, ctxParts, ctxPaint, clampStep, bump, shortenHints, shT, seg, openOvl, closeOvl, shBtnPaint };

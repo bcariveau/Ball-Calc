@@ -5,14 +5,14 @@
 import { schedule } from "./app.js";
 import { idbGet, idbPut } from "./bulletdb.js";
 import { powderT } from "./calc.js";
-import { shBtnPaint, toast } from "./components.js";
+import { setIconText, shBtnPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, n1, n3, num, setVal } from "./core.js";
 import { cleanRecipe, curLoad, curRifle, recipeSnapshot, recipeText, updateDirty } from "./gear.js";
 import { closeImport } from "./log-import.js";
 import { SEL, lpFired, paintSel, set_lpFired } from "./reassign.js";
 import { SH, shHide, shNeedGear, shPaint, shRollIfEnded } from "./shooting.js";
 import { banHide, banPaint, banShow } from "./shot-banner.js";
-import { asFiredFrom, cleanAsFired, assignShots, calcFallback, opticOn, placeOnString, staleMv } from "./link-v3.js";
+import { asFiredFrom, cleanAsFired, assignShots, calcFallback, opticOn, placeOnString, scopeSentence, staleMv } from "./link-v3.js";
 import { P, load, savePresets, store, uid } from "./storage.js";
 import { paintStrBar, paintTgView } from "./strings.js";
 import { mkGlyph } from "./target-draw.js";
@@ -129,8 +129,8 @@ function renderLog() {
   $("slSum").hidden = emp; $("slEmpty").hidden = !emp;   // one short muted line in the empty card
   if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = (emp ? slEmptyHTML(false) : "") + orphanHTML(orph); $("slChartBox").style.display = "none"; $("slCmp").hidden = true; paintSel(); return; }
   const blurb = s => { const n = tgView(s).strings.length; return `${n} string${n === 1 ? "" : "s"}${sessionGearLabel(s) ? " · " + sessionGearLabel(s) : ""}`; };
-  $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} for “${l.name}”`
-    : `No sessions yet for “${l.name}”. Tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Session to type velocities, or import an Athlon file.`;
+  setIconText($("slSum"), list.length ? `${list.length} session${list.length > 1 ? "s" : ""} for “${l.name}”`
+    : `No sessions yet for “${l.name}”. Tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Session to type velocities, or import an Athlon file.`);
   $("slList").innerHTML = list.slice().reverse().map(s => `${tgThumbA(s)}<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
     <span>${escapeHtml(fmtDate(s.date))}</span>
     <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
@@ -273,7 +273,7 @@ function stringGear(st) {
   const named = af && af.opticId && (P.optics || []).find(o => o.id === af.opticId);
   const opticName = named && named.name ? named.name : (af && af.optic ? "saved optic" : "no optic saved");
   const fb = calcFallback(af, gun || null, opticOn(P, gun || null), null);
-  return { gun: gun ? gun.name : "", load: load ? load.name : "", opticName, warning: (fb && fb.warning) || "" };
+  return { gun: gun ? gun.name : "", load: load ? load.name : "", opticName, warning: scopeSentence(gun && gun.name, fb && fb.source, fb && fb.spec && fb.spec.lbl) };
 }
 function recText(st, t) {
   const g = stringGear(st);
@@ -299,11 +299,10 @@ function paintStrPick() {
   $("strPickList").innerHTML = t.strings.map((st, i) => {
     const g = stringGear(st), on = st.id === t.cur;
     const who = [g.gun, g.load].filter(Boolean).join(" · ") || "No saved firearm";
-    const sub = [g.opticName, g.warning].filter(Boolean).join(" · ");
-    return `<button type="button" class="destPick${on ? " on" : ""}" data-str="${escapeHtml(st.id)}"><b>String ${i + 1} · ${escapeHtml(who)}</b><small>${escapeHtml(sub)}</small></button>`;
+    return `<button type="button" class="strOpt${on ? " on" : ""}" data-str="${escapeHtml(st.id)}" aria-current="${on ? "true" : "false"}"><span class="strOptTop"><b>String ${i + 1} · ${escapeHtml(who)}</b>${on ? `<span class="recBadge"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Recording</span>` : ""}</span><small>${escapeHtml(g.opticName)}</small></button>`;
   }).join("");
   const g = stringGear(cur);
-  $("strPickNote").textContent = g.warning || "New shots record to the string you pick, using that string's saved firearm, optic, and load. Nothing is invented, and the snapshot is not changed.";
+  $("strPickNote").textContent = g.warning || "New shots record to the string you pick, using that string's saved firearm, optic, and load. The snapshot is not changed.";
 }
 async function setActiveString(id) {
   if (!ED) return;
@@ -387,8 +386,7 @@ function scopeNote(c) {
   if (c.af.optic) return "";
   const gun = c.rifle ? c.rifle.name : "This firearm";
   const fb = calcFallback(c.af, c.rifle, c.optic);
-  if (fb && fb.spec && fb.spec.lbl) return `${gun} has no scope saved, so clicks use its current turret (${fb.spec.lbl}). Add a scope in Gear to fix.`;
-  return `${gun} has no scope saved, and it has no turret click value. Add a scope in Gear to fix. Nothing was invented.`;
+  return scopeSentence(gun, fb && fb.source, fb && fb.spec && fb.spec.lbl);
 }
 function destNote(value) {
   const c = destContext(value); if (!c.sess || !c.st) return "Pick a string. Nothing has been moved.";
@@ -471,9 +469,9 @@ function paintUseMV() {
   b.textContent = !m.st.n ? "Use avg as MV (no kept shots yet)" : `Use ${m.mv} fps${m.t != null ? ` at ${fmt(m.t, 0)}°F` : ""} for ${m.l ? m.l.name : "this load"}`;
   const left = [m.out.x && `${m.out.x} removed`].filter(Boolean);
   note.classList.toggle("warn", !!m.st.n && m.n < 5);
-  note.textContent = !m.l ? "Assign this session to a saved load to use its average as the MV." : !m.st.n ? "" :
+  setIconText(note, !m.l ? "Assign this session to a saved load to use its average as the MV." : !m.st.n ? "" :
     `Average of ${m.n} shot${m.n === 1 ? "" : "s"}${left.length ? ` (left out: ${left.join(", ")})` : ""}${m.st.n > 1 ? ` · SD ${m.st.sd.toFixed(1)}` : ""}.` +
-    (m.t == null ? " No session temperature yet: you'll be asked for it." : "") + (m.n < 5 ? ` <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Only ${m.n} shot${m.n === 1 ? "" : "s"}; 5 or more give a steadier MV.` : "");
+    (m.t == null ? " No session temperature yet: you'll be asked for it." : "") + (m.n < 5 ? ` <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Only ${m.n} shot${m.n === 1 ? "" : "s"}; 5 or more give a steadier MV.` : ""));
 }
 function addVelocities(text) {
   const vals = String(text).split(/[\s,;]+/).map(parseFloat).filter(v => isFinite(v) && v >= 50 && v <= 6000);

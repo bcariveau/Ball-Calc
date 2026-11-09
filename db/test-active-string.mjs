@@ -95,7 +95,10 @@ try {
   await page.waitForSelector("#strPickSheet:not([hidden])");
   const pick = await page.locator("#strPickList").innerText();
   ok(/String 1 · Rifle A · Load A/.test(pick) && /Razor/.test(pick), "the picker names string 1's gun, load, and optic");
-  ok(/String 2 · Rifle B · Load B/.test(pick) && /no optic saved/.test(pick) && /Nothing was invented/.test(pick), "the picker names string 2 and the missing-optic fallback");
+  ok(/String 2 · Rifle B · Load B/.test(pick) && /no optic saved/.test(pick) && !/Nothing was invented/.test(pick) && !/No as-fired optic/.test(pick), "the picker names string 2 without the old optic warning");
+  const pickNote = await page.locator("#strPickNote").innerText();
+  ok(pickNote === "Rifle B has no scope saved, and it has no turret click value. Add a scope in Gear to fix.", "the sheet states the missing scope once");
+  ok((pickNote.match(/Add a scope in Gear to fix/g) || []).length === 1, "the approved missing-scope sentence is not repeated in the sheet");
   await page.screenshot({ path: ART + "/after-picker.png" });
   await page.locator("#strPickList button").filter({ hasText: "String 1 · Rifle A · Load A" }).click();
   await page.waitForFunction(() => document.querySelector("#strRec .strRecTo")?.textContent === "Recording to: String 1 · Rifle A · Load A");
@@ -182,7 +185,9 @@ try {
   await page.locator("#strPickList button").filter({ hasText: "String 2 · Rifle B · Load B" }).click();
   await page.waitForFunction(() => /Rifle B · Load B/.test(document.querySelector("#shFor")?.textContent || ""));
   const shForB = await page.locator("#shFor").innerText();
-  ok(/Rifle B/.test(shForB) && /Load B/.test(shForB) && /Nothing was invented/.test(shForB), "switching in the shooting view uses that string's setup and the missing-optic fallback");
+  ok(/Rifle B/.test(shForB) && /Load B/.test(shForB) && /Rifle B has no scope saved, and it has no turret click value/.test(shForB) && !/No as-fired optic/.test(shForB), "switching in the shooting view uses that string's setup and the missing-scope sentence");
+  const shCopy = await page.evaluate(() => document.getElementById("shFor").textContent + "\n" + document.getElementById("shDope").textContent);
+  ok((shCopy.match(/Add a scope in Gear to fix/g) || []).length === 1 && !/No as-fired optic/.test(shCopy), "the shooting view shows that sentence once");
   await page.click("#shExit");
   await page.waitForSelector("#shView.show", { state: "hidden" });
 

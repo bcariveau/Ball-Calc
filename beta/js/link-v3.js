@@ -130,6 +130,15 @@ function calcFallback(asFired, rifle, optic, liveSpec) {
   return { source: h.source, warning: h.warning, spec: h.spec, optic: h.source === "as-fired" ? asFired.optic : null };
 }
 
+// The one sentence shown when a string has no saved scope. The data-layer warning stays on histSource for callers that
+// need to know the fallback happened; screens use this sentence instead of that warning text.
+function scopeSentence(gunName, source, label) {
+  if (!source || source === "as-fired") return "";
+  const gun = gunName || "This firearm";
+  if (source === "current" && label) return `${gun} has no scope saved, so clicks use its current turret (${label}). Add a scope in Gear to fix.`;
+  return `${gun} has no scope saved, and it has no turret click value. Add a scope in Gear to fix.`;
+}
+
 function asFiredFrom(rifle, optic, load, recipe) {
   return cleanAsFired({
     rifleId: rifle?.id || null,
@@ -341,5 +350,5 @@ function stringStats(session, stringId) {
 
 export {
   clone, opticSnap, cleanAsFired, loadsOf, specFromSaved, recordedDial, clicksFor, histLoad, angConvert, dialComeUp, currentTurretKnown, histSource, calcFallback, asFiredFrom, opticOn, recallFirearm,
-  migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, assignShots, placeOnString, stringStats,
+  migrateToV3, rollback, exportBundle, importBundle, shotStatsOf, staleMv, moveShots, splitFrom, assignShots, placeOnString, stringStats, scopeSentence,
 };

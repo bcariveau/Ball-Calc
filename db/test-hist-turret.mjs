@@ -99,7 +99,7 @@ try {
   await page.click("#tgEdDone");
   await page.click("#slEdClose");
   await page.click("#tabBtnGear");
-  await page.selectOption("#opTurret", "0.25moa");
+  await page.selectOption("#opTurret", "0.25moa", { force: true });
   await page.locator("#opTrack").fill("1.02", { force: true });
   await page.locator("#opTrack").dispatchEvent("input");
   await page.locator("#opSH").fill("2", { force: true });
@@ -127,7 +127,7 @@ try {
   await page.click("#tgEdDone");
   await page.click("#slEdClose");
   await page.click("#tabBtnGear");
-  await page.selectOption("#opTurret", "custom");
+  await page.selectOption("#opTurret", "custom", { force: true });
   await page.locator("#opTurretV").fill("", { force: true });
   await page.locator("#opTurretV").dispatchEvent("input");
   await openTarget("st2");
@@ -179,7 +179,7 @@ try {
   let controlled = await page.evaluate(() => !!navigator.serviceWorker.controller);
   if (!controlled) {
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent === "BallisticBench");
+    await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent.replace("™","") === "BallisticBench");
     controlled = await page.evaluate(() => !!navigator.serviceWorker.controller);
   }
   ok(controlled, "service worker controls the isolated page");

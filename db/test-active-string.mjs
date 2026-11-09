@@ -51,7 +51,7 @@ async function boot() {
     });
   }, { preset: presetRaw, sessions: JSON.stringify(sessions) });
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.querySelector("h1")?.textContent === "BallisticBench" && window.__bc?.log?.length);
+  await page.waitForFunction(() => document.querySelector("h1")?.textContent.replace("™","") === "BallisticBench" && window.__bc?.log?.length);
 }
 const openSession = async () => {
   await page.click("#tabBtnLog");
@@ -157,7 +157,7 @@ try {
   ok(bag.holes.find((h) => h.id === "st2").n === 0, "the other string gains no hole");
 
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.querySelector("h1")?.textContent === "BallisticBench" && window.__bc?.log?.length);
+  await page.waitForFunction(() => document.querySelector("h1")?.textContent.replace("™","") === "BallisticBench" && window.__bc?.log?.length);
   await openSession();
   ok((await rec()) === "Recording to: String 1 · Rifle A · Load A", "reload keeps the active string from the existing tg.cur field");
   ok((await shotsOn()).st1.includes(2720) && (await shotsOn()).cur === "st1", "reload keeps the shots on that string");

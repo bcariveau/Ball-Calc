@@ -84,7 +84,7 @@ try {
     return r.result.value;
   };
 
-  const name = await ev("document.querySelector('h1').textContent");
+  const name = await ev("document.querySelector('h1').textContent.replace('\\u2122','')");
   assert.equal(name, "BallisticBench");
   const title = await ev("document.title");
   assert.equal(title, "BallisticBench");
@@ -248,7 +248,7 @@ try {
   await sleep(2000);
   const off = await ev(`JSON.stringify({ title: document.title, h1: document.querySelector('h1') && document.querySelector('h1').textContent, ready: document.readyState })`);
   const offJ = JSON.parse(off);
-  assert.equal(offJ.h1, "BallisticBench");
+  assert.equal(offJ.h1.replace("™",""), "BallisticBench");
   assert.equal(offJ.ready, "complete");
   console.log("OFFLINE", off);
   console.log("PASS bench-a");

@@ -40,7 +40,7 @@ function openMove(ids) {
   $("mvTitle").innerHTML = ss.length > 1 ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move ${ss.length} sessions` : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move session";
   const n = ss.reduce((a, s) => a + ((s.tg && s.tg.strings && s.tg.strings.length) || 1), 0);
   $("mvFrom").textContent = ss.length > 1 ? `${ss.length} sessions · ${n} strings` : `${fmtDate(ss[0].date)} · ${((ss[0].tg && ss[0].tg.strings && ss[0].tg.strings.length) || 1)} strings · ${SRC_LBL[ss[0].source] || ss[0].source}`;
-  $("mvGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)} — ${r.gunKind === "handgun" ? "Handgun" : "Rifle"}${r.barrel ? ` · ${r.barrel}"` : ""} (${r.loads.length} load${r.loads.length === 1 ? "" : "s"})</option>`).join("");
+  $("mvGun").innerHTML = P.rifles.filter(r => !r.archived).map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)} — ${r.gunKind === "handgun" ? "Handgun" : "Rifle"}${r.barrel ? ` · ${r.barrel}"` : ""} (${r.loads.filter(l => !l.archived).length} load${r.loads.filter(l => !l.archived).length === 1 ? "" : "s"})</option>`).join("");
   $("mvGun").value = MV.gunId; $("mvUpd").checked = true;
   renderMove(); openOvl("mvSheet");
 }
@@ -48,7 +48,7 @@ function distinct(arr, max = 3) { const u = [...new Set(arr.map(x => x || "—")
 function renderMove() {
   const r = P.rifles.find(x => x.id === MV.gunId), ss = MV.ids.map(sessGet).filter(Boolean);
   const curIds = new Set(ss.map(s => s.rifleId + "|" + s.loadId));
-  $("mvLoads").innerHTML = r && r.loads.length ? r.loads.map(l => {
+  $("mvLoads").innerHTML = r && r.loads.some(l => !l.archived) ? r.loads.filter(l => !l.archived).map(l => {
     const rt = recipeText(l), cur = curIds.has(r.id + "|" + l.id), n = LOG.filter(s => s.rifleId === r.id && s.loadId === l.id).length;
     return `<button type="button" class="rcItem${l.id === MV.loadId ? " on" : ""}${cur ? " cur" : ""}" data-id="${escapeHtml(l.id)}"><span>${escapeHtml(l.name)}${cur ? '<span class="tag">current</span>' : ""}</span><span class="s"><small>${n} session${n === 1 ? "" : "s"}</small></span>` +
       `<span class="d">${escapeHtml(bulletText(l) || "no bullet data")}${l.mv ? ` · ${escapeHtml(l.mv)} fps` : ""}</span><span class="r">${rt ? (l.ldKind === "factory" ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z'/><path d='M12 22V12'/><path d='m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7'/></svg> " : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg> ") + escapeHtml(rt) : '<span style="color:var(--hint)">No load data saved</span>'}</span></button>`;

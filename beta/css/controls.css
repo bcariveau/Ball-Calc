@@ -62,8 +62,10 @@ body.has-sensors .sensorbtn { display: inline-block; }
 #mvEstOut { font-size: 0.8rem; color: var(--warn); margin-top: 4px; }
 #mvEstOut b { color: var(--text); }
 [hidden] { display: none !important; }
-#appHead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 12px; }
-#appHead .brand { display: flex; align-items: center; gap: 10px; color: var(--text); --logo-fg: var(--text); --logo-ac: var(--accent); --logo-bg: var(--bg); }
+#appHead { display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 8px; margin: 0 0 12px; }
+#appHead .brand { display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; min-width: 0; color: var(--text); --logo-fg: var(--text); --logo-ac: var(--accent); --logo-bg: var(--bg); }
+#appHead .brand > div { min-width: 0; }
 #appHead .logo { width: 44px; height: 44px; flex: 0 0 44px; }
-#appHead h1 { margin: 0; font-size: 1.45rem; line-height: 1.1; text-align: left; color: var(--text); font-weight: 800; letter-spacing: 0.01em; }
+#appHead h1 { margin: 0; font-size: clamp(1.05rem, 4.6vw, 1.45rem); line-height: 1.1; text-align: left; color: var(--text); font-weight: 800; letter-spacing: 0.01em; white-space: nowrap; }
+#appHead h1 .tm { font-size: 0.55em; line-height: 0; margin-left: 0.06em; color: inherit; vertical-align: super; font-weight: 700; }
 #appHead h1 span { color: var(--accent); }

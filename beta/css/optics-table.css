@@ -79,10 +79,5 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
 .tuRow select { flex: 1 1 auto; min-width: 0; }
 /* basics-first load form: bullet, BC + drag, MV on screen; the rest under More ▾ */
 #loadBasic { margin-top: 8px; }
-#tabGear #loadDetails > summary::before { display: none; }
-#tabGear #loadDetails > summary { flex-wrap: wrap; }
-#tabGear #loadDetails > summary .rsum { flex: 1 0 100%; display: block; margin: 1px 0 0; font-weight: 400; font-size: 0.78rem; color: var(--muted); }
-#tabGear #loadDetails > summary .rsum:empty { display: none; }
 #tabGear #loadDetails > #recipeDetails { margin-top: 10px; }
 .sampleNote span { font-size: 0.82rem; }
-#tabGear #loadDetails[open] > summary .mArr { display: inline-block; transform: rotate(180deg); }

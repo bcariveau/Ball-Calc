@@ -101,7 +101,7 @@ async function radarFlush() {
     while (RD.pending.length) {
       const s = RD.pending[0];
       // radar shot #1 = a new string on the radar → start a new app session if the live one already has radar shots
-      if (s.n === 1 && SH.on && ED && ED.id === SH.sid) { const t = tgEnsure(ED); if (readings(ED, t.cur).length) SH.ended = t.cur; }   // shooting view: a new radar string = a new string in the same session
+      if (s.n === 1 && SH.on && ED && ED.id === SH.sid && !SH.hold) { const t = tgEnsure(ED); if (readings(ED, t.cur).length) SH.ended = t.cur; }   // shooting view: a new radar string = a new string, unless the shooter picked the active string
       else if (s.n === 1) { const L = LIVE && LOG.find(q => q.id === LIVE.id); if (ED && ED.source === "bluetooth" && ED.shots.length) { closeEditor(true); set_LIVE(null); } else if (L && L.shots.length) set_LIVE(null); }
       const id = await addShotsToLiveSession([{ v: s.fps, t: s.timeStr ? s.timeStr.slice(11) : "" }], { source: "bluetooth", open: false });
       if (!id) break;

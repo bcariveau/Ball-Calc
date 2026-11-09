@@ -42,6 +42,8 @@ svg.mk { width: 14px; height: 14px; flex: 0 0 14px; vertical-align: -2px; margin
 .shot.dis .v, .shot.dis .dv { text-decoration: line-through; color: var(--hint); }
 .shot button.xd.on { color: var(--err); }
 .sgh { margin-top: 10px; padding: 6px 0 2px; font-weight: 700; font-size: 0.86rem; display: flex; flex-direction: column; align-items: stretch; gap: 2px; border-bottom: 2px solid var(--border); }
+.sgh.active { outline: 2px solid var(--accent); background: var(--panel); border-radius: 8px; padding: 6px 8px; }
+.sghLive { color: var(--accent); font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
 .sghTop { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
 .sghWho { margin-left: auto; min-width: 0; max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 650; }
 .sgh small { font-weight: 500; color: var(--muted); margin-left: 0; }

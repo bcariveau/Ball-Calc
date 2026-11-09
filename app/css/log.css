@@ -32,11 +32,19 @@
 #shotSelBar[hidden] { display: none !important; }
 #shotSelBar .n { font-weight: 700; }
 #shotMoveOpen, #shotSplit, #shotMoveGo { width: 100%; min-height: 44px; }
-#shotDestSheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 46; max-height: 78vh; overflow: auto; background: var(--card); color: var(--text); border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; padding: 12px 12px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 24px rgba(0,0,0,.35); }
-#shotDestSheet[hidden] { display: none !important; }
-#shotDestSheet .sheetHd { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 800; margin-bottom: 8px; }
-#shotDestSheet select, #shotDestList { width: 100%; }
-#shotDestList { display: flex; flex-direction: column; gap: 6px; }
+#shotDestSheet, #strPickSheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 46; max-height: 78vh; overflow: auto; background: var(--card); color: var(--text); border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; padding: 12px 12px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 24px rgba(0,0,0,.35); }
+#shotDestSheet[hidden], #strPickSheet[hidden] { display: none !important; }
+#shotDestSheet .sheetHd, #strPickSheet .sheetHd { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 800; margin-bottom: 8px; }
+#shotDestSheet select, #shotDestList, #strPickList { width: 100%; }
+#shotDestList, #strPickList { display: flex; flex-direction: column; gap: 6px; }
+.strRec { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; height: auto; margin: 6px 0; padding: 8px 10px; text-align: left; white-space: normal; line-height: 1.25; }
+.strRec .strRecTo { display: block; font-size: 0.92rem; }
+.strRec .strRecOpt { display: block; font-weight: 600; font-size: 0.75rem; color: inherit; opacity: .85; }
+#strPickList .strOpt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; min-height: 44px; height: auto; margin: 0; padding: 8px 10px; text-align: left; white-space: normal; line-height: 1.3; background: var(--input); color: var(--text); border: 1px solid var(--border); }
+#strPickList .strOpt .strOptTop { display: flex; gap: 8px; align-items: center; width: 100%; }
+#strPickList .strOpt small { font-weight: 600; color: var(--muted); font-size: 0.75rem; }
+#strPickList .strOpt.on { background: var(--panel); border: 2px solid var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.recBadge { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
 .destPick { width: 100%; min-height: 44px; height: auto; text-align: left; white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }
 .destPick.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 #shotDelDlg { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; }

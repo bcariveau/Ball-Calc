@@ -17,7 +17,7 @@
  * (The page also asks this worker to compare the cached page and every module with the network, so a forgotten bump
  *  still shows the banner.)
  */
-const VERSION = "2026-11-08.11";
+const VERSION = "2026-11-08.14";
 
 const PREFIX = "ballcalc-main-";
 const CACHE = PREFIX + VERSION;

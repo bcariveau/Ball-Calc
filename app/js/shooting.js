@@ -8,8 +8,8 @@ import { shBtnPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, num, val } from "./core.js";
 import { CLOCK, lr, ud } from "./dope.js";
 import { applyLoad, applyRifle, curLoad, curRifle } from "./gear.js";
-import { calcFallback, histLoad, opticOn, recallFirearm } from "./link-v3.js";
-import { ED, LOG, addVelocities, closeEditor, commitEditor, curKeyIds, edDirty, openEditor, renderEditor, set_edDirty, shotStats } from "./log.js";
+import { calcFallback, histLoad, opticOn, recallFirearm, scopeSentence } from "./link-v3.js";
+import { ED, LOG, addVelocities, closeEditor, commitEditor, curKeyIds, edDirty, openEditor, paintStrRec, renderEditor, set_edDirty, shotStats } from "./log.js";
 import { RD, hasBT } from "./radar.js";
 import { banHide, wakeSync } from "./shot-banner.js";
 import { P, S, savePresets } from "./storage.js";
@@ -17,7 +17,7 @@ import { dialView, tgAutoDial, tgNewString, tgSame } from "./strings.js";
 import { closeTgEd, openTgEd } from "./target-editor.js";
 import { LIVE, angU, fpsT, readings, strNo, tgDefDist, tgEnsure, tgYd, tgtLetter, tsFor, unpair } from "./targets.js";
 
-var SH = { on: false, sid: null, back: null, ended: null, pend: null, closing: false, calcKey: "", tok: 0, es: null, dope: null, lastId: null };
+var SH = { on: false, sid: null, back: null, ended: null, pend: null, closing: false, calcKey: "", tok: 0, es: null, dope: null, lastId: null, hold: false };
 /* ================= Shooting view (Start shooting on Dope) =================
    Full-screen chronograph view on top of the session editor: ED is the session, so strings, targets, Mark holes and the radar
    all keep working as before. Shots autosave. Radar shots land here live (no banner, no second session). */
@@ -119,7 +119,8 @@ function shPaint() {
   const gunFired = P.rifles.find(x => x.id === (cur.asFired?.rifleId || ED.rifleId));
   const loadFired = gunFired && (gunFired.loads || []).find(x => x.id === (cur.asFired?.loadId || ED.loadId));
   const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired), gunFired && curRifle() === gunFired ? turretSpec() : null);
-  $("shFor").textContent = [gunFired?.name, loadFired?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
+  const scope = fb && fb.source !== "as-fired" ? scopeSentence(gunFired && gunFired.name, fb.source, fb.spec && fb.spec.lbl) : "";
+  $("shFor").textContent = [gunFired?.name, loadFired?.name, `${yd} yd`, scope].filter(Boolean).join(" · ");
   const gun = $("shGun");
   if (gun && gun.dataset.lock !== "1") {
     gun.innerHTML = P.rifles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");
@@ -142,7 +143,7 @@ function shPaint() {
       <span class="n">#${i + 1}</span><span class="v">${fpsT(s.v)}</span>${(() => { const c = s.x ? "" : shDevCls(s.v, keptV); return `<span class="dv${c ? " " + c : ""}"${c ? ` title="${shDevWord(c)}"` : ""}>${s.x ? "removed" : q.n > 1 ? shSigned(Math.round(s.v - q.avg)) : ""}</span>`; })()}<span class="shTg">${escapeHtml(shTags(s))}</span>
       <button type="button" data-a="x" aria-pressed="${!!s.x}" aria-label="${s.x ? "Restore" : "Remove"} shot ${i + 1}" title="${s.x ? "Restore this shot to the stats" : "Remove from every stat. The shot stays in the string."}">${s.x ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 7v6h6'/><path d='M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13'/></svg>" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><path d='m4.9 4.9 14.2 14.2'/></svg>"}</button></div>`).join("")
     : `<div class="shEmpty">No shots in String ${sn} yet. Fire with the radar connected, or tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add shot to type a velocity.</div>`;
-  shTagPaint(); shStatus(); $("shEndStr").classList.toggle("on", en); $("shStrBtn").classList.toggle("on", en);
+  shTagPaint(); shStatus(); paintStrRec(); $("shEndStr").classList.toggle("on", en); $("shStrBtn").classList.toggle("on", en);
   $("shStrBtn").innerHTML = en ? `String <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg><small>ended</small>` : "String <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg>"; $("shStrFor").innerHTML = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
   $("shBad").disabled = !rd.some(s => !s.x);
   shCalc(q, yd, cur);
@@ -168,8 +169,8 @@ function formLoadBag() {
 function histSolve(st, ts) {
   const hl = histLoad(st?.asFired?.recipe, formLoadBag());
   if (hl.source === "missing") return { blocked: hl.warning };
-  if (ts && !(ts.v > 0)) return { blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
-  const warn = [ts && ts.warning, hl.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean).join(" ");
+  if (ts && !(ts.v > 0)) return { blocked: "Enter a turret click value before calculating." };
+  const warn = [hl.warning, "Zero, twist, and weather are the current setup and are not written onto the string."].filter(Boolean).join(" ");
   return { load: hl.used, source: hl.source, warn, sh: ts && ts.sh, allowBlank: true };
 }
 // vertical spread at the target from the slowest vs fastest kept shot, same zero + conditions + angle as the Dope tab
@@ -199,8 +200,8 @@ async function shDopeAt(yd, st) {   // dope strip: recorded load and turret when
   const ts = st ? tsFor(st.asFired?.rifleId || ED?.rifleId, st) : turretSpec();
   const solved = st ? histSolve(st, ts) : null;
   if (solved && solved.blocked) return { yd, blocked: solved.blocked };
-  if (!(ts.v > 0)) return { yd, blocked: ts.warning || "Enter a turret click value before calculating. Nothing was invented." };
-  const o = { yd, warn: (solved && solved.warn) || ts.warning || "" };
+  if (!(ts.v > 0)) return { yd, blocked: "Enter a turret click value before calculating." };
+  const o = { yd, warn: (solved && solved.warn) || "" };
   if (st && st.dial) { const dv = dialView(st.dial, ts); o.elev = `${dv.txt}`; o.clk = dv.c != null ? `${Math.abs(dv.c)} clicks` : ""; o.src = st.dial.src === "app" ? "dialed" : "dialed (edited)"; }
   if (typeof B === "undefined" || !B || !(yd >= 5 && yd <= 3000)) return o;
   if (!solved && !tgSame()) return o;

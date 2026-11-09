@@ -6,7 +6,7 @@ import { B, angs, curCond, entryRequired, powderT, solveShot, turretSpec } from 
 import { toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal } from "./core.js";
 import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
-import { asFiredFrom, calcFallback, opticOn, recordedDial } from "./link-v3.js";
+import { asFiredFrom, recordedDial, scopeSentence } from "./link-v3.js";
 import { curOptic } from "./optics.js";
 import { ED, commitEditor, edDirty, renderEditor, set_edDirty, stringWho } from "./log.js";
 import { banPaint } from "./shot-banner.js";
@@ -20,11 +20,8 @@ import { BAN, TE, TV, angConv, angU, bulletDiaIn, cleanDial, grpStats, hoff, inP
 function paintStrBar() {
   if (!ED) return; const t = tgView(ED), cur = t.strings.find(q => q.id === t.cur), n = strNo(t, cur.id), rd = readings(ED, cur.id);
   $("tgHdrT").textContent = `String ${n} · Target ${tgtLetter(t, cur.tid)}`;
-  const af = cur.asFired, gun = (af && P.rifles.find(x => x.id === af.rifleId)) || null;
-  const live = gun && curRifle() === gun ? turretSpec() : null;
-  const fb = af ? calcFallback(af, gun, opticOn(P, gun), live && live.v > 0 ? live : null) : null;
   const kept = rd.filter(s => !s.x), who = stringWho(cur);
-  $("tgHdrS").textContent = [who, `${kept.length} shot${kept.length === 1 ? "" : "s"}`, `${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}`, t.strings.length > 1 ? `${t.strings.length} strings` : "", fb && fb.warning].filter(Boolean).join(" · ");
+  $("tgHdrS").textContent = [who, `${kept.length} shot${kept.length === 1 ? "" : "s"}`, `${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}`, t.strings.length > 1 ? `${t.strings.length} strings` : ""].filter(Boolean).join(" · ");
   $("tgMarkEach").checked = !!t.mark;
   $("tgMarkBtn").innerHTML = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes · String ${n}`;
 }
@@ -127,7 +124,7 @@ async function teDialSet(raw, dir) {
   if (raw === "" || raw == null) { if (st.dial) { teSnap(); delete st.dial; tgAfterEditQuiet(); } teRender(); return; }
   if (!(v >= 0 && v <= 300)) { toast("Elevation 0–300"); teDialPaint(); return; }
   const ts = tsFor(ED.rifleId, st);
-  if (!(ts.v > 0)) { toast(ts.warning || "Enter a turret click value before calculating. Nothing was invented."); teDialPaint(); return; }
+  if (!(ts.v > 0)) { const gun = P.rifles.find(x => x.id === (st.asFired && st.asFired.rifleId)); toast(scopeSentence(gun && gun.name, ts.source, "") || "Enter a turret click value before calculating."); teDialPaint(); return; }
   const U = ts.u, e = dir === "D" ? -v : v, old = st.dial, ov = old && dialView(old, ts);
   if (ov && +ov.s === v && ov.dir === dir) { teDialPaint(); return; }   // unchanged (an app dial shown at clicks keeps its stored value)
   teSnap(); st.dial = cleanDial({ e, u: U, c: Math.round(e / ts.v), cl: ts.lbl, k: old && old.k || ts.k || 1, src: "user",

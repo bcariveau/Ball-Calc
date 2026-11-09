@@ -23,7 +23,7 @@ ${startBtn("slStartBtn")}
   </div>
   <input type="file" id="slFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
   <div class="summary" id="slSum">Chronograph sessions for the selected load.</div>
-  <div id="slChartBox"><canvas id="slChart" aria-label="Average velocity per session with ±1 SD band"></canvas></div>
+  <div id="slChartBox" hidden><canvas id="slChart" aria-hidden="true"></canvas></div>
   <details id="slCmp" hidden><summary><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 3v16a2 2 0 0 0 2 2h16'/><path d='M18 17V9'/><path d='M13 17V5'/><path d='M8 17v-3'/></svg> Compare sessions (charge / ladder test)</summary>
     <span class="seg" id="slCmpScope" role="group" aria-label="Compare scope"><button type="button" data-v="load" class="on">This load</button><button type="button" data-v="gun">All loads on this gun</button></span>
     <div id="slCmpTbl"></div>

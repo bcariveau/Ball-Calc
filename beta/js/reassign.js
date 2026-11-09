@@ -5,7 +5,7 @@
 import { closeOvl, openOvl, toast } from "./components.js";
 import { $, escapeHtml, setVal } from "./core.js";
 import { cleanRecipe, curRifle, recipeText } from "./gear.js";
-import { ED, LOG, SRC_LBL, fmtDate, maybeRenderLog, paintEdFor, paintEdRecipe, saveLog, sessHome, set_slKey, shotStats, slKey } from "./log.js";
+import { ED, LOG, SRC_LBL, fmtDate, maybeRenderLog, paintEdFor, paintEdRecipe, saveLog, sessHome, set_slKey, slKey } from "./log.js";
 import { dia3, fnum } from "./recipes.js";
 import { P, REC_F } from "./storage.js";
 
@@ -38,8 +38,8 @@ function openMove(ids) {
   MV = { ids: ss.map(s => s.id), gunId: (h.r || curRifle() || P.rifles.find(r => r.loads.length)).id, loadId: h.l ? h.l.id : "" };
   if (ss.some(s => s.rifleId !== ss[0].rifleId || s.loadId !== ss[0].loadId)) MV.loadId = "";
   $("mvTitle").innerHTML = ss.length > 1 ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move ${ss.length} sessions` : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move session";
-  const n = ss.reduce((a, s) => a + shotStats(s.shots).n, 0);
-  $("mvFrom").textContent = ss.length > 1 ? `${ss.length} sessions · ${n} shots` : `${fmtDate(ss[0].date)} · ${shotStats(ss[0].shots).n} shots · ${SRC_LBL[ss[0].source] || ss[0].source}`;
+  const n = ss.reduce((a, s) => a + ((s.tg && s.tg.strings && s.tg.strings.length) || 1), 0);
+  $("mvFrom").textContent = ss.length > 1 ? `${ss.length} sessions · ${n} strings` : `${fmtDate(ss[0].date)} · ${((ss[0].tg && ss[0].tg.strings && ss[0].tg.strings.length) || 1)} strings · ${SRC_LBL[ss[0].source] || ss[0].source}`;
   $("mvGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)} — ${r.gunKind === "handgun" ? "Handgun" : "Rifle"}${r.barrel ? ` · ${r.barrel}"` : ""} (${r.loads.length} load${r.loads.length === 1 ? "" : "s"})</option>`).join("");
   $("mvGun").value = MV.gunId; $("mvUpd").checked = true;
   renderMove(); openOvl("mvSheet");

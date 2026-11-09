@@ -143,13 +143,14 @@ try {
   await page.click("#tabBtnLog");
   await page.click(".slItem");
   await page.waitForSelector("#slEditor.show");
-  const beforeRemove = await page.locator("#slStats").innerText();
-  ok(beforeRemove.includes("4") && beforeRemove.includes("2755"), "removed 2500 is already out of the session stats");
+  const str1 = () => page.locator(".sgh").filter({ hasText: "String 1 ·" }).locator("small").innerText();
+  const beforeRemove = await str1();
+  ok(beforeRemove.includes("3 shots") && beforeRemove.includes("avg 2737"), "string 1 stats leave out the removed 2500");
   await page.locator(".shot[data-id='a'] button[data-f='x']").click();
-  const removed = await page.locator("#slStats").innerText();
-  ok(!removed.includes("2755") && removed.includes("3"), "Remove drops that shot from the visible stats");
+  const removed = await str1();
+  ok(removed.includes("2 shots") && removed.includes("avg 2755"), "Remove drops that shot from its string only");
   await page.locator(".shot[data-id='a'] button[data-f='x']").click();
-  ok((await page.locator("#slStats").innerText()).includes("2755"), "Restore puts the shot back");
+  ok((await str1()).includes("avg 2737") && (await str1()).includes("3 shots"), "Restore puts the shot back on its string");
 
   await startSelect();
   await page.locator(".shot[data-id='c'] .shotCk").check();

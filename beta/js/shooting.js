@@ -116,10 +116,10 @@ function shPaint() {
   const { t, cur } = shCurStr(), sn = strNo(t, cur.id), rd = readings(ED, cur.id), w = shWeight(), q = shStatsOf(rd, w), g = t.targets.find(x => x.id === cur.tid);
   const yd = Math.round(tgYd(g) || tgDefDist());
   $("shStr").textContent = `String ${sn} · Target ${tgtLetter(t, cur.tid)}`;
-  const r = P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
-  const gunFired = P.rifles.find(x => x.id === cur.asFired?.rifleId) || r;
+  const gunFired = P.rifles.find(x => x.id === (cur.asFired?.rifleId || ED.rifleId));
+  const loadFired = gunFired && (gunFired.loads || []).find(x => x.id === (cur.asFired?.loadId || ED.loadId));
   const fb = calcFallback(cur.asFired, gunFired, opticOn(P, gunFired), gunFired && curRifle() === gunFired ? turretSpec() : null);
-  $("shFor").textContent = [r?.name, l?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
+  $("shFor").textContent = [gunFired?.name, loadFired?.name, `${yd} yd`, fb.warning || ""].filter(Boolean).join(" · ");
   const gun = $("shGun");
   if (gun && gun.dataset.lock !== "1") {
     gun.innerHTML = P.rifles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");

@@ -7,7 +7,7 @@ import { bandsOn, renderBulletInfo } from "./bulletdb.js";
 import { mvAdjOn, mvAdjust, powderT, zeroCond } from "./calc.js";
 import { ctxPaint, toast } from "./components.js";
 import { $, compass, escapeHtml, fmt, n1, n3, num, setVal, val } from "./core.js";
-import { LOG, cleanSession, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
+import { LOG, cleanSession, exportSessions, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
 import { applyOptic, curOptic, effSH, paintOptic } from "./optics.js";
 import { openCopy, paintRecipeBtns } from "./recipes.js";
 import { suActive, suCheck } from "./setup.js";
@@ -232,7 +232,7 @@ export function init1() {
 
   /* export / import */
   $("exportBtn").onclick = () => {
-    const data = JSON.stringify({ app: "ballistic-calculator", exported: new Date().toISOString(), ...P, shotSessions: LOG }, null, 2);
+    const data = JSON.stringify({ app: "ballistic-calculator", exported: new Date().toISOString(), ...P, shotSessions: exportSessions() }, null, 2);
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
     a.download = `ballistic-presets-${new Date().toISOString().slice(0, 10)}.json`;

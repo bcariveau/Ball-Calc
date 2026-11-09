@@ -78,6 +78,45 @@ function shotStats(shots) {
   const sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - avg) ** 2, 0) / (n - 1)) : 0;   // sample SD (n−1)
   return { n, avg: +avg.toFixed(1), sd: +sd.toFixed(1), es: +(max - min).toFixed(1), min, max };
 }
+function stringWho(st) {
+  const af = st && st.asFired; if (!af) return "";
+  const gun = P.rifles.find(r => r.id === af.rifleId);
+  const load = gun && (gun.loads || []).find(l => l.id === af.loadId);
+  return [gun && gun.name, load && load.name].filter(Boolean).join(" · ");
+}
+function sessionGearLabel(session) {
+  const seen = [], add = (w) => { if (w && !seen.includes(w)) seen.push(w); };
+  tgView(session).strings.forEach(st => add(stringWho(st)));
+  if (!seen.length) {
+    const r = P.rifles.find(x => x.id === session.rifleId), l = r?.loads.find(x => x.id === session.loadId);
+    add([r?.name, l?.name].filter(Boolean).join(" · "));
+  }
+  return seen.join(", ");
+}
+function stringStatRows(session) {
+  const t = tgView(session);
+  return t.strings.map((st, i) => {
+    const stats = shotStats((session.shots || []).filter(sh => strOf(session, sh) === st.id));
+    const af = st.asFired || {}, gun = P.rifles.find(r => r.id === af.rifleId), load = gun && (gun.loads || []).find(l => l.id === af.loadId);
+    return { index: i + 1, id: st.id, gun: gun ? gun.name : "", load: load ? load.name : "", n: stats.n || 0, avg: stats.n ? stats.avg : null, sd: stats.n > 1 ? stats.sd : null, es: stats.n > 1 ? stats.es : null, min: stats.n ? stats.min : null, max: stats.n ? stats.max : null };
+  });
+}
+function stringStatText(session) {
+  return stringStatRows(session).map(r => `S${r.index} ${[r.gun, r.load].filter(Boolean).join(" · ")} n=${r.n} avg=${r.avg ?? ""} sd=${r.sd ?? ""} es=${r.es ?? ""}`).join(" | ");
+}
+function keptOnLoad(session, loadId) {
+  if (!session || !loadId) return [];
+  return (session.shots || []).filter(s => {
+    if (!s || s.x) return false;
+    const sid = strOf(session, s);
+    const st = session.tg && session.tg.strings && session.tg.strings.find(q => q.id === sid);
+    const lid = (st && st.asFired && st.asFired.loadId) || session.loadId;
+    return lid === loadId;
+  });
+}
+function exportSessions() {
+  return LOG.map(s => { const copy = JSON.parse(JSON.stringify(s)); delete copy.stats; copy.stringStats = stringStatRows(s); return copy; });
+}
 const curKeyIds = () => ({ rifleId: curRifle()?.id || "", loadId: curLoad()?.id || "" });
 const sessFor = (rifleId, loadId) => LOG.filter(s => s.rifleId === rifleId && s.loadId === loadId).sort((a, b) => a.date.localeCompare(b.date));
 const fmtDate = iso => { const d = new Date(iso); return d.toLocaleDateString(undefined, { year: "2-digit", month: "short", day: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); };
@@ -89,16 +128,15 @@ function renderLog() {
   const orph = orphanSessions(), emp = !l ? !LOG.length : !list.length;
   $("slSum").hidden = emp; $("slEmpty").hidden = !emp;   // one short muted line in the empty card
   if (!l) { $("slSum").textContent = "Pick or save a load to log chronograph sessions for it."; $("slList").innerHTML = (emp ? slEmptyHTML(false) : "") + orphanHTML(orph); $("slChartBox").style.display = "none"; $("slCmp").hidden = true; paintSel(); return; }
-  const all = list.flatMap(s => s.shots), st = shotStats(all);
-  $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} · ${st.n} shots for “${l.name}” · all-shot avg ${st.avg.toFixed(0)} fps, SD ${st.sd.toFixed(1)}`
+  const blurb = s => { const n = tgView(s).strings.length; return `${n} string${n === 1 ? "" : "s"}${sessionGearLabel(s) ? " · " + sessionGearLabel(s) : ""}`; };
+  $("slSum").textContent = list.length ? `${list.length} session${list.length > 1 ? "s" : ""} for “${l.name}”`
     : `No sessions yet for “${l.name}”. Tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Session to type velocities, or import an Athlon file.`;
   $("slList").innerHTML = list.slice().reverse().map(s => `${tgThumbA(s)}<button type="button" class="slItem" data-id="${escapeHtml(s.id)}">
-    <span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
-    <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
-    <span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>${tgThumbB(s)}`).join("") + (emp ? slEmptyHTML(true) : "") + orphanHTML(orph);
+    <span>${escapeHtml(fmtDate(s.date))}</span>
+    <span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)}${s.barrel ? ` · ${s.barrel}" bbl` : ""}${s.notes ? " · " + escapeHtml(s.notes.slice(0, 40)) : ""}</span>
+    <span class="d">${escapeHtml(blurb(s))}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>${tgThumbB(s)}`).join("") + (emp ? slEmptyHTML(true) : "") + orphanHTML(orph);
   paintSel();
-  $("slChartBox").style.display = list.length ? "block" : "none";
-  if (list.length) drawLogChart(list);
+  $("slChartBox").style.display = "none";
   renderCompare();
 }
 function slEmptyHTML(hasLoad) {
@@ -108,24 +146,20 @@ function slEmptyHTML(hasLoad) {
 let cmpScope = "load";
 function renderCompare() {
   const { rifleId, loadId } = curKeyIds(), r = curRifle();
-  const list = (cmpScope === "gun" ? LOG.filter(s => s.rifleId === rifleId) : sessFor(rifleId, loadId)).filter(s => s.stats.n);
-  $("slCmp").hidden = !LOG.some(s => s.rifleId === rifleId && s.stats.n);
+  const list = (cmpScope === "gun" ? LOG.filter(s => s.rifleId === rifleId) : sessFor(rifleId, loadId)).filter(s => (s.shots || []).some(sh => !sh.x));
+  $("slCmp").hidden = !LOG.some(s => s.rifleId === rifleId && (s.shots || []).some(sh => !sh.x));
   $("slCmpScope").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cmpScope));
   if (!list.length) { $("slCmpTbl").innerHTML = `<div class="hint">No sessions with shots for this ${cmpScope === "gun" ? "gun" : "load"} yet.</div>`; return; }
   const ch = s => { const v = parseFloat(s.recipe?.ldCharge); return isFinite(v) ? v : null; };
   const rows = list.slice().sort((a, b) => (ch(a) ?? 1e9) - (ch(b) ?? 1e9) || a.date.localeCompare(b.date));
-  const sds = rows.filter(s => s.stats.n > 2).map(s => s.stats.sd), best = sds.length ? Math.min(...sds) : null;
   const lname = s => r?.loads.find(l => l.id === s.loadId)?.name || s.recipe?.loadName || "?";
-  let prev = null;
-  $("slCmpTbl").innerHTML = `<table><thead><tr>${cmpScope === "gun" ? "<th>Load</th>" : ""}<th>Charge</th><th>Powder</th><th>COAL</th><th>n</th><th>Avg</th><th>SD</th><th>ES</th><th>fps/gr</th><th title="Powder temp (air temp if not set)">°F</th><th>Date</th></tr></thead><tbody>` +
+  $("slCmpTbl").innerHTML = `<table><thead><tr>${cmpScope === "gun" ? "<th>Load</th>" : ""}<th>Charge</th><th>Powder</th><th>COAL</th><th>Strings</th><th title="Powder temp (air temp if not set)">°F</th><th>Date</th></tr></thead><tbody>` +
     rows.map(s => { const c = ch(s), rc = s.recipe || {};
-      const fpg = c != null && prev && prev.c != null && c !== prev.c ? ((s.stats.avg - prev.avg) / (c - prev.c)).toFixed(0) : "";
-      if (c != null) prev = { c, avg: s.stats.avg };
-      return `<tr data-id="${escapeHtml(s.id)}"${best != null && s.stats.n > 2 && s.stats.sd === best ? ' class="best" title="Lowest SD (3+ shots)"' : ""}>${cmpScope === "gun" ? `<td class="l">${escapeHtml(lname(s))}</td>` : ""}
+      return `<tr data-id="${escapeHtml(s.id)}">${cmpScope === "gun" ? `<td class="l">${escapeHtml(lname(s))}</td>` : ""}
         <td>${c != null ? n1(c) : rc.ldKind === "factory" ? "fact." : "—"}</td><td class="l">${escapeHtml((rc.ldKind === "factory" ? rc.ldProduct || rc.ldMaker : rc.ldPowder) || "—")}</td>
-        <td>${n3(rc.ldCOAL) || "—"}</td><td>${s.stats.n}</td><td>${s.stats.avg.toFixed(0)}</td><td>${s.stats.n > 1 ? s.stats.sd.toFixed(1) : "—"}</td><td>${s.stats.n > 1 ? fpsT(s.stats.es) : "—"}</td>
-        <td>${fpg}</td><td>${(s.wx.powder ?? s.wx.temp) != null ? fmt(s.wx.powder ?? s.wx.temp, 0) : "—"}</td><td>${escapeHtml(new Date(s.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</td></tr>`; }).join("") + "</tbody></table>" +
-    `<div class="hint">Sorted by charge (from each session's saved recipe). Highlighted = lowest SD with 3+ shots. fps/gr = velocity gain per grain from the previous charge. Tap a row to open it.</div>`;
+        <td>${n3(rc.ldCOAL) || "—"}</td><td>${tgView(s).strings.length}</td>
+        <td>${(s.wx.powder ?? s.wx.temp) != null ? fmt(s.wx.powder ?? s.wx.temp, 0) : "—"}</td><td>${escapeHtml(new Date(s.date).toLocaleDateString(undefined, { month: "numeric", day: "numeric" }))}</td></tr>`; }).join("") + "</tbody></table>" +
+    `<div class="hint">Sorted by charge (from each session's saved recipe). Velocity stats stay on each string. Tap a row to open it.</div>`;
 }
 /* CSV export of every session, one row per session, with the recipe snapshot */
 // sessions whose gun or load no longer exists
@@ -135,19 +169,19 @@ function orphanHTML(list) {
   if (!list.length) return "";
   return `<div class="slGrp"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Unassigned sessions (${list.length}) — their gun or load was deleted. Tap one and use <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move to give it a home.</div>` + list.map(s => {
     const h = sessHome(s), was = [s.recipe?.gunName, s.recipe?.loadName].filter(Boolean).join(" · ");
-    return `<button type="button" class="slItem orphan" data-id="${escapeHtml(s.id)}"><span>${escapeHtml(fmtDate(s.date))}</span><span class="s"><b>${s.stats.n ? s.stats.avg.toFixed(0) : "—"}</b> fps</span>
-    <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${s.stats.n} shot${s.stats.n === 1 ? "" : "s"}</span><span class="d s">SD ${s.stats.sd ?? "—"} · ES ${s.stats.es != null ? fpsT(s.stats.es) : "—"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
+    return `<button type="button" class="slItem orphan" data-id="${escapeHtml(s.id)}"><span>${escapeHtml(fmtDate(s.date))}</span>
+    <span class="o">Unassigned (${h.why})${was ? " · was " + escapeHtml(was) : ""}</span><span class="d">${escapeHtml(SRC_LBL[s.source] || s.source)} · ${tgView(s).strings.length} string${tgView(s).strings.length === 1 ? "" : "s"}</span>${recipeText(s.recipe) ? `<span class="r">${escapeHtml(recipeText(s.recipe))}</span>` : ""}</button>`;
   }).join("");
 }
 function sessionsCSV() {
   const q = v => { const s = v == null ? "" : String(v); return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  const cols = ["date", "gun", "gun_type", "load", "source", "shots", "avg_fps", "sd", "es", "min", "max", "velocities_fps", "bullet", "weight_gr", "bc", "drag", "muzzle_velocity_preset",
+  const cols = ["date", "gun", "gun_type", "load", "source", "string_stats", "bullet", "weight_gr", "bc", "drag", "muzzle_velocity_preset",
     "ammo", "powder", "charge_gr", "primer", "case", "times_fired", "trim_in", "coal_in", "cbto_in", "jump_in", "case_prep", "factory_brand", "factory_product", "lot", "load_notes",
     "session_notes", "temp_f", "humidity", "pressure_inhg", "altitude_ft", "barrel_in", "powder_temp_f", "temp_sens_fps_per_10f", "chrono_temp_f", "mv_at_powder_temp", "strings", "targets", "discarded_shots", "shot_detail"];
   const rows = LOG.slice().sort((a, b) => a.date.localeCompare(b.date)).map(s => {
     const r = P.rifles.find(x => x.id === s.rifleId), l = r?.loads.find(x => x.id === s.loadId), rc = s.recipe || {};
-    return [s.date, r?.name || rc.gunName, r?.gunKind || rc.gunKind, l?.name || (rc.loadName ? rc.loadName + (r ? " (deleted load)" : " (deleted gun)") : "(unassigned)"), s.source, s.stats.n, s.stats.avg, s.stats.sd, s.stats.es, s.stats.min, s.stats.max,
-      s.shots.map(x => x.v).join(" "), rc.bulletName || (rc.weight ? rc.weight + " gr" : ""), rc.weight, rc.bc, rc.drag, rc.mv,
+    return [s.date, r?.name || rc.gunName, r?.gunKind || rc.gunKind, l?.name || (rc.loadName ? rc.loadName + (r ? " (deleted load)" : " (deleted gun)") : "(unassigned)"), s.source, stringStatText(s),
+      rc.bulletName || (rc.weight ? rc.weight + " gr" : ""), rc.weight, rc.bc, rc.drag, rc.mv,
       rc.ldKind === "factory" ? "factory" : rc.ldKind ? "handload" : "", rc.ldPowder, rc.ldCharge, rc.ldPrimer, rc.ldCase, rc.ldFired, rc.ldTrim, rc.ldCOAL, rc.ldCBTO, rc.ldJump, rc.ldPrep,
       rc.ldMaker, rc.ldProduct, rc.ldLot, rc.ldNotes, s.notes, s.wx.temp, s.wx.humidity, s.wx.pressure, s.wx.altitude, s.barrel, s.wx.powder, rc.ptSens, rc.mvTemp, rc.mvAdj,
       tgView(s).strings.length, tgView(s).targets.length, s.shots.filter(x => x.x).length, shotDetail(s)].map(q).join(",");
@@ -213,10 +247,10 @@ function paintEdRecipe() {
   $("slEdRecipeBtn").innerHTML = t ? "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> Replace with the load's current data" : "<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/></svg> Attach the load's current data";
 }
 function renderEditor() {
-  const st = shotStats(ED.shots), f = v => v == null ? "—" : (+v).toFixed(1);
-  $("slStats").innerHTML = [["Avg fps", st.n ? fpsT(st.avg) : "—"], ["SD", st.n > 1 ? f(st.sd) : "—"], ["ES", st.n > 1 ? fpsT(st.es) : "—"],
-    ["Shots", st.n], ["Min", st.n ? fpsT(st.min) : "—"], ["Max", st.n ? fpsT(st.max) : "—"]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
   const tv = tgView(ED), multi = tv.strings.length > 1;
+  const gear = sessionGearLabel(ED);
+  $("slStats").className = "sessSum";
+  $("slStats").textContent = `${tv.strings.length} string${tv.strings.length === 1 ? "" : "s"}${gear ? " · " + gear : ""}`;
   const row = ({ s, i }, sst, si) => `<div class="shot${s.x ? " dis" : ""}" data-i="${i}" data-id="${escapeHtml(s.id || "")}">
     ${SHOTSEL ? `<input type="checkbox" class="shotCk" data-sel="${escapeHtml(s.id || "")}" ${s.id && SHOTSEL.has(s.id) ? "checked" : ""} aria-label="Select shot ${i + 1}">` : ""}
     <span class="n">#${i + 1}</span><span class="mid"><span class="v">${fpsT(s.v)}</span> <span class="dv">${s.x ? "removed" : sst.n > 1 ? (Math.round(s.v - sst.avg) >= 0 ? "+" : "−") + Math.abs(Math.round(s.v - sst.avg)) : ""}${s.t ? " · " + escapeHtml(s.t) : ""}</span></span>
@@ -224,9 +258,9 @@ function renderEditor() {
     <div class="tgs"><button type="button" class="tg${s.clean ? " on" : ""}" data-f="clean" aria-pressed="${!!s.clean}">Clean</button><button type="button" class="tg${s.cold ? " on" : ""}" data-f="cold" aria-pressed="${!!s.cold}">Cold bore</button><button type="button" class="tg${s.fl ? " on" : ""}" data-f="fl" aria-pressed="${!!s.fl}">Flier</button><button type="button" class="tg${s.ie ? " on" : ""}" data-f="ie" aria-pressed="${!!s.ie}">Input error</button>${multi ? `<span class="sl">${mkGlyph(si)}S${si + 1}</span>` : ""}</div>`}
     ${!SHOTSEL && (s.note || s._showNote) ? `<input class="note" type="text" maxlength="200" placeholder="shot note" value="${escapeHtml(s.note || "")}">` : ""}</div>`;
   const all = ED.shots.map((s, i) => ({ s, i }));
-  $("slShots").innerHTML = (multi ? tv.strings.map((q, si) => ({ q, si })).reverse().map(({ q, si }) => { const mine = all.filter(o => strOf(ED, o.s) === q.id), sst = shotStats(mine.map(o => o.s));
-      return `<div class="sgh">${mkGlyph(si)}String ${si + 1} · Target ${tgtLetter(tv, q.tid)}<small>${mine.length} shot${mine.length === 1 ? "" : "s"}${sst.n ? ` · avg ${fpsT(sst.avg)}` : ""}${sst.n > 1 ? ` · SD ${sst.sd.toFixed(1)} · ES ${fpsT(sst.es)}` : ""}</small></div>` + mine.reverse().map(o => row(o, sst, si)).join(""); }).join("")
-    : all.reverse().map(o => row(o, st, 0)).join("")) ||
+  $("slShots").innerHTML = (tv.strings.map((q, si) => ({ q, si })).reverse().map(({ q, si }) => { const mine = all.filter(o => strOf(ED, o.s) === q.id), sst = shotStats(mine.map(o => o.s));
+      const who = stringWho(q), removed = mine.filter(o => o.s.x).length, n = sst.n || 0;
+      return `<div class="sgh" data-str="${escapeHtml(q.id)}"><div class="sghTop"><span class="sghId">${mkGlyph(si)}String ${si + 1} · Target ${tgtLetter(tv, q.tid)}</span>${who ? `<span class="sghWho">${escapeHtml(who)}</span>` : ""}</div><small>${n} shot${n === 1 ? "" : "s"}${n ? ` · avg ${fpsT(sst.avg)}` : ""}${n > 1 ? ` · SD ${sst.sd.toFixed(1)} · ES ${fpsT(sst.es)}` : ""}${removed ? ` · ${removed} removed` : ""}</small></div>` + mine.reverse().map(o => row(o, sst, si)).join(""); }).join("")) ||
     `<div class="hint" style="padding:8px 0">No shots yet.</div>`;
   paintStrBar(); paintTgView(); if (BAN.sid === ED.id && !$("shotBan").hidden) banPaint();
   paintUseMV(); paintShotSel();
@@ -363,11 +397,12 @@ function applyShotResult(result) {
 // "Use … as MV": the average of every shot that was not Removed. Tags (Clean, Cold bore, Flier, Input error) stay in the average.
 // Behavior change: Cold bore and Flier used to be left out automatically. They no longer are. Only the removed flag (x) excludes.
 function mvPick() {
-  const all = ED ? ED.shots : [], use = all.filter(s => !s.x), st = shotStats(use);
-  const out = { x: all.filter(s => s.x).length };
   const r = ED && P.rifles.find(x => x.id === ED.rifleId), l = r?.loads.find(x => x.id === ED.loadId);
+  const use = keptOnLoad(ED, l && l.id);
+  const st = shotStats(use);
+  const removed = ED ? (ED.shots || []).filter(s => s.x && (() => { const sid = strOf(ED, s); const stg = ED.tg && ED.tg.strings && ED.tg.strings.find(q => q.id === sid); return ((stg && stg.asFired && stg.asFired.loadId) || ED.loadId) === (l && l.id); })()).length : 0;
   const t = num("slPowder") ?? num("slTemp");
-  return { st, n: use.length, out, l, t, mv: st.n ? Math.round(st.avg) : null };
+  return { st, n: use.length, out: { x: removed }, l, t, mv: st.n ? Math.round(st.avg) : null };
 }
 function paintUseMV() {
   if (!ED) return;
@@ -584,7 +619,7 @@ export function init() {
   $("slShots").addEventListener("change", e => { if (e.target.classList.contains("note")) { const i = +e.target.closest(".shot").dataset.i; ED.shots[i].note = e.target.value.trim(); edDirty = true; } });
   ["slDate", "slNotes", "slTemp", "slPowder", "slHum", "slPress", "slAlt", "slBarrel"].forEach(id => $(id).addEventListener("input", () => edDirty = true));
   $("slEdClose").onclick = () => closeEditor();
-  $("slSave").onclick = async () => { if (!ED.shots.length) { toast("Add at least one shot"); return; } const c = await commitEditor(); closeEditor(true); toast(`Session saved · ${c.stats.n} shots, avg ${c.stats.avg.toFixed(0)} fps`); };
+  $("slSave").onclick = async () => { if (!ED.shots.length) { toast("Add at least one shot"); return; } const c = await commitEditor(); closeEditor(true); const ns = tgView(c).strings.length; toast(`Session saved · ${ns} string${ns === 1 ? "" : "s"}`); };
   $("slDel").onclick = async () => { if (!confirm("Delete this session?")) return; LOG = LOG.filter(s => s.id !== ED.id); await saveLog(); slKey = null; closeEditor(true); maybeRenderLog(); toast("Session deleted"); };
   $("slUseMV").onclick = async () => {
     const m0 = mvPick(); if (!m0.st.n || !m0.l) return;
@@ -607,4 +642,4 @@ export function init() {
   document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("slEditor").classList.contains("show")) closeEditor(); else if ($("slImport").classList.contains("show")) closeImport(); });
 }
 
-export { mvPick, paintUseMV, SHEETJS_URLS, ENGINE_URLS, K_LOG, MPS, LOG, slKey, ED, edDirty, IMP, loadLog, saveLog, nOrNull, sstr, cleanSession, shotStats, curKeyIds, sessFor, fmtDate, SRC_LBL, maybeRenderLog, renderLog, slEmptyHTML, cmpScope, renderCompare, sessHome, orphanSessions, orphanHTML, sessionsCSV, drawLogChart, toLocalInput, newSession, openEditor, paintEdFor, paintEdRecipe, renderEditor, addVelocities, addFromInput, readEditor, commitEditor, closeEditor, addShotsToLiveSession, set_LOG, set_slKey, set_edDirty, set_IMP };
+export { mvPick, paintUseMV, SHEETJS_URLS, ENGINE_URLS, K_LOG, MPS, LOG, slKey, ED, edDirty, IMP, loadLog, saveLog, nOrNull, sstr, cleanSession, shotStats, stringWho, stringStatRows, stringStatText, exportSessions, curKeyIds, sessFor, fmtDate, SRC_LBL, maybeRenderLog, renderLog, slEmptyHTML, cmpScope, renderCompare, sessHome, orphanSessions, orphanHTML, sessionsCSV, drawLogChart, toLocalInput, newSession, openEditor, paintEdFor, paintEdRecipe, renderEditor, addVelocities, addFromInput, readEditor, commitEditor, closeEditor, addShotsToLiveSession, set_LOG, set_slKey, set_edDirty, set_IMP };

@@ -331,8 +331,11 @@ function splitFrom(session, shotId) {
 }
 
 function stringStats(session, stringId) {
-  const st = session.tg && session.tg.strings.find((s) => s.id === stringId);
-  const shots = (session.shots || []).filter((s) => (s.str || null) === (stringId || null));
+  const strings = (session.tg && session.tg.strings) || [];
+  const st = strings.find((s) => s.id === stringId);
+  const known = new Set(strings.map((s) => s.id));
+  const first = strings[0] ? strings[0].id : null;
+  const shots = (session.shots || []).filter((s) => ((s && s.str && known.has(s.str)) ? s.str : first) === stringId);
   return { asFired: st ? (st.asFired || null) : null, stats: shotStatsOf(shots) };
 }
 

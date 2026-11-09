@@ -96,8 +96,8 @@ function fillImpLoads() {
 function openImport(fname) {
   $("slImpFile").textContent = `${fname}: ${IMP.length} session${IMP.length > 1 ? "s" : ""} found${IMP.some(s => s.dup) ? " · already-imported ones are unticked" : ""}.`;
   const rs = $("slImpRifle"); rs.innerHTML = ""; P.rifles.forEach(r => rs.add(new Option(r.name, r.id))); rs.value = curRifle()?.id || P.rifles[0]?.id || ""; fillImpLoads();
-  $("slImpList").innerHTML = IMP.map((s, i) => { const st = shotStats(s.shots); return `<label class="impSess"><input type="checkbox" data-i="${i}"${s.dup ? "" : " checked"}>
-    <span><b>${escapeHtml(fmtDate(s.date))}</b>${s.dateKnown ? "" : " (date unknown)"} · ${st.n} shots · avg ${st.avg.toFixed(0)} fps · SD ${st.sd} · ES ${st.es}${s.dup ? ' · <span class="dup">already imported</span>' : ""}
+  $("slImpList").innerHTML = IMP.map((s, i) => { const groups = s.tg && s.tg.strings && s.tg.strings.length > 1 ? s.tg.strings.map((st, si) => { const one = shotStats((s.shots || []).filter(sh => (sh.str || s.tg.strings[0].id) === st.id)); return `String ${si + 1}: ${one.n || 0}${one.n ? " · avg " + one.avg.toFixed(0) : ""}`; }).join(", ") : (() => { const one = shotStats(s.shots || []); return `${one.n || 0} shots${one.n ? " · avg " + one.avg.toFixed(0) + " fps" : ""}`; })(); return `<label class="impSess"><input type="checkbox" data-i="${i}"${s.dup ? "" : " checked"}>
+    <span><b>${escapeHtml(fmtDate(s.date))}</b>${s.dateKnown ? "" : " (date unknown)"} · ${groups}${s.dup ? ' · <span class="dup">already imported</span>' : ""}
     <span class="d" style="display:block">${escapeHtml(s.title || "")}${s.device ? ` · file: avg ${s.device.avg} ${escapeHtml(s.device.unit)}` : ""} · velocities converted from ${escapeHtml(s.unit)}${s.wx.temp != null ? ` · ${s.wx.temp}°F` : ""}${s.wx.pressure != null ? ` · ${s.wx.pressure} inHg` : ""}</span></span></label>`; }).join("");
   $("slImport").classList.add("show"); document.body.style.overflow = "hidden";
 }

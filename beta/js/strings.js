@@ -8,7 +8,7 @@ import { $, escapeHtml, fmt, num, setVal } from "./core.js";
 import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
 import { asFiredFrom, calcFallback, opticOn, recordedDial } from "./link-v3.js";
 import { curOptic } from "./optics.js";
-import { ED, commitEditor, edDirty, renderEditor, set_edDirty } from "./log.js";
+import { ED, commitEditor, edDirty, renderEditor, set_edDirty, stringWho } from "./log.js";
 import { banPaint } from "./shot-banner.js";
 import { P, uid } from "./storage.js";
 import { mkGlyph, tgSvg } from "./target-draw.js";
@@ -20,10 +20,11 @@ import { BAN, TE, TV, angConv, angU, bulletDiaIn, cleanDial, grpStats, hoff, inP
 function paintStrBar() {
   if (!ED) return; const t = tgView(ED), cur = t.strings.find(q => q.id === t.cur), n = strNo(t, cur.id), rd = readings(ED, cur.id);
   $("tgHdrT").textContent = `String ${n} · Target ${tgtLetter(t, cur.tid)}`;
-  const af = cur.asFired, gun = (af && P.rifles.find(x => x.id === af.rifleId)) || curRifle();
+  const af = cur.asFired, gun = (af && P.rifles.find(x => x.id === af.rifleId)) || null;
   const live = gun && curRifle() === gun ? turretSpec() : null;
   const fb = af ? calcFallback(af, gun, opticOn(P, gun), live && live.v > 0 ? live : null) : null;
-  $("tgHdrS").textContent = `${gun ? gun.name + " · " : ""}${rd.length} shot${rd.length === 1 ? "" : "s"} · ${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}${t.strings.length > 1 ? ` · ${t.strings.length} strings` : ""}${fb && fb.warning ? " · " + fb.warning : ""}`;
+  const kept = rd.filter(s => !s.x), who = stringWho(cur);
+  $("tgHdrS").textContent = [who, `${kept.length} shot${kept.length === 1 ? "" : "s"}`, `${cur.holes.length} hole${cur.holes.length === 1 ? "" : "s"}`, t.strings.length > 1 ? `${t.strings.length} strings` : "", fb && fb.warning].filter(Boolean).join(" · ");
   $("tgMarkEach").checked = !!t.mark;
   $("tgMarkBtn").innerHTML = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes · String ${n}`;
 }

@@ -3,14 +3,26 @@ import { ctxRow, sheetHead } from "./parts.js";
 
 export const gearTab = `
 <!-- ===== Gear tab ===== -->
-<section class="tab" id="tabGear" data-tab="gear" role="tabpanel" aria-labelledby="tabBtnGear">
+<section class="tab" id="tabGear" data-tab="gear" data-gearview="list" data-gearsect="gun" role="tabpanel" aria-labelledby="tabBtnGear">
 ${ctxRow("ctxGear")}
 <!-- ===== Presets ===== -->
 <div class="section" id="gearSec">
   <h2>Gear <span class="row"><button class="sm ghost" id="exportBtn" type="button"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' x2='12' y1='15' y2='3'/></svg> Export</button><button class="sm ghost" id="importBtn" type="button"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' x2='12' y1='3' y2='15'/></svg> Import</button></span></h2>
   <input type="file" id="importFile" accept="application/json,.json" hidden>
+  <div id="gearSwitch" role="tablist" aria-label="Gear sections">
+    <button type="button" data-sec="gun" class="on" aria-selected="true">Firearms</button>
+    <button type="button" data-sec="optic" aria-selected="false">Optics</button>
+    <button type="button" data-sec="load" aria-selected="false">Loads</button>
+  </div>
+  <div id="gearListBar">
+    <button type="button" id="gearAdd"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add</button>
+    <button type="button" class="ghost" id="gearArch" aria-pressed="false">Archived</button>
+    <button type="button" class="ghost" id="gearBack" hidden><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m15 18-6-6 6-6'/></svg> List</button>
+    <button type="button" class="ghost" id="gearArchive" hidden>Archive</button>
+  </div>
+  <div id="gearList"></div>
 
-  <div class="picker">
+  <div class="picker" id="gunPicker">
     <div class="lbl"><span>Gun</span><span class="saved" id="rifleSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="rifleSel" aria-label="Gun"></select>
@@ -48,18 +60,20 @@ ${ctxRow("ctxGear")}
         </div>
       </div>
     </div>
+    <div class="grid" id="gunEss">
+      <div class="full"><label for="gunKind">Type</label><select id="gunKind"><option value="rifle">Rifle</option><option value="handgun">Handgun</option></select></div>
+      <div><label for="zero">Zero range (yd)</label><div class="stepper" data-step="25" data-min="10" data-max="1000"><input type="number" inputmode="numeric" id="zero" value="100"></div><div class="err" id="e-zero"></div></div>
+      <div><label for="barrel">Barrel length (in)</label><input type="number" inputmode="decimal" id="barrel" step="0.5" placeholder="optional, e.g. 20"><div class="err" id="e-barrel"></div></div>
+      <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift and the stability check (needs bullet length).</div><div class="err" id="e-twist"></div></div>
+      <div class="full" id="gunTurretRow"><label for="turret">Turret · unit and click value<span class="ro" id="gunTurretRoL" hidden>set by optic</span></label><div class="roVal" id="gunTurretRo" hidden></div><div class="tuRow"><span class="seg tuSeg" id="turretUSeg" role="group" aria-label="Turret unit"><button type="button" data-v="moa">MOA</button><button type="button" data-v="mil">MIL</button></span><select id="turret" aria-label="Turret click value"><option value="">Enter a click value</option><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div></div>
+      <div id="turretCustom" hidden><label for="turretV">Click value</label><input type="number" inputmode="decimal" id="turretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-turretV"></div></div>
+      <div id="turretCustomU" hidden><label for="turretU">Click unit</label><select id="turretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
+    </div>
     <details id="rifleDetails">
-      <summary>Gun details</summary>
+      <summary>More</summary>
       <div class="grid">
-        <div class="full"><label for="gunKind">Type</label><select id="gunKind"><option value="rifle">Rifle</option><option value="handgun">Handgun</option></select></div>
         <div class="full hint" id="gunOptNote" hidden></div>
         <div id="gunSHRow"><label for="sightHeight">Sight height (in)<span class="ro" id="gunSHRoL" hidden>set by optic</span></label><div class="roVal" id="gunSHRo" hidden></div><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
-        <div><label for="zero">Zero range (yd)</label><div class="stepper" data-step="25" data-min="10" data-max="1000"><input type="number" inputmode="numeric" id="zero" value="100"></div><div class="err" id="e-zero"></div></div>
-        <div><label for="barrel">Barrel length (in)</label><input type="number" inputmode="decimal" id="barrel" step="0.5" placeholder="optional, e.g. 20"><div class="err" id="e-barrel"></div></div>
-        <div class="full"><label for="twist">Twist rate (inches per turn)</label><input type="number" inputmode="decimal" id="twist" step="0.5" value="10" placeholder="e.g. 10 (blank = ignore)"><div class="hint">Right-hand twist is positive, left-hand negative. Used for spin drift and the stability check (needs bullet length).</div><div class="err" id="e-twist"></div></div>
-        <div class="full" id="gunTurretRow"><label for="turret">Turret · unit and click value<span class="ro" id="gunTurretRoL" hidden>set by optic</span></label><div class="roVal" id="gunTurretRo" hidden></div><div class="tuRow"><span class="seg tuSeg" id="turretUSeg" role="group" aria-label="Turret unit"><button type="button" data-v="moa">MOA</button><button type="button" data-v="mil">MIL</button></span><select id="turret" aria-label="Turret click value"><option value="">Enter a click value</option><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div></div>
-        <div id="turretCustom" hidden><label for="turretV">Click value</label><input type="number" inputmode="decimal" id="turretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-turretV"></div></div>
-        <div id="turretCustomU" hidden><label for="turretU">Click unit</label><select id="turretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
         <div class="full"><details id="zeroDetails"><summary>Zero conditions <span class="rsum" id="zeroSum">same as today</span></summary>
           <div class="grid">
             <div><label for="zTemp">Temp (°F)</label><input type="number" inputmode="numeric" id="zTemp" placeholder="blank = today"><div class="err" id="e-zTemp"></div></div>
@@ -73,7 +87,7 @@ ${ctxRow("ctxGear")}
     </details>
   </div>
 
-  <div class="picker">
+  <div class="picker" id="loadPicker">
     <div class="lbl"><span>Load (ammo for this gun)</span><span class="saved" id="loadSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="loadSel" aria-label="Load"></select>
@@ -145,7 +159,7 @@ ${ctxRow("ctxGear")}
     <div class="summary" id="loadRecipe"></div>
   </div>
 
-  <div class="picker">
+  <div class="picker" id="rangePicker">
     <div class="lbl"><span>Shooting range / location</span><span class="saved" id="rangeSaved" aria-live="polite"></span></div>
     <div class="row pkRow">
       <select id="rangeSel" aria-label="Range"></select>
@@ -165,7 +179,16 @@ ${ctxRow("ctxGear")}
 </div>
 </section>`;
 
-export const gearSheets = `<div id="pkMenu" role="dialog" aria-modal="true" aria-labelledby="pkTitle"><div class="box">
+export const gearSheets = `<div id="gearDlg" hidden role="dialog" aria-modal="true" aria-labelledby="gearDlgMsg">
+  <div class="box">
+    <p id="gearDlgMsg"></p>
+    <div class="row">
+      <button type="button" class="ghost" id="gearDlgCancel">Cancel</button>
+      <button type="button" id="gearDlgGo">Archive</button>
+    </div>
+  </div>
+</div>
+<div id="pkMenu" role="dialog" aria-modal="true" aria-labelledby="pkTitle"><div class="box">
   <h3 id="pkTitle">Actions</h3>
   <div class="grp" data-k="rifle">
     <button type="button" id="rifleNew"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> New gun</button>

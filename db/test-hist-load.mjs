@@ -74,9 +74,14 @@ try {
   await page.click("#tgEdDone");
   await page.click("#slEdClose");
   await page.click("#tabBtnGear");
+  await page.click('#gearSwitch button[data-sec="load"]');
+  await page.locator('#gearList .gearItem[data-id="l1"]').click();
   await page.fill("#mv", "3200");
   await page.fill("#bc", "0.550");
   await page.selectOption("#drag", "G1");
+  await page.click("#gearBack");
+  await page.click('#gearSwitch button[data-sec="optic"]');
+  await page.locator('#gearList .gearItem[data-id="o1"]').click();
   await page.selectOption("#opTurret", "0.25moa");
   await page.click("#tabBtnDope");
   await page.fill("#target", "600");
@@ -128,14 +133,16 @@ try {
   await page.screenshot({ path: ART + "/truing-moa-360.png" });
 
   await page.click("#trClose");
+  if (await page.locator("#tgEd.show").count()) await page.click("#tgEdDone");
+  if (await page.locator("#slEditor.show").count()) await page.click("#slEdClose");
   await page.click("#tabBtnGear");
-  await page.selectOption("#loadSel", "l1");
-  await page.locator("#bc").fill("", { force: true });
-  await page.locator("#bc").dispatchEvent("input");
-  await page.locator("#weight").fill("", { force: true });
-  await page.locator("#weight").dispatchEvent("input");
-  await page.locator("#diameter").fill("", { force: true });
-  await page.locator("#diameter").dispatchEvent("input");
+  if ((await page.getAttribute("#tabGear", "data-gearview")) === "edit") await page.click("#gearBack");
+  await page.click('#gearSwitch button[data-sec="load"]');
+  await page.locator('#gearList .gearItem[data-id="l1"]').click();
+  await page.fill("#bc", "");
+  await page.locator("#loadDetails").evaluate((el) => { el.open = true; });
+  await page.fill("#weight", "");
+  await page.fill("#diameter", "");
   await page.click("#tabBtnLog");
   await page.click(".slItem");
   await page.click("#tgMarkBtn");
@@ -172,7 +179,7 @@ try {
   if (!controlled) {
     await page.context().setOffline(false);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent === "BallisticBench");
+    await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent.replace("™","") === "BallisticBench");
     controlled = await page.evaluate(() => !!navigator.serviceWorker.controller);
     await page.context().setOffline(true);
     await page.reload({ waitUntil: "domcontentloaded" });

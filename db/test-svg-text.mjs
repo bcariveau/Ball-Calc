@@ -44,7 +44,7 @@ async function boot() {
     });
   }, { preset: presetRaw, sessions: sessionRaw });
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.querySelector("h1")?.textContent === "BallisticBench");
+  await page.waitForFunction(() => document.querySelector("h1")?.textContent.replace("™","") === "BallisticBench");
 }
 async function leaks() {
   return page.evaluate(() => {
@@ -86,22 +86,25 @@ try {
   await boot();
   await scan("Dope");
   await page.click("#tabBtnGear");
-  await page.waitForSelector("#rifleMenu");
-  for (const id of ["#rifleMenu", "#opticMenu", "#loadMenu"]) {
+  await page.waitForSelector("#gearList .gearItem");
+  for (const [sec, id] of [["gun", "#rifleMenu"], ["optic", "#opticMenu"], ["load", "#loadMenu"]]) {
+    await page.click(`#gearSwitch button[data-sec="${sec}"]`);
+    await page.locator("#gearList .gearItem").first().click();
     await page.click(id);
     await page.waitForSelector("#pkMenu.show");
     await scan("Gear " + id);
     await page.click("#pkCancel");
     await page.waitForSelector("#pkMenu.show", { state: "hidden" });
+    await page.click("#gearBack");
   }
-  await page.selectOption("#rifleSel", "r2");
+  await page.selectOption("#rifleSel", "r2", { force: true });
   await page.click("#tabBtnLog");
   await page.waitForFunction(() => /No sessions yet/.test(document.querySelector("#slSum")?.textContent || ""));
   ok(await page.locator("#slSum svg.ic").count() > 0, "the empty log summary renders the plus icon");
   await scan("empty Log");
   await page.click("#tabBtnGear");
-  await page.selectOption("#rifleSel", "r1");
-  await page.selectOption("#loadSel", "l1");
+  await page.selectOption("#rifleSel", "r1", { force: true });
+  await page.selectOption("#loadSel", "l1", { force: true });
   await page.click("#tabBtnLog");
   await page.click(".slItem");
   await page.waitForSelector("#slMvNote");

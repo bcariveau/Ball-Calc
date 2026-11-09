@@ -48,6 +48,13 @@ async function startSelect() {
   if (await page.locator("#shotSelBtn").isHidden()) await page.click("#shotSelDone");
   await page.click("#shotSelBtn");
 }
+async function editGear(sec, id) {
+  await page.click("#tabBtnGear");
+  if ((await page.getAttribute("#tabGear", "data-gearview")) === "edit") await page.click("#gearBack");
+  await page.click(`#gearSwitch button[data-sec="${sec}"]`);
+  await page.locator(`#gearList .gearItem[data-id="${id}"]`).click();
+  await page.waitForFunction(() => document.querySelector("#tabGear").dataset.gearview === "edit");
+}
 
 async function seed() {
   await page.evaluate(async ({ preset, sessions }) => {
@@ -74,8 +81,8 @@ try {
   await page.waitForSelector("h1");
   await seed();
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent === "BallisticBench" && window.__bc && window.__bc.P.rifles.length === 2);
-  ok((await page.locator("h1").innerText()) === "BallisticBench", "beta page shows BallisticBench");
+  await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent.replace("™","") === "BallisticBench" && window.__bc && window.__bc.P.rifles.length === 2);
+  ok((await page.locator("h1").innerText()).replace("™","") === "BallisticBench", "beta page shows BallisticBench");
 
   const mig = await page.evaluate(async ({ preset, sessions }) => {
     const liveBefore = localStorage.getItem("bcalc.presets.v1");
@@ -100,26 +107,31 @@ try {
   ok(mig.lifted && mig.nullOptic, "the copy lifts loads and leaves the missing optic null");
 
   await page.click("#tabBtnGear");
-  await page.selectOption("#rifleSel", "r2");
+  await page.selectOption("#rifleSel", "r2", { force: true });
   await page.waitForFunction(() => document.querySelector("#loadSel").value === "l3" && document.querySelector("#opticSel").value === "");
   ok((await page.evaluate(() => window.__bc.P.rifles.find((r) => r.id === "r2").turret || "")) === "", "recalling a gun with no turret does not store a click value");
   ok(true, "Rifle B recalls Load B and no optic");
   await page.screenshot({ path: ART + "/recall-rifle-b-360.png" });
-  await page.selectOption("#rifleSel", "r1");
+  await page.selectOption("#rifleSel", "r1", { force: true });
   await page.waitForFunction(() => document.querySelector("#loadSel").value === "l1" && document.querySelector("#opticSel").value === "o1" && document.querySelector("#opTurret").value === "0.1mil");
   ok(true, "Rifle A recalls Razor and Load A");
 
+  await editGear("load", "l1");
   await page.fill("#mv", "2999");
+  await editGear("optic", "o1");
   await page.selectOption("#opTurret", "0.25moa");
   promptAnswer = "Rifle A edited";
+  await editGear("gun", "r1");
   await page.click("#rifleMenu");
   await page.click("#rifleRename");
   await page.waitForFunction(() => document.querySelector("#rifleSel").selectedOptions[0].textContent === "Rifle A edited");
   promptAnswer = "Load A edited";
+  await editGear("load", "l1");
   await page.click("#loadMenu");
   await page.click("#loadRename");
   await page.waitForFunction(() => document.querySelector("#loadSel").selectedOptions[0].textContent === "Load A edited");
   promptAnswer = "Razor edited";
+  await editGear("optic", "o1");
   await page.click("#opticMenu");
   await page.click("#opRename");
   await page.waitForFunction(() => document.querySelector("#opticSel").selectedOptions[0].textContent.startsWith("Razor edited"));
@@ -137,7 +149,9 @@ try {
   ok(edited.other.optic === null && edited.other.rifleId === "r2" && edited.other.recipe.mv === "2800", "the other firearm's string is not rewritten");
   ok(edited.liveMv === "2999" && edited.liveTurret === "0.25moa" && edited.liveGun === "Rifle A edited", "the live records did take the edits");
 
+  await editGear("load", "l1");
   await page.fill("#mv", "2737");
+  await editGear("optic", "o1");
   await page.selectOption("#opTurret", "0.1mil");
 
   await page.click("#tabBtnLog");
@@ -243,7 +257,7 @@ try {
   await page.waitForFunction(() => window.__bc.ED.shots.find((s) => s.id === "c").str === "st1");
   await page.click("#slEdClose");
   await page.waitForFunction(() => !document.querySelector("#slEditor").classList.contains("show"));
-  await page.click("#tabBtnGear");
+  await editGear("load", "l1");
   await page.fill("#mv", "2737");
   await page.click("#tabBtnLog");
   await page.click(".slItem");
@@ -293,6 +307,7 @@ try {
   const exported = JSON.parse(fs.readFileSync(exportPath, "utf8"));
   ok(exported.rifles.length === 2 && exported.shotSessions.some((s) => s.id === "sess1") && exported.version === 2, "export contains both firearms and the session");
   promptAnswer = "Temporary name";
+  await editGear("gun", "r1");
   await page.click("#rifleMenu");
   await page.click("#rifleRename");
   await page.waitForFunction(() => document.querySelector("#rifleSel").selectedOptions[0].textContent === "Temporary name");
@@ -301,11 +316,10 @@ try {
   ok(true, "import replaces the renamed gun with the exported copy");
 
   await page.click("#tabBtnDope");
-  await page.click("#tabBtnGear");
-  await page.selectOption("#rifleSel", "r2");
+  await editGear("gun", "r2");
   await page.locator("#rifleDetails").evaluate((el) => { el.open = true; });
   await page.selectOption("#turret", "custom");
-  await page.fill("#turretV", "");
+  await page.locator("#turretV").fill("");
   await page.click("#tabBtnDope");
   await page.click("#calcBtn");
   await page.waitForFunction(() => /Nothing was invented/.test(document.querySelector("#status").textContent));
@@ -319,13 +333,13 @@ try {
   });
   if (!controlled.c) {
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent === "BallisticBench");
+    await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent.replace("™","") === "BallisticBench");
     controlled = await page.evaluate(() => ({ c: !!navigator.serviceWorker.controller }));
   }
   ok(controlled.c, "the beta service worker is controlling this isolated page");
   await page.context().setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.readyState === "complete" && document.querySelector("h1") && document.querySelector("h1").textContent === "BallisticBench");
+  await page.waitForFunction(() => document.readyState === "complete" && document.querySelector("h1") && document.querySelector("h1").textContent.replace("™","") === "BallisticBench");
   const offline = await page.evaluate(async () => {
     const idb = await new Promise((res, rej) => {
       const o = indexedDB.open("bcalc-db", 1);
@@ -334,10 +348,10 @@ try {
     });
     return { h1: document.querySelector("h1").textContent, ready: document.readyState, version: JSON.parse(localStorage.getItem("bcalc.presets.v1")).version, shots: idb.find((s) => s.id === "sess1").shots.length };
   });
-  ok(offline.h1 === "BallisticBench" && offline.ready === "complete" && offline.version === 2 && offline.shots === 5, "offline reload still has the page, the v2 save, and the five shots");
+  ok(offline.h1.replace("™","") === "BallisticBench" && offline.ready === "complete" && offline.version === 2 && offline.shots === 5, "offline reload still has the page, the v2 save, and the five shots");
   await page.click("#tabBtnGear");
-  await page.selectOption("#rifleSel", "r1");
-  await page.selectOption("#loadSel", "l1");
+  await page.selectOption("#rifleSel", "r1", { force: true });
+  await page.selectOption("#loadSel", "l1", { force: true });
   await page.click("#tabBtnLog");
   await page.waitForSelector(".slItem");
   await page.screenshot({ path: ART + "/offline-log-360.png" });

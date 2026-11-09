@@ -58,7 +58,7 @@ async function boot(list) {
     });
   }, { preset: presetRaw, sessions: JSON.stringify(list) });
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.querySelector("h1")?.textContent === "BallisticBench" && window.__bc?.log?.length);
+  await page.waitForFunction(() => document.querySelector("h1")?.textContent.replace("™","") === "BallisticBench" && window.__bc?.log?.length);
 }
 const small = (label) => page.locator(".sgh").filter({ hasText: label }).locator("small").innerText();
 const who = (label) => page.locator(".sgh").filter({ hasText: label }).locator(".sghWho").innerText();
@@ -163,7 +163,7 @@ try {
   await page.click("#shotSelDone");
   await page.click("#slEdClose");
   await page.click("#tabBtnGear");
-  await page.selectOption("#loadSel", "l2");
+  await page.selectOption("#loadSel", "l2", { force: true });
   await page.click("#tabBtnLog");
   await page.waitForFunction(() => [...document.querySelectorAll(".slItem")].some((el) => el.dataset.id === "sess2"));
   await page.locator(".slItem[data-id='sess2']").click();

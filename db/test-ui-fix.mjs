@@ -50,7 +50,7 @@ async function boot() {
     });
   }, { preset: JSON.stringify(preset), sessions: JSON.stringify(sessions) });
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.querySelector("h1")?.textContent === "BallisticBench" && window.__bc?.log?.length === 2);
+  await page.waitForFunction(() => document.querySelector("h1")?.textContent.replace("™","") === "BallisticBench" && window.__bc?.log?.length === 2);
 }
 
 try {

@@ -43,7 +43,7 @@ function bestSession(rid, l) {
 function recipeMatches(cur = pick(LOAD_F), withStats) {
   const me = curLoad(), r0 = curRifle(), out = [];
   P.rifles.forEach(r => r.loads.forEach(l => {
-    if (l === me || !recipeText(l)) return;
+    if (l === me || l.archived || r.archived || !recipeText(l)) return;
     const m = projMatch(cur, l); if (m) out.push({ r, l, m, best: withStats ? bestSession(r.id, l) : null });
   }));
   return out.sort((a, b) => (b.r === r0) - (a.r === r0) || (a.best?.s.stats.n >= 3 ? a.best.s.stats.sd : 99) - (b.best?.s.stats.n >= 3 ? b.best.s.stats.sd : 99) || a.l.name.localeCompare(b.l.name));
@@ -108,7 +108,7 @@ function openCopy(mode) {
   cpAll = false; renderCopy(); openOvl("cpSheet");
 }
 function renderCopy() {
-  const src = pick(LOAD_F), r0 = curRifle(), others = P.rifles.filter(g => g !== r0);
+  const src = pick(LOAD_F), r0 = curRifle(), others = P.rifles.filter(g => g !== r0 && !g.archived);
   const fits = g => { const d = gunDias(g); return !d.length || d.some(x => Math.abs(+x - (fnum(src.diameter) ?? -1)) < 0.0015); };
   const nFit = others.filter(fits).length, show = cpAll ? others : others.filter(fits);
   $("cpMv").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cpMv));

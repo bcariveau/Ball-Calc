@@ -112,7 +112,7 @@ async function boot() {
   await page.goto(`http://127.0.0.1:${PORT}/beta.html`, { waitUntil: "domcontentloaded" });
   await seed();
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent === "BallisticBench" && window.__bc && window.__bc.log.length === 2);
+  await page.waitForFunction(() => document.querySelector("h1") && document.querySelector("h1").textContent.replace("™","") === "BallisticBench" && window.__bc && window.__bc.log.length === 2);
 }
 async function openFirst() {
   await page.click("#tabBtnLog");
@@ -147,7 +147,7 @@ const snap = () => page.evaluate(() => {
 
 try {
   await boot();
-  ok((await page.locator("h1").innerText()) === "BallisticBench", "beta page shows BallisticBench");
+  ok((await page.locator("h1").innerText()).replace("™","") === "BallisticBench", "beta page shows BallisticBench");
   await openFirst();
   const before = await snap();
   await startSelect();

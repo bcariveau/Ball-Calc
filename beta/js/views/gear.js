@@ -40,6 +40,7 @@ ${ctxRow("ctxGear")}
       <div class="summary" id="opticSum"></div>
       <div id="opticBody" hidden>
         <div class="grid" style="margin-top:8px">
+          <div class="full"><label for="opCatalog">Catalog</label><select id="opCatalog" aria-label="Optic catalog"><option value="">Blank — enter your own</option></select><div class="hint" id="opCatalogSrc"></div></div>
           <div class="full"><label for="opTurret">Turret · unit and click value</label><div class="tuRow"><span class="seg tuSeg" id="opTurretUSeg" role="group" aria-label="Turret unit"><button type="button" data-v="moa">MOA</button><button type="button" data-v="mil">MIL</button></span><select id="opTurret" aria-label="Turret click value"><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div></div>
           <div id="opTurretCustom" hidden><label for="opTurretV">Click value</label><input type="number" inputmode="decimal" id="opTurretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-opTurretV"></div></div>
           <div id="opTurretCustomU" hidden><label for="opTurretU">Click unit</label><select id="opTurretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
@@ -76,7 +77,7 @@ ${ctxRow("ctxGear")}
         <div class="full hint">Right-hand twist is positive, left-hand negative. Used for spin drift and the stability check (needs bullet length).</div>
         <div class="full hint" id="gunOptNote" hidden></div>
         <div id="gunSHRow"><label for="sightHeight">Sight height (in)<span class="ro" id="gunSHRoL" hidden>set by optic</span></label><div class="roVal" id="gunSHRo" hidden></div><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>
-        <div class="full"><details id="zeroDetails" open><summary>Zero conditions <span class="rsum" id="zeroSum">same as today</span></summary>
+        <div class="full"><details id="zeroDetails" open><summary><span>Zero conditions <span class="rsum" id="zeroSum">same as today</span></span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
           <div class="grid">
             <div><label for="zTemp">Temp (°F)</label><input type="number" inputmode="numeric" id="zTemp" placeholder="blank = today"><div class="err" id="e-zTemp"></div></div>
             <div><label for="zHum">Humidity (%)</label><input type="number" inputmode="numeric" id="zHum" placeholder="blank = today"><div class="err" id="e-zHum"></div></div>
@@ -94,7 +95,7 @@ ${ctxRow("ctxGear")}
         </div>
         <div class="summary" id="rangeSum"></div>
         <details id="rangeDetails" open>
-          <summary>Range location</summary>
+          <summary><span>Range location</span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
           <div class="grid">
             <div><label for="rangeLat">Latitude</label><input type="number" inputmode="decimal" id="rangeLat" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLat"></div></div>
             <div><label for="rangeLon">Longitude</label><input type="number" inputmode="decimal" id="rangeLon" step="0.0001" placeholder="optional"><div class="err" id="e-rangeLon"></div></div>
@@ -136,7 +137,7 @@ ${ctxRow("ctxGear")}
         <div class="full summary" id="truedNote" hidden></div><input type="hidden" id="trued">
         <div class="full" id="bandsRow" style="display:none"><label for="useBands">Sierra velocity-banded G1</label><select id="useBands"><option value="">Use single BC above</option><option value="1">Use velocity bands (G1 only)</option></select><div class="hint" id="bandsTxt"></div></div>
         <div class="full hint">BC must match the drag model printed on the box (G1 vs G7). Bullet length is optional; it enables spin drift. Factory BCs are often optimistic — true them against real drops.</div>
-        <div class="full"><details id="mvEstBox" open><summary>Estimate MV for a different barrel (no chronograph)</summary>
+        <div class="full"><details id="mvEstBox" open><summary><span>Estimate MV for a different barrel (no chronograph)</span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
           <div class="grid">
             <div><label for="refMV">Reference MV (fps)</label><input type="number" inputmode="numeric" id="refMV" step="5" placeholder="box / load data"><div class="err" id="e-refMV"></div></div>
             <div><label for="refBarrel">Ref. barrel (in)</label><input type="number" inputmode="decimal" id="refBarrel" step="0.5" placeholder="24"><div class="err" id="e-refBarrel"></div></div>
@@ -147,7 +148,7 @@ ${ctxRow("ctxGear")}
           </div></details></div>
       </div>
       <details id="recipeDetails" open>
-        <summary>Load data <span class="rsum" id="recipeSum" hidden></span></summary>
+        <summary><span>Load data <span class="rsum" id="recipeSum" hidden></span></span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
         <span class="seg" id="ldKindSeg" role="group" aria-label="Ammo type"><button type="button" data-v="hand"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg> Handload</button><button type="button" data-v="factory"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z'/><path d='M12 22V12'/><path d='m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7'/></svg> Factory ammo</button></span>
         <input type="hidden" id="ldKind" value="hand">
         <button class="sm ghost rcBtn" type="button" id="rcFind" hidden></button>

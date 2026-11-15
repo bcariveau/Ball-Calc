@@ -73,7 +73,9 @@ function tgNewString(newTarget) {
   }
   tgAfterEdit();
   const nc = t.strings.find(s => s.id === t.cur), msg = `String ${strNo(t, nc.id)} · Target ${tgtLetter(t, nc.tid)}${newTarget ? " (fresh sheet)" : " (same sheet, new aim point)"}`;
-  if (needMark) toast(`${msg} — String ${curNo} has no holes marked`, { label: "Mark holes", fn: () => openTgEd(cur.id) }); else toast(msg);
+  if (newTarget) { openTgEd(nc.id); toast(msg); }
+  else if (needMark) toast(`${msg} — String ${curNo} has no holes marked`, { label: "Mark holes", fn: () => openTgEd(cur.id) });
+  else toast(msg);
   tgAutoDial(ED, nc);
 }
 

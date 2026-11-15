@@ -78,15 +78,14 @@ try {
   await page.locator("#slTgView").screenshot({ path: ART + "/compare-single.png" });
 
   await page.click("#tgNewTgt");
-  await page.click("#tgMarkBtn");
   await page.waitForSelector("#tgEd.show");
   const aim = await page.evaluate(() => {
     const t = window.__bc.ED.tg, st = t.strings.find((s) => s.id === t.cur);
     const hole = document.querySelector('#tgMode button[data-v="hole"]');
-    return { x: st.aim && st.aim.x, y: st.aim && st.aim.y, holes: hole.getAttribute("aria-pressed") === "true" && hole.classList.contains("on") };
+    return { x: st.aim && st.aim.x, y: st.aim && st.aim.y, holes: hole.getAttribute("aria-pressed") === "true" && hole.classList.contains("on"), tip: document.querySelector("#tgTip").textContent };
   });
   ok(aim.x === 0 && aim.y === 0, "a new target aims at the sheet center");
-  ok(aim.holes, "Holes mode is on for that new target");
+  ok(aim.holes && /Tap each hole/.test(aim.tip), "Holes mode is already on after New target");
   await page.locator("#tgSvg").screenshot({ path: ART + "/aim-center.png" });
   await page.locator("#tgMode").screenshot({ path: ART + "/holes-active.png" });
   await page.click("#tgEdDone");

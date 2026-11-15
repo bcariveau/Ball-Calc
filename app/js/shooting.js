@@ -123,7 +123,7 @@ function shPaint() {
   $("shFor").textContent = [gunFired?.name, loadFired?.name, `${yd} yd`, scope].filter(Boolean).join(" · ");
   const gun = $("shGun");
   if (gun && gun.dataset.lock !== "1") {
-    gun.innerHTML = P.rifles.map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");
+    gun.innerHTML = P.rifles.filter(g => !g.archived).map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join("");
     gun.value = curRifle()?.id || "";
   }
   const x = q.last;

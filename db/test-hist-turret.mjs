@@ -99,7 +99,10 @@ try {
   await page.click("#tgEdDone");
   await page.click("#slEdClose");
   await page.click("#tabBtnGear");
-  await page.selectOption("#opTurret", "0.25moa", { force: true });
+  await page.click('#gearSwitch button[data-sec="optic"]');
+  await page.locator('#gearList .gearItem[data-id="o1"]').click();
+  await page.locator('#opTurretUSeg button[data-v="moa"]').click();
+  await page.selectOption("#opTurret", "0.25moa");
   await page.locator("#opTrack").fill("1.02", { force: true });
   await page.locator("#opTrack").dispatchEvent("input");
   await page.locator("#opSH").fill("2", { force: true });

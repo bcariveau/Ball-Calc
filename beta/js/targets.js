@@ -62,7 +62,7 @@ function tgView(s) { return s.tg || { targets: [{ id: "_t", tpl: "grid1", dist: 
 function tgEnsure(s) {
   s.shots.forEach(x => { if (!x.id) x.id = uid(); });
   if (!s.tg) { const tid = uid(), sid = uid(); const r = curRifle(), l = curLoad();
-    s.tg = { targets: [{ id: tid, tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: sid, tid, aim: null, holes: [], asFired: asFiredFrom(r, curOptic(), l, r && l ? recipeSnapshot(r.id, l.id) : null) }], cur: sid, mark: false }; }
+    s.tg = { targets: [{ id: tid, tpl: "grid1", dist: tgDefDist(), du: "yd", u: "in" }], strings: [{ id: sid, tid, aim: { x: 0, y: 0 }, holes: [], asFired: asFiredFrom(r, curOptic(), l, r && l ? recipeSnapshot(r.id, l.id) : null) }], cur: sid, mark: false }; }
   return s.tg;
 }
 function strOf(s, x) { const t = tgView(s); return x.str && t.strings.some(q => q.id === x.str) ? x.str : t.strings[0].id; }

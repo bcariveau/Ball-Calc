@@ -25,20 +25,33 @@ function paintStrBar() {
   $("tgMarkEach").checked = !!t.mark;
   $("tgMarkBtn").innerHTML = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes · String ${n}`;
 }
+function strRifleId(st) { return (st && st.asFired && st.asFired.rifleId) || (ED && ED.rifleId) || ""; }
 function paintTgView() {
   if (!ED) return; const box = $("slTgView"), t = tgView(ED);
-  if (TV.sid !== ED.id) { TV.sid = ED.id; TV.hide = new Set(); }
+  if (TV.sid !== ED.id) { TV.sid = ED.id; TV.hide = new Set(); TV.gun = null; }
+  const curSt = t.strings.find(q => q.id === t.cur);
+  if (TV.gun == null) TV.gun = strRifleId(curSt);
   const any = t.strings.some(st => st.holes.length);
   if (!any) { box.innerHTML = `<div class="hint">No holes marked yet. Tap <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg> Mark holes after a string (or turn on Mark each shot).</div>`; return; }
-  const vis = t.strings.map((st, i) => ({ st, i, g: t.targets.find(q => q.id === st.tid) })).filter(o => o.st.holes.length);
+  const all = t.strings.map((st, i) => ({ st, i, g: t.targets.find(q => q.id === st.tid) })).filter(o => o.st.holes.length);
+  const rifles = [];
+  all.forEach(o => { const id = strRifleId(o.st); if (!rifles.some(r => r.id === id)) { const g = P.rifles.find(r => r.id === id); rifles.push({ id, name: g ? g.name : "This session" }); } });
+  if (!rifles.some(r => r.id === TV.gun)) TV.gun = strRifleId(curSt);
+  const vis = all.filter(o => strRifleId(o.st) === TV.gun);
   const shown = vis.filter(o => !TV.hide.has(o.st.id));
-  const yds = [...new Set(shown.map(o => Math.round(tgYd(o.g))))], ts = tsFor(ED.rifleId, t.strings.find(q => q.id === t.cur)), ang = yds.length > 1 ? ts.u : null, lu = shown[0]?.g.u || "in";
+  const multi = shown.length > 1;
+  const yds = [...new Set(shown.map(o => Math.round(tgYd(o.g))))], ts = tsFor(ED.rifleId, curSt), ang = yds.length > 1 ? ts.u : null;
   const conv = (p, g) => ang ? { x: p.x / inPerU(ang, tgYd(g)), y: p.y / inPerU(ang, tgYd(g)) } : p;
-  let mx = 0; const layers = shown.map(o => ({ i: o.i, sid: o.st.id, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = conv(hoff(o.st, h), o.g); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: k + 1, meas: !!h.m, rm: !statHoles(ED, { holes: [h] }).length, id: h.id }; }) }));
-  const span = Math.max(ang ? 2 : 3, mx * 2.5), sv = tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers, dia: bulletDiaIn(ED), px: span / Math.max(200, box.clientWidth || 380) });
+  let mx = 0; const layers = shown.map((o, ci) => ({ i: o.i, ci, sid: o.st.id, aim: { x: 0, y: 0 }, holes: o.st.holes.map((h, k) => { const p = conv(hoff(o.st, h), o.g); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y)); return { p, n: k + 1, meas: !!h.m, rm: !statHoles(ED, { holes: [h] }).length, id: h.id }; }) }));
+  const span = Math.max(ang ? 2 : 3, mx * 2.5), sv = shown.length ? tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers, colors: multi, dia: bulletDiaIn(ED), px: span / Math.max(200, box.clientWidth || 380) }) : null;
+  const gunName = id => { const g = P.rifles.find(r => r.id === id); return g ? g.name : "This session"; };
+  const loadName = st => { const af = st.asFired; const g = af && P.rifles.find(r => r.id === af.rifleId); const l = g && (g.loads || []).find(x => x.id === af.loadId); return l ? l.name : ""; };
   const chips = vis.map(o => { const on = !TV.hide.has(o.st.id), gs = grpStats(statHoles(ED, o.st).map(h => hoff(o.st, h)));
-    return `<button type="button" class="sc${on ? " on" : ""}" data-s="${escapeHtml(o.st.id)}" aria-pressed="${on}">${mkGlyph(o.i)}S${o.i + 1} · ${tgtLetter(t, o.st.tid)} · ${fmt(o.g.dist, 0)} ${o.g.du}${gs && gs.n > 1 ? ` · ${lenTxt(gs.es, o.g.u)}` : ""}</button>`; }).join("");
-  box.innerHTML = `<div class="scRow" role="group" aria-label="Show or hide strings">${chips}</div>` +
+    const ci = shown.findIndex(s => s.st.id === o.st.id);
+    return `<button type="button" class="sc${on ? " on" : ""}" data-s="${escapeHtml(o.st.id)}" aria-pressed="${on}">${mkGlyph(ci < 0 ? 0 : ci, multi && on)}S${o.i + 1} · ${tgtLetter(t, o.st.tid)} · ${fmt(o.g.dist, 0)} ${o.g.du}${gs && gs.n > 1 ? ` · ${lenTxt(gs.es, o.g.u)}` : ""}</button>`; }).join("");
+  const legend = multi ? `<div class="tgLeg" id="slTgLeg">${shown.map((o, ci) => `<span><i class="s${(ci % 6) + 1}"></i>S${o.i + 1} · ${escapeHtml(gunName(strRifleId(o.st)))}${loadName(o.st) ? ` · ${escapeHtml(loadName(o.st))}` : ""}</span>`).join("")}</div>` : "";
+  const riflePick = `<label class="full" for="slTgRifle">Rifle</label><select id="slTgRifle" aria-label="Rifle for string comparison">${rifles.map(r => `<option value="${escapeHtml(r.id)}"${r.id === TV.gun ? " selected" : ""}>${escapeHtml(r.name)}</option>`).join("")}</select>`;
+  box.innerHTML = riflePick + `<div class="scRow" role="group" aria-label="Show or hide strings">${chips || `<div class="hint">No strings for this rifle.</div>`}</div>` + legend +
     (shown.length ? `<svg id="slTgSvg" class="tgS" viewBox="${sv.vb}" role="img" aria-label="Overlay of ${shown.length} string${shown.length > 1 ? "s" : ""}, aligned on their aim points">${sv.html}</svg>` : `<div class="hint">All strings hidden — tap a chip to show it.</div>`) +
     `<div class="hint" id="slTgNote">${shown.length ? `Aligned on each string's aim point · grid ${fmt(sv.grid.step, 2)} ${ang ? angU(ang) : "in"}${ang ? ` · <b>different distances (${yds.join(", ")} yd) — plotted in ${angU(ang)}</b> so groups compare by angle` : ""}` : ""}</div>`;
 }
@@ -52,8 +65,8 @@ function tgNewString(newTarget) {
   const needMark = !empty && !cur.holes.length && rdN > 0, curNo = strNo(t, cur.id);
   if (newTarget) {
     const g0 = t.targets.find(g => g.id === cur.tid), g = { ...g0, id: uid() }; t.targets.push(g);
-    if (empty) { const old = cur.tid; cur.tid = g.id; cur.aim = null; if (!t.strings.some(s => s.tid === old)) t.targets = t.targets.filter(q => q.id !== old); }
-    else { const s = newString(g.id); t.strings.push(s); t.cur = s.id; }
+    if (empty) { const old = cur.tid; cur.tid = g.id; cur.aim = { x: 0, y: 0 }; if (!t.strings.some(s => s.tid === old)) t.targets = t.targets.filter(q => q.id !== old); }
+    else { const s = newString(g.id); s.aim = { x: 0, y: 0 }; t.strings.push(s); t.cur = s.id; }
   } else {
     if (empty) { toast(`String ${curNo} has no shots yet`); return; }
     const s = newString(cur.tid); t.strings.push(s); t.cur = s.id;
@@ -144,6 +157,7 @@ function teSumPaint() {   // one tappable line for String/Template/Distance/Meas
 
 export function init() {
   $("slTgView").addEventListener("click", e => { const b = e.target.closest(".sc"); if (!b) return; const id = b.dataset.s; TV.hide.has(id) ? TV.hide.delete(id) : TV.hide.add(id); paintTgView(); });
+  $("slTgView").addEventListener("change", e => { if (e.target.id !== "slTgRifle") return; TV.gun = e.target.value; TV.hide = new Set(); paintTgView(); });
   $("tgNewStr").onclick = () => tgNewString(false);
   $("tgNewTgt").onclick = () => tgNewString(true);
   $("tgMarkBtn").onclick = () => { if (!ED) return; const t = tgEnsure(ED); openTgEd(t.cur); };

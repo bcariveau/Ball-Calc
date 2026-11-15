@@ -82,6 +82,7 @@ try {
   await page.click("#gearBack");
   await page.click('#gearSwitch button[data-sec="optic"]');
   await page.locator('#gearList .gearItem[data-id="o1"]').click();
+  await page.locator('#opTurretUSeg button[data-v="moa"]').click();
   await page.selectOption("#opTurret", "0.25moa");
   await page.click("#tabBtnDope");
   await page.fill("#target", "600");

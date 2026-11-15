@@ -74,6 +74,9 @@ details.section > summary { color: var(--accent); font-size: 1rem; font-weight: 
 #tabGear[data-gearview="edit"] #gearListBar { margin-bottom: 4px; }
 #tabGear[data-gearview="edit"] #gunEss,
 #tabGear[data-gearview="edit"] #loadBasic { gap: 4px 8px; }
+#tabGear details > summary::before { display: none; }
+#tabGear details > summary .chev { margin-left: auto; flex: 0 0 auto; transition: transform .15s; }
+#tabGear details[open] > summary .chev { transform: rotate(180deg); }
 #tabGear details.more > summary::before { display: none; }
 #tabGear details.more > summary { justify-content: space-between; gap: 8px; }
 #tabGear details.more > summary .chev { margin-left: auto; flex: 0 0 auto; transition: transform .15s; }

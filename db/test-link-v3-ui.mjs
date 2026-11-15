@@ -119,6 +119,7 @@ try {
   await editGear("load", "l1");
   await page.fill("#mv", "2999");
   await editGear("optic", "o1");
+  await page.locator('#opTurretUSeg button[data-v="moa"]').click();
   await page.selectOption("#opTurret", "0.25moa");
   promptAnswer = "Rifle A edited";
   await editGear("gun", "r1");
@@ -152,6 +153,7 @@ try {
   await editGear("load", "l1");
   await page.fill("#mv", "2737");
   await editGear("optic", "o1");
+  await page.locator('#opTurretUSeg button[data-v="mil"]').click();
   await page.selectOption("#opTurret", "0.1mil");
 
   await page.click("#tabBtnLog");

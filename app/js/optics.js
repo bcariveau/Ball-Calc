@@ -7,7 +7,7 @@ import { TURRETS, lastRun, turretSpec } from "./calc.js";
 import { closeOvl, ctxPaint, openOvl, toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { renderAll, renderCard } from "./dope.js";
-import { applyRifle, askName, autosave, curRifle, flashSaved, formFor, pick, renderPickers, same, updateDirty } from "./gear.js";
+import { applyRifle, askName, askRemove, autosave, curRifle, flashSaved, formFor, pick, renderPickers, same, updateDirty } from "./gear.js";
 import { F_DEF, OPTIC_F, P, S, savePresets, saveSettings, uid } from "./storage.js";
 import { auto, manual, wx } from "./weather.js";
 
@@ -52,7 +52,7 @@ function applyOptic() {
 function renderOpticSel() {
   const r = curRifle(), sel = $("opticSel"), o = curOptic(); sel.innerHTML = "";
   sel.add(new Option(r ? "No optic" : "Add a gun first", ""));
-  (P.optics || []).forEach(x => { const on = P.rifles.find(g => g.opticId === x.id); sel.add(new Option(x.name + (on && on !== r ? ` (on ${on.name})` : ""), x.id)); });
+  (P.optics || []).filter(x => !x.archived).forEach(x => { const on = P.rifles.find(g => g.opticId === x.id); sel.add(new Option(x.name + (on && on !== r ? ` (on ${on.name})` : ""), x.id)); });
   sel.value = o ? o.id : ""; sel.disabled = !r;
 }
 function paintOptic() {
@@ -156,19 +156,15 @@ export function init1() {
     P.optics.push(o); const at = attachOptic(o.id, true); followUnits(true); if (at !== "ask") toast(`Optic “${n}” added to “${r.name}”`);
   };
   $("opRename").onclick = () => { const o = curOptic(); if (!o) return; const n = askName("Rename optic:", o.name); if (!n) return; o.name = n; savePresets(); renderOpticSel(); paintOptic(); flashSaved("optic"); };
-  $("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60), opUp: "" }; delete c.opUpRe; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> Attach)`); };
+  $("opDup").onclick = () => { const o = curOptic(); if (!o) return; autosave(); const c = { ...o, id: uid(), name: `${o.name} (copy)`.slice(0, 60), opUp: "" }; delete c.opUpRe; delete c.archived; P.optics.push(c); savePresets(); renderOpticSel(); paintOptic(); toast(`Duplicated as “${c.name}” (not attached — use ⋯ <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> Attach)`); };
   $("opDetach").onclick = () => detachOptic();
   $("opDel").onclick = () => {
-    const o = curOptic(), r = curRifle(); if (!o || !confirm(`Delete optic “${o.name}”?\nThe gun falls back to its own turret settings and its zero is marked not confirmed.`)) return;
-    const i = P.optics.indexOf(o), z = r.zeroUnconf; P.optics.splice(i, 1); r.opticId = null; flagZero(r, `optic “${o.name}” deleted`);
-    savePresets(); applyOptic(); updateDirty(); schedule();
-    toast(`Optic “${o.name}” deleted`, { label: "Undo", fn: () => { P.optics.splice(Math.min(i, P.optics.length), 0, o); if (P.rifles.includes(r)) { r.opticId = o.id; if (z) r.zeroUnconf = z; else delete r.zeroUnconf; P.lastRifleId = r.id; }
-      savePresets(); renderPickers(); applyRifle(); updateDirty(); schedule(); toast(`Optic “${o.name}” restored`); } });
+    const o = curOptic(); if (o) askRemove("optic", o.id);
   };
   $("opAttach").onclick = () => {
     const r = curRifle(); if (!r) return;
     $("opSheetFor").textContent = `Pick the optic now mounted on “${r.name}”. Moving an optic marks the zero of both guns “not confirmed”.`;
-    $("opList").innerHTML = (P.optics || []).map(o => { const on = P.rifles.find(g => g.opticId === o.id), ts = TURRETS[o.opTurret];
+    $("opList").innerHTML = (P.optics || []).filter(o => !o.archived).map(o => { const on = P.rifles.find(g => g.opticId === o.id), ts = TURRETS[o.opTurret];
       return `<button type="button" class="opItem${on === r ? " on" : ""}" data-id="${escapeHtml(o.id)}">${escapeHtml(o.name)}<small>${ts ? ts[2] : escapeHtml(o.opTurretV ? `${o.opTurretV} ${o.opTurretU}` : "custom")} turret · ${o.opReticle === "moa" ? "MOA" : "MIL"} reticle · ${on ? (on === r ? "on this gun" : `on “${escapeHtml(on.name)}”`) : "not attached"}</small></button>`; }).join("") || `<div class="summary">No optics saved yet — use ⋯ <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg> New optic.</div>`;
     openOvl("opSheet");
   };

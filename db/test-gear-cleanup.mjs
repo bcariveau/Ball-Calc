@@ -228,11 +228,11 @@ try {
   await page.click("#tabBtnLog");
   ok((await page.locator("#slList").innerText()).includes("Rifle B"), "production history still resolves the archived firearm");
   const shown = await page.locator("#rifleSel option").allInnerTexts();
-  ok(shown.includes("Rifle B"), "production pickers still show the archived firearm");
+  ok(!shown.includes("Rifle B"), "production pickers hide the archived firearm");
   await page.click("#tabBtnGear");
-  await page.evaluate(() => { const s = document.getElementById("rifleSel"); s.value = "r1"; s.dispatchEvent(new Event("change", { bubbles: true })); document.getElementById("rifleDetails").open = true; });
-  await page.locator("#zero").fill("125", { force: true });
-  await page.dispatchEvent("#zero", "input");
+  await page.locator("#gearList .gearItem").filter({ hasText: "Rifle A" }).click();
+  await page.locator("#zero").click();
+  await page.locator("#zero").fill("125");
   await page.waitForFunction(() => JSON.parse(localStorage.getItem("bcalc.presets.v1")).rifles.find((r) => r.id === "r1").zero === "125");
   const saved = await presets();
   ok(saved.rifles.find((r) => r.id === "r2").archived === true, "a production save keeps the archived flag");

@@ -337,10 +337,10 @@ function paintShotSel() {
   $("shotDestStr").innerHTML = choices.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join("");
   if (keepS && [...$("shotDestStr").options].some(o => o.value === keepS)) $("shotDestStr").value = keepS;
   $("shotDestList").innerHTML = choices.map(o => `<button type="button" class="destPick${o.value === $("shotDestStr").value ? " on" : ""}" data-dest="${escapeHtml(o.value)}">${escapeHtml(o.label)}</button>`).join("");
-  $("shotDestGun").innerHTML = P.rifles.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join("");
+  $("shotDestGun").innerHTML = P.rifles.filter(r => !r.archived).map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join("");
   $("shotDestGun").value = P.rifles.some(r => r.id === keepG) ? keepG : (curRifle()?.id || P.rifles[0]?.id || "");
   const gun = P.rifles.find(r => r.id === $("shotDestGun").value);
-  $("shotDestLoad").innerHTML = (gun?.loads || []).map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join("");
+  $("shotDestLoad").innerHTML = (gun?.loads || []).filter(l => !l.archived).map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join("");
   if (keepL && (gun?.loads || []).some(l => l.id === keepL)) $("shotDestLoad").value = keepL;
   const n = SHOTSEL.size;
   $("shotSelN").textContent = `${n} selected`;

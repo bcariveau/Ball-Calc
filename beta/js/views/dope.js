@@ -97,7 +97,7 @@ ${startBtn("shStartBtn")}
 </div>
 
 <details class="section" id="advCond">
-  <summary><span>Advanced conditions</span><span class="advSum" id="advSum"></span></summary>
+  <summary><span>Advanced conditions</span><span class="advSum" id="advSum"></span><svg class="ic chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="down" d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path class="up" d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
   <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px"><span class="summary" style="margin:0">Live weather</span><button class="sm ghost" type="button" id="wxBtn"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> Weather</button></div>
   <div id="wxStatus">Weather not loaded yet.</div>
   <div id="placeBox" class="row">

@@ -46,6 +46,11 @@ try {
     a.recipe = { ...(a.recipe || {}), ldKind: "hand", ldPowder: "H4350", ldCharge: "41.5" };
     a.tg.strings[0].asFired.recipe = { ...(a.tg.strings[0].asFired.recipe || {}), ldCharge: "41.5", ldPowder: "H4350" };
     a.tg.strings[0].holes.push({ id: "h1b", x: -0.4, y: 0.6 });
+    const st2 = a.tg.strings[1];
+    st2.asFired.rifleId = "r1";
+    st2.asFired.loadId = "l1";
+    st2.aim = { x: 0, y: 0 };
+    st2.holes = [{ id: "hx", x: 0.8, y: 0.3 }, { id: "hy", x: -0.5, y: 0.9 }];
     log.push({
       id: "sess2", rifleId: "r1", loadId: "l1", date: "2026-07-02T15:00:00.000Z", source: "manual", notes: "July", wx: {},
       recipe: { ldKind: "hand", ldPowder: "H4350", ldCharge: "41.5", loadName: "Load A" },
@@ -74,6 +79,7 @@ try {
   const nested = await page.evaluate(() => ({ recipe: document.getElementById("recipeDetails").open, mv: document.getElementById("mvEstBox").open, sum: !document.getElementById("loadDetails").open && !document.getElementById("loadMoreSum").hidden }));
   ok(!moreOpen && !nested.recipe && !nested.mv, "More, load data, and the MV estimate start collapsed");
   await page.locator("#loadDetails").screenshot({ path: ART + "/loads-layout-closed.png" });
+  await page.locator("#loadDetails > summary").screenshot({ path: ART + "/v2-loads-more-closed.png" });
   await page.click("#loadDetails > summary");
   const opened = await page.evaluate(() => {
     const sum = document.getElementById("loadMoreSum");
@@ -81,9 +87,27 @@ try {
     return { open: document.getElementById("loadDetails").open, hidden: cs.display === "none", recipeInMore: !sum.textContent.includes("H4350") && !sum.textContent.includes("41.5") };
   });
   ok(opened.open && opened.hidden, "the More summary hides once More is open");
+  await page.waitForTimeout(200);
   await page.locator("#loadDetails > summary").screenshot({ path: ART + "/loads-layout-open.png" });
+  await page.locator("#loadDetails > summary").screenshot({ path: ART + "/v2-loads-more-open.png" });
+  const chevrons = await page.evaluate(() => [...document.querySelectorAll("details")].flatMap((details) => {
+    const svg = details.querySelector(":scope > summary svg.ic.chev");
+    if (!svg) return [];
+    const read = () => {
+      const path = [...svg.querySelectorAll("path")].find((p) => getComputedStyle(p).display !== "none");
+      return { d: path && path.getAttribute("d"), tr: getComputedStyle(svg).transform };
+    };
+    const was = details.open;
+    details.open = false;
+    const closed = read();
+    details.open = true;
+    const opened = read();
+    details.open = was;
+    return [{ id: details.id || (details.querySelector("summary") && details.querySelector("summary").textContent.slice(0, 28)), closed, opened }];
+  }));
+  ok(chevrons.length >= 6 && chevrons.every((c) => c.closed.d === "m6 9 6 6 6-6" && c.closed.tr === "none" && c.opened.d === "m6 15 6-6 6 6" && c.opened.tr === "none"), "every details chevron is down when closed and up when open, with no rotation: " + chevrons.map((c) => c.id + " " + c.closed.d + "/" + c.opened.tr).join("; "));
   const rows = await page.locator("#ldStrList .ldStr").allInnerTexts();
-  ok(rows.length === 3 && rows[0].includes("S1") && rows[0].includes("41.5"), "one summary row per string for this load, newest first, with the charge");
+  ok(rows.length === 4 && rows[0].includes("S1") && rows[0].includes("41.5"), "one summary row per string for this load, newest first, with the charge");
   ok(rows.some((t) => /fps/.test(t)) && rows.some((t) => /hole|″|in/.test(t) || /\d/.test(t)), "rows include velocity and a group when holes exist");
   await page.locator("#ldStrings").screenshot({ path: ART + "/strings-for-load.png" });
   await page.locator("#ldStrList .ldStr").first().click();
@@ -102,7 +126,22 @@ try {
   }));
   ok(cmp.svg && cmp.chips >= 2 && /rifle/i.test(cmp.note) && /fps/.test(cmp.legend), "the overlay compares this rifle's strings and lists a stat per string");
   ok(cmp.rifles.includes("Rifle B") && cmp.rifles.includes("Rifle A"), "another rifle that used this load can be chosen");
+  const colorsOf = (svgSel, legSel) => page.evaluate(({ svgSel, legSel }) => {
+    const svg = document.querySelector(svgSel);
+    const legs = [...document.querySelectorAll(legSel + " i")];
+    return [...svg.querySelectorAll("g.hole")].map((h) => {
+      const ms = h.querySelector(".ms");
+      const cls = [...ms.classList].find((c) => /^s[1-6]$/.test(c));
+      const circle = ms.querySelector("circle");
+      const cs = getComputedStyle(circle);
+      const sw = legs.find((i) => i.classList.contains(cls));
+      return { fill: cs.fill, stroke: cs.stroke, dash: cs.strokeDasharray, bg: sw ? getComputedStyle(sw).backgroundColor : "" };
+    });
+  }, { svgSel, legSel });
+  const crossColors = await colorsOf("#cmpBoard svg", "#cmpLeg");
+  ok(crossColors.length >= 2 && crossColors.every((h) => h.fill === h.bg && h.stroke === h.bg && (h.dash === "none" || h.dash === "0px")), "cross-session holes use each string's legend color and are not dashed");
   await page.locator("#cmpSheet").screenshot({ path: ART + "/compare-cross-session.png" });
+  await page.locator("#cmpSheet").screenshot({ path: ART + "/v2-compare-cross-session.png" });
   await page.selectOption("#cmpRifle", "r2");
   const other = await page.locator("#cmpChips").innerText();
   ok(/S1/.test(other), "choosing the other rifle shows its strings for this load");
@@ -110,8 +149,12 @@ try {
   await page.click("#gearBack");
   await page.click("#tabBtnLog");
   await page.waitForSelector("#slList .slItem");
-  await page.click("#slList .slItem");
+  await page.locator("#slList .slItem").filter({ hasText: "fixture" }).click();
   await page.waitForSelector("#slEditor.show");
+  await page.waitForSelector("#slTgSvg");
+  const liveColors = await colorsOf("#slTgSvg", "#slTgLeg");
+  ok(liveColors.length >= 2 && liveColors.every((h) => h.fill === h.bg && h.stroke === h.bg && (h.dash === "none" || h.dash === "0px")), "in-session holes use each string's legend color and are not dashed");
+  await page.locator("#slTgView").screenshot({ path: ART + "/v2-compare-in-session.png" });
   await page.evaluate(() => document.getElementById("slCompare").scrollIntoView({ block: "center" }));
   await page.click("#slCompare");
   await page.waitForSelector("#cmpSheet.show");
@@ -121,6 +164,25 @@ try {
   await page.waitForSelector("#tgEd.show");
   await page.click("#tgSum");
   await page.locator("#tgDialBox").screenshot({ path: ART + "/dial-row.png" });
+  await page.click("#tgEdDone");
+  const csv = "SHOT #,SPEED (FPS)\n1,2700\n2,2710\n";
+  await page.setInputFiles("#slFile", { name: "sample.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
+  await page.waitForSelector("#slImport.show");
+  const impRaw = await page.evaluate(() => {
+    const bad = [];
+    const root = document.getElementById("slImport");
+    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walk.nextNode())) {
+      const t = node.nodeValue || "";
+      if (t.includes("<svg") || t.includes("<path")) bad.push(t.trim().slice(0, 80));
+    }
+    return bad;
+  });
+  ok(!impRaw.length, "the import sheet has no raw icon markup: " + impRaw.join(" | "));
+  await page.waitForFunction(() => !document.getElementById("toast").classList.contains("show"));
+  await page.locator("#slImport").screenshot({ path: ART + "/v2-import-sheet.png" });
+  await page.click("#slImpClose");
   const keys = await page.evaluate(() => Object.keys(localStorage).sort());
   ok(keys.every((k) => k === "bcalc.presets.v1" || k === "bcalc.settings.v1"), "the string list adds no storage key");
   console.log("PASS string-summary", n);

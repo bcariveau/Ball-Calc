@@ -4,6 +4,12 @@ html[data-theme=light] { --s1: #c62828; --s2: #1565c0; --s3: #8a5300; --s4: #7b1
 html[data-theme=night] { --s1: #ff3b2f; --s2: #ff8a5c; --s3: #ffb199; --s4: #ff6a9c; --s5: #ffc29e; --s6: #e0503f; }
 .ms.solo { fill: var(--text); }
 .ms.s1 { fill: var(--s1); } .ms.s2 { fill: var(--s2); } .ms.s3 { fill: var(--s3); } .ms.s4 { fill: var(--s4); } .ms.s5 { fill: var(--s5); } .ms.s6 { fill: var(--s6); }
+svg .hole.col .ms.s1 circle, svg .hole.col .ms.s1 polygon, svg .hole.col .ms.s1 rect { fill: var(--s1); stroke: var(--s1); stroke-dasharray: none; }
+svg .hole.col .ms.s2 circle, svg .hole.col .ms.s2 polygon, svg .hole.col .ms.s2 rect { fill: var(--s2); stroke: var(--s2); stroke-dasharray: none; }
+svg .hole.col .ms.s3 circle, svg .hole.col .ms.s3 polygon, svg .hole.col .ms.s3 rect { fill: var(--s3); stroke: var(--s3); stroke-dasharray: none; }
+svg .hole.col .ms.s4 circle, svg .hole.col .ms.s4 polygon, svg .hole.col .ms.s4 rect { fill: var(--s4); stroke: var(--s4); stroke-dasharray: none; }
+svg .hole.col .ms.s5 circle, svg .hole.col .ms.s5 polygon, svg .hole.col .ms.s5 rect { fill: var(--s5); stroke: var(--s5); stroke-dasharray: none; }
+svg .hole.col .ms.s6 circle, svg .hole.col .ms.s6 polygon, svg .hole.col .ms.s6 rect { fill: var(--s6); stroke: var(--s6); stroke-dasharray: none; }
 .tgLeg { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 8px; font-size: 0.78rem; }
 .tgLeg span { display: flex; align-items: center; min-height: 28px; }
 .tgLeg i { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; flex: 0 0 12px; }

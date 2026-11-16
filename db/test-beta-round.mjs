@@ -111,17 +111,16 @@ try {
   await page.click('#gearSwitch button[data-sec="gun"]');
   await page.locator("#gearList .gearItem").filter({ hasText: "Rifle A" }).click();
   await page.locator("#rifleDetails > summary").click();
-  await page.waitForFunction(() => /matrix\(-1/.test(getComputedStyle(document.querySelector("#rifleDetails > summary svg.ic.chev")).transform));
   const more = await page.evaluate(() => {
     const chev = (sel) => {
       const el = document.querySelector(sel);
       const svg = el && el.querySelector("svg.ic.chev");
-      const tr = svg ? getComputedStyle(svg).transform : "";
-      return { svg: !!svg, open: el && el.parentElement.open, up: /matrix\(-1/.test(tr) };
+      const path = svg && [...svg.querySelectorAll("path")].find((p) => getComputedStyle(p).display !== "none");
+      return { svg: !!svg, open: el && el.parentElement.open, up: path && path.getAttribute("d") === "m6 15 6-6 6 6", still: svg && getComputedStyle(svg).transform === "none" };
     };
     return { more: chev("#rifleDetails > summary"), zero: chev("#zeroDetails > summary") };
   });
-  ok(more.more.svg && more.more.open && more.more.up && more.zero.svg && more.zero.open && more.zero.up, "open More and the headers inside it use an upward Lucide chevron");
+  ok(more.more.svg && more.more.open && more.more.up && more.more.still && more.zero.svg && more.zero.open && more.zero.up && more.zero.still, "open More and the headers inside it use an upward Lucide chevron");
   await page.locator("#rifleDetails").screenshot({ path: ART + "/more-fixed.png" });
   console.log("PASS beta-round", n);
 } catch (e) {

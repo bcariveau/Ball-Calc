@@ -8,8 +8,45 @@ import { closeOvl, ctxPaint, openOvl, toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { renderAll, renderCard } from "./dope.js";
 import { applyRifle, askName, askRemove, autosave, curRifle, flashSaved, formFor, pick, renderPickers, same, updateDirty } from "./gear.js";
+import { OPTIC_CATALOG } from "./optic-catalog.js";
 import { F_DEF, OPTIC_F, P, S, savePresets, saveSettings, uid } from "./storage.js";
 import { auto, manual, wx } from "./weather.js";
+
+// Published turret specs only. Sight height is a mount measurement, so it stays blank.
+let catLock = false;
+function paintCatalog() {
+  const qEl = $("opCatSearch"), brandEl = $("opCatBrand"), modelEl = $("opCatalog");
+  if (!modelEl) return;
+  catLock = true;
+  const q = (qEl && qEl.value || "").trim().toLowerCase();
+  const prevB = brandEl ? brandEl.value : "";
+  const brands = [...new Set(OPTIC_CATALOG.map(c => c.brand))].filter(b => !q || b.toLowerCase().includes(q) || OPTIC_CATALOG.some(c => c.brand === b && c.name.toLowerCase().includes(q))).sort();
+  if (brandEl) {
+    brandEl.innerHTML = `<option value="">All brands</option>` + brands.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
+    if (brands.includes(prevB)) brandEl.value = prevB;
+  }
+  const brand = brandEl ? brandEl.value : "";
+  const models = OPTIC_CATALOG.filter(c => (!brand || c.brand === brand) && (!q || `${c.brand} ${c.name}`.toLowerCase().includes(q)));
+  const prev = modelEl.value;
+  modelEl.innerHTML = `<option value="">Choose a model</option>` + models.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join("");
+  if (models.some(c => c.id === prev)) modelEl.value = prev;
+  catLock = false;
+}
+function applyCatalog(id) {
+  const c = OPTIC_CATALOG.find(x => x.id === id), o = curOptic(); if (!c || !o) return;
+  o.name = c.brand + " " + c.name;
+  // The click list hides the other unit. Enable every option first so a mil or MOA model can be written either way.
+  [...$("opTurret").options].forEach(op => { op.disabled = false; op.hidden = false; });
+  OPTIC_F.forEach(f => setVal(f, c[f] != null && c[f] !== "" ? c[f] : ""));
+  const src = $("opCatalogSrc");
+  if (src) {
+    src.hidden = false;
+    src.href = c.source;
+    const u = src.querySelector(".srcu");
+    if (u) u.textContent = c.source;
+  }
+  savePresets(); renderOpticSel(); paintOptic(); updateDirty();
+}
 
 
 
@@ -144,6 +181,14 @@ function paintRO() {
 }
 
 export function init1() {
+  const cat = $("opCatalog");
+  if (cat) {
+    paintCatalog();
+    cat.onchange = () => { if (!catLock && cat.value) applyCatalog(cat.value); };
+    const brand = $("opCatBrand"), search = $("opCatSearch");
+    if (brand) brand.onchange = () => paintCatalog();
+    if (search) search.oninput = () => paintCatalog();
+  }
   $("turretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("turret", "turretU", "turretUSeg", b.dataset.v); });
   $("opTurretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("opTurret", "opTurretU", "opTurretUSeg", b.dataset.v); });
   $("opticSel").onchange = e => { const v = e.target.value; if (!v) detachOptic(); else if (attachOptic(v) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); };

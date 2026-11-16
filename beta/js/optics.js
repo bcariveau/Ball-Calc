@@ -8,23 +8,43 @@ import { closeOvl, ctxPaint, openOvl, toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { renderAll, renderCard } from "./dope.js";
 import { applyRifle, askName, askRemove, autosave, curRifle, flashSaved, formFor, pick, renderPickers, same, updateDirty } from "./gear.js";
+import { OPTIC_CATALOG } from "./optic-catalog.js";
 import { F_DEF, OPTIC_F, P, S, savePresets, saveSettings, uid } from "./storage.js";
 import { auto, manual, wx } from "./weather.js";
 
 // Published turret specs only. Sight height is a mount measurement, so it stays blank.
-const OPTIC_CATALOG = [
-  { id: "nf-atacr-735-mrad", name: "Nightforce ATACR 7-35x56 F1 (MRAD)", source: "https://www.nightforceoptics.com/riflescopes/atacr/atacr-7-35x56-f1", opTurret: "0.1mil", opReticle: "mil", opFP: "FFP", opTravel: "29", opWTravel: "17" },
-  { id: "nf-atacr-735-moa", name: "Nightforce ATACR 7-35x56 F1 (MOA)", source: "https://www.nightforceoptics.com/riflescopes/atacr/atacr-7-35x56-f1", opTurret: "0.25moa", opReticle: "moa", opFP: "FFP", opTravel: "100", opWTravel: "60" },
-  { id: "nf-atacr-525-mrad", name: "Nightforce ATACR 5-25x56 F1 (MRAD)", source: "https://www.nightforceoptics.com/riflescopes/atacr/atacr-5-25x56-f1", opTurret: "0.1mil", opReticle: "mil", opFP: "FFP", opTravel: "35", opWTravel: "23" },
-  { id: "nf-atacr-525-moa", name: "Nightforce ATACR 5-25x56 F1 (MOA)", source: "https://www.nightforceoptics.com/riflescopes/atacr/atacr-5-25x56-f1", opTurret: "0.25moa", opReticle: "moa", opFP: "FFP", opTravel: "120", opWTravel: "80" },
-  { id: "leu-mark5-525-mrad", name: "Leupold Mark 5HD 5-25x56 M5C3 FFP (MIL)", source: "https://www.leupold.com/mark-5hd-5-25x56-m5c3-ffp-tmr-riflescope", opTurret: "0.1mil", opReticle: "mil", opFP: "FFP", opTurn: "10.5", opTravel: "35", opWTravel: "17" },
-  { id: "vtx-razor-g2-427-mrad", name: "Vortex Razor HD Gen II 4.5-27x56 FFP H59 (MRAD)", source: "https://www.vortexcanada.net/riflescopes/vt-rzr-42709-vortex-razor-hd-gen-ii-45-27x56-ffp-h59-mrad", opTurret: "0.1mil", opReticle: "mil", opFP: "FFP", opTurn: "10", opTravel: "28.5", opWTravel: "10" },
-];
+let catLock = false;
+function paintCatalog() {
+  const qEl = $("opCatSearch"), brandEl = $("opCatBrand"), modelEl = $("opCatalog");
+  if (!modelEl) return;
+  catLock = true;
+  const q = (qEl && qEl.value || "").trim().toLowerCase();
+  const prevB = brandEl ? brandEl.value : "";
+  const brands = [...new Set(OPTIC_CATALOG.map(c => c.brand))].filter(b => !q || b.toLowerCase().includes(q) || OPTIC_CATALOG.some(c => c.brand === b && c.name.toLowerCase().includes(q))).sort();
+  if (brandEl) {
+    brandEl.innerHTML = `<option value="">All brands</option>` + brands.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
+    if (brands.includes(prevB)) brandEl.value = prevB;
+  }
+  const brand = brandEl ? brandEl.value : "";
+  const models = OPTIC_CATALOG.filter(c => (!brand || c.brand === brand) && (!q || `${c.brand} ${c.name}`.toLowerCase().includes(q)));
+  const prev = modelEl.value;
+  modelEl.innerHTML = `<option value="">Choose a model</option>` + models.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join("");
+  if (models.some(c => c.id === prev)) modelEl.value = prev;
+  catLock = false;
+}
 function applyCatalog(id) {
   const c = OPTIC_CATALOG.find(x => x.id === id), o = curOptic(); if (!c || !o) return;
-  o.name = c.name;
+  o.name = c.brand + " " + c.name;
+  // The click list hides the other unit. Enable every option first so a mil or MOA model can be written either way.
+  [...$("opTurret").options].forEach(op => { op.disabled = false; op.hidden = false; });
   OPTIC_F.forEach(f => setVal(f, c[f] != null && c[f] !== "" ? c[f] : ""));
-  const src = $("opCatalogSrc"); if (src) src.textContent = c.source;
+  const src = $("opCatalogSrc");
+  if (src) {
+    src.hidden = false;
+    src.href = c.source;
+    const u = src.querySelector(".srcu");
+    if (u) u.textContent = c.source;
+  }
   savePresets(); renderOpticSel(); paintOptic(); updateDirty();
 }
 
@@ -163,8 +183,11 @@ function paintRO() {
 export function init1() {
   const cat = $("opCatalog");
   if (cat) {
-    OPTIC_CATALOG.forEach(c => cat.add(new Option(c.name, c.id)));
-    cat.onchange = () => { if (cat.value) applyCatalog(cat.value); };
+    paintCatalog();
+    cat.onchange = () => { if (!catLock && cat.value) applyCatalog(cat.value); };
+    const brand = $("opCatBrand"), search = $("opCatSearch");
+    if (brand) brand.onchange = () => paintCatalog();
+    if (search) search.oninput = () => paintCatalog();
   }
   $("turretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("turret", "turretU", "turretUSeg", b.dataset.v); });
   $("opTurretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("opTurret", "opTurretU", "opTurretUSeg", b.dataset.v); });

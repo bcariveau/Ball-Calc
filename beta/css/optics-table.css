@@ -92,4 +92,11 @@ label .ro { color: var(--muted); font-weight: 600; font-size: 0.78rem; margin-le
 /* basics-first load form: bullet, BC + drag, MV on screen; the rest under More ▾ */
 #loadBasic { margin-top: 8px; }
 #tabGear #loadDetails > #recipeDetails { margin-top: 10px; }
+#tabGear #loadDetails[open] > summary #loadMoreSum { display: none; }
+#ldStrings { margin-top: 14px; }
+.ldStrHd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ldStrHd .sm { width: auto; margin: 0; flex: 0 0 auto; }
+#ldStrList .rcItem, #ldStrDetail .shotLn { width: 100%; }
+#ldStrDetail .shotLn { display: flex; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+#cmpBoard .tgS { width: 100%; height: auto; margin-top: 8px; background: var(--panel); border-radius: 12px; }
 .sampleNote span { font-size: 0.82rem; }

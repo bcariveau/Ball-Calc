@@ -55,7 +55,7 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
   <p class="hint sh" id="slAddHint"><span class="h1">Type a velocity and tap Add (or Enter).</span> <button type="button" class="info" id="slAddHelp" aria-expanded="false" aria-label="More about adding shots">?</button><span class="more" hidden> You can paste several at once, e.g. "2701 2698 2710". Tags (Clean, Cold bore, Flier, Input error) can be combined and never change the stats. Remove keeps the shot in the log, grays it, and leaves it out of every stat until you restore it.</span></p>
   <div class="row" id="shotSelTools"><button class="sm ghost" type="button" id="shotSelBtn"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5'/><path d='m9 11 3 3L22 4'/></svg> Select shots</button></div>
   <div id="slShots"></div>
-  <div class="sub" style="margin-top:10px">Targets</div>
+  <div class="sub ldStrHd" style="margin-top:10px"><span>Targets</span><button type="button" class="sm ghost" id="slCompare">Compare strings</button></div>
   <div id="slTgView"></div>
   <details style="margin-top:10px"><summary>Session details (date, notes, weather, barrel)</summary>
     <div class="grid">
@@ -131,4 +131,13 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
   </div>
   <div id="slImpList"></div>
   <button type="button" id="slImpGo">Import</button>
+</div>
+<div id="cmpSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Compare strings">
+  ${sheetHead("Compare strings", "cmpClose")}
+  <p class="hint" id="cmpNote"></p>
+  <label for="cmpRifle">Rifle</label>
+  <select id="cmpRifle" aria-label="Rifle for this comparison"></select>
+  <div id="cmpChips" class="scRow" role="group" aria-label="Strings in the overlay"></div>
+  <div id="cmpLeg" class="tgLeg"></div>
+  <div id="cmpBoard"></div>
 </div>`;

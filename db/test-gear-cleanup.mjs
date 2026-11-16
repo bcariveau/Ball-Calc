@@ -150,7 +150,10 @@ try {
   ok(loadMore && loadMore.y + loadMore.height <= tabBox.y + 1, "the load More toggle sits above the tab bar");
   ok(await page.locator("#bc").isVisible() && await page.locator("#mv").isVisible() && await page.locator("#drag").isVisible() && !(await page.locator("#weight").isVisible()) && !(await page.locator("#ldPowder").isVisible()), "a load edit shows BC, drag, and MV, with the rest closed");
   await page.locator("#loadDetails > summary").click();
-  ok(await page.locator("#weight").isVisible() && await page.locator("#diameter").isVisible() && await page.locator("#length").isVisible() && await page.locator("#ldPowder").isVisible() && await page.locator("#ldCharge").isVisible() && await page.locator("#refMV").isVisible(), "load More reveals the remaining load and recipe fields");
+  ok(await page.locator("#weight").isVisible() && await page.locator("#diameter").isVisible() && await page.locator("#length").isVisible() && !(await page.locator("#ldPowder").isVisible()) && !(await page.locator("#refMV").isVisible()), "load More shows the bullet fields and keeps load data and the MV estimate collapsed");
+  await page.locator("#recipeDetails > summary").click();
+  await page.locator("#mvEstBox > summary").click();
+  ok(await page.locator("#ldPowder").isVisible() && await page.locator("#ldCharge").isVisible() && await page.locator("#refMV").isVisible(), "opening load data and the MV estimate reveals those fields");
   const fields = ["gunKind", "sightHeight", "zero", "twist", "barrel", "turret", "turretV", "turretU", "zTemp", "zPress", "zAlt", "zHum", "opTurret", "opTurretV", "opTurretU", "opReticle", "opFP", "opMag", "opTurn", "opTravel", "opCant", "opUp", "opSH", "opWTravel", "opTrack", "bc", "drag", "weight", "diameter", "mv", "length", "mvSource", "refMV", "refBarrel", "fpsPerInch", "bulletId", "bulletName", "bcBands", "useBands", "ptSens", "mvTemp", "tipLen", "trued", "ldKind", "ldPowder", "ldCharge", "ldPrimer", "ldCOAL", "ldCBTO", "ldJump", "ldCase", "ldFired", "ldTrim", "ldPrep", "ldMaker", "ldProduct", "ldLot", "ldNotes", "rangeLat", "rangeLon"];
   const missing = await page.evaluate((ids) => ids.filter((id) => !document.getElementById(id)), fields);
   ok(!missing.length, "every gear field is still in the form: " + missing.join(", "));

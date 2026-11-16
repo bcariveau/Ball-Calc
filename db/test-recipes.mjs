@@ -40,7 +40,10 @@ const pm = await p.evaluate(E => { const m = window.__bc.projMatch; return {
 ok("match rules: db id / name / diameter+weight+BC; diameter is required", pm.db === "db" && pm.diffId === "" && pm.name === "name" && pm.spec === "spec" && pm.bcOff === "" && pm.model === "" && pm.dia === "" && pm.wt === "", JSON.stringify(pm));
 
 /* button + sheet */
-ok("Load data shows 'Use a saved recipe for this bullet (3)'", await p.evaluate(() => !document.getElementById("rcFind").hidden && document.getElementById("rcFind").textContent.includes("(3)") && !document.getElementById("rcBulletBtn").hidden));
+ok("Load data shows 'Use a saved recipe for this bullet (3)'", await p.evaluate(() => {
+  const vis = ["rcBulletBtn", "rcFind"].map(id => document.getElementById(id)).filter(el => el && !el.hidden);
+  return vis.length === 1 && vis[0].innerText.replace(/\s+/g, " ").includes("Use a saved recipe for this bullet (3)") && !vis[0].innerText.includes("<svg");
+}));
 await p.click("#recipeDetails > summary"); await p.click("#rcFind"); await p.waitForSelector("#rcSheet.show");
 const rows = await p.$$eval("#rcList .rcItem", a => a.map(x => x.innerText.replace(/\s+/g, " ")));
 console.log(rows.join("\n"));
@@ -125,7 +128,11 @@ await p.selectOption("#loadSel", "A"); await menu("loadCopy"); await p.click("#c
 ok("second duplicate gets '(copy 2)'", (await p.evaluate(() => loadSel.selectedOptions[0].text)) === "ELD-M H4350 (copy 2)");
 // the copies now show up as saved recipes for this bullet
 await p.selectOption("#loadSel", "E");
-ok("copies appear as saved recipes", (await p.textContent("#rcFind")).includes("(7)"), await p.textContent("#rcFind"));
+ok("copies appear as saved recipes", await p.evaluate(() => {
+  const vis = ["rcBulletBtn", "rcFind"].map(id => document.getElementById(id)).filter(el => el && !el.hidden);
+  const t = vis.map(el => el.innerText.replace(/\s+/g, " ")).join(" ");
+  return vis.length === 1 && t.includes("(7)") && !t.includes("<svg");
+}), "visible recipe label");
 
 /* themes: sheets render in all 5 */
 for (const t of ["light", "od", "fde", "night", "dark"]) {

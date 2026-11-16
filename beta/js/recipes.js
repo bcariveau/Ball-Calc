@@ -3,7 +3,7 @@
 // init*() and is called by main.js in the original order.
 
 import { schedule } from "./app.js";
-import { closeOvl, openOvl, toast } from "./components.js";
+import { closeOvl, openOvl, setIconText, toast } from "./components.js";
 import { $, escapeHtml, n3, num, setVal } from "./core.js";
 import { applyLoad, applyRifle, curLoad, curRifle, isDirty, paintLdKind, pick, pkRefresh, recipeText, renderPickers, same, updateDirty } from "./gear.js";
 import { LOG, saveLog } from "./log.js";
@@ -48,9 +48,13 @@ function recipeMatches(cur = pick(LOAD_F), withStats) {
   }));
   return out.sort((a, b) => (b.r === r0) - (a.r === r0) || (a.best?.s.stats.n >= 3 ? a.best.s.stats.sd : 99) - (b.best?.s.stats.n >= 3 ? b.best.s.stats.sd : 99) || a.l.name.localeCompare(b.l.name));
 }
+const RC_ICON = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M12 7v14'/><path d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/></svg>`;
 function paintRecipeBtns() {
-  const n = recipeMatches().length, t = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M12 7v14'/><path d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/></svg> Use a saved recipe for this bullet (${n})`;
-  ["rcFind", "rcBulletBtn"].forEach(id => { $(id).hidden = !n; $(id).textContent = t; });
+  const n = recipeMatches().length, t = `${RC_ICON} Use a saved recipe for this bullet (${n})`;
+  const open = !!($("recipeDetails") && $("recipeDetails").open);
+  $("rcFind").hidden = !(n && open);
+  $("rcBulletBtn").hidden = !(n && !open);
+  if (n) { setIconText($("rcFind"), t); setIconText($("rcBulletBtn"), t); }
 }
 function openRecipes() {
   const cur = pick(LOAD_F), r0 = curRifle(), myBar = num("barrel");
@@ -60,13 +64,15 @@ function openRecipes() {
     const bar = fnum(x.r.barrel), st = x.best?.s.stats, other = x.r !== r0;
     const where = `${x.r.name} · ${x.l.name} · ${x.r.gunKind === "handgun" ? "Handgun" : "Rifle"}${bar ? ` · ${bar}" barrel` : ""}`;
     const extra = x.l.ldKind !== "factory" ? [x.l.ldCase ? x.l.ldCase + (x.l.ldFired ? ` ×${x.l.ldFired}` : "") : "", n3(x.l.ldCBTO) ? `CBTO ${n3(x.l.ldCBTO)}"` : "", n3(x.l.ldJump) ? `jump ${n3(x.l.ldJump)}"` : ""].filter(Boolean).join(" · ") : "";
+    const warnIcon = `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg>`;
     let warn = "";
-    if (other) warn = bar && myBar && Math.abs(bar - myBar) >= 0.5 ? `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> ${bar}" barrel vs your ${myBar}" — velocity will differ (≈${myBar > bar ? "+" : "−"}${Math.round(Math.abs(myBar - bar) * 25)} fps). Work up again.`
-      : `<svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg> Another gun${bar ? "" : " (barrel length not set)"} — chamber and velocity may differ. Work up again.`;
+    if (other) warn = bar && myBar && Math.abs(bar - myBar) >= 0.5
+      ? `${warnIcon} ${escapeHtml(`${bar}" barrel vs your ${myBar}" — velocity will differ (≈${myBar > bar ? "+" : "−"}${Math.round(Math.abs(myBar - bar) * 25)} fps). Work up again.`)}`
+      : `${warnIcon} ${escapeHtml(`Another gun${bar ? "" : " (barrel length not set)"} — chamber and velocity may differ. Work up again.`)}`;
     const stats = st ? `${Math.round(st.avg)} fps<small>SD ${st.n > 1 ? st.sd.toFixed(1) : "—"} · ${st.n} shot${st.n === 1 ? "" : "s"}${x.best.n > 1 ? ` · best of ${x.best.n}` : ""}${x.best.thisRecipe ? "" : " · older recipe"}</small>`
       : x.l.mv ? `${x.l.mv} fps<small class="none">saved MV${({ measured: " (chrono)", factory: " (box)", estimate: " (est.)" })[x.l.mvSource] || ""}</small>` : `<small class="none">no chrono data</small>`;
     return `<button type="button" class="rcItem" data-i="${i}"><span>${escapeHtml(recipeText(x.l))}${x.m === "spec" ? '<span class="tag">same weight + BC</span>' : ""}</span><span class="s">${stats}</span>` +
-      `<span class="d">${escapeHtml(where)}${extra ? "<br>" + escapeHtml(extra) : ""}</span>${warn ? `<span class="w">${escapeHtml(warn)}</span>` : ""}</button>`;
+      `<span class="d">${escapeHtml(where)}${extra ? "<br>" + escapeHtml(extra) : ""}</span>${warn ? `<span class="w">${warn}</span>` : ""}</button>`;
   }).join("") : `<div class="hint">No saved recipes for this bullet yet. Save load data on a load that uses this bullet and it shows up here for every gun of the same bullet diameter.</div>`;
   openOvl("rcSheet");
 }

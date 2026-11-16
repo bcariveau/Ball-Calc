@@ -33,11 +33,14 @@ try {
   await page.click("#gearAdd");
   await page.waitForSelector("#opCatBrand");
   const brands = await page.locator("#opCatBrand").evaluate((el) => [...el.options].map((o) => o.textContent));
-  ok(brands.includes("Nightforce") && brands.includes("Leupold") && brands.includes("Zeiss") && brands.includes("Kahles") && brands.includes("Schmidt & Bender") && brands.includes("EOTech"), "brand list leads with the makers");
+  ok(brands.includes("Nightforce") && brands.includes("March") && brands.includes("Tangent Theta") && brands.includes("Arken") && brands.includes("Athlon") && brands.includes("Bushnell") && brands.includes("Primary Arms") && brands.includes("Vortex"), "brand list includes the added makers");
   await page.evaluate(() => document.getElementById("toast").classList.remove("show", "act"));
+  await page.setViewportSize({ width: 360, height: 1600 });
   await page.locator("#opCatBrand").evaluate((el) => { el.size = el.options.length; });
   await page.locator("#opCatBrand").screenshot({ path: ART + "/optics-brand-list.png" });
+  await page.locator("#opCatBrand").screenshot({ path: ART + "/v2-optics-brand-list.png" });
   await page.locator("#opCatBrand").evaluate((el) => { el.size = 1; });
+  await page.setViewportSize({ width: 360, height: 740 });
 
   await page.selectOption("#opCatBrand", "Nightforce");
   const models = await page.locator("#opCatalog").evaluate((el) => [...el.options].map((o) => o.textContent));
@@ -47,6 +50,10 @@ try {
   await page.locator("#opCatalog").screenshot({ path: ART + "/optics-model-list.png" });
   await page.locator("#opCatalog").evaluate((el) => { el.size = 1; });
   await page.setViewportSize({ width: 360, height: 740 });
+  await page.selectOption("#opCatBrand", "March");
+  await page.locator("#opCatalog").evaluate((el) => { el.size = el.options.length; });
+  await page.locator("#opCatalog").screenshot({ path: ART + "/v2-optics-model-list.png" });
+  await page.locator("#opCatalog").evaluate((el) => { el.size = 1; });
 
   await page.selectOption("#opCatBrand", "");
   await page.fill("#opCatSearch", "K525");
@@ -74,6 +81,18 @@ try {
   ok(mil.turret === "0.1mil" && mil.fp === "FFP" && mil.travel === "29" && mil.wind === "17" && mil.sh === "" && mil.cant === "" && mil.track === "" && /ATACR 7-35/.test(mil.name), "picking a model prefills the published turret and leaves sight height, cant, and tracking blank");
   await page.waitForFunction(() => !document.getElementById("toast").classList.contains("show"));
   await page.locator("#opticBody").screenshot({ path: ART + "/optics-prefilled.png" });
+  await page.locator("#opticBody").screenshot({ path: ART + "/v2-optics-prefilled.png" });
+  await page.evaluate(() => { document.getElementById("opMore").open = false; });
+  await page.locator("#opMore > summary").scrollIntoViewIfNeeded();
+  await page.locator("#opMore > summary").screenshot({ path: ART + "/v2-more-closed.png" });
+  const closedChev = await page.evaluate(() => getComputedStyle(document.querySelector("#opMore summary svg.ic.chev")).transform);
+  await page.locator("#opMore > summary").click();
+  await page.locator("#opMore > summary").screenshot({ path: ART + "/v2-more-open.png" });
+  const openChev = await page.evaluate(() => {
+    const svg = document.querySelector("#opMore summary svg.ic.chev");
+    return { path: svg && svg.querySelector("path").getAttribute("d"), fill: svg && svg.querySelector("path").getAttribute("fill"), transform: getComputedStyle(svg).transform };
+  });
+  ok(openChev.path === "m6 9 6 6 6-6" && openChev.fill === "none" && /matrix\(-1/.test(openChev.transform) && openChev.transform !== closedChev, "the optic More control is a stroked Lucide chevron that flips open");
 
   const src = await page.evaluate(() => {
     const a = document.getElementById("opCatalogSrc");

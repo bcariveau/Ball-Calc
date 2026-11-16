@@ -82,17 +82,42 @@ try {
   await page.waitForFunction(() => !document.getElementById("toast").classList.contains("show"));
   await page.locator("#opticBody").screenshot({ path: ART + "/optics-prefilled.png" });
   await page.locator("#opticBody").screenshot({ path: ART + "/v2-optics-prefilled.png" });
-  await page.evaluate(() => { document.getElementById("opMore").open = false; });
-  await page.locator("#opMore > summary").scrollIntoViewIfNeeded();
-  await page.locator("#opMore > summary").screenshot({ path: ART + "/v2-more-closed.png" });
-  const closedChev = await page.evaluate(() => getComputedStyle(document.querySelector("#opMore summary svg.ic.chev")).transform);
-  await page.locator("#opMore > summary").click();
-  await page.locator("#opMore > summary").screenshot({ path: ART + "/v2-more-open.png" });
-  const openChev = await page.evaluate(() => {
+  const chevronDir = () => page.evaluate(() => {
     const svg = document.querySelector("#opMore summary svg.ic.chev");
-    return { path: svg && svg.querySelector("path").getAttribute("d"), fill: svg && svg.querySelector("path").getAttribute("fill"), transform: getComputedStyle(svg).transform };
+    const path = [...svg.querySelectorAll("path")].find((p) => getComputedStyle(p).display !== "none");
+    const len = path.getTotalLength();
+    const scr = (t) => {
+      const p = path.getPointAtLength(len * t);
+      const s = new DOMPoint(p.x, p.y).matrixTransform(path.getScreenCTM());
+      return { x: s.x, y: s.y };
+    };
+    const a = scr(0), m = scr(0.5), b = scr(1);
+    const armY = (a.y + b.y) / 2, armX = (a.x + b.x) / 2;
+    const dy = m.y - armY, dx = m.x - armX;
+    const pointing = Math.abs(dy) > Math.abs(dx) ? (dy > 0 ? "down" : "up") : (dx < 0 ? "left" : "right");
+    return { d: path.getAttribute("d"), pointing, transform: getComputedStyle(svg).transform };
   });
-  ok(openChev.path === "m6 9 6 6 6-6" && openChev.fill === "none" && /matrix\(-1/.test(openChev.transform) && openChev.transform !== closedChev, "the optic More control is a stroked Lucide chevron that flips open");
+  const zoomChev = async (file) => {
+    await page.evaluate(() => {
+      const svg = document.querySelector("#opMore summary svg.ic.chev");
+      svg.style.width = "140px";
+      svg.style.height = "140px";
+    });
+    await page.locator("#opMore summary svg.ic.chev").screenshot({ path: ART + "/" + file });
+    await page.evaluate(() => {
+      const svg = document.querySelector("#opMore summary svg.ic.chev");
+      svg.style.width = "";
+      svg.style.height = "";
+    });
+  };
+  await page.evaluate(() => { document.getElementById("opMore").open = false; });
+  const closedChev = await chevronDir();
+  ok(closedChev.d === "m6 9 6 6 6-6" && closedChev.pointing === "down" && closedChev.transform === "none", "closed More is a down chevron, apex below the arms");
+  await zoomChev("v3-more-closed.png");
+  await page.evaluate(() => { document.getElementById("opMore").open = true; });
+  const openChev = await chevronDir();
+  ok(openChev.d === "m6 15 6-6 6 6" && openChev.pointing === "up" && openChev.transform === "none", "open More is an up chevron, apex above the arms");
+  await zoomChev("v3-more-open.png");
 
   const src = await page.evaluate(() => {
     const a = document.getElementById("opCatalogSrc");

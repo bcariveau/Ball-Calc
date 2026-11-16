@@ -97,6 +97,30 @@ try {
     await page.waitForSelector("#pkMenu.show", { state: "hidden" });
     await page.click("#gearBack");
   }
+  await page.click('#gearSwitch button[data-sec="load"]');
+  await page.locator("#gearList .gearItem").filter({ hasText: "Load A" }).first().click();
+  await page.evaluate(() => {
+    const rifleB = window.__bc.P.rifles.find((r) => r.id === "r2");
+    rifleB.barrel = "20";
+    const b = rifleB.loads[0];
+    b.bulletName = "140 ELD-M"; b.weight = "140"; b.diameter = "0.264"; b.bc = "0.326"; b.drag = "G7";
+    b.ldKind = "hand"; b.ldPowder = "Hodgdon H4350"; b.ldCharge = "40.0";
+    const a = window.__bc.P.rifles.find((r) => r.id === "r1").loads.find((l) => l.id === "l1");
+    a.ldPowder = "Varget"; a.ldCharge = "41.5";
+  });
+  await page.locator("#bc").dispatchEvent("input");
+  await page.waitForFunction(() => !document.getElementById("rcBulletBtn").hidden);
+  ok(!(await page.locator("#rcBulletBtn").innerText()).includes("<svg") && (await page.locator("#rcFind").isHidden()), "one recipe button, with the icon rendered");
+  await page.locator("#rcBulletBtn").screenshot({ path: "/opt/cursor/artifacts/recipe-btn.png" });
+  await scan("recipe button");
+  await page.click("#loadDetails > summary");
+  await page.click("#recipeDetails > summary");
+  await page.click("#rcFind");
+  await page.waitForSelector("#rcSheet.show");
+  ok(await page.locator("#rcList .w svg.ic").count() > 0 && !(await page.locator("#rcList .w").innerText()).includes("<svg"), "the cross-gun warning renders its icon");
+  await scan("saved recipes");
+  await page.click("#rcClose");
+  await page.click("#gearBack");
   await page.selectOption("#rifleSel", "r2", { force: true });
   await page.click("#tabBtnLog");
   await page.waitForFunction(() => /No sessions yet/.test(document.querySelector("#slSum")?.textContent || ""));
@@ -108,6 +132,14 @@ try {
   await page.click("#tabBtnLog");
   await page.click(".slItem");
   await page.waitForSelector("#slMvNote");
+  await page.click("#tgMarkBtn");
+  await page.waitForSelector("#tgEd.show");
+  await page.click("#tgSum");
+  await page.waitForSelector("#tgDialD");
+  const dial = await page.locator("#tgDialD option").allInnerTexts();
+  ok(dial.length === 2 && dial.every((t) => t === "U" || t === "D") && dial.join("").indexOf("<") === -1, "the dial row uses plain U / D text");
+  await scan("dial row");
+  await page.click("#tgEdDone");
   ok(await page.locator("#slMvNote svg.ic").count() === 1, "the MV note renders one warning icon");
   ok(!(await page.locator("#slMvNote").innerText()).includes("<svg") && !(await page.locator("#slMvNote").innerText()).includes("<path"), "the MV note text has no icon markup");
   await page.locator("#slMvNote").scrollIntoViewIfNeeded();

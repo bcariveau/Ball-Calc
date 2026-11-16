@@ -137,7 +137,7 @@ ${ctxRow("ctxGear")}
         <div class="full summary" id="truedNote" hidden></div><input type="hidden" id="trued">
         <div class="full" id="bandsRow" style="display:none"><label for="useBands">Sierra velocity-banded G1</label><select id="useBands"><option value="">Use single BC above</option><option value="1">Use velocity bands (G1 only)</option></select><div class="hint" id="bandsTxt"></div></div>
         <div class="full hint">BC must match the drag model printed on the box (G1 vs G7). Bullet length is optional; it enables spin drift. Factory BCs are often optimistic — true them against real drops.</div>
-        <div class="full"><details id="mvEstBox" open><summary><span>Estimate MV for a different barrel (no chronograph)</span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <div class="full"><details id="mvEstBox"><summary><span>Estimate MV for a different barrel (no chronograph)</span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
           <div class="grid">
             <div><label for="refMV">Reference MV (fps)</label><input type="number" inputmode="numeric" id="refMV" step="5" placeholder="box / load data"><div class="err" id="e-refMV"></div></div>
             <div><label for="refBarrel">Ref. barrel (in)</label><input type="number" inputmode="decimal" id="refBarrel" step="0.5" placeholder="24"><div class="err" id="e-refBarrel"></div></div>
@@ -147,7 +147,7 @@ ${ctxRow("ctxGear")}
             <div class="full hint">Estimate = reference MV + (your barrel − reference barrel) × fps per inch. Rough guide only (typically 20–30 fps/in); a chronographed MV always wins. Set your barrel length under Gun details.</div>
           </div></details></div>
       </div>
-      <details id="recipeDetails" open>
+      <details id="recipeDetails">
         <summary><span>Load data <span class="rsum" id="recipeSum" hidden></span></span><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
         <span class="seg" id="ldKindSeg" role="group" aria-label="Ammo type"><button type="button" data-v="hand"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg> Handload</button><button type="button" data-v="factory"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z'/><path d='M12 22V12'/><path d='m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7'/></svg> Factory ammo</button></span>
         <input type="hidden" id="ldKind" value="hand">
@@ -177,6 +177,11 @@ ${ctxRow("ctxGear")}
       </details>
     </details>
     <div class="summary" id="loadRecipe"></div>
+    <div id="ldStrings">
+      <div class="sub ldStrHd"><span>Strings for this load</span><button type="button" class="sm ghost" id="ldCompare">Compare strings</button></div>
+      <div id="ldStrList"></div>
+      <div id="ldStrDetail" hidden></div>
+    </div>
   </div>
 </div>
 </section>`;

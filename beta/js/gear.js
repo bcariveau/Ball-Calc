@@ -10,6 +10,7 @@ import { $, compass, escapeHtml, fmt, n1, n3, num, setVal, val } from "./core.js
 import { LOG, cleanSession, exportSessions, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
 import { applyOptic, curOptic, effSH, paintOptic } from "./optics.js";
 import { openCopy, paintRecipeBtns } from "./recipes.js";
+import { paintLoadStrings } from "./strings.js";
 import { suActive, suCheck } from "./setup.js";
 import { SH, shPendCheck } from "./shooting.js";
 import { F_DEF, LOAD_F, LONG_F, OPTIC_F, P, RANGE_F, REC_F, RIFLE_F, S, migrateGunOptic, migratePresets, savePresets, uid } from "./storage.js";
@@ -198,8 +199,9 @@ function paintLoadMore(ls) {
   const tw = num("twist"), parts = [val("weight") ? `${val("weight")} gr` : "", val("diameter") ? `${val("diameter")}"` : "",
     val("length") ? `L ${val("length")}"` : (tw ? "no length (spin drift off)" : ""), val("tipLen") ? `tip ${val("tipLen")}"` : "",
     { measured: "chrono MV", factory: "box MV", estimate: "est. MV", trued: "trued MV" }[$("mvSource").value] || "",
-    bandsOn() ? "banded G1" : "", mvAdjOn() ? `${val("ptSens")} fps/10°F` : "", ls || ""];
+    bandsOn() ? "banded G1" : "", mvAdjOn() ? `${val("ptSens")} fps/10°F` : ""];
   $("loadMoreSum").textContent = parts.filter(Boolean).join(" · ");
+  paintLoadStrings();
 }
 function moreNeeded() {   // More opens by itself when something in it is part of the current solution
   return bandsOn() || mvAdjOn() || [...$("loadDetails").querySelectorAll("input.bad, select.bad")].length > 0;
@@ -270,7 +272,7 @@ function paintGearExtra() {
 export function init1() {
   SNAP_F = ["loadName", "gunName", "gunKind", "bulletName", "weight", "bc", "drag", "mv", "diameter", "ptSens", "mvTemp", "mvAdj", ...REC_F];
   // a nested panel under More (Load data, MV estimate) opening from code or a link opens More too
-  ["recipeDetails", "mvEstBox"].forEach(id => $(id).addEventListener("toggle", () => { if ($(id).open) $("loadDetails").open = true; }));
+  ["recipeDetails", "mvEstBox"].forEach(id => $(id).addEventListener("toggle", () => { if ($(id).open) $("loadDetails").open = true; if (id === "recipeDetails") paintRecipeBtns(); }));
   $("ldKindSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; $("ldKind").value = b.dataset.v; paintLdKind(); updateDirty(); });
 
   $("rifleSel").onchange = e => { if (e.target.value === ADD_V) { e.target.value = curRifle()?.id || ""; const n0 = P.rifles.length; $("rifleNew").click(); if (P.rifles.length > n0) $("rifleDetails").open = true; return; }

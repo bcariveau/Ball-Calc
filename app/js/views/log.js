@@ -16,7 +16,7 @@ ${startBtn("slStartBtn")}
     <div id="radarMore" hidden>
     <div class="summary" id="radarStatus">Not connected.</div>
     <div class="hint" id="radarHint">Athlon Rangecraft Velocity PRO over Bluetooth (Chrome on Android). Close Athlon's own app first: the radar talks to one app at a time. Each shot drops into a live session for the selected load.</div>
-    <details id="radarRaw"><summary>Raw packets (<span id="radarRawN">0</span>)</summary>
+    <details id="radarRaw"><summary>Raw packets (<span id="radarRawN">0</span>)<svg class="ic chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="down" d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path class="up" d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
       <div class="row" style="margin-top:4px"><button class="sm ghost" type="button" id="radarCopy"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><rect width='8' height='4' x='8' y='2' rx='1' ry='1'/><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/></svg> Copy</button><button class="sm ghost" type="button" id="radarClear">Clear</button></div>
       <pre id="radarRawPre"></pre></details>
     </div>
@@ -24,7 +24,7 @@ ${startBtn("slStartBtn")}
   <input type="file" id="slFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
   <div class="summary" id="slSum">Chronograph sessions for the selected load.</div>
   <div id="slChartBox" hidden><canvas id="slChart" aria-hidden="true"></canvas></div>
-  <details id="slCmp" hidden><summary><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 3v16a2 2 0 0 0 2 2h16'/><path d='M18 17V9'/><path d='M13 17V5'/><path d='M8 17v-3'/></svg> Compare sessions (charge / ladder test)</summary>
+  <details id="slCmp" hidden><summary><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 3v16a2 2 0 0 0 2 2h16'/><path d='M18 17V9'/><path d='M13 17V5'/><path d='M8 17v-3'/></svg> Compare sessions (charge / ladder test)<svg class="ic chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="down" d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path class="up" d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
     <span class="seg" id="slCmpScope" role="group" aria-label="Compare scope"><button type="button" data-v="load" class="on">This load</button><button type="button" data-v="gun">All loads on this gun</button></span>
     <div id="slCmpTbl"></div>
   </details>
@@ -55,9 +55,9 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
   <p class="hint sh" id="slAddHint"><span class="h1">Type a velocity and tap Add (or Enter).</span> <button type="button" class="info" id="slAddHelp" aria-expanded="false" aria-label="More about adding shots">?</button><span class="more" hidden> You can paste several at once, e.g. "2701 2698 2710". Tags (Clean, Cold bore, Flier, Input error) can be combined and never change the stats. Remove keeps the shot in the log, grays it, and leaves it out of every stat until you restore it.</span></p>
   <div class="row" id="shotSelTools"><button class="sm ghost" type="button" id="shotSelBtn"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5'/><path d='m9 11 3 3L22 4'/></svg> Select shots</button></div>
   <div id="slShots"></div>
-  <div class="sub" style="margin-top:10px">Targets</div>
+  <div class="sub ldStrHd" style="margin-top:10px"><span>Targets</span><button type="button" class="sm ghost" id="slCompare">Compare strings</button></div>
   <div id="slTgView"></div>
-  <details style="margin-top:10px"><summary>Session details (date, notes, weather, barrel)</summary>
+  <details style="margin-top:10px"><summary>Session details (date, notes, weather, barrel)<svg class="ic chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="down" d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path class="up" d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
     <div class="grid">
       <div class="full"><label for="slDate">Date / time</label><input type="datetime-local" id="slDate"></div>
       <div class="full"><label for="slNotes">Notes</label><input type="text" id="slNotes" maxlength="300" placeholder="powder lot, seating depth, conditions…"></div>
@@ -131,4 +131,13 @@ export const logSheets = `<div id="slEditor" class="ovl" role="dialog" aria-moda
   </div>
   <div id="slImpList"></div>
   <button type="button" id="slImpGo">Import</button>
+</div>
+<div id="cmpSheet" class="ovl" role="dialog" aria-modal="true" aria-label="Compare strings">
+  ${sheetHead("Compare strings", "cmpClose")}
+  <p class="hint" id="cmpNote"></p>
+  <label for="cmpRifle">Rifle</label>
+  <select id="cmpRifle" aria-label="Rifle for this comparison"></select>
+  <div id="cmpChips" class="scRow" role="group" aria-label="Strings in the overlay"></div>
+  <div id="cmpLeg" class="tgLeg"></div>
+  <div id="cmpBoard"></div>
 </div>`;

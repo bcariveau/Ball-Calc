@@ -3,12 +3,12 @@
 // init*() and is called by main.js in the original order.
 
 import { B, angs, curCond, entryRequired, powderT, solveShot, turretSpec } from "./calc.js";
-import { toast } from "./components.js";
+import { closeOvl, openOvl, toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal } from "./core.js";
-import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
+import { curLoad, curRifle, recipeSnapshot, recipeText } from "./gear.js";
 import { asFiredFrom, recordedDial, scopeSentence } from "./link-v3.js";
 import { curOptic } from "./optics.js";
-import { ED, commitEditor, edDirty, renderEditor, set_edDirty, stringWho } from "./log.js";
+import { ED, LOG, commitEditor, edDirty, renderEditor, set_edDirty, stringWho } from "./log.js";
 import { banPaint } from "./shot-banner.js";
 import { P, uid } from "./storage.js";
 import { mkGlyph, tgSvg } from "./target-draw.js";
@@ -157,6 +157,118 @@ function teSumPaint() {   // one tappable line for String/Template/Distance/Meas
   $("tgEd").classList.toggle("setc", !open);
 }
 
+/* ---- strings for the load on screen, and a read-only cross-session overlay (memory only) ---- */
+const XS = { detail: "", gun: "", hide: new Set(), forLoad: "" };
+const strKey = (sess, st) => `${sess.id}|${st.id}`;
+function strLoadId(sess, st) { return (st && st.asFired && st.asFired.loadId) || (sess && sess.loadId) || ""; }
+function strRifleIdOf(sess, st) { return (st && st.asFired && st.asFired.rifleId) || (sess && sess.rifleId) || ""; }
+function shotStatsOf(shots) {
+  const v = (shots || []).filter(s => s && !s.x && s.v != null).map(s => +s.v).filter(x => isFinite(x));
+  const n = v.length; if (!n) return { n: 0 };
+  const avg = v.reduce((a, b) => a + b, 0) / n, min = Math.min(...v), max = Math.max(...v);
+  const sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - avg) ** 2, 0) / (n - 1)) : 0;
+  return { n, avg: +avg.toFixed(1), sd: +sd.toFixed(1), es: +(max - min).toFixed(1) };
+}
+function fmtWhen(iso) { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString(undefined, { year: "2-digit", month: "short", day: "numeric" }); }
+function chargeOf(sess, st) {
+  const rc = (st.asFired && st.asFired.recipe) || sess.recipe || null;
+  return recipeText(rc) || "";
+}
+function stringsForLoad(loadId) {
+  if (!loadId) return [];
+  const rows = [];
+  LOG.forEach(sess => {
+    const t = tgView(sess);
+    (t.strings || []).forEach(st => {
+      if (strLoadId(sess, st) !== loadId) return;
+      if (!readings(sess, st.id).length && !(st.holes && st.holes.length)) return;
+      rows.push({ sess, st, t, g: (t.targets || []).find(q => q.id === st.tid) || t.targets[0] });
+    });
+  });
+  return rows.sort((a, b) => String(b.sess.date || "").localeCompare(String(a.sess.date || "")) || strNo(b.t, b.st.id) - strNo(a.t, a.st.id));
+}
+function tagList(sh) {
+  return [sh.cold && "Cold bore", sh.clean && "Clean", sh.fl && "Flier", sh.ie && "Input error", sh.x && "Removed"].filter(Boolean).join(", ");
+}
+function paintLoadStrings() {
+  const box = $("ldStrings"); if (!box) return;
+  const l = curLoad();
+  if (!l) { box.hidden = true; return; }
+  box.hidden = false;
+  if (XS.forLoad !== l.id) { XS.forLoad = l.id; XS.detail = ""; }
+  const rows = stringsForLoad(l.id);
+  const list = $("ldStrList"), det = $("ldStrDetail"), btn = $("ldCompare");
+  if (btn) btn.disabled = !rows.length;
+  if (!rows.length) { list.hidden = false; list.innerHTML = `<div class="hint">No strings yet for this load.</div>`; det.hidden = true; return; }
+  const hit = rows.find(r => strKey(r.sess, r.st) === XS.detail);
+  if (!hit) {
+    list.hidden = false; det.hidden = true;
+    list.innerHTML = rows.map(r => {
+      const shots = readings(r.sess, r.st.id), vs = shotStatsOf(shots), holes = statHoles(r.sess, r.st);
+      const gs = holes.length > 1 ? grpStats(holes.map(h => hoff(r.st, h))) : null;
+      const vel = vs.n ? `${Math.round(vs.avg)} fps · SD ${vs.n > 1 ? vs.sd.toFixed(1) : "—"} · ES ${vs.n > 1 ? vs.es : "—"}` : "no velocity";
+      const grp = holes.length > 1 && gs ? lenTxt(gs.es, r.g && r.g.u) : holes.length === 1 ? "1 hole" : "";
+      const sessLbl = r.sess.notes ? r.sess.notes.slice(0, 40) : (r.sess.source === "athlon" ? "Athlon import" : r.sess.source === "bluetooth" ? "Bluetooth" : "manual");
+      return `<button type="button" class="rcItem ldStr" data-k="${escapeHtml(strKey(r.sess, r.st))}"><span>${escapeHtml(fmtWhen(r.sess.date))} · S${strNo(r.t, r.st.id)} · ${escapeHtml(tgtLetter(r.t, r.st.tid))}</span><span class="s">${escapeHtml(vel)}</span><span class="d">${escapeHtml(sessLbl)}${chargeOf(r.sess, r.st) ? " · " + escapeHtml(chargeOf(r.sess, r.st)) : ""}${grp ? " · " + escapeHtml(grp) : ""}</span></button>`;
+    }).join("");
+    return;
+  }
+  list.hidden = true; det.hidden = false;
+  const shots = readings(hit.sess, hit.st.id);
+  const lines = shots.length ? shots.map((sh, i) => `<div class="shotLn"><span>${i + 1}. ${sh.v == null ? "—" : Math.round(sh.v) + " fps"}</span><span>${escapeHtml(tagList(sh) || "—")}</span></div>`).join("") : `<div class="hint">No shots on this string.</div>`;
+  det.innerHTML = `<button type="button" class="sm ghost" id="ldStrBack">Back to strings</button><div class="sub">S${strNo(hit.t, hit.st.id)} · ${escapeHtml(fmtWhen(hit.sess.date))}</div>${lines}<button type="button" class="sm" id="ldStrOverlay">Open overlay</button>`;
+}
+function riflesFor(rows) {
+  const out = [];
+  rows.forEach(r => { const id = strRifleIdOf(r.sess, r.st); if (!out.some(x => x.id === id)) { const g = P.rifles.find(x => x.id === id); out.push({ id, name: g ? g.name : "This rifle" }); } });
+  return out;
+}
+function openCompare(loadId, gunId) {
+  const rows = stringsForLoad(loadId);
+  if (!rows.length) { toast("No strings for this load yet"); return; }
+  XS.forLoad = loadId; XS.hide = new Set();
+  const rifles = riflesFor(rows);
+  XS.gun = rifles.some(r => r.id === gunId) ? gunId : (rifles[0] && rifles[0].id) || "";
+  openOvl("cmpSheet"); paintCompare();
+}
+function paintCompare() {
+  const note = $("cmpNote"), sel = $("cmpRifle"), chips = $("cmpChips"), leg = $("cmpLeg"), board = $("cmpBoard");
+  if (!note) return;
+  const all = stringsForLoad(XS.forLoad), rifles = riflesFor(all);
+  if (!rifles.some(r => r.id === XS.gun)) XS.gun = rifles[0] ? rifles[0].id : "";
+  sel.innerHTML = rifles.map(r => `<option value="${escapeHtml(r.id)}"${r.id === XS.gun ? " selected" : ""}>${escapeHtml(r.name)}</option>`).join("");
+  const rows = all.filter(r => strRifleIdOf(r.sess, r.st) === XS.gun);
+  note.textContent = rifles.length > 1
+    ? "One rifle at a time. Pick another rifle to compare its strings for this load. Groups are aligned on each aim point."
+    : "Same rifle and load. Groups are aligned on each aim point.";
+  const shown = rows.filter(r => !XS.hide.has(strKey(r.sess, r.st)));
+  const yds = [...new Set(shown.map(r => Math.round(tgYd(r.g || { dist: 100, du: "yd" }))))];
+  const ts = tsFor(XS.gun, shown[0] && shown[0].st);
+  const ang = yds.length > 1 ? (ts.u || "MIL") : null;
+  const conv = (p, g) => ang ? { x: p.x / inPerU(ang, tgYd(g)), y: p.y / inPerU(ang, tgYd(g)) } : p;
+  let mx = 0;
+  const layers = shown.map((r, ci) => ({ i: ci, ci, sid: r.st.id, aim: { x: 0, y: 0 }, holes: (r.st.holes || []).map((h, k) => {
+    const p = conv(hoff(r.st, h), r.g || { dist: 100, du: "yd" }); mx = Math.max(mx, Math.abs(p.x), Math.abs(p.y));
+    return { p, n: k + 1, meas: !!h.m, rm: !statHoles(r.sess, { holes: [h] }).length, id: h.id };
+  }) }));
+  const multi = shown.length > 1;
+  chips.innerHTML = rows.map(r => {
+    const on = !XS.hide.has(strKey(r.sess, r.st));
+    const ci = shown.findIndex(s => strKey(s.sess, s.st) === strKey(r.sess, r.st));
+    return `<button type="button" class="sc${on ? " on" : ""}" data-k="${escapeHtml(strKey(r.sess, r.st))}" aria-pressed="${on}">${mkGlyph(ci < 0 ? 0 : ci, multi && on)}S${strNo(r.t, r.st.id)} · ${escapeHtml(fmtWhen(r.sess.date))}</button>`;
+  }).join("") || `<div class="hint">No strings for this rifle.</div>`;
+  leg.innerHTML = shown.map((r, ci) => {
+    const vs = shotStatsOf(readings(r.sess, r.st.id)), holes = statHoles(r.sess, r.st);
+    const gs = holes.length > 1 ? grpStats(holes.map(h => hoff(r.st, h))) : null;
+    const bits = [`S${strNo(r.t, r.st.id)}`, fmtWhen(r.sess.date), vs.n ? `${Math.round(vs.avg)} fps` : "no velocity", gs ? lenTxt(gs.es, r.g && r.g.u) : ""].filter(Boolean);
+    return `<span><i class="s${(ci % 6) + 1}"></i>${escapeHtml(bits.join(" · "))}</span>`;
+  }).join("");
+  if (!shown.length) { board.innerHTML = `<div class="hint">All strings hidden — tap a chip to show it.</div>`; return; }
+  const span = Math.max(ang ? 2 : 3, mx * 2.5);
+  const dia = bulletDiaIn(shown[0].sess);
+  const sv = tgSvg({ span, tpl: "grid1", yd: 100, u: ang || "in", layers, colors: multi, dia, px: span / 320 });
+  board.innerHTML = `<svg class="tgS" viewBox="${sv.vb}" role="img" aria-label="Overlay of ${shown.length} strings, aligned on their aim points">${sv.html}</svg><div class="hint">${ang ? `Different distances (${yds.join(", ")} yd) — plotted in ${angU(ang)}.` : "Aligned on each string's aim point."}</div>`;
+}
 export function init() {
   $("slTgView").addEventListener("click", e => { const b = e.target.closest(".sc"); if (!b) return; const id = b.dataset.s; TV.hide.has(id) ? TV.hide.delete(id) : TV.hide.add(id); paintTgView(); });
   $("slTgView").addEventListener("change", e => { if (e.target.id !== "slTgRifle") return; TV.gun = e.target.value; TV.hide = new Set(); paintTgView(); });
@@ -172,6 +284,30 @@ export function init() {
     teSnap(); st.dial = d; tgAfterEditQuiet(); teRender(); toast(`Dial set to the app's dope: ${dialTxt(d)} (${Math.abs(d.c)} clicks)`);
   };
   $("tgSum").onclick = () => { if (!TE) return; TE.setOpen = !TE.setOpen; teSumPaint(); if (TE.setOpen) $("tgStrSel").focus({ preventScroll: true }); };
+  const ld = $("ldStrings");
+  if (ld) ld.addEventListener("click", e => {
+    const row = e.target.closest(".ldStr");
+    if (row) { XS.detail = row.dataset.k; paintLoadStrings(); return; }
+    if (e.target.closest("#ldStrBack")) { XS.detail = ""; paintLoadStrings(); return; }
+    if (e.target.closest("#ldStrOverlay")) {
+      const hit = stringsForLoad(curLoad() && curLoad().id).find(r => strKey(r.sess, r.st) === XS.detail);
+      if (hit) openCompare(strLoadId(hit.sess, hit.st), strRifleIdOf(hit.sess, hit.st));
+      return;
+    }
+    if (e.target.closest("#ldCompare")) { const l = curLoad(); if (l) openCompare(l.id, curRifle() && curRifle().id); }
+  });
+  if ($("slCompare")) $("slCompare").onclick = () => {
+    if (!ED) { toast("Open a session first"); return; }
+    const t = tgView(ED), st = t.strings.find(s => s.id === t.cur) || t.strings[0];
+    openCompare(strLoadId(ED, st), strRifleIdOf(ED, st));
+  };
+  if ($("cmpClose")) $("cmpClose").onclick = () => closeOvl("cmpSheet");
+  if ($("cmpRifle")) $("cmpRifle").onchange = e => { XS.gun = e.target.value; XS.hide = new Set(); paintCompare(); };
+  if ($("cmpChips")) $("cmpChips").addEventListener("click", e => {
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    XS.hide.has(b.dataset.k) ? XS.hide.delete(b.dataset.k) : XS.hide.add(b.dataset.k);
+    paintCompare();
+  });
 }
 
-export { paintStrBar, paintTgView, tgAfterEdit, tgNewString, tgSame, tgDope, tgWxSnap, tgRecent, tgAutoDial, tgRedope, dialDec, dialView, dialTxt, teDialPaint, teDialSet, teSumPaint };
+export { paintStrBar, paintTgView, paintLoadStrings, tgAfterEdit, tgNewString, tgSame, tgDope, tgWxSnap, tgRecent, tgAutoDial, tgRedope, dialDec, dialView, dialTxt, teDialPaint, teDialSet, teSumPaint };

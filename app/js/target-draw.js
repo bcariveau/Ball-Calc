@@ -66,7 +66,7 @@ function tgSvg(o) {
     if (Ly.aim) { const ax = Ly.aim.x, ay = -Ly.aim.y, a = r * 2.6;
       s += `<g class="aim${Ly.dim ? " dim" : ""}" data-s="${Ly.sid || ""}"><line x1="${(ax - a).toFixed(3)}" y1="${ay.toFixed(3)}" x2="${(ax + a).toFixed(3)}" y2="${ay.toFixed(3)}" vector-effect="non-scaling-stroke"/><line x1="${ax.toFixed(3)}" y1="${(ay - a).toFixed(3)}" x2="${ax.toFixed(3)}" y2="${(ay + a).toFixed(3)}" vector-effect="non-scaling-stroke"/><circle cx="${ax.toFixed(3)}" cy="${ay.toFixed(3)}" r="${(r * 1.3).toFixed(3)}" vector-effect="non-scaling-stroke"/></g>`; }
     Ly.holes.forEach((H, hi) => { const x = H.p.x, y = -H.p.y, L = LB.get(li + ":" + hi);
-      s += `<g class="hole${rad.caliber ? " cal" : " unk"}${H.rm ? " rm" : ""}${H.sel ? " sel" : ""}${H.meas ? " meas" : ""}" data-h="${H.id || ""}" data-n="${H.n}">` +
+      s += `<g class="hole${o.colors ? " col" : rad.caliber ? " cal" : " unk"}${H.rm ? " rm" : ""}${H.sel ? " sel" : ""}${H.meas ? " meas" : ""}" data-h="${H.id || ""}" data-n="${H.n}">` +
         (H.sel ? `<circle class="selr" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(hr * 2.3).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
         (H.meas ? `<circle class="mr s${Ly.i % 6 + 1}" cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${(hr * 1.75).toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +
         `<g class="${cl}">${shpPath("circle", x, y, hr)}</g>` + (L.lead ? `<line class="hl${Ly.dim ? " dim" : ""}" x1="${L.lx.toFixed(3)}" y1="${L.ly.toFixed(3)}" x2="${L.ex.toFixed(3)}" y2="${L.ey.toFixed(3)}" vector-effect="non-scaling-stroke"/>` : "") +

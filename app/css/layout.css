@@ -75,12 +75,12 @@ details.section > summary { color: var(--accent); font-size: 1rem; font-weight: 
 #tabGear[data-gearview="edit"] #gunEss,
 #tabGear[data-gearview="edit"] #loadBasic { gap: 4px 8px; }
 #tabGear details > summary::before { display: none; }
-#tabGear details > summary .chev { margin-left: auto; flex: 0 0 auto; transition: transform .15s; }
-#tabGear details[open] > summary .chev { transform: rotate(180deg); }
+#tabGear details > summary .chev,
+#tabGear details[open] > summary .chev,
+#tabGear details.more > summary .chev,
+#tabGear details.more[open] > summary .chev { margin-left: auto; flex: 0 0 auto; transform: none; transition: none; }
 #tabGear details.more > summary::before { display: none; }
 #tabGear details.more > summary { justify-content: space-between; gap: 8px; }
-#tabGear details.more > summary .chev { margin-left: auto; flex: 0 0 auto; transition: transform .15s; }
-#tabGear details.more[open] > summary .chev { transform: rotate(180deg); }
 #tabGear details.more > summary .rsum { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; color: var(--muted); }
 #tabGear details.more > summary .rsum:empty { display: none; }
 #gearDlg { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; }

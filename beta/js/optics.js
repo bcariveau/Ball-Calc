@@ -8,6 +8,7 @@ import { closeOvl, ctxPaint, openOvl, toast } from "./components.js";
 import { $, escapeHtml, fmt, num, setVal, val } from "./core.js";
 import { renderAll, renderCard } from "./dope.js";
 import { applyRifle, askName, askRemove, autosave, curRifle, flashSaved, formFor, pick, renderPickers, same, updateDirty } from "./gear.js";
+import { FL6_MARKS, formToHoldover, marksToText, sameHold } from "./holdover.js";
 import { OPTIC_CATALOG } from "./optic-catalog.js";
 import { F_DEF, OPTIC_F, P, S, savePresets, saveSettings, uid } from "./storage.js";
 import { auto, manual, wx } from "./weather.js";
@@ -45,6 +46,10 @@ function applyCatalog(id) {
     const u = src.querySelector(".srcu");
     if (u) u.textContent = c.source;
   }
+  const note = $("opCatNote");
+  if (note) { note.hidden = !c.note; note.textContent = c.note || ""; }
+  if ($("opFixed")) $("opFixed").checked = !!c.opFixed;
+  commitOpticExtras();
   savePresets(); renderOpticSel(); paintOptic(); updateDirty();
 }
 
@@ -80,9 +85,54 @@ function setTurretUnit(sel, uSel, seg, u) {
   el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
 }
 function paintTurrets() { paintTurretPick("turret", "turretU", "turretUSeg"); paintTurretPick("opTurret", "opTurretU", "opTurretUSeg"); }
+function fillHoldover(ho) {
+  const mode = ho && ho.mode || "none";
+  if ($("hoMode")) $("hoMode").value = mode;
+  if ($("hoUnit")) $("hoUnit").value = ho && ho.unit === "MIL" ? "MIL" : "MOA";
+  setVal("hoSpacing", ho && ho.spacing != null ? ho.spacing : "");
+  setVal("hoCount", ho && ho.count != null ? ho.count : "");
+  if ($("hoMarks")) $("hoMarks").value = marksToText(ho && ho.marks);
+  setVal("hoCalMag", ho && ho.calibratedMag != null ? ho.calibratedMag : "");
+  const ref = ho && ho.bdcRef || {};
+  setVal("hoCartridge", ref.cartridge || "");
+  setVal("hoBullet", ref.bullet || "");
+  setVal("hoMv", ref.mv != null ? ref.mv : "");
+  setVal("hoZero", ref.zeroYd != null ? ref.zeroYd : "");
+  setVal("hoSH", ref.sightHeight != null ? ref.sightHeight : "");
+  setVal("hoNotes", ref.notes || "");
+  setVal("hoStadia", ho && ho.rangeStadia || "");
+  setVal("hoWind", ho && ho.windDots || "");
+  const sel = $("hoLoad");
+  if (sel) {
+    const cur = ref.loadId || "";
+    sel.innerHTML = `<option value="">None</option>` + (P.rifles || []).flatMap(r => (r.loads || []).filter(l => !l.archived).map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(r.name)} · ${escapeHtml(l.name)}</option>`)).join("");
+    sel.value = [...sel.options].some(o => o.value === cur) ? cur : "";
+  }
+}
+function readHoldoverForm() {
+  if (!$("hoMode")) return null;
+  return formToHoldover({
+    mode: $("hoMode").value, unit: $("hoUnit") && $("hoUnit").value, spacing: val("hoSpacing"), count: val("hoCount"),
+    marksText: $("hoMarks") && $("hoMarks").value, calMag: val("hoCalMag"), loadId: $("hoLoad") && $("hoLoad").value,
+    cartridge: val("hoCartridge"), bullet: val("hoBullet"), mv: val("hoMv"), zeroYd: val("hoZero"),
+    sightHeight: val("hoSH"), notes: val("hoNotes"), stadia: val("hoStadia"), wind: val("hoWind"),
+  });
+}
+function commitOpticExtras() {
+  const o = curOptic();
+  if (!o || formFor.o !== o.id || !$("opFixed")) return false;
+  let changed = false;
+  const fixed = $("opFixed").checked;
+  if (fixed !== !!o.opFixed) { if (fixed) o.opFixed = true; else delete o.opFixed; changed = true; }
+  const next = readHoldoverForm();
+  if (!sameHold(next, o.holdover || null)) { if (next) o.holdover = next; else delete o.holdover; changed = true; }
+  return changed;
+}
 function applyOptic() {
   const o = curOptic();
   OPTIC_F.forEach(f => setVal(f, o ? ((o[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : o[f]) : (F_DEF[f] || "")));
+  if ($("opFixed")) $("opFixed").checked = !!(o && o.opFixed);
+  fillHoldover(o && o.holdover);
   formFor.o = o?.id || null;
   renderOpticSel(); paintOptic(); followUnits();
 }
@@ -97,7 +147,11 @@ function paintOptic() {
   $("opticPk").hidden = !r; $("opticBody").hidden = !o;
   const c = $("opTurret").value === "custom"; $("opTurretCustom").hidden = !o || !c; $("opTurretCustomU").hidden = true;   // the unit comes from the MOA | MIL switch
   paintTurrets();
-  $("opMagRow").hidden = $("opFP").value !== "SFP";
+  const fixed = !!($("opFixed") && $("opFixed").checked);
+  if ($("opFpRow")) $("opFpRow").hidden = fixed;
+  if ($("opMagRow")) $("opMagRow").hidden = !(fixed || $("opFP").value === "SFP");
+  if ($("opMagLbl")) $("opMagLbl").textContent = fixed ? "Magnification (×)" : "Holds true at (×)";
+  paintHoldover();
   document.querySelectorAll("#opticBody .u2").forEach(e => e.textContent = `(${tu})`);
   $("opticSum").textContent = o ? [`${ts.lbl} turret`, `${$("opReticle").value === "moa" ? "MOA" : "MIL"} reticle`, ts.sfp ? `SFP (true at ${fmt(ts.sfp, 1)}×)` : $("opFP").value,
       ts.perTurn ? `${fmt(ts.perTurn, 2)} ${tu}/turn` : "", ts.up != null ? `${ts.upSet ? "" : "~"}${fmt(ts.up, 1)} ${tu} up travel` : "", num("opSH") != null ? `SH ${val("opSH")}"` : "", ts.k !== 1 ? `tracking ×${fmt(ts.k, 3)}` : ""].filter(Boolean).join(" · ")
@@ -109,11 +163,23 @@ function paintOptic() {
   ["opDup", "opRename", "opDetach", "opDel"].forEach(id => $(id).disabled = !o);
   paintRO();
 }
+function paintHoldover() {
+  const mode = $("hoMode") ? $("hoMode").value : "none";
+  if ($("hoBody")) $("hoBody").hidden = mode === "none";
+  const show = id => { const el = $(id); if (el) el.hidden = false; };
+  const hide = id => { const el = $(id); if (el) el.hidden = true; };
+  if (mode === "none") return;
+  ["hoUnitRow", "hoSpaceRow", "hoCountRow", "hoMarksRow", "hoCalRow", "hoRefRow", "hoAcssRow", "hoShRow"].forEach(hide);
+  if (mode === "hash") { show("hoUnitRow"); show("hoSpaceRow"); show("hoCountRow"); show("hoMarksRow"); show("hoCalRow"); }
+  if (mode === "bdc") { show("hoUnitRow"); show("hoMarksRow"); show("hoCalRow"); show("hoRefRow"); }
+  if (mode === "acss") { show("hoUnitRow"); show("hoMarksRow"); show("hoCalRow"); show("hoRefRow"); show("hoAcssRow"); }
+  if (mode === "cds") { show("hoUnitRow"); show("hoMarksRow"); show("hoRefRow"); show("hoShRow"); }
+}
 function flagZero(r, why) { if (r) r.zeroUnconf = { why, at: new Date().toISOString() }; setTimeout(ctxPaint, 0); }
-function attachOptic(oid, fresh) {   // fresh = optic just created for this gun (no zero flag unless it replaces another optic)
+function attachOptic(oid, fresh, confirmed) {   // fresh = optic just created for this gun (no zero flag unless it replaces another optic)
   const r = curRifle(), o = (P.optics || []).find(x => x.id === oid); if (!r || !o || r.opticId === oid) { renderOpticSel(); return false; }
   const other = P.rifles.find(x => x !== r && x.opticId === oid);
-  if (other && !confirm(`“${o.name}” is on “${other.name}”. Move it to “${r.name}”?\nBoth guns' zeros will be marked “not confirmed”.`)) { renderOpticSel(); return false; }
+  if (other && !confirmed && !confirm(`“${o.name}” is on “${other.name}”. Move it to “${r.name}”?\nBoth guns' zeros will be marked “not confirmed”.`)) { renderOpticSel(); return false; }
   autosave();
   const prev = r.opticId ? P.optics.find(x => x.id === r.opticId) : null;
   const snap = { rO: r.opticId || null, rZ: r.zeroUnconf, oZ: other?.zeroUnconf, up: o.opUp, re: o.opUpRe, sh: o.opSH, pUp: prev?.opUp, pRe: prev?.opUpRe };
@@ -191,6 +257,15 @@ export function init1() {
   }
   $("turretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("turret", "turretU", "turretUSeg", b.dataset.v); });
   $("opTurretUSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTurretUnit("opTurret", "opTurretU", "opTurretUSeg", b.dataset.v); });
+  if ($("opFixed")) $("opFixed").addEventListener("change", () => { paintOptic(); updateDirty(); });
+  if ($("hoMode")) $("hoMode").addEventListener("change", () => { paintHoldover(); updateDirty(); });
+  if ($("hoFillFl6")) $("hoFillFl6").onclick = () => {
+    if ($("hoMode")) $("hoMode").value = "hash";
+    if ($("hoUnit")) $("hoUnit").value = "MOA";
+    if ($("hoMarks")) $("hoMarks").value = marksToText(FL6_MARKS);
+    setVal("hoSpacing", ""); setVal("hoCount", ""); setVal("hoCalMag", "6");
+    paintHoldover(); updateDirty();
+  };
   $("opticSel").onchange = e => { const v = e.target.value; if (!v) detachOptic(); else if (attachOptic(v) === true) toast(`“${curOptic().name}” attached to “${curRifle().name}” — confirm the zero`); };
   $("opNew").onclick = () => {
     const r = curRifle(); if (!r) return; const n = askName("Name for the new optic (e.g. Razor 4.5-27):", `${r.name} scope`); if (!n) return;
@@ -223,4 +298,4 @@ export function init2() {
   document.addEventListener("keydown", e => { if (e.key === "Escape" && $("zpDlg").classList.contains("show")) { e.stopImmediatePropagation(); answerZero(false); } }, true);
 }
 
-export { TU_DEF, tuUnit, paintTurretPick, setTurretUnit, paintTurrets, curOptic, effSH, unitFollowed, paintSeg, followUnits, applyOptic, renderOpticSel, paintOptic, flagZero, attachOptic, clearUp, detachOptic, ZP, askZero, answerZero, paintShHint, paintUpNote, paintRO };
+export { TU_DEF, tuUnit, paintTurretPick, setTurretUnit, paintTurrets, curOptic, effSH, unitFollowed, paintSeg, followUnits, applyOptic, renderOpticSel, paintOptic, flagZero, attachOptic, clearUp, detachOptic, ZP, askZero, answerZero, paintShHint, paintUpNote, paintRO, commitOpticExtras };

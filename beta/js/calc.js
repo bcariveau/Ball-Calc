@@ -199,7 +199,7 @@ function turretSpec() {   // the attached optic wins; otherwise the gun's own tu
     const tr = num("opTravel"), cant = num("opCant") || 0, cantT = s.u === "MIL" ? cant / 3.437747 : cant;
     const upF = num("opUp"); s.upSet = upF > 0;   // measured "up travel from zero" overrides the estimate
     s.up = s.upSet ? upF : tr > 0 ? Math.min(tr, tr / 2 + cantT) : null;   // ASSUMPTION: zero near the optical center on a flat base → half the travel is up; a canted base adds its MOA
-    s.sfp = $("opFP").value === "SFP" && num("opMag") > 0 ? num("opMag") : null;
+    s.sfp = !($("opFixed") && $("opFixed").checked) && $("opFP").value === "SFP" && num("opMag") > 0 ? num("opMag") : null;
     return s;
   }
   const t = $("turret").value;

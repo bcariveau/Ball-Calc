@@ -12,7 +12,7 @@
  * >>> Bump VERSION on every publish that changes this file's precache list or the page. <<<
  * (The page also asks this worker to compare the cached page against the network, so a forgotten bump still shows the banner.)
  */
-const VERSION = "2026-11-08.25";
+const VERSION = "2026-11-08.26";
 
 const SCOPE = new URL(self.registration.scope);
 const BETA = /\/beta$/.test(SCOPE.pathname);           // ".../Ball-Calc/beta" when registered with scope "./beta"
@@ -40,6 +40,7 @@ const MODULES = BETA ? [
   "beta/js/app.js",
   "beta/js/bulletdb.js",
   "beta/js/calc.js",
+  "beta/js/cartridges.js",
   "beta/js/components.js",
   "beta/js/core.js",
   "beta/js/dope-card.js",

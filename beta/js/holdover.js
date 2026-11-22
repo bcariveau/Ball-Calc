@@ -18,6 +18,8 @@ function gunDias(loads) {
 // common valid diameter on the gun. A tie, or no valid diameter, is no reference.
 function sizeRef(gun) {
   if (!gun) return { kind: "unknown", dia: null };
+  const set = validDia(gun.cartridge);
+  if (set != null) return { kind: "known", dia: set, from: "firearm", name: gun.cartridge.name || "" };
   const loads = gun.loads || [];
   const cur = loads.find(l => l.id === gun.lastLoadId);
   const curD = validDia(cur);

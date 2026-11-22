@@ -1,22 +1,24 @@
 // Bore fit and holdover math. No browser, no storage.
 import assert from "node:assert/strict";
 import { OPTIC_CATALOG } from "../beta/js/optic-catalog.js";
-import { FL6_MARKS, boreOf, hashMarks, holdText, loadFit, scaleFactor, toUnit } from "../beta/js/holdover.js";
+import { FL6_MARKS, hashMarks, holdText, loadFit, scaleFactor, sizeRef, sizeWarn, toUnit } from "../beta/js/holdover.js";
 
 let n = 0;
 const ok = (cond, msg) => { assert.ok(cond, msg); n++; };
 
-const fit = (dia) => ({ diameter: dia });
-ok(boreOf([]).kind === "unknown", "a gun with no numeric diameters has an unknown bore");
-ok(boreOf([fit(""), fit("nope"), fit(null)]).kind === "unknown", "invalid diameters do not invent a bore");
-ok(boreOf([fit("0.264"), fit("0.2644")]).kind === "known" && Math.abs(boreOf([fit("0.264"), fit("0.2644")]).dia - 0.264) < 0.0015, "diameters inside 0.0015 in are one bore");
-ok(boreOf([fit("0.264"), fit("0.308")]).kind === "mixed", "two diameters outside the tolerance are mixed");
-const known = boreOf([fit("0.264")]);
-ok(loadFit(fit("0.265"), known) === "fit", "0.001 in is still a fit");
-ok(loadFit(fit("0.266"), known) === "wrong", "0.002 in is the wrong size");
-ok(loadFit(fit(""), known) === "unknown" && loadFit(fit("abc"), known) === "unknown", "a missing diameter stays unknown size");
-ok(loadFit(fit("0.308"), boreOf([])).kind === undefined && loadFit(fit("0.308"), { kind: "unknown" }) === "neutral", "an unknown bore does not warn");
-ok(loadFit(fit("0.308"), { kind: "mixed" }) === "neutral" && loadFit(fit(""), { kind: "mixed" }) === "unknown", "a mixed bore does not mark a size wrong");
+const L = (id, dia) => ({ id, diameter: dia });
+const gun = (loads, cur) => ({ lastLoadId: cur, loads });
+ok(sizeRef(gun([], null)).kind === "unknown", "a gun with no numeric diameters has no reference");
+ok(sizeRef(gun([L("a", ""), L("b", "nope")], "a")).kind === "unknown", "invalid diameters do not invent a reference");
+const current = sizeRef(gun([L("a", "0.264"), L("b", "0.308")], "a"));
+ok(current.kind === "known" && current.from === "current" && current.dia === 0.264, "a mixed gun uses the current load's diameter");
+ok(sizeWarn(current, L("b", "0.308")) && !sizeWarn(current, L("c", "0.265")) && sizeWarn(current, L("d", "0.266")), "0.0015 in is the warning line");
+ok(loadFit(L("x", ""), current) === "unknown", "a missing diameter stays unknown size");
+const tie = sizeRef(gun([L("a", "0.264"), L("b", "0.308")], "missing"));
+ok(tie.kind === "unknown" && tie.tie && !sizeWarn(tie, L("b", "0.308")), "a tie with no current diameter does not warn");
+const common = sizeRef(gun([L("a", "0.264"), L("b", "0.264"), L("c", "0.308")], ""));
+ok(common.from === "common" && Math.abs(common.dia - 0.264) < 1e-9, "with no current diameter the most common size is the reference");
+ok(loadFit(L("u", "0.308"), { kind: "unknown" }) === "neutral", "an unknown reference does not tag a sized load as wrong");
 
 const even = hashMarks(1, 4);
 ok(even.map(m => m.subtension).join() === "1,2,3,4" && even[1].label === "2nd hash", "even hash spacing counts from the first mark");

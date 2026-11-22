@@ -8,7 +8,7 @@ import { mvAdjOn, mvAdjust, powderT, zeroCond } from "./calc.js";
 import { ctxPaint, toast } from "./components.js";
 import { $, compass, escapeHtml, fmt, n1, n3, num, setVal, val } from "./core.js";
 import { LOG, cleanSession, exportSessions, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
-import { boreOf, caliberName, dia3, loadFit } from "./holdover.js";
+import { caliberName, dia3, loadFit, sizeRef, sizeWarn } from "./holdover.js";
 import { applyOptic, attachOptic, commitOpticExtras, curOptic, effSH, paintOptic } from "./optics.js";
 import { openCopy, paintRecipeBtns } from "./recipes.js";
 import { paintLoadStrings } from "./strings.js";
@@ -86,6 +86,7 @@ function paintGearMode() {
   if ($("gearSubOptic")) $("gearSubOptic").textContent = optic ? optic.name : "No optic";
   if ($("gearSubLoad")) $("gearSubLoad").textContent = load ? load.name : "No load";
   if ($("gearNowNames")) $("gearNowNames").textContent = [gun ? gun.name : "No firearm", optic ? optic.name : "No optic", load ? load.name : "No load"].join(" · ");
+  if ($("gearBackLbl")) $("gearBackLbl").textContent = gearSec === "optic" ? "Back to Optics" : gearSec === "load" ? "Back to Loads" : "Back to Firearms";
   const rec = currentGearRecord();
   $("gearArchive").hidden = !gearEditing || !rec;
   if (rec) $("gearArchive").textContent = rec.archived ? "Unarchive" : "Archive";
@@ -119,7 +120,7 @@ function paintGearList() {
       rows.push({ kind: "optic", id: o.id, line: [o.name, ts].filter(Boolean).join(" · "), link: guns.length ? `On ${guns.join(", ")}` : "Not on a firearm", archived: !!o.archived });
     }
   } else {
-    const bore = boreOf(curRifle() && curRifle().loads);
+    const bore = sizeRef(curRifle());
     let hiddenWrong = 0;
     for (const r of P.rifles) for (const l of r.loads || []) {
       if (!!l.archived !== wantArch) continue;
@@ -300,7 +301,13 @@ export function init1() {
     if (r?.lastOpticId && (P.optics || []).some(o => o.id === r.lastOpticId)) r.opticId = r.lastOpticId;
     applyRifle(); renderPickers(); applyLoad(); savePresets(); updateDirty(); schedule(); };
   $("loadSel").onchange = e => { if (e.target.value === ADD_V) { e.target.value = curLoad()?.id || ""; $("loadNew").click(); return; }
-    const r = curRifle(); if (r) r.lastLoadId = e.target.value; applyLoad(); savePresets(); updateDirty(); schedule(); };
+    const r = curRifle(); if (!r) return;
+    const id = e.target.value;
+    const next = r.loads.find(l => l.id === id);
+    const prev = r.lastLoadId;
+    const apply = () => { r.lastLoadId = id; applyLoad(); savePresets(); renderPickers(); updateDirty(); schedule(); };
+    if (next && next.id !== prev && sizeWarn(sizeRef(r), next)) { e.target.value = prev || ""; confirmSize(r, next, apply); return; }
+    apply(); };
   $("rangeSel").onchange = e => { P.lastRangeId = e.target.value || null; applyRange(); savePresets(); updateDirty(); refreshWeather(); schedule(); };
   $("rifleNew").onclick = () => { const n = askName("Name for the new gun (starts from the gun details on screen):", ""); if (!n) return;
     const r = { id: uid(), name: n, ...pick(RIFLE_F), loads: [] };
@@ -465,6 +472,11 @@ function finishGear(kind) {
   paintGearList();
   updateDirty();
 }
+function confirmSize(gun, load, proceed) {
+  const ref = sizeRef(gun);
+  if (!load || !sizeWarn(ref, load)) { proceed(); return; }
+  openGearDlg(`This bullet is ${dia3(load.diameter)} and this firearm's bore is ${dia3(ref.dia)}.`, "Use anyway", proceed, false, true);
+}
 function openLoadGear(host) {
   P.lastRifleId = host.rifle.id;
   if (host.rifle.lastOpticId && (P.optics || []).some(o => o.id === host.rifle.lastOpticId && !o.archived)) host.rifle.opticId = host.rifle.lastOpticId;
@@ -485,11 +497,9 @@ function showGear(kind, id) {
   }
   if (kind === "load") {
     const host = gearHost("load", id); if (!host) return;
-    const bore = boreOf(curRifle() && curRifle().loads);
-    if (loadFit(host.load, bore) === "wrong") {
-      openGearDlg(`This bullet is ${dia3(host.load.diameter)} and this firearm's bore is ${dia3(bore.dia)}.`, "Use anyway", () => openLoadGear(host), false, true);
-      return;
-    }
+    const r = curRifle();
+    const same = r && host.rifle.id === r.id && host.load.id === r.lastLoadId;
+    if (!same) { confirmSize(r, host.load, () => openLoadGear(host)); return; }
     openLoadGear(host);
     return;
   }
@@ -507,4 +517,4 @@ export function init2() {
   $("roundClk").checked = !!S.round;
 }
 
-export { ADD_V, paintLoadMore, moreNeeded, paintSample, curRifle, curLoad, curRange, fillOptions, renderPickers, applyRifle, applyGunKind, applyLoad, applyRange, same, isDirty, formFor, savedT, autosave, flashSaved, updateDirty, ldShort, recipeText, SNAP_F, recipeSnapshot, cleanRecipe, paintLdKind, askName, pick, pkRefresh, openPk, closePk, paintGearExtra, askRemove, activeOf };
+export { ADD_V, paintLoadMore, moreNeeded, paintSample, curRifle, curLoad, curRange, fillOptions, renderPickers, applyRifle, applyGunKind, applyLoad, applyRange, same, isDirty, formFor, savedT, autosave, flashSaved, updateDirty, ldShort, recipeText, SNAP_F, recipeSnapshot, cleanRecipe, paintLdKind, askName, pick, pkRefresh, openPk, closePk, paintGearExtra, askRemove, activeOf, confirmSize };

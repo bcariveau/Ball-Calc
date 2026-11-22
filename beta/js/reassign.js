@@ -4,7 +4,7 @@
 
 import { closeOvl, openOvl, toast } from "./components.js";
 import { $, escapeHtml, setVal } from "./core.js";
-import { cleanRecipe, curRifle, recipeText } from "./gear.js";
+import { cleanRecipe, confirmSize, curRifle, recipeText } from "./gear.js";
 import { ED, LOG, SRC_LBL, fmtDate, maybeRenderLog, paintEdFor, paintEdRecipe, saveLog, sessHome, set_slKey, slKey } from "./log.js";
 import { dia3, fnum } from "./recipes.js";
 import { P, REC_F } from "./storage.js";
@@ -117,7 +117,7 @@ export function init() {
   $("mvLoads").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (!b) return; MV.loadId = b.dataset.id; renderMove(); });
   $("mvUpd").onchange = () => renderMove();
   $("mvClose").onclick = $("mvCancel").onclick = () => closeOvl("mvSheet");
-  $("mvGo").onclick = () => doMove();
+  $("mvGo").onclick = () => { const r = P.rifles.find(x => x.id === MV.gunId), l = r?.loads.find(x => x.id === MV.loadId); confirmSize(r, l, () => doMove()); };
   $("slMoveBtn").onclick = () => { if (ED) openMove([ED.id]); };
   $("slSelBtn").onclick = () => { SEL = new Set(); paintSel(); toast("Tap sessions to select them, then <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 8 4 4-4 4'/><path d='M2 12h20'/><path d='m6 8-4 4 4 4'/></svg> Move"); };
   $("slSelDone").onclick = () => { SEL = null; paintSel(); };

@@ -43,7 +43,7 @@ export function init1() {
 
 export async function init2() {
   document.addEventListener("input", e => {
-    const id = e.target.id; if (!id || id === "placeQ" || id.startsWith("db") || id.startsWith("sl") || id.startsWith("su") || /^(tr[A-Z]|dcv)/.test(id)) return;
+    const id = e.target.id; if (!id || id === "placeQ" || id === "cartSearch" || id.startsWith("db") || id.startsWith("sl") || id.startsWith("su") || /^(tr[A-Z]|dcv)/.test(id)) return;
     if (id.startsWith("ld")) { updateDirty(); return; }   // load data: no effect on the trajectory
     if (id === "gunKind") applyGunKind();
     if (id === "roundClk") { S.round = e.target.checked; saveSettings(); renderAll(); return; }

@@ -8,6 +8,7 @@ import { mvAdjOn, mvAdjust, powderT, zeroCond } from "./calc.js";
 import { ctxPaint, toast } from "./components.js";
 import { $, compass, escapeHtml, fmt, n1, n3, num, setVal, val } from "./core.js";
 import { LOG, cleanSession, exportSessions, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
+import { CARTRIDGES, cleanCartridge, softNote } from "./cartridges.js";
 import { caliberName, dia3, loadFit, sizeRef, sizeWarn } from "./holdover.js";
 import { applyOptic, attachOptic, commitOpticExtras, curOptic, effSH, paintOptic } from "./optics.js";
 import { openCopy, paintRecipeBtns } from "./recipes.js";
@@ -82,10 +83,14 @@ function paintGearMode() {
   $("gearArch").setAttribute("aria-pressed", String(gearArchOn));
   $("gearArch").textContent = gearArchOn ? "Active" : "Archived";
   const gun = curRifle(), optic = curOptic(), load = curLoad();
-  if ($("gearSubGun")) $("gearSubGun").textContent = gun ? gun.name : "None";
+  if ($("gearSubGun")) {
+    const cart = gun && gun.cartridge && (gun.cartridge.short || gun.cartridge.name);
+    const both = gun && cart ? `${gun.name} · ${cart}` : "";
+    $("gearSubGun").textContent = gun ? (both && both.length <= 20 ? both : gun.name) : "None";
+  }
   if ($("gearSubOptic")) $("gearSubOptic").textContent = optic ? optic.name : "No optic";
   if ($("gearSubLoad")) $("gearSubLoad").textContent = load ? load.name : "No load";
-  if ($("gearNowNames")) $("gearNowNames").textContent = [gun ? gun.name : "No firearm", optic ? optic.name : "No optic", load ? load.name : "No load"].join(" · ");
+  if ($("gearNowNames")) $("gearNowNames").textContent = [gun ? (gun.cartridge && gun.cartridge.name ? `${gun.name} · ${gun.cartridge.name}` : gun.name) : "No firearm", optic ? optic.name : "No optic", load ? load.name : "No load"].join(" · ");
   if ($("gearBackLbl")) $("gearBackLbl").textContent = gearSec === "optic" ? "Back to Optics" : gearSec === "load" ? "Back to Loads" : "Back to Firearms";
   const rec = currentGearRecord();
   $("gearArchive").hidden = !gearEditing || !rec;
@@ -107,7 +112,7 @@ function paintGearList() {
       if (!!r.archived !== wantArch) continue;
       const optic = r.opticId && (P.optics || []).find(o => o.id === r.opticId);
       const load = (r.loads || []).find(l => l.id === r.lastLoadId) || (r.loads || []).find(l => !l.archived);
-      const bits = [r.name, r.barrel ? `${r.barrel}"` : "", twistBit(r), optic && optic.name, load && load.name].filter(Boolean);
+      const bits = [r.name, r.cartridge && r.cartridge.name, r.barrel ? `${r.barrel}"` : "", twistBit(r), optic && optic.name, load && load.name].filter(Boolean);
       const last = hist.guns[r.id] && hist.guns[r.id].last;
       const link = [optic ? optic.name : "No optic", load ? load.name : "No load", last ? `Last used ${shortDate(last)}` : "No sessions yet"].join(" · ");
       rows.push({ kind: "gun", id: r.id, line: bits.join(" · "), link, archived: !!r.archived });
@@ -128,7 +133,8 @@ function paintGearList() {
       if (fit === "wrong" && !showAllLoads) { hiddenWrong++; continue; }
       const n = hist.loads[l.id] ? hist.loads[l.id].strings : 0;
       const name = fit === "fit" ? caliberName(l.diameter) : "";
-      const tag = fit === "fit" ? `${dia3(l.diameter)} fits${name ? " · " + name : ""}` : fit === "wrong" ? `Wrong size ${dia3(l.diameter)}` : fit === "unknown" ? "Unknown size" : "";
+      const note = fit === "fit" ? softNote(curRifle(), l) : "";
+      const tag = fit === "fit" ? `${dia3(l.diameter)} fits${name ? " · " + name : ""}${note ? " · " + note : ""}` : fit === "wrong" ? `Wrong size ${dia3(l.diameter)}` : fit === "unknown" ? "Unknown size" : "";
       rows.push({ kind: "load", id: l.id, line: [l.name, l.mv ? `${l.mv} fps` : "", r.name].filter(Boolean).join(" · "), link: `On ${r.name} · ${n} string${n === 1 ? "" : "s"}`, archived: !!l.archived, current: !!(curRifle() && curRifle().lastLoadId === l.id && r.id === curRifle().id), dim: fit === "wrong", tag });
     }
     const allBtn = $("gearAllLoads");
@@ -153,7 +159,44 @@ function renderPickers() {
   fillOptions($("rangeSel"), P.ranges, curRange(), "Current location");
   updateDirty();
 }
-function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; applyGunKind(); applyOptic(); }
+function paintCartridge() {
+  const sel = $("cartPick"); if (!sel) return;
+  const q = ($("cartSearch") && $("cartSearch").value || "").trim().toLowerCase();
+  const cur = sel.value;
+  const rows = CARTRIDGES.filter(c => !q || `${c.name} ${c.short}`.toLowerCase().includes(q));
+  sel.innerHTML = `<option value="">Not set</option>` + rows.map(c => `<option value="${c.id}">${c.name} · ${c.diameter.toFixed(3)}"</option>`).join("") + `<option value="custom">Custom…</option>`;
+  if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+  const custom = sel.value === "custom";
+  if ($("cartCustom")) $("cartCustom").hidden = !custom;
+  const hit = CARTRIDGES.find(c => c.id === sel.value);
+  if ($("cartHint")) $("cartHint").textContent = hit ? `${hit.name} uses a ${hit.diameter.toFixed(3)} in bullet.` : custom ? "Enter the cartridge name and its bullet diameter." : "Optional. When set, this diameter decides which loads fit. Not set keeps the current behavior.";
+}
+function fillCartridge(cart) {
+  if (!$("cartPick")) return;
+  if ($("cartSearch")) $("cartSearch").value = "";
+  paintCartridge();
+  if (cart && cart.id && CARTRIDGES.some(c => c.id === cart.id)) $("cartPick").value = cart.id;
+  else if (cart && cart.diameter) { $("cartPick").value = "custom"; if ($("cartName")) $("cartName").value = cart.name || ""; if ($("cartDia")) $("cartDia").value = cart.diameter; }
+  else $("cartPick").value = "";
+  paintCartridge();
+}
+function readCartridge() {
+  if (!$("cartPick")) return null;
+  const v = $("cartPick").value;
+  if (!v) return null;
+  if (v === "custom") return cleanCartridge({ name: $("cartName") && $("cartName").value, diameter: $("cartDia") && $("cartDia").value });
+  const c = CARTRIDGES.find(x => x.id === v);
+  return c ? { id: c.id, name: c.name, short: c.short, diameter: c.diameter } : null;
+}
+function commitCartridge(r) {
+  if (!$("cartPick") || !r || formFor.r !== r.id) return false;
+  const next = readCartridge();
+  const same = JSON.stringify(next || null) === JSON.stringify(r.cartridge || null);
+  if (same) return false;
+  if (next) r.cartridge = next; else delete r.cartridge;
+  return true;
+}
+function applyRifle() { const r = curRifle(); if (r) RIFLE_F.forEach(f => setVal(f, r[f] || F_DEF[f] || r[f])); formFor.r = r?.id || null; fillCartridge(r && r.cartridge); applyGunKind(); applyOptic(); }
 function applyGunKind() { const hg = $("gunKind").value === "handgun"; $("barrel").placeholder = hg ? "optional, e.g. 4.25" : "optional, e.g. 20"; }
 function applyLoad() { if (SH.pend) setTimeout(shPendCheck, 0); const l = curLoad(); if (l) LOAD_F.forEach(f => setVal(f, (l[f] ?? "") === "" && F_DEF[f] ? F_DEF[f] : l[f])); formFor.l = l?.id || null; paintLdKind(); renderBulletInfo(); if (moreNeeded() && !gearEditing) $("loadDetails").open = true; }
 function applyRange() {
@@ -173,7 +216,7 @@ var formFor = { r: null, l: null, g: null, o: null };
 var savedT = {};
 function autosave() {
   const r = curRifle(), l = curLoad(), g = curRange(), done = [];
-  if (r && formFor.r === r.id && isDirty(r, RIFLE_F)) { Object.assign(r, pick(RIFLE_F)); done.push("rifle"); }
+  if (r && formFor.r === r.id) { const dirty = isDirty(r, RIFLE_F), extra = commitCartridge(r); if (dirty) Object.assign(r, pick(RIFLE_F)); if (dirty || extra) done.push("rifle"); }
   if (l && formFor.l === l.id && isDirty(l, LOAD_F)) { Object.assign(l, pick(LOAD_F)); done.push("load"); }
   { const o = curOptic(); if (o && formFor.o === o.id) { const extra = commitOpticExtras(); const dirty = isDirty(o, OPTIC_F); if (dirty) Object.assign(o, pick(OPTIC_F)); if (extra || dirty) done.push("optic"); } }
   if (g && formFor.g === g.id) {
@@ -305,12 +348,14 @@ export function init1() {
     const id = e.target.value;
     const next = r.loads.find(l => l.id === id);
     const prev = r.lastLoadId;
+    if (!next) { e.target.value = prev || ""; return; }
     const apply = () => { r.lastLoadId = id; applyLoad(); savePresets(); renderPickers(); updateDirty(); schedule(); };
-    if (next && next.id !== prev && sizeWarn(sizeRef(r), next)) { e.target.value = prev || ""; confirmSize(r, next, apply); return; }
+    if (next.id !== prev && sizeWarn(sizeRef(r), next)) { e.target.value = prev || ""; confirmSize(r, next, apply); return; }
     apply(); };
   $("rangeSel").onchange = e => { P.lastRangeId = e.target.value || null; applyRange(); savePresets(); updateDirty(); refreshWeather(); schedule(); };
   $("rifleNew").onclick = () => { const n = askName("Name for the new gun (starts from the gun details on screen):", ""); if (!n) return;
     const r = { id: uid(), name: n, ...pick(RIFLE_F), loads: [] };
+    const cart = readCartridge(); if (cart) r.cartridge = cart;
     const l = curLoad(); if (l) { const c = { ...pick(LOAD_F), id: uid(), name: l.name }; r.loads.push(c); r.lastLoadId = c.id; }
     P.rifles.push(r); P.lastRifleId = r.id; pkRefresh(); toast(`Gun “${n}” added${r.loads.length ? " (current load copied)" : ""}`); };
   $("rifleDup").onclick = () => { const r = curRifle(); if (!r) return;
@@ -336,6 +381,8 @@ export function init1() {
     const i = P.ranges.indexOf(g); P.ranges.splice(i, 1); P.lastRangeId = null; formFor.g = null; savePresets(); renderPickers(); refreshWeather();
     toast(`Range “${g.name}” deleted`, { label: "Undo", fn: () => { P.ranges.splice(Math.min(i, P.ranges.length), 0, g); P.lastRangeId = g.id; savePresets(); renderPickers(); applyRange(); refreshWeather(); schedule(); toast(`Range “${g.name}” restored`); } }); };
   ["rifle", "load", "range", "optic"].forEach(k => $(k + "Menu").onclick = () => openPk(k));
+  if ($("cartPick")) $("cartPick").addEventListener("change", () => { paintCartridge(); updateDirty(); });
+  if ($("cartSearch")) $("cartSearch").addEventListener("input", () => paintCartridge());
   $("gearSwitch").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; gearSec = b.dataset.sec; gearEditing = false; paintGearList(); });
   $("gearArch").onclick = () => { gearArchOn = !gearArchOn; paintGearList(); };
   if ($("gearAllLoads")) $("gearAllLoads").onclick = () => { showAllLoads = !showAllLoads; paintGearList(); };
@@ -396,6 +443,7 @@ export function init1() {
         ...Object.fromEntries(RIFLE_F.map(k => [k, str(r[k])])), lastLoadId: str(r.lastLoadId) || null, lastOpticId: str(r.lastOpticId) || null, opticId: str(r.opticId) || null,
         ...keepArch(r),
         ...(r.zeroUnconf && typeof r.zeroUnconf === "object" ? { zeroUnconf: { why: str(r.zeroUnconf.why, 120), at: str(r.zeroUnconf.at) } } : {}),
+        ...(cleanCartridge(r.cartridge) ? { cartridge: cleanCartridge(r.cartridge) } : {}),
         loads: (Array.isArray(r.loads) ? r.loads : []).filter(l => l && l.name).map(l => ({ id: str(l.id) || uid(), name: String(l.name).slice(0, 60),
           ...keepArch(l),
           ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k], LONG_F[k])])) })) }));

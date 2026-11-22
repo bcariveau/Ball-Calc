@@ -111,7 +111,7 @@ try {
 
   await page.click('#gearSwitch button[data-sec="load"]');
   const loads = await page.locator("#gearList .gearItem").allInnerTexts();
-  ok(loads.length === 3 && loads.some((t) => /Load A2/.test(t)) && loads.some((t) => /On Rifle B · 1 string/.test(t)) && loads.some((t) => /On Rifle A · 1 string/.test(t)), "the load list includes every load and its string count");
+  ok(loads.length === 2 && loads.every((t) => /Rifle A/.test(t)) && loads.some((t) => /Load A2/.test(t)) && loads.some((t) => /\.264" fits/.test(t)), "the load list keeps this firearm's fitting loads and hides a different bore");
   await page.screenshot({ path: ART + "/after-loads.png" });
   ok(!(await leaks()).length, "gear lists have no raw icon markup");
 

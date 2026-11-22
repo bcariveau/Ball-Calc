@@ -115,7 +115,10 @@ try {
   await page.locator("#tgHist").scrollIntoViewIfNeeded();
   await page.screenshot({ path: ART + "/load-fallback-360.png" });
 
-  await page.selectOption("#loadSel", "l2", { force: true });
+  await page.evaluate(() => { const el = document.getElementById("loadSel"); el.value = "l2"; el.dispatchEvent(new Event("change", { bubbles: true })); });
+  await page.waitForSelector("#gearDlg:not([hidden])");
+  await page.click("#gearDlgGo");
+  await page.waitForFunction(() => document.getElementById("loadSel").value === "l2");
   await page.selectOption("#tgStrSel", "st1");
   await page.locator("#tgAtDist").check();
   await page.click("#tgTrue");
@@ -139,7 +142,9 @@ try {
   await page.click("#tabBtnGear");
   if ((await page.getAttribute("#tabGear", "data-gearview")) === "edit") await page.click("#gearBack");
   await page.click('#gearSwitch button[data-sec="load"]');
+  if (!(await page.locator('#gearList .gearItem[data-id="l1"]').count())) await page.click("#gearAllLoads");
   await page.locator('#gearList .gearItem[data-id="l1"]').click();
+  if (await page.locator("#gearDlg:not([hidden])").count()) await page.click("#gearDlgGo");
   await page.fill("#bc", "");
   await page.locator("#loadDetails").evaluate((el) => { el.open = true; });
   await page.fill("#weight", "");

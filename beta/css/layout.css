@@ -40,9 +40,12 @@ details.section > summary { color: var(--accent); font-size: 1rem; font-weight: 
 #gearSwitch button { flex: 1; min-height: 44px; margin: 0; padding: 6px 4px; font-size: 0.86rem; background: var(--input); color: var(--text); border: 1px solid var(--border); line-height: 1.15; }
 #gearSwitch button small { display: block; font-size: 0.68rem; font-weight: 650; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #gearSwitch button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-#tabGear[data-gearview="edit"] #gearNow,
-#tabGear[data-gearview="edit"] #gearSwitch small,
+#gearBack { display: none; flex: 2; justify-content: flex-start; gap: 6px; font-weight: 700; }
+#tabGear[data-gearview="edit"] #gearNow { display: none !important; }
+#tabGear[data-gearview="edit"] #gearBack { display: flex !important; }
 #tabGear[data-gearview="edit"] #gearAllLoads { display: none !important; }
+#gearSwitch button { padding: 4px 4px 3px; }
+#gearSwitch button small { line-height: 1.05; }
 #gearListBar { display: flex; gap: 6px; align-items: center; margin: 0 0 8px; }
 #gearListBar button { flex: 1; min-height: 44px; margin: 0; }
 #gearList { display: flex; flex-direction: column; gap: 6px; }

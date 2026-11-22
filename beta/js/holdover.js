@@ -6,29 +6,45 @@ const MOA_PER_MIL = 3.437747;
 function fnum(v) { const x = parseFloat(v); return Number.isFinite(x) ? x : null; }
 function dia3(d) { const x = fnum(d); return x == null ? "" : x.toFixed(3).replace(/^0/, "") + '"'; }
 
-function gunDias(loads) {
-  return [...new Set((loads || []).map(l => fnum(l && l.diameter)).filter(x => x != null && x > 0).map(x => x.toFixed(3)))];
-}
-
-// One cluster within the tolerance is a known bore. None is unknown. More than one is mixed.
-function boreOf(loads) {
-  const dias = [];
-  for (const l of loads || []) {
-    const x = fnum(l && l.diameter);
-    if (x == null || x <= 0) continue;
-    if (!dias.some(d => Math.abs(d - x) < 0.0015)) dias.push(x);
-  }
-  if (!dias.length) return { kind: "unknown", dias };
-  if (dias.length > 1) return { kind: "mixed", dias };
-  return { kind: "known", dia: dias[0], dias };
-}
-
-function loadFit(load, bore) {
+function validDia(load) {
   const x = fnum(load && load.diameter);
-  const missing = x == null || x <= 0;
-  if (!bore || bore.kind !== "known") return missing ? "unknown" : "neutral";
-  if (missing) return "unknown";
-  return Math.abs(x - bore.dia) < 0.0015 ? "fit" : "wrong";
+  return x != null && x > 0 ? x : null;
+}
+function gunDias(loads) {
+  return [...new Set((loads || []).map(validDia).filter(x => x != null).map(x => x.toFixed(3)))];
+}
+
+// Reference is the current load's diameter when that is valid. Otherwise the most
+// common valid diameter on the gun. A tie, or no valid diameter, is no reference.
+function sizeRef(gun) {
+  if (!gun) return { kind: "unknown", dia: null };
+  const loads = gun.loads || [];
+  const cur = loads.find(l => l.id === gun.lastLoadId);
+  const curD = validDia(cur);
+  if (curD != null) return { kind: "known", dia: curD, from: "current" };
+  const counts = [];
+  for (const l of loads) {
+    const x = validDia(l);
+    if (x == null) continue;
+    const hit = counts.find(c => Math.abs(c.dia - x) < 0.0015);
+    if (hit) hit.n++;
+    else counts.push({ dia: x, n: 1 });
+  }
+  if (!counts.length) return { kind: "unknown", dia: null };
+  counts.sort((a, b) => b.n - a.n);
+  if (counts.length > 1 && counts[0].n === counts[1].n) return { kind: "unknown", dia: null, tie: true };
+  return { kind: "known", dia: counts[0].dia, from: "common" };
+}
+function sizeWarn(ref, load) {
+  const x = validDia(load);
+  if (!ref || ref.kind !== "known" || x == null) return false;
+  return Math.abs(x - ref.dia) >= 0.0015;
+}
+function loadFit(load, ref) {
+  const x = validDia(load);
+  if (!ref || ref.kind !== "known") return x == null ? "unknown" : "neutral";
+  if (x == null) return "unknown";
+  return Math.abs(x - ref.dia) >= 0.0015 ? "wrong" : "fit";
 }
 
 const CALIBERS = [
@@ -176,6 +192,6 @@ function holdText(hold, opts) {
 function sameHold(a, b) { return JSON.stringify(a || null) === JSON.stringify(b || null); }
 
 export {
-  MOA_PER_MIL, fnum, dia3, gunDias, boreOf, loadFit, caliberName, hashMarks, toUnit, scaleFactor,
+  MOA_PER_MIL, fnum, dia3, gunDias, validDia, sizeRef, sizeWarn, loadFit, caliberName, hashMarks, toUnit, scaleFactor,
   textToMarks, marksToText, FL6_MARKS, formToHoldover, holdMarks, holdText, sameHold,
 };

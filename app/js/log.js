@@ -7,7 +7,7 @@ import { idbGet, idbPut } from "./bulletdb.js";
 import { powderT } from "./calc.js";
 import { setIconText, shBtnPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, n1, n3, num, setVal } from "./core.js";
-import { cleanRecipe, curLoad, curRifle, recipeSnapshot, recipeText, updateDirty } from "./gear.js";
+import { cleanRecipe, confirmSize, curLoad, curRifle, recipeSnapshot, recipeText, updateDirty } from "./gear.js";
 import { closeImport } from "./log-import.js";
 import { SEL, lpFired, paintSel, set_lpFired } from "./reassign.js";
 import { SH, shHide, shNeedGear, shPaint, shRollIfEnded } from "./shooting.js";
@@ -610,7 +610,8 @@ export function init() {
     ]);
     show();
   };
-  $("shotMoveGo").onclick = async () => { if (!ED || !SHOTSEL?.size) return;
+  async function runShotMove() {
+    if (!ED || !SHOTSEL?.size) return;
     if ($("shotDestKind").value === "existing") { await moveToExisting(); return; }
     const af = chosenAsFired(); if (!af) return;
     const result = assignShots(ED, [...SHOTSEL], af);
@@ -619,6 +620,12 @@ export function init() {
     const strNo = result.session.tg.strings.findIndex(st => st.id === result.destId) + 1;
     $("shotDestSheet").hidden = true;
     shotToast(done, `Moved ${result.movedIds.length} shot${result.movedIds.length === 1 ? "" : "s"} to ${gun ? gun.name : "the saved firearm"} · String ${strNo}.`);
+  }
+  $("shotMoveGo").onclick = () => {
+    if (!ED || !SHOTSEL?.size) return;
+    if ($("shotDestKind").value === "existing") { runShotMove(); return; }
+    const gun = P.rifles.find(x => x.id === $("shotDestGun").value), load = gun?.loads.find(x => x.id === $("shotDestLoad").value);
+    confirmSize(gun, load, () => runShotMove());
   };
   async function moveToExisting() {
     const ctx = destContext($("shotDestStr").value); if (!ctx.sess || !ctx.st) return;
@@ -676,7 +683,19 @@ export function init() {
     if (avg == null || Math.round(avg) !== Math.round(parseFloat(load.mv))) return null;
     return { message: "The destination load's MV matched its kept shots before this move. It was not changed. Redo dest MV uses the shots now on that load and drops removed shots." };
   }
-  $("shotSplit").onclick = () => { if (!ED || !SHOTSEL?.size) return; const af = chosenAsFired(); if (!af) return; const id = [...SHOTSEL][0]; const result = assignShots(ED, [id], af, { splitFromId: id }); const done = applyShotResult(result); const gun = P.rifles.find(r => r.id === af.rifleId); const strNo = result.session.tg.strings.findIndex(st => st.id === result.destId) + 1; shotToast(done, `Moved ${result.movedIds.length} shot${result.movedIds.length === 1 ? "" : "s"} to ${gun ? gun.name : "the saved firearm"} · String ${strNo}.`); };
+  $("shotSplit").onclick = () => {
+    if (!ED || !SHOTSEL?.size) return;
+    const gun = P.rifles.find(x => x.id === $("shotDestGun").value), load = gun?.loads.find(x => x.id === $("shotDestLoad").value);
+    confirmSize(gun, load, () => {
+      const af = chosenAsFired(); if (!af) return;
+      const id = [...SHOTSEL][0];
+      const result = assignShots(ED, [id], af, { splitFromId: id });
+      const done = applyShotResult(result);
+      const named = P.rifles.find(r => r.id === af.rifleId);
+      const strNo = result.session.tg.strings.findIndex(st => st.id === result.destId) + 1;
+      shotToast(done, `Moved ${result.movedIds.length} shot${result.movedIds.length === 1 ? "" : "s"} to ${named ? named.name : "the saved firearm"} · String ${strNo}.`);
+    });
+  };
   $("slShots").addEventListener("change", e => { const box = e.target.closest(".shotCk"); if (!box || !SHOTSEL) return; box.checked ? SHOTSEL.add(box.dataset.sel) : SHOTSEL.delete(box.dataset.sel); paintShotSel(); });
   let shotLp;
   $("slShots").addEventListener("pointerdown", e => { const row = e.target.closest(".shot"); if (!row || SHOTSEL || e.target.closest("button, input")) return; clearTimeout(shotLp);

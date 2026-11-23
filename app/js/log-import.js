@@ -4,7 +4,7 @@
 
 import { toast } from "./components.js";
 import { $, escapeHtml, importFirst } from "./core.js";
-import { curLoad, curRifle, recipeSnapshot } from "./gear.js";
+import { confirmSize, curLoad, curRifle, recipeSnapshot } from "./gear.js";
 import { IMP, LOG, MPS, SHEETJS_URLS, cleanSession, fmtDate, maybeRenderLog, nOrNull, saveLog, set_IMP, set_slKey, shotStats, slKey } from "./log.js";
 import { P, uid } from "./storage.js";
 
@@ -122,11 +122,16 @@ export function init() {
   $("slImpLoad").onchange = () => $("slImpGo").disabled = !$("slImpLoad").value;
   $("slImpGo").onclick = async () => {
     const rifleId = $("slImpRifle").value, loadId = $("slImpLoad").value, r = P.rifles.find(x => x.id === rifleId); if (!loadId) return;
+    const load = r?.loads.find(x => x.id === loadId);
+    confirmSize(r, load, () => finishImport(r, loadId));
+  };
+  async function finishImport(r, loadId) {
+    const rifleId = r?.id; if (!loadId) return;
     const pickd = [...$("slImpList").querySelectorAll("input:checked")].map(x => IMP[+x.dataset.i]);
     pickd.forEach(s => { const c = cleanSession({ ...s, id: uid(), rifleId, loadId, source: "athlon", barrel: nOrNull(r?.barrel), recipe: recipeSnapshot(rifleId, loadId) }); if (c) LOG.push(c); });
     await saveLog(); closeImport(); set_slKey(null); maybeRenderLog();
     toast(pickd.length ? `Imported ${pickd.length} session(s)` : "Nothing imported");
-  };
+  }
 }
 
 export { parseCSV, numIn, sheetDate, parseAthlonRows, readChronoFile, fillImpLoads, openImport, closeImport };

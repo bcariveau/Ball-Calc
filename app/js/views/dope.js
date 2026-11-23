@@ -45,6 +45,8 @@ ${ctxRow("ctxDope")}
   <div class="dcDist"><div class="stepper" data-step="25" data-min="25" data-max="3000"><input type="number" inputmode="numeric" id="target" value="500" aria-label="Target distance in yards"></div><span class="u">yd</span></div>
   <div class="err" id="e-target"></div>
   <div id="dcBracket"></div>
+  <div id="dcHold"></div>
+  <div id="dcMag" hidden><label for="hoNow">Current magnification (×)</label><input type="number" inputmode="decimal" id="hoNow" step="0.1" min="1"><p class="hint" id="dcMagWarn" hidden></p></div>
   <div id="dcMsg"></div>
   <div id="dcWarn"></div>
   <div class="dcMoreRow"><button type="button" id="dcMoreBtn" aria-expanded="false" aria-controls="dcMore">Details <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg></button><button class="ghost ic wxIc" type="button" id="calcBtn" aria-label="Refresh weather and recalculate" title="Refresh weather and recalculate"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg> <span class="wxL">Weather</span></button></div>

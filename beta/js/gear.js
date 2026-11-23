@@ -4,12 +4,13 @@
 
 import { schedule } from "./app.js";
 import { bandsOn, renderBulletInfo } from "./bulletdb.js";
-import { mvAdjOn, mvAdjust, powderT, zeroCond } from "./calc.js";
+import { lastRun, mvAdjOn, mvAdjust, powderT, zeroCond } from "./calc.js";
 import { ctxPaint, toast } from "./components.js";
 import { $, compass, escapeHtml, fmt, n1, n3, num, setVal, val } from "./core.js";
 import { LOG, cleanSession, exportSessions, maybeRenderLog, saveLog, set_LOG, set_slKey, slKey } from "./log.js";
-import { CARTRIDGES, cleanCartridge, softNote } from "./cartridges.js";
-import { caliberName, dia3, loadFit, sizeRef, sizeWarn } from "./holdover.js";
+import { CARTRIDGES, cleanCartridge } from "./cartridges.js";
+import { dia3, loadFit, sizeRef, sizeWarn } from "./holdover.js";
+import { cleanDismissed, cleanOffsetList, cleanZeroConfirm, evaluate, rebaseOffsets, zeroReminder } from "./rezero.js";
 import { applyOptic, attachOptic, commitOpticExtras, curOptic, effSH, paintOptic } from "./optics.js";
 import { openCopy, paintRecipeBtns } from "./recipes.js";
 import { paintLoadStrings } from "./strings.js";
@@ -110,28 +111,137 @@ function currentGearRecord() {
   if (gearSec === "optic") return curOptic();
   return curLoad();
 }
+const CLICK_LBL = { "0.1mil": "0.1 mil/click", "0.05mil": "0.05 mil/click", "0.25moa": "0.25 MOA/click", "0.125moa": "0.125 MOA/click", "0.5moa": "0.5 MOA/click" };
+const CHEV = `<svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>`;
+function angUnitOf(r, optic) {
+  const t = (optic && optic.opTurret) || (r && r.turret) || "";
+  if (/moa/i.test(t)) return "MOA";
+  if (/mil/i.test(t)) return "MIL";
+  return S.ang === "MOA" ? "MOA" : "MIL";
+}
+function specOf(r, optic) {
+  const t = (optic && optic.opTurret) || (r && r.turret) || "";
+  const table = { "0.1mil": ["MIL", 0.1], "0.05mil": ["MIL", 0.05], "0.25moa": ["MOA", 0.25], "0.125moa": ["MOA", 0.125], "0.5moa": ["MOA", 0.5] };
+  if (table[t]) { const [u, v] = table[t]; const k = optic && parseFloat(optic.opTrack); return { u, v, k: k >= 0.8 && k <= 1.2 ? k : 1, lbl: CLICK_LBL[t] }; }
+  return { u: angUnitOf(r, optic), v: null, k: 1, lbl: "" };
+}
+function suggestionFor(r, load) {
+  if (!r) return null;
+  const optic = r.opticId && (P.optics || []).find(o => o.id === r.opticId);
+  const spec = specOf(r, optic);
+  const trans = lastRun && lastRun.trans && lastRun.td && lastRun.trans.range <= lastRun.td;
+  return evaluate({ sessions: LOG, rifle: r, load: load || null, spec, zeroYd: parseFloat(r.zero) || 100, dismissed: r.dismissedSuggestions || [], nearTransonic: !!trans });
+}
+function chipHtml(list) { return list.filter(Boolean).map(c => `<span class="chip ${c.cls}">${escapeHtml(c.t)}</span>`).join(""); }
+function gearCard(row) {
+  return `<button type="button" class="gearItem${row.dim ? " dim" : ""}" data-kind="${row.kind}" data-id="${escapeHtml(row.id)}" title="${escapeHtml(row.title || row.name)}"><span class="gMain"><span class="gL1"><b class="gName">${escapeHtml(row.name)}</b>${row.weight ? `<span class="gWt">${escapeHtml(row.weight)}</span>` : ""}${chipHtml(row.chips)}</span>${row.l2 ? `<small class="gL2${row.l2warn ? " warn" : ""}">${escapeHtml(row.l2)}</small>` : ""}${row.l3 ? `<small class="gL3">${escapeHtml(row.l3)}</small>` : ""}${row.archived ? `<span class="unarch" data-unarch="1">Unarchive</span>` : ""}</span>${CHEV}</button>`;
+}
+function lowerActive(r, load) {
+  const rows = [...(r && r.offsets || []), ...(load && load.offsets || [])].filter(o => o && o.status === "active" && o.type !== "zero");
+  return rows.length > 0;
+}
+function writeZeroOffset(mode, rebase) {
+  const r = curRifle(), load = curLoad(), hit = suggestionFor(r, load);
+  if (!r || !hit || hit.class !== "zero") return;
+  if (mode === "apply" && hit.mode !== "apply") return;
+  const offset = {
+    id: uid(), type: "zero", v: hit.v, h: hit.h, unit: hit.unit, date: new Date().toISOString(), distYd: hit.distYd,
+    shots: hit.shots, ci: hit.ci, sourceStringIds: hit.sourceStringIds, status: "active",
+  };
+  const prev = Array.isArray(r.offsets) ? r.offsets.map(o => o && o.type === "zero" && o.status === "active" ? { ...o, status: "cleared" } : o) : [];
+  r.offsets = [...prev, offset];
+  if (rebase) {
+    r.offsets = rebaseOffsets(r.offsets, hit.v, hit.h, hit.unit);
+    if (load && Array.isArray(load.offsets)) load.offsets = rebaseOffsets(load.offsets, hit.v, hit.h, hit.unit);
+  }
+  if (mode === "apply") {
+    r.lastZeroConfirm = { at: offset.date, distYd: hit.distYd, source: "apply" };
+    for (const sess of LOG) for (const st of (sess.tg && sess.tg.strings) || []) {
+      if (hit.sourceStringIds.includes(st.id)) st.consumedByCorrection = { correctionId: offset.id, at: offset.date };
+    }
+    saveLog();
+  }
+  savePresets();
+  paintGearList();
+  paintZeroNotice();
+}
+function saveOrApply(mode) {
+  const r = curRifle(), hit = suggestionFor(r, curLoad());
+  if (!hit || hit.class !== "zero") return;
+  if (lowerActive(r, curLoad())) {
+    openGearDlg("Re-base load and truing offsets by this zero change?", "Re-base", () => writeZeroOffset(mode, true), false);
+    return;
+  }
+  writeZeroOffset(mode, false);
+}
+function dismissSuggestion() {
+  const r = curRifle(); if (!r) return;
+  const hit = suggestionFor(r, curLoad());
+  const load = curLoad();
+  const row = hit
+    ? { id: uid(), at: new Date().toISOString(), sourceStringIds: hit.sourceStringIds, rifleId: r.id, loadId: load ? load.id : "", reason: hit.class }
+    : { id: uid(), at: new Date().toISOString(), sourceStringIds: [], rifleId: r.id, loadId: load ? load.id : "", reason: "reminder" };
+  r.dismissedSuggestions = [...(r.dismissedSuggestions || []), row];
+  savePresets();
+  paintGearList();
+  paintZeroNotice();
+}
+function confirmZeroNow() {
+  const r = curRifle(); if (!r) return;
+  delete r.zeroUnconf;
+  r.lastZeroConfirm = { at: new Date().toISOString(), distYd: parseFloat(r.zero) || 0, source: "confirm" };
+  savePresets();
+  updateDirty();
+  paintGearList();
+  paintZeroNotice();
+}
+function paintZeroNotice() {
+  const box = $("rzNotice"); if (!box) return;
+  const r = curRifle(), load = curLoad();
+  const hit = suggestionFor(r, load);
+  const remind = zeroReminder(r, Date.now());
+  const show = hit || (remind && remind.kind === "stale") || (remind && remind.kind === "unconf");
+  box.hidden = !show;
+  if (!show) return;
+  const text = hit ? hit.text : remind.kind === "unconf" ? "Zero not confirmed" : "Check zero — last confirmed over 30 days ago";
+  $("rzText").textContent = text;
+  $("rzSave").hidden = !(hit && hit.class === "zero");
+  $("rzApply").hidden = !(hit && hit.mode === "apply");
+  $("rzTrue").hidden = !(hit && hit.mode === "truing");
+  $("rzConfirm").hidden = !(remind && remind.kind === "unconf" && !hit);
+  $("rzDismiss").hidden = !!(remind && remind.kind === "unconf" && !hit);
+}
 function paintGearList() {
   const box = $("gearList"); if (!box) return;
   paintGearMode();
-  const hist = gearHistory();
   const wantArch = gearArchOn;
   const rows = [];
   if (gearSec === "gun") {
     for (const r of P.rifles) {
       if (!!r.archived !== wantArch) continue;
       const optic = r.opticId && (P.optics || []).find(o => o.id === r.opticId);
-      const load = (r.loads || []).find(l => l.id === r.lastLoadId) || (r.loads || []).find(l => !l.archived);
-      const bits = [r.name, r.cartridge && r.cartridge.name, r.barrel ? `${r.barrel}"` : "", twistBit(r), optic && optic.name, load && load.name].filter(Boolean);
-      const last = hist.guns[r.id] && hist.guns[r.id].last;
-      const link = [optic ? optic.name : "No optic", load ? load.name : "No load", last ? `Last used ${shortDate(last)}` : "No sessions yet"].join(" · ");
-      rows.push({ kind: "gun", id: r.id, line: bits.join(" · "), link, archived: !!r.archived });
+      const load = (r.loads || []).find(l => l.id === r.lastLoadId && !l.archived) || null;
+      const hit = suggestionFor(r, load);
+      const remind = zeroReminder(r, Date.now());
+      const mismatch = !!(load && loadFit(load, sizeRef(r)) === "wrong");
+      const chips = [];
+      if (curRifle() && curRifle().id === r.id) chips.push({ cls: "inuse", t: "In use" });
+      if (r.zeroUnconf) chips.push({ cls: "zero", t: "Unconfirmed" });
+      if (hit || (remind && remind.kind === "stale")) chips.push({ cls: "zero", t: "Check zero" });
+      if (mismatch) chips.push({ cls: "mis", t: "Size mismatch" });
+      const l2 = [r.cartridge && r.cartridge.name, r.zero ? `${r.zero} yd zero` : "", angUnitOf(r, optic)].filter(Boolean).join(" · ");
+      rows.push({ kind: "gun", id: r.id, name: r.name, title: r.name, chips, l2, l2warn: !!(r.zeroUnconf || (remind && remind.kind === "stale")), l3: load ? load.name : "", archived: !!r.archived });
     }
   } else if (gearSec === "optic") {
     for (const o of P.optics || []) {
       if (!!o.archived !== wantArch) continue;
       const guns = P.rifles.filter(r => r.opticId === o.id).map(r => r.name);
-      const ts = o.opTurret || "";
-      rows.push({ kind: "optic", id: o.id, line: [o.name, ts].filter(Boolean).join(" · "), link: guns.length ? `On ${guns.join(", ")}` : "Not on a firearm", archived: !!o.archived });
+      const mag = o.opFixed ? (o.opMag ? `${o.opMag}× fixed` : "Fixed power") : (o.opMag ? `${o.opMag}×` : "");
+      const click = CLICK_LBL[o.opTurret] || (o.opTurretV ? `${o.opTurretV} ${/moa/i.test(o.opTurretU || "") ? "MOA" : "mil"}/click` : "");
+      const fp = o.opFP === "SFP" ? "SFP" : o.opFP === "FFP" ? "FFP" : "";
+      const l2 = [mag, click, fp, guns.length ? `on ${guns.join(", ")}` : ""].filter(Boolean).join(" · ");
+      const chips = curOptic() && curOptic().id === o.id ? [{ cls: "inuse", t: "In use" }] : [];
+      rows.push({ kind: "optic", id: o.id, name: o.name, title: o.name, chips, l2, archived: !!o.archived });
     }
   } else {
     const bore = sizeRef(curRifle());
@@ -139,12 +249,15 @@ function paintGearList() {
     for (const r of P.rifles) for (const l of r.loads || []) {
       if (!!l.archived !== wantArch) continue;
       const fit = loadFit(l, bore);
+      const own = loadFit(l, sizeRef(r));
       if (fit === "wrong" && !showAllLoads) { hiddenWrong++; continue; }
-      const n = hist.loads[l.id] ? hist.loads[l.id].strings : 0;
-      const name = fit === "fit" ? caliberName(l.diameter) : "";
-      const note = fit === "fit" ? softNote(curRifle(), l) : "";
-      const tag = fit === "fit" ? `${dia3(l.diameter)} fits${name ? " · " + name : ""}${note ? " · " + note : ""}` : fit === "wrong" ? `Wrong size ${dia3(l.diameter)}` : fit === "unknown" ? "Unknown size" : "";
-      rows.push({ kind: "load", id: l.id, line: [l.name, l.mv ? `${l.mv} fps` : "", r.name].filter(Boolean).join(" · "), link: `On ${r.name} · ${n} string${n === 1 ? "" : "s"}`, archived: !!l.archived, current: !!(curRifle() && curRifle().lastLoadId === l.id && r.id === curRifle().id), dim: fit === "wrong", tag });
+      const mismatch = fit === "wrong" || own === "wrong";
+      const chips = [];
+      if (curRifle() && curRifle().id === r.id && curRifle().lastLoadId === l.id) chips.push({ cls: "inuse", t: "In use" });
+      if (mismatch) chips.push({ cls: "mis", t: "Size mismatch" });
+      const l2fixed = [l.mv ? `${l.mv} fps${l.mvTemp ? ` @ ${l.mvTemp}°F` : ""}` : "", l.mvSource || ""].filter(Boolean).join(" · ");
+      const l3 = l.drag && l.bc ? `${l.drag} ${l.bc}` : "";
+      rows.push({ kind: "load", id: l.id, name: l.name, title: l.name, weight: l.weight ? `${l.weight} gr` : "", chips, l2: l2fixed, l2warn: !!(l.mv && (!l.mvTemp || !l.mvSource)), l3, archived: !!l.archived, dim: fit === "wrong" });
     }
     const allBtn = $("gearAllLoads");
     if (allBtn) {
@@ -154,9 +267,9 @@ function paintGearList() {
     }
   }
   if (gearSec !== "load" && $("gearAllLoads")) $("gearAllLoads").hidden = true;
-  const curId = gearSec === "gun" ? curRifle() && curRifle().id : gearSec === "optic" ? curOptic() && curOptic().id : curLoad() && curLoad().id;
-  box.innerHTML = rows.length ? rows.map(row => `<button type="button" class="gearItem${row.current || row.id === curId && gearSec !== "load" ? " on" : ""}${row.dim ? " dim" : ""}" data-kind="${row.kind}" data-id="${escapeHtml(row.id)}"><b>${escapeHtml(row.line)}</b><small>${escapeHtml(row.link)}</small>${row.tag ? `<span class="tag">${escapeHtml(row.tag)}</span>` : ""}${row.current || (row.id === curId && gearSec !== "load") ? `<span class="cur">Current</span>` : ""}${row.archived ? `<span class="unarch" data-unarch="1">Unarchive</span>` : ""}</button>`).join("")
+  box.innerHTML = rows.length ? rows.map(gearCard).join("")
     : `<div class="hint">${wantArch ? "Nothing archived." : "Nothing saved in this section yet."}</div>`;
+  paintZeroNotice();
 }
 function renderPickers() {
   if (!curRifle() && P.rifles.length) { const n = activeOf(P.rifles)[0]; if (n) P.lastRifleId = n.id; }
@@ -453,8 +566,12 @@ export function init1() {
         ...keepArch(r),
         ...(r.zeroUnconf && typeof r.zeroUnconf === "object" ? { zeroUnconf: { why: str(r.zeroUnconf.why, 120), at: str(r.zeroUnconf.at) } } : {}),
         ...(cleanCartridge(r.cartridge) ? { cartridge: cleanCartridge(r.cartridge) } : {}),
+        ...(cleanOffsetList(r.offsets, ["zero", "config", "truing"]) ? { offsets: cleanOffsetList(r.offsets, ["zero", "config", "truing"]) } : {}),
+        ...(cleanZeroConfirm(r.lastZeroConfirm) ? { lastZeroConfirm: cleanZeroConfirm(r.lastZeroConfirm) } : {}),
+        ...(cleanDismissed(r.dismissedSuggestions) ? { dismissedSuggestions: cleanDismissed(r.dismissedSuggestions) } : {}),
         loads: (Array.isArray(r.loads) ? r.loads : []).filter(l => l && l.name).map(l => ({ id: str(l.id) || uid(), name: String(l.name).slice(0, 60),
           ...keepArch(l),
+          ...(cleanOffsetList(l.offsets, ["load", "truing"]) ? { offsets: cleanOffsetList(l.offsets, ["load", "truing"]) } : {}),
           ...Object.fromEntries(LOAD_F.map(k => [k, str(l[k], LONG_F[k])])) })) }));
       const ranges = (Array.isArray(d.ranges) ? d.ranges : []).filter(g => g && g.name).map(g => ({ id: str(g.id) || uid(), name: String(g.name).slice(0, 60),
         ...Object.fromEntries(RANGE_F.map(k => [k, str(g[k])])) }));
@@ -574,4 +691,4 @@ export function init2() {
   $("roundClk").checked = !!S.round;
 }
 
-export { ADD_V, paintLoadMore, moreNeeded, paintSample, curRifle, curLoad, curRange, fillOptions, renderPickers, applyRifle, applyGunKind, applyLoad, applyRange, same, isDirty, formFor, savedT, autosave, flashSaved, updateDirty, ldShort, recipeText, SNAP_F, recipeSnapshot, cleanRecipe, paintLdKind, askName, pick, pkRefresh, openPk, closePk, paintGearExtra, askRemove, activeOf, confirmSize };
+export { ADD_V, paintLoadMore, moreNeeded, paintSample, curRifle, curLoad, curRange, fillOptions, renderPickers, applyRifle, applyGunKind, applyLoad, applyRange, same, isDirty, formFor, savedT, autosave, flashSaved, updateDirty, ldShort, recipeText, SNAP_F, recipeSnapshot, cleanRecipe, paintLdKind, askName, pick, pkRefresh, openPk, closePk, paintGearExtra, askRemove, activeOf, confirmSize, suggestionFor, paintZeroNotice, saveOrApply, dismissSuggestion, confirmZeroNow };

@@ -55,10 +55,10 @@ try {
   ok(await bars() === 1, "the load list has one Gear tab bar");
   ok((await page.locator("#gearSubLoad").innerText()) === "Load A", "the tab bar keeps the current load name");
   const hidden = await page.locator("#gearList .gearItem").allInnerTexts();
-  ok(!hidden.some((t) => /Wrong/.test(t)) && hidden.some((t) => /Blank/.test(t) && /Unknown size/.test(t)), "a mixed gun still filters by the current load and shows unknown size");
+  ok(!hidden.some((t) => /Wrong/.test(t)) && hidden.some((t) => /Blank/.test(t)) && !hidden.some((t) => /Unknown size/.test(t)), "a mixed gun still filters by the current load and leaves unknown size off the card");
   await page.locator("#gearList").screenshot({ path: ART + "/fix-gear-loads.png" });
   await page.click("#gearAllLoads");
-  ok((await page.locator("#gearList .gearItem.dim").allInnerTexts()).every((t) => /Wrong size \.308"/.test(t)), "Show all tags every other size");
+  ok((await page.locator("#gearList .gearItem.dim").allInnerTexts()).every((t) => /Size mismatch/.test(t)), "Show all chips every other size");
   await page.locator("#gearList").screenshot({ path: ART + "/fix-gear-loads-all.png" });
   const before = await page.evaluate(() => window.__bc.P.rifles.find((r) => r.id === "r1").lastLoadId);
   await page.locator('#gearList .gearItem[data-id="lbad"]').click();

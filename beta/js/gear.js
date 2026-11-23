@@ -83,14 +83,23 @@ function paintGearMode() {
   $("gearArch").setAttribute("aria-pressed", String(gearArchOn));
   $("gearArch").textContent = gearArchOn ? "Active" : "Archived";
   const gun = curRifle(), optic = curOptic(), load = curLoad();
-  if ($("gearSubGun")) {
-    const cart = gun && gun.cartridge && (gun.cartridge.short || gun.cartridge.name);
-    const both = gun && cart ? `${gun.name} · ${cart}` : "";
-    $("gearSubGun").textContent = gun ? (both && both.length <= 20 ? both : gun.name) : "None";
+  const fullGun = gun ? (gun.cartridge && gun.cartridge.name ? `${gun.name} · ${gun.cartridge.name}` : gun.name) : "None";
+  const fullOpt = optic ? optic.name : "No optic";
+  const fullLoad = load ? load.name : "No load";
+  const setSub = (id, text, label) => {
+    const el = $(id); if (!el) return;
+    el.textContent = text;
+    const btn = el.closest("button");
+    if (btn) { btn.title = label; btn.setAttribute("aria-label", label); }
+  };
+  setSub("gearSubGun", fullGun, `Firearms, ${fullGun}`);
+  setSub("gearSubOptic", fullOpt, `Optics, ${fullOpt}`);
+  setSub("gearSubLoad", fullLoad, `Loads, ${fullLoad}`);
+  if ($("gearNowNames")) {
+    const line = [gun ? fullGun : "No firearm", fullOpt, fullLoad].join(" · ");
+    $("gearNowNames").textContent = line;
+    $("gearNowNames").title = line;
   }
-  if ($("gearSubOptic")) $("gearSubOptic").textContent = optic ? optic.name : "No optic";
-  if ($("gearSubLoad")) $("gearSubLoad").textContent = load ? load.name : "No load";
-  if ($("gearNowNames")) $("gearNowNames").textContent = [gun ? (gun.cartridge && gun.cartridge.name ? `${gun.name} · ${gun.cartridge.name}` : gun.name) : "No firearm", optic ? optic.name : "No optic", load ? load.name : "No load"].join(" · ");
   if ($("gearBackLbl")) $("gearBackLbl").textContent = gearSec === "optic" ? "Back to Optics" : gearSec === "load" ? "Back to Loads" : "Back to Firearms";
   const rec = currentGearRecord();
   $("gearArchive").hidden = !gearEditing || !rec;

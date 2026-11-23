@@ -9,15 +9,17 @@ ${ctxRow("ctxGear")}
 <div class="section" id="gearSec">
   <h2>Gear <span class="row"><button class="sm ghost" id="exportBtn" type="button"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' x2='12' y1='15' y2='3'/></svg> Export</button><button class="sm ghost" id="importBtn" type="button"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' x2='12' y1='3' y2='15'/></svg> Import</button></span></h2>
   <input type="file" id="importFile" accept="application/json,.json" hidden>
+  <div id="gearNow"><span class="k">Current setup</span><span id="gearNowNames"></span></div>
   <div id="gearSwitch" role="tablist" aria-label="Gear sections">
-    <button type="button" data-sec="gun" class="on" aria-selected="true">Firearms</button>
-    <button type="button" data-sec="optic" aria-selected="false">Optics</button>
-    <button type="button" data-sec="load" aria-selected="false">Loads</button>
+    <button type="button" data-sec="gun" class="on" aria-selected="true"><span>Firearms</span><small id="gearSubGun"></small></button>
+    <button type="button" data-sec="optic" aria-selected="false"><span>Optics</span><small id="gearSubOptic"></small></button>
+    <button type="button" data-sec="load" aria-selected="false"><span>Loads</span><small id="gearSubLoad"></small></button>
   </div>
   <div id="gearListBar">
     <button type="button" id="gearAdd"><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='M5 12h14'/><path d='M12 5v14'/></svg> Add</button>
     <button type="button" class="ghost" id="gearArch" aria-pressed="false">Archived</button>
-    <button type="button" class="ghost" id="gearBack" hidden><svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m15 18-6-6 6-6'/></svg> List</button>
+    <button type="button" class="ghost" id="gearAllLoads" hidden>Show all loads</button>
+    <button type="button" class="ghost" id="gearBack" hidden><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span id="gearBackLbl">Back to Firearms</span></button>
     <button type="button" class="ghost" id="gearArchive" hidden>Archive</button>
   </div>
   <div id="gearList"></div>
@@ -40,16 +42,17 @@ ${ctxRow("ctxGear")}
       <div class="summary" id="opticSum"></div>
       <div id="opticBody" hidden>
         <div class="grid" style="margin-top:8px">
-          <div class="full" id="opCatBox"><label for="opCatSearch">Find a scope</label><input id="opCatSearch" type="search" placeholder="Search brand or model" autocomplete="off" aria-label="Search optic catalog"><label for="opCatBrand">Brand</label><select id="opCatBrand" aria-label="Optic brand"></select><label for="opCatalog">Model</label><select id="opCatalog" aria-label="Optic catalog"><option value="">Choose a model</option></select><a id="opCatalogSrc" href="" target="_blank" rel="noopener noreferrer" hidden>Source<span class="srcu"></span></a></div>
+          <div class="full" id="opCatBox"><label for="opCatSearch">Find a scope</label><input id="opCatSearch" type="search" placeholder="Search brand or model" autocomplete="off" aria-label="Search optic catalog"><label for="opCatBrand">Brand</label><select id="opCatBrand" aria-label="Optic brand"></select><label for="opCatalog">Model</label><select id="opCatalog" aria-label="Optic catalog"><option value="">Choose a model</option></select><a id="opCatalogSrc" href="" target="_blank" rel="noopener noreferrer" hidden>Source<span class="srcu"></span></a><p class="hint" id="opCatNote" hidden></p></div>
           <div class="full"><label for="opTurret">Turret · unit and click value</label><div class="tuRow"><span class="seg tuSeg" id="opTurretUSeg" role="group" aria-label="Turret unit"><button type="button" data-v="moa">MOA</button><button type="button" data-v="mil">MIL</button></span><select id="opTurret" aria-label="Turret click value"><option value="0.1mil">0.1 mil</option><option value="0.05mil">0.05 mil</option><option value="0.25moa">¼ MOA</option><option value="0.125moa">⅛ MOA</option><option value="0.5moa">½ MOA</option><option value="custom">Custom…</option></select></div></div>
           <div id="opTurretCustom" hidden><label for="opTurretV">Click value</label><input type="number" inputmode="decimal" id="opTurretV" step="0.01" placeholder="e.g. 0.2"><div class="err" id="e-opTurretV"></div></div>
           <div id="opTurretCustomU" hidden><label for="opTurretU">Click unit</label><select id="opTurretU"><option value="mil">mil</option><option value="moa">MOA</option></select></div>
           <div class="full"><details class="more" id="opMore"><summary><span>More <span class="rsum" id="opMoreSum"></span></span><svg class="ic chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="down" d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path class="up" d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
             <div class="grid">
               <div class="full hint">Clicks always count in the turret unit; the Dope MOA/MIL switch only changes how numbers read.</div>
+              <div class="full"><label class="chk" for="opFixed"><input type="checkbox" id="opFixed"> Fixed power</label></div>
               <div class="full"><label for="opReticle">Reticle unit</label><select id="opReticle"><option value="mil">MIL reticle</option><option value="moa">MOA reticle</option></select></div>
-              <div><label for="opFP">Focal plane</label><select id="opFP"><option value="FFP">FFP (first)</option><option value="SFP">SFP (second)</option></select></div>
-              <div id="opMagRow" hidden><label for="opMag">Holds true at (×)</label><input type="number" inputmode="decimal" id="opMag" step="1" placeholder="e.g. 10"><div class="err" id="e-opMag"></div></div>
+              <div id="opFpRow"><label for="opFP">Focal plane</label><select id="opFP"><option value="FFP">FFP (first)</option><option value="SFP">SFP (second)</option></select></div>
+              <div id="opMagRow" hidden><label for="opMag" id="opMagLbl">Holds true at (×)</label><input type="number" inputmode="decimal" id="opMag" step="0.1" placeholder="e.g. 10"><div class="err" id="e-opMag"></div></div>
               <div><label for="opTurn">Elevation per turn <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTurn" step="0.5" placeholder="e.g. 10"><div class="err" id="e-opTurn"></div></div>
               <div><label for="opTravel">Total elev. travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opTravel" step="0.5" placeholder="e.g. 29"><div class="err" id="e-opTravel"></div></div>
               <div><label for="opCant">Canted base (MOA)</label><input type="number" inputmode="decimal" id="opCant" step="5" placeholder="e.g. 20"><div class="err" id="e-opCant"></div></div>
@@ -57,6 +60,42 @@ ${ctxRow("ctxGear")}
               <div><label for="opSH">Sight height (in)</label><input type="number" inputmode="decimal" id="opSH" step="0.05" placeholder="blank = gun's"><div class="err" id="e-opSH"></div></div>
               <div><label for="opWTravel">Windage travel <span class="u2">(mil)</span></label><input type="number" inputmode="decimal" id="opWTravel" step="0.5" placeholder="optional"><div class="err" id="e-opWTravel"></div></div>
               <div><label for="opTrack">Tracking factor</label><input type="number" inputmode="decimal" id="opTrack" step="0.005" placeholder="e.g. 1.02"><div class="err" id="e-opTrack"></div></div>
+              <div class="full" id="holdBox">
+                <label for="hoMode">Holdover reticle</label>
+                <select id="hoMode">
+                  <option value="none">None</option>
+                  <option value="hash">Hash-tree</option>
+                  <option value="bdc">Yardage BDC</option>
+                  <option value="acss">ACSS-hybrid</option>
+                  <option value="cds">Custom dial (CDS)</option>
+                </select>
+                <div id="hoBody" hidden>
+                  <div class="grid">
+                    <div id="hoUnitRow"><label for="hoUnit">Unit</label><select id="hoUnit"><option value="MIL">MIL</option><option value="MOA">MOA</option></select></div>
+                    <div id="hoSpaceRow"><label for="hoSpacing">Even spacing</label><input type="number" inputmode="decimal" id="hoSpacing" step="0.01" placeholder="e.g. 1"></div>
+                    <div id="hoCountRow"><label for="hoCount">Hash count</label><input type="number" inputmode="numeric" id="hoCount" step="1" placeholder="e.g. 4"></div>
+                    <div class="full" id="hoMarksRow"><label for="hoMarks">Marks (label | subtension | yards)</label><textarea id="hoMarks" rows="4" placeholder="2nd hash | 5.95 |"></textarea></div>
+                    <div id="hoCalRow"><label for="hoCalMag">Calibrated at (×)</label><input type="number" inputmode="decimal" id="hoCalMag" step="0.1" placeholder="SFP max mag"></div>
+                    <div class="full" id="hoRefRow">
+                      <label for="hoCartridge">Reference load</label>
+                      <input id="hoCartridge" type="text" maxlength="60" placeholder="Cartridge">
+                      <input id="hoBullet" type="text" maxlength="80" placeholder="Bullet">
+                      <div class="grid">
+                        <div><label for="hoMv">MV (fps)</label><input id="hoMv" type="number" inputmode="numeric" step="1"></div>
+                        <div><label for="hoZero">Zero (yd)</label><input id="hoZero" type="number" inputmode="numeric" step="1"></div>
+                        <div id="hoShRow"><label for="hoSH">Sight height (in)</label><input id="hoSH" type="number" inputmode="decimal" step="0.05"></div>
+                      </div>
+                      <label for="hoLoad">Link a saved load</label><select id="hoLoad"><option value="">None</option></select>
+                      <label for="hoNotes">Notes</label><input id="hoNotes" type="text" maxlength="200">
+                    </div>
+                    <div class="full" id="hoAcssRow">
+                      <label for="hoStadia">Ranging stadia</label><input id="hoStadia" type="text" maxlength="120" placeholder="optional note">
+                      <label for="hoWind">Wind dots</label><input id="hoWind" type="text" maxlength="120" placeholder="optional note">
+                    </div>
+                    <div class="full"><button type="button" class="sm ghost" id="hoFillFl6">Fill FL-6 example (MOA at max mag)</button></div>
+                  </div>
+                </div>
+              </div>
               <div class="full hint" id="opHint">Up travel from zero: dial fully up from your zero and enter what's left; blank = estimate of half the total travel + the canted base. Tracking factor = how far the scope really moves per dialed unit (1.02 = 2% more), so dial = required ÷ factor.</div>
             </div></details></div>
         </div>
@@ -74,6 +113,7 @@ ${ctxRow("ctxGear")}
     <details class="more" id="rifleDetails">
       <summary><span>More</span><svg class="ic chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="down" d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path class="up" d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
       <div class="grid">
+        <div class="full" id="cartBox"><label for="cartPick">Cartridge / caliber</label><input id="cartSearch" type="search" placeholder="Search cartridges" autocomplete="off" aria-label="Search cartridges"><select id="cartPick" aria-label="Cartridge"><option value="">Not set</option><option value="custom">Custom…</option></select><div id="cartCustom" hidden><label for="cartName">Custom name</label><input id="cartName" type="text" maxlength="40" placeholder="e.g. 6mm ARC"><label for="cartDia">Diameter (in)</label><input id="cartDia" type="number" inputmode="decimal" step="0.001" placeholder="e.g. 0.243"></div><p class="hint" id="cartHint">Optional. When set, this diameter decides which loads fit. Not set keeps the current behavior.</p></div>
         <div class="full hint">Right-hand twist is positive, left-hand negative. Used for spin drift and the stability check (needs bullet length).</div>
         <div class="full hint" id="gunOptNote" hidden></div>
         <div id="gunSHRow"><label for="sightHeight">Sight height (in)<span class="ro" id="gunSHRoL" hidden>set by optic</span></label><div class="roVal" id="gunSHRo" hidden></div><input type="number" inputmode="decimal" id="sightHeight" step="0.1" value="1.5"><div class="err" id="e-sightHeight"></div></div>

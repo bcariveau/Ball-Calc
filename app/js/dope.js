@@ -7,6 +7,8 @@ import { B, angDec, angs, clkShort, clkTxt, lastRun, mvAdjOn, perMph, pointVals,
 import { ctxPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, norm360, num, resultsDiv, val } from "./core.js";
 import { curRifle, updateDirty } from "./gear.js";
+import { holdText, toUnit } from "./holdover.js";
+import { curOptic } from "./optics.js";
 import { S, savePresets } from "./storage.js";
 import { cv } from "./themes.js";
 import { wx } from "./weather.js";
@@ -17,7 +19,7 @@ function setStale(on) { $("dopeCard").classList.toggle("stale", on); resultsDiv.
 function noResult(bad) {
   set_lastRun(null); setStale(false);
   $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; $("dcElevC").textContent = ""; $("dcWindC").textContent = ""; $("dcBracket").textContent = ""; ["dcElevClk", "dcWindClk", "dcWarn"].forEach(id => $(id).textContent = "");
-  $("dcInfo").innerHTML = ""; $("dcChips").innerHTML = ""; $("dcMsg").innerHTML = bad && bad.length ? `<span class="bad">Fix ${bad.length} field${bad.length > 1 ? "s" : ""}: ${bad.map(f => escapeHtml(fieldName(f))).join(", ")}</span><br><button class="sm ghost" type="button" id="dcFix">Go to field</button>` : `<span class="bad">No result</span>`;
+  $("dcInfo").innerHTML = ""; $("dcChips").innerHTML = ""; if ($("dcHold")) $("dcHold").textContent = ""; if ($("dcMag")) $("dcMag").hidden = true; $("dcMsg").innerHTML = bad && bad.length ? `<span class="bad">Fix ${bad.length} field${bad.length > 1 ? "s" : ""}: ${bad.map(f => escapeHtml(fieldName(f))).join(", ")}</span><br><button class="sm ghost" type="button" id="dcFix">Go to field</button>` : `<span class="bad">No result</span>`;
   if ($("dcFix")) $("dcFix").onclick = () => goToField(bad[0]);
   resultsDiv.innerHTML = ""; renderChart(null);
 }
@@ -34,12 +36,12 @@ function renderCard() {
   if (!R.tgt) {
     $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; ["dcElevC", "dcWindC", "dcElevClk", "dcWindClk", "dcBracket", "dcInfo"].forEach(id => $(id).textContent = "");
     $("dcMsg").innerHTML = R.td ? `<span class="bad">${R.td} yd is beyond where this bullet can reach.</span>` : "Set a target distance.";
-    paintWarn(); paintPt(); return;
+    paintWarn(); paintPt(); if ($("dcHold")) $("dcHold").textContent = ""; if ($("dcMag")) $("dcMag").hidden = true; return;
   }
   if (!(ts.v > 0)) {
     $("dcElev").textContent = "—"; $("dcWind").textContent = "—";
     $("dcMsg").innerHTML = `<span class="bad">Enter a turret click value before calculating. Nothing was invented.</span>`;
-    return;
+    if ($("dcHold")) $("dcHold").textContent = ""; if ($("dcMag")) $("dcMag").hidden = true; return;
   }
   const v = pointVals(R.tgt), a = angs(R.tgt), dd = angDec(ts), tt = turnsTxt(a.ec, ts);
   $("dcElev").textContent = ud(a.e, dd); $("dcWind").textContent = lr(a.w, dd);
@@ -60,7 +62,32 @@ function renderCard() {
   const pm = perMph(R.tgtN, R.tgtF), sp = R.tgtN ? pointVals(R.tgtN).wind : null;
   $("dcInfo").innerHTML = `MV ${Math.round(R.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(R.Tp, 0)}°F powder` : ""} · ${v.vel.toFixed(0)} fps · ${v.energy.toFixed(0)} ft·lb · ${v.tof.toFixed(2)} s · drop ${v.drop.toFixed(1)}"` +
     (pm != null ? ` · 1 mph full = ${pm.toFixed(2)} ${u}` : "") + (sp != null && Math.abs(sp) >= 0.005 ? ` · spin drift ${sp > 0 ? "R" : "L"} ${Math.abs(sp).toFixed(2)} ${u} (in wind hold)` : "");
-  paintWarn(); paintPt();
+  paintWarn(); paintPt(); paintHold();
+}
+let hoNow = null, hoFor = null;
+function paintHold() {
+  const box = $("dcHold"), mag = $("dcMag"), warn = $("dcMagWarn");
+  if (!box) return;
+  const o = curOptic(), ho = o && o.holdover, R = lastRun;
+  const fixed = !!(o && o.opFixed);
+  const sfp = !!(o && !fixed && $("opFP") && $("opFP").value === "SFP" && ho && ho.mode && ho.mode !== "none" && ho.mode !== "cds");
+  if (!ho || !ho.mode || ho.mode === "none" || !R || !R.tgt) { box.textContent = ""; if (mag) mag.hidden = true; return; }
+  if (hoFor !== o.id) { hoFor = o.id; hoNow = ho.calibratedMag || (parseFloat(o.opMag) || null); }
+  if (mag) mag.hidden = !sfp;
+  if (sfp && $("hoNow")) {
+    const typed = parseFloat($("hoNow").value);
+    if (Number.isFinite(typed)) hoNow = typed;
+    else $("hoNow").value = hoNow || "";
+  }
+  const curMag = sfp ? (parseFloat($("hoNow") && $("hoNow").value) || hoNow) : null;
+  const a = angs(R.tgt);
+  const call = holdText(ho, { required: Math.abs(a.e), requiredUnit: S.ang, distance: pointVals(R.tgt).range, fp: fixed ? "FFP" : ($("opFP") && $("opFP").value), fixed, currentMag: curMag, calibratedMag: ho.calibratedMag });
+  box.textContent = call ? call.text : "";
+  if (warn) {
+    const off = sfp && ho.calibratedMag && curMag && Math.abs(curMag - ho.calibratedMag) >= 0.05;
+    warn.hidden = !off;
+    warn.textContent = off ? `Holds are calibrated at ${ho.calibratedMag}×. You are at ${curMag}×, so the marks are scaled.` : "";
+  }
 }
 function renderTable(samples) {
   const R = lastRun, u = S.ang, full = S.view === "full", ts = turretSpec(), dd = angDec(ts), A = B.Angular, TU = ts.u === "MIL" ? A.MRad : A.MOA, sd = u === "MIL" ? 2 : 1;

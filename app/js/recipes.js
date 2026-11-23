@@ -5,7 +5,7 @@
 import { schedule } from "./app.js";
 import { closeOvl, openOvl, setIconText, toast } from "./components.js";
 import { $, escapeHtml, n3, num, setVal } from "./core.js";
-import { applyLoad, applyRifle, curLoad, curRifle, isDirty, paintLdKind, pick, pkRefresh, recipeText, renderPickers, same, updateDirty } from "./gear.js";
+import { applyLoad, applyRifle, confirmSize, curLoad, curRifle, isDirty, paintLdKind, pick, pkRefresh, recipeText, renderPickers, same, updateDirty } from "./gear.js";
 import { LOG, saveLog } from "./log.js";
 import { F_DEF, LOAD_F, P, REC_F, savePresets, uid } from "./storage.js";
 
@@ -161,10 +161,10 @@ export function init() {
   $("rcList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (b) applySavedRecipe(RC[+b.dataset.i]); });
   $("loadCopy").onclick = () => openCopy("copy");
   $("cpClose").onclick = () => closeOvl("cpSheet");
-  $("cpDup").onclick = () => copyLoadTo(curRifle());
+  $("cpDup").onclick = () => { const g = curRifle(), l = curLoad(); if (!g || !l) return; confirmSize(g, l, () => copyLoadTo(g)); };
   $("cpAllBtn").onclick = () => { cpAll = !cpAll; renderCopy(); };
   $("cpMv").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cpMv = b.dataset.v; renderCopy(); });
-  $("cpList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (!b) return; const g = P.rifles.find(x => x.id === b.dataset.id); cpMode === "move" ? moveLoadTo(g) : copyLoadTo(g); });
+  $("cpList").addEventListener("click", e => { const b = e.target.closest(".rcItem"); if (!b) return; const g = P.rifles.find(x => x.id === b.dataset.id); const l = curLoad(); if (!g || !l) return; confirmSize(g, l, () => cpMode === "move" ? moveLoadTo(g) : copyLoadTo(g)); });
   document.addEventListener("keydown", e => { if (e.key !== "Escape") return; ["rcSheet", "cpSheet"].forEach(id => $(id).classList.contains("show") && closeOvl(id)); });
 }
 

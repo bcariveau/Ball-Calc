@@ -46,6 +46,7 @@ ${ctxRow("ctxDope")}
   <div class="err" id="e-target"></div>
   <div id="dcBracket"></div>
   <div id="dcHold"></div>
+  <div id="dcStack" hidden><span id="dcStackText"></span><button type="button" id="dcConfig" hidden aria-pressed="false">Config</button></div>
   <div id="dcMag" hidden><label for="hoNow">Current magnification (×)</label><input type="number" inputmode="decimal" id="hoNow" step="0.1" min="1"><p class="hint" id="dcMagWarn" hidden></p></div>
   <div id="dcMsg"></div>
   <div id="dcWarn"></div>

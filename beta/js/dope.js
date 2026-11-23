@@ -6,10 +6,11 @@ import { setTab } from "./app.js";
 import { B, angDec, angs, clkShort, clkTxt, lastRun, mvAdjOn, perMph, pointVals, set_lastRun, turretSpec, windHoldAt } from "./calc.js";
 import { ctxPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, norm360, num, resultsDiv, val } from "./core.js";
-import { curRifle, updateDirty } from "./gear.js";
+import { confirmZeroNow, curLoad, curRifle, updateDirty } from "./gear.js";
 import { holdText, toUnit } from "./holdover.js";
 import { curOptic } from "./optics.js";
-import { S, savePresets } from "./storage.js";
+import { activeStack, configActive, setConfigActive } from "./rezero.js";
+import { S } from "./storage.js";
 import { cv } from "./themes.js";
 import { wx } from "./weather.js";
 
@@ -28,6 +29,17 @@ function goToField(f) { const el = $(f); if (!el) return; const t = el.closest("
 const ud = (v, d) => Math.abs(v) < 0.05 ? "0.0" : `${v > 0 ? "U" : "D"} ${Math.abs(v).toFixed(d)}`;
 const lr = (v, d) => Math.abs(v) < 0.05 ? "0.0" : `${v > 0 ? "R" : "L"} ${Math.abs(v).toFixed(d)}`;
 const CLOCK = d => { const h = Math.round(norm360(d) / 30) % 12; return h === 0 ? 12 : h; };
+function paintStack() {
+  const el = $("dcStack"); if (!el) return;
+  const r = curRifle(), l = curLoad();
+  const hasConfig = !!(r && (r.offsets || []).some(o => o && o.type === "config" && o.status === "active"));
+  const stack = activeStack(r, l, { configOn: configActive(), displayUnit: S.ang === "MOA" ? "MOA" : "MIL" });
+  const btn = $("dcConfig");
+  if (btn) { btn.hidden = !hasConfig; btn.classList.toggle("on", configActive()); btn.setAttribute("aria-pressed", String(configActive())); }
+  if ($("dcStackText")) $("dcStackText").textContent = stack.line;
+  el.hidden = !stack.line && !hasConfig;
+  el.title = stack.layers.map(o => [o.type, o.date, o.distYd ? `${o.distYd} yd` : "", o.shots ? `${o.shots} shots` : "", o.ci ? `CI ${o.ci.v}/${o.ci.h}` : "", (o.sourceStringIds || []).length ? `${o.sourceStringIds.length} strings` : ""].filter(Boolean).join(" ")).join(" · ");
+}
 function renderCard() {
   const R = lastRun, u = S.ang, ts = turretSpec();
   ctxPaint();
@@ -36,12 +48,12 @@ function renderCard() {
   if (!R.tgt) {
     $("dcElev").textContent = "—"; $("dcWind").textContent = "—"; ["dcElevC", "dcWindC", "dcElevClk", "dcWindClk", "dcBracket", "dcInfo"].forEach(id => $(id).textContent = "");
     $("dcMsg").innerHTML = R.td ? `<span class="bad">${R.td} yd is beyond where this bullet can reach.</span>` : "Set a target distance.";
-    paintWarn(); paintPt(); if ($("dcHold")) $("dcHold").textContent = ""; if ($("dcMag")) $("dcMag").hidden = true; return;
+    paintWarn(); paintPt(); paintStack(); if ($("dcHold")) $("dcHold").textContent = ""; if ($("dcMag")) $("dcMag").hidden = true; return;
   }
   if (!(ts.v > 0)) {
     $("dcElev").textContent = "—"; $("dcWind").textContent = "—";
     $("dcMsg").innerHTML = `<span class="bad">Enter a turret click value before calculating. Nothing was invented.</span>`;
-    if ($("dcHold")) $("dcHold").textContent = ""; if ($("dcMag")) $("dcMag").hidden = true; return;
+    if ($("dcHold")) $("dcHold").textContent = ""; if ($("dcMag")) $("dcMag").hidden = true; paintStack(); return;
   }
   const v = pointVals(R.tgt), a = angs(R.tgt), dd = angDec(ts), tt = turnsTxt(a.ec, ts);
   $("dcElev").textContent = ud(a.e, dd); $("dcWind").textContent = lr(a.w, dd);
@@ -62,7 +74,7 @@ function renderCard() {
   const pm = perMph(R.tgtN, R.tgtF), sp = R.tgtN ? pointVals(R.tgtN).wind : null;
   $("dcInfo").innerHTML = `MV ${Math.round(R.mvNow)} fps${mvAdjOn() ? ` @ ${fmt(R.Tp, 0)}°F powder` : ""} · ${v.vel.toFixed(0)} fps · ${v.energy.toFixed(0)} ft·lb · ${v.tof.toFixed(2)} s · drop ${v.drop.toFixed(1)}"` +
     (pm != null ? ` · 1 mph full = ${pm.toFixed(2)} ${u}` : "") + (sp != null && Math.abs(sp) >= 0.005 ? ` · spin drift ${sp > 0 ? "R" : "L"} ${Math.abs(sp).toFixed(2)} ${u} (in wind hold)` : "");
-  paintWarn(); paintPt(); paintHold();
+  paintWarn(); paintPt(); paintHold(); paintStack();
 }
 let hoNow = null, hoFor = null;
 function paintHold() {
@@ -211,7 +223,8 @@ function paintScroll() {
 
 export function init() {
   $("dcWarn").addEventListener("click", e => { if (e.target.closest("#dcZeroOk")) $("zeroConfirm").onclick(); });
-  $("zeroConfirm").onclick = () => { const r = curRifle(); if (!r) return; delete r.zeroUnconf; savePresets(); updateDirty(); ctxPaint(); if (lastRun) renderCard(); toast(`Zero confirmed for “${r.name}”`); };
+  $("zeroConfirm").onclick = () => { const r = curRifle(); if (!r) return; confirmZeroNow(); if (lastRun) renderCard(); toast(`Zero confirmed for “${r.name}”`); };
+  if ($("dcConfig")) $("dcConfig").onclick = () => { setConfigActive(!configActive()); if (lastRun) renderCard(); else paintStack(); };
   $("dcMoreBtn").onclick = () => { const open = $("dcMore").hidden; $("dcMore").hidden = !open; $("dcMoreBtn").setAttribute("aria-expanded", String(open)); $("dcMoreBtn").innerHTML = open ? "Details <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m18 15-6-6-6 6'/></svg>" : "Details <svg class='ic' viewBox='0 0 24 24' aria-hidden='true'><path d='m6 9 6 6 6-6'/></svg>"; };
 }
 

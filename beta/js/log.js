@@ -7,7 +7,7 @@ import { idbGet, idbPut } from "./bulletdb.js";
 import { powderT } from "./calc.js";
 import { setIconText, shBtnPaint, toast } from "./components.js";
 import { $, escapeHtml, fmt, n1, n3, num, setVal } from "./core.js";
-import { cleanRecipe, confirmSize, curLoad, curRifle, recipeSnapshot, recipeText, updateDirty } from "./gear.js";
+import { cleanRecipe, confirmSize, confirmZeroNow, curLoad, curRifle, dismissSuggestion, paintZeroNotice, recipeSnapshot, recipeText, saveOrApply, suggestionFor, updateDirty } from "./gear.js";
 import { closeImport } from "./log-import.js";
 import { SEL, lpFired, paintSel, set_lpFired } from "./reassign.js";
 import { SH, shHide, shNeedGear, shPaint, shRollIfEnded } from "./shooting.js";
@@ -15,6 +15,7 @@ import { banHide, banPaint, banShow } from "./shot-banner.js";
 import { asFiredFrom, cleanAsFired, assignShots, calcFallback, opticOn, placeOnString, scopeSentence, staleMv } from "./link-v3.js";
 import { P, load, savePresets, store, uid } from "./storage.js";
 import { paintStrBar, paintTgView } from "./strings.js";
+import { TR, openTrue } from "./truing.js";
 import { mkGlyph } from "./target-draw.js";
 import { shotDetail, tgThumbA, tgThumbB } from "./target-editor.js";
 import { BAN, LIVE, TE, cleanTg, fpsT, set_LIVE, set_TE, strNo, strOf, tgEnsure, tgRestore, tgSaveSidecar, tgView, tgtLetter, unpair } from "./targets.js";
@@ -138,6 +139,7 @@ function renderLog() {
   paintSel();
   $("slChartBox").style.display = "none";
   renderCompare();
+  paintZeroNotice();
 }
 function slEmptyHTML(hasLoad) {
   return "";   // the static #slEmpty line ("No sessions yet.") covers the empty state;  Start shooting sits right above
@@ -540,6 +542,11 @@ function set_edDirty(v) { return edDirty = v; }
 function set_slKey(v) { return slKey = v; }
 
 export function init() {
+  if ($("rzSave")) $("rzSave").onclick = () => saveOrApply("save");
+  if ($("rzApply")) $("rzApply").onclick = () => saveOrApply("apply");
+  if ($("rzDismiss")) $("rzDismiss").onclick = () => dismissSuggestion();
+  if ($("rzConfirm")) $("rzConfirm").onclick = () => confirmZeroNow();
+  if ($("rzTrue")) $("rzTrue").onclick = () => { const hit = suggestionFor(curRifle(), curLoad()); TR.what = hit && hit.what === "bc" ? "bc" : "mv"; openTrue(); };
   $("slCmpScope").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cmpScope = b.dataset.v; renderCompare(); });
   $("slCmpTbl").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if (tr) openEditor(LOG.find(s => s.id === tr.dataset.id)); });
   $("slCsvBtn").onclick = () => {

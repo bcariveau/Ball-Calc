@@ -100,18 +100,18 @@ try {
   await page.click("#tabBtnGear");
   await page.waitForSelector("#gearList .gearItem");
   const guns = await page.locator("#gearList .gearItem").allInnerTexts();
-  ok(guns.some((t) => /Rifle A · 24" · 1:8 RH · Razor · Load A/.test(t)) && guns.some((t) => /Rifle B/.test(t)), "the firearm list names every saved gun");
-  ok(guns.some((t) => /Last used/.test(t) && /Razor/.test(t)), "a firearm line links its optic, load, and last-used date");
+  ok(guns.some((t) => /Rifle A/.test(t) && /100 yd zero/.test(t) && /Load A/.test(t)) && guns.some((t) => /Rifle B/.test(t)) && !guns.some((t) => /1:8 RH/.test(t)), "the firearm list names every saved gun and keeps barrel and twist off the card");
+  ok(!guns.some((t) => /Last used/.test(t) || /Razor/.test(t)), "optic and last-used stay off the firearm card");
   await page.screenshot({ path: ART + "/after-firearms.png" });
 
   await page.click('#gearSwitch button[data-sec="optic"]');
   const optics = await page.locator("#gearList .gearItem").allInnerTexts();
-  ok(optics.length === 1 && /Razor/.test(optics[0]) && /On Rifle A/.test(optics[0]), "the optic list links the firearm that uses it");
+  ok(optics.length === 1 && /Razor/.test(optics[0]) && /on Rifle A/.test(optics[0]) && /0\.1 mil\/click/.test(optics[0]), "the optic list links the firearm that uses it");
   await page.screenshot({ path: ART + "/after-optics.png" });
 
   await page.click('#gearSwitch button[data-sec="load"]');
   const loads = await page.locator("#gearList .gearItem").allInnerTexts();
-  ok(loads.length === 2 && loads.every((t) => /Rifle A/.test(t)) && loads.some((t) => /Load A2/.test(t)) && loads.some((t) => /\.264" fits/.test(t)), "the load list keeps this firearm's fitting loads and hides a different bore");
+  ok(loads.length === 2 && loads.some((t) => /Load A2/.test(t)) && loads.some((t) => /G7 0\.290/.test(t)) && !loads.some((t) => /\.264" fits/.test(t)), "the load list keeps this firearm's fitting loads and hides a different bore");
   await page.screenshot({ path: ART + "/after-loads.png" });
   ok(!(await leaks()).length, "gear lists have no raw icon markup");
 

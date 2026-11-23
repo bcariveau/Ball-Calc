@@ -64,7 +64,7 @@ try {
   await page.click('#gearSwitch button[data-sec="load"]');
   await page.click("#gearAllLoads");
   const row = await page.locator("#gearList .gearItem").filter({ hasText: "Load B" }).innerText();
-  ok(/Wrong size \.308"/.test(row), "the firearm diameter, not the current load, marks .308 wrong");
+  ok(/Size mismatch/.test(row), "the firearm diameter, not the current load, marks .308 wrong");
   await page.locator("#gearList").screenshot({ path: ART + "/cal-loads.png" });
   await page.locator("#gearList .gearItem").filter({ hasText: "Load B" }).click();
   await page.waitForSelector("#gearDlg:not([hidden])");

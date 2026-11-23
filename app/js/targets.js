@@ -42,6 +42,7 @@ function cleanTg(t, ids) {
         if (sh && used.has(sh)) sh = null; if (sh) used.add(sh);
         const o = { id: sstr(h.id, 20) || uid(), x: p.x, y: p.y, sh }; if (m) o.m = m; if (!sh && h.nr) o.nr = true; if (h.ad && !m) o.ad = true; return o; }) };
     const af = cleanAsFired(s.asFired); if (af) st.asFired = af;
+    if (s.consumedByCorrection && s.consumedByCorrection.correctionId) st.consumedByCorrection = { correctionId: sstr(s.consumedByCorrection.correctionId, 40), at: sstr(s.consumedByCorrection.at, 40) };
     return st;
   }).map((st, i) => { const d = cleanDial(t.strings.filter(q => q && typeof q === "object")[i].dial); if (d) st.dial = d; return st; });
   if (!strings.length) return null;
